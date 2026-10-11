@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#14161b">
 <title>Pente</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Pente">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <style>
 :root {
   --bg: #14161b;
@@ -110,6 +116,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
     <div class="field"><label class="lbl" for="name1" data-i18n="menu.p1"></label><input type="text" id="name1" maxlength="18" autocomplete="off"></div>
     <div class="field"><label class="lbl" for="name2" data-i18n="menu.p2"></label><input type="text" id="name2" maxlength="18" autocomplete="off"></div>
     <label class="check"><input type="checkbox" id="optTournament" checked><span><span data-i18n="menu.tournamentRule"></span><small data-i18n="menu.tournamentRuleHint"></small></span></label>
+    <label class="check"><input type="checkbox" id="optExact"><span><span data-i18n="menu.exactFive"></span><small data-i18n="menu.exactFiveHint"></small></span></label>
     <label class="check"><input type="checkbox" id="optConfirm"><span><span data-i18n="menu.confirmTap"></span><small data-i18n="menu.confirmTapHint"></small></span></label>
     <div class="btns">
       <button class="btn primary" id="btnStart" data-i18n="menu.start"></button>
@@ -195,7 +202,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
       options: {
         tournamentRule: opts.tournamentRule !== false,
         capturesToWin: opts.capturesToWin || 5,
-        lineToWin: opts.lineToWin || 5
+        lineToWin: opts.lineToWin || 5,
+        exactFive: !!opts.exactFive            // true: solo cuenta una línea de EXACTAMENTE lineToWin
       }
     };
   }
@@ -210,7 +218,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
       captures: { 1: s.captures[1], 2: s.captures[2] },
       moves: s.moves.slice(), lastMove: s.lastMove, status: s.status,
       winner: s.winner, winReasons: s.winReasons.slice(), winLine: s.winLine,
-      options: { tournamentRule: s.options.tournamentRule, capturesToWin: s.options.capturesToWin, lineToWin: s.options.lineToWin }
+      options: { tournamentRule: s.options.tournamentRule, capturesToWin: s.options.capturesToWin, lineToWin: s.options.lineToWin, exactFive: s.options.exactFive }
     };
   }
 
@@ -259,6 +267,22 @@ button { font: inherit; color: inherit; cursor: pointer; }
     return best;
   }
 
+  /** Modo exactFive: busca en todo el tablero una racha de EXACTAMENTE lineToWin fichas de "player". */
+  function findExactLine(s, player) {
+    for (var a = 0; a < AXES.length; a++) {
+      var dx = AXES[a][0], dy = AXES[a][1];
+      for (var y = 0; y < s.size; y++) for (var x = 0; x < s.size; x++) {
+        if (get(s, x, y) !== player) continue;
+        var px = x - dx, py = y - dy;
+        if (inBounds(s, px, py) && get(s, px, py) === player) continue;   // no es inicio de racha
+        var cells = [], cx = x, cy = y;
+        while (inBounds(s, cx, cy) && get(s, cx, cy) === player) { cells.push({ x: cx, y: cy }); cx += dx; cy += dy; }
+        if (cells.length === s.options.lineToWin) return cells;
+      }
+    }
+    return null;
+  }
+
   /** Ejecuta una jugada. Devuelve {ok:true,state,captured,...} o {ok:false,error}. No muta el estado recibido. */
   function playMove(s, x, y, player) {
     var err = validateMove(s, x, y, player);
@@ -272,13 +296,24 @@ button { font: inherit; color: inherit; cursor: pointer; }
     n.moves.push({ x: x, y: y, player: me, captured: captured });
     n.lastMove = { x: x, y: y, player: me };
 
-    var reasons = [], line = null;
+    var reasons = [], line = null, winner = 0;
     if (n.captures[me] >= n.options.capturesToWin) reasons.push('captures');
-    line = findLine(n, x, y, me);
-    if (line) reasons.push('line');
+    if (n.options.exactFive) {
+      // Solo cuenta una línea de exactamente 5. Se revisa todo el tablero porque una captura
+      // puede dejar en 5 una línea de 6 (también del rival).
+      line = findExactLine(n, me);
+      if (line) reasons.push('line');
+      if (!reasons.length) {
+        var oppLine = findExactLine(n, opponent(me));
+        if (oppLine) { winner = opponent(me); reasons.push('line'); line = oppLine; }
+      }
+    } else {
+      line = findLine(n, x, y, me);
+      if (line) reasons.push('line');
+    }
 
     if (reasons.length) {
-      n.status = 'won'; n.winner = me; n.winReasons = reasons; n.winLine = line;
+      n.status = 'won'; n.winner = winner || me; n.winReasons = reasons; n.winLine = line;
     } else if (isBoardFull(n)) {
       n.status = 'draw';   // tablero lleno sin ganador
     } else {
@@ -322,6 +357,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
       'menu.p2': 'Jugador 2 (blancas)',
       'menu.tournamentRule': 'Regla de torneo',
       'menu.tournamentRuleHint': 'El jugador 1 abre en el centro y su segunda ficha va a 3 o más casillas del centro.',
+      'menu.exactFive': 'Seis o más en línea no cuenta',
+      'menu.exactFiveHint': 'Solo gana una línea de exactamente cinco. Si capturan una ficha y la línea de seis queda en cinco, cuenta.',
       'menu.confirmTap': 'Confirmar con segundo toque',
       'menu.confirmTapHint': 'Pensado para celular: el primer toque marca, el segundo coloca.',
       'menu.start': 'Jugar',
@@ -355,6 +392,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
       'rules.4': 'Si ponés una ficha entre dos rivales que ya la flanquean, no te la capturan.',
       'rules.5': 'Ganás también si capturás cinco pares.',
       'rules.6': 'Con la regla de torneo, el jugador 1 abre en el centro y su segunda ficha va a 3 o más casillas de distancia del centro.',
+      'rules.7': 'Variante opcional: una línea de seis o más no cuenta; solo gana una de exactamente cinco.',
       'a11y.board': 'Tablero de Pente',
       'player.1': 'Jugador 1',
       'player.2': 'Jugador 2'
@@ -380,7 +418,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
   var canvas = $('board'), ctx = canvas.getContext('2d');
   var state = null, names = { 1: '', 2: '' };
-  var settings = { tournamentRule: true, confirmTap: matchMedia('(pointer: coarse)').matches };
+  var settings = { tournamentRule: true, exactFive: false, confirmTap: matchMedia('(pointer: coarse)').matches };
   var hover = null;       // {x,y} previsualización (mouse / toque pendiente)
   var pending = null;     // toque pendiente de confirmar
   var kbd = null;         // cursor de teclado
@@ -392,8 +430,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
     names[1] = ($('name1').value || '').trim() || t('player.1');
     names[2] = ($('name2').value || '').trim() || t('player.2');
     settings.tournamentRule = $('optTournament').checked;
+    settings.exactFive = $('optExact').checked;
     settings.confirmTap = $('optConfirm').checked;
-    state = P.createGame({ tournamentRule: settings.tournamentRule });
+    state = P.createGame({ tournamentRule: settings.tournamentRule, exactFive: settings.exactFive });
     hover = pending = null;
     kbd = settings.tournamentRule ? { x: 9, y: 9 } : { x: 9, y: 9 };
     closeAll(); render(); setStatus('');
@@ -402,7 +441,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   function tryMove(x, y) {
     if (!state || state.status !== 'playing') return;
     var r = P.playMove(state, x, y, state.current);
-    if (!r.ok) { setStatus(t('err.' + r.error), true); return; }
+    if (!r.ok) { setStatus(t('err.' + r.error), true); render(); return; }
     var mover = state.current;
     state = r.state; pending = hover = null;
     if (r.captured.length) {
@@ -492,6 +531,15 @@ button { font: inherit; color: inherit; cursor: pointer; }
     }); });
     if (!state) return;
 
+    // Regla de torneo: en la 2ª ficha del J1 se sombrea el cuadrado de 5x5 del centro (prohibido)
+    if (state.status === 'playing' && state.options.tournamentRule && state.moves.length === 2) {
+      var c0 = P.center(state), half = metrics.cell * 0.5;
+      var x0 = px(c0 - 2) - half, y0 = px(c0 - 2) - half, side = metrics.cell * 5;
+      ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.fillRect(x0, y0, side, side);
+      ctx.strokeStyle = 'rgba(0,0,0,.55)'; ctx.lineWidth = Math.max(2, metrics.cell * 0.06);
+      ctx.strokeRect(x0, y0, side, side);
+    }
+
     var winSet = {};
     if (state.winLine) state.winLine.forEach(function (c) { winSet[c.x + ',' + c.y] = 1; });
     for (var y = 0; y < n; y++) for (var x = 0; x < n; x++) {
@@ -516,8 +564,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
     }
     // cursor de teclado
     if (document.activeElement === canvas && kbd) {
-      ctx.strokeStyle = '#79b8ff'; ctx.lineWidth = Math.max(2, metrics.cell * 0.07);
-      ctx.strokeRect(px(kbd.x) - metrics.cell * .5, px(kbd.y) - metrics.cell * .5, metrics.cell, metrics.cell);
+      ctx.strokeStyle = '#79b8ff'; ctx.lineWidth = Math.max(2, metrics.cell * 0.08);
+      ctx.beginPath(); ctx.arc(px(kbd.x), px(kbd.y), metrics.cell * 0.62, 0, Math.PI * 2); ctx.stroke();
     }
     updateHud();
   }
@@ -555,7 +603,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
     }
     $('endText').textContent = tx; open('endOverlay');
   }
-  function rematch() { state = P.createGame({ tournamentRule: settings.tournamentRule }); hover = pending = null; kbd = { x: 9, y: 9 }; closeAll(); setStatus(''); render(); }
+  function rematch() { state = P.createGame({ tournamentRule: settings.tournamentRule, exactFive: settings.exactFive }); hover = pending = null; kbd = { x: 9, y: 9 }; closeAll(); setStatus(''); render(); }
 
   /* ---------- Textos estáticos (i18n) ---------- */
   function applyI18n() {
@@ -563,7 +611,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
     document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = t(el.getAttribute('data-i18n')); });
     canvas.setAttribute('aria-label', t('a11y.board'));
     var ol = $('rulesList'); ol.innerHTML = '';
-    for (var i = 1; i <= 6; i++) { var li = document.createElement('li'); li.textContent = t('rules.' + i); ol.appendChild(li); }
+    for (var i = 1; i <= 7; i++) { var li = document.createElement('li'); li.textContent = t('rules.' + i); ol.appendChild(li); }
   }
 
   /* ---------- Eventos ---------- */
@@ -580,6 +628,16 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
   applyI18n(); resize(); open('menuOverlay');
   window.__pente = { get state() { return state; }, tryMove: tryMove, startGame: startGame };  // utilidad para pruebas manuales
+})();
+</script>
+<script>
+/* Registro del service worker. Solo funciona servido por http(s); abriendo el archivo directo se ignora. */
+(function () {
+  'use strict';
+  if (!('serviceWorker' in navigator) || location.protocol.indexOf('http') !== 0) return;
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function () { /* sin SW el juego funciona igual */ });
+  });
 })();
 </script>
 </body>
