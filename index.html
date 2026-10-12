@@ -221,6 +221,14 @@ body.in-screen .app { visibility: hidden; }
 .clock.low .cturn { animation: clockPulse 1s ease-in-out infinite; }
 @keyframes clockPulse { 50% { opacity: .45; } }
 @media (prefers-reduced-motion: reduce) { .clock.low .cturn { animation: none; } }
+
+/* ---------- Video ---------- */
+.videobox { margin: 12px 0; background: #000; border-radius: 12px; overflow: hidden; }
+.videobox canvas, .videobox video { display: block; width: 100%; height: auto; max-height: 62vh; object-fit: contain; margin: 0 auto; }
+.videobox canvas[hidden], .videobox video[hidden] { display: none; }
+.progress { height: 8px; background: var(--panel-2); border-radius: 4px; overflow: hidden; }
+.progress[hidden] { display: none; }
+.progress > div { height: 100%; width: 0; background: var(--accent); transition: width .25s linear; }
 </style>
 </head>
 <body>
@@ -261,6 +269,7 @@ body.in-screen .app { visibility: hidden; }
           <div class="box-actions">
             <button type="button" class="btn" id="btnCopyMoves" data-i18n="moves.copy"></button>
             <button type="button" class="btn" id="btnSaveMoves" data-i18n="moves.save"></button>
+            <button type="button" class="btn" id="btnVideoMoves" hidden data-i18n="video.make"></button>
             <button type="button" class="btn" id="btnShareMoves" hidden data-i18n="moves.share"></button>
           </div>
         </section>
@@ -327,7 +336,25 @@ body.in-screen .app { visibility: hidden; }
   </div>
 </div>
 
-<!-- Contra la máquina (offline) -->
+<!-- Video de la partida (se arma en el dispositivo) -->
+<div class="overlay screen" id="videoOverlay">
+  <div class="screen-body">
+    <h2 data-i18n="video.title"></h2>
+    <p class="sub" id="videoSub"></p>
+    <div class="videobox">
+      <canvas id="videoCanvas" width="720" height="872"></canvas>
+      <video id="videoPlayer" controls playsinline hidden></video>
+    </div>
+    <div class="progress" id="videoProg" hidden><div id="videoBar"></div></div>
+    <div class="btns">
+      <button class="btn primary" id="btnVideoSave" hidden data-i18n="video.save"></button>
+      <button class="btn" id="btnVideoShare" hidden data-i18n="video.share"></button>
+      <button class="btn" id="btnVideoBack" data-i18n="video.back"></button>
+    </div>
+    <p class="hint" data-i18n="video.hint"></p>
+  </div>
+</div>
+
 <div class="overlay screen" id="settingsOverlay">
   <div class="screen-body settings">
     <h2 id="cfgTitle" data-i18n="cfg.title"></h2>
@@ -452,6 +479,7 @@ body.in-screen .app { visibility: hidden; }
     <p class="sub" id="endHint"></p>
     <div class="btns">
       <button class="btn primary" id="btnRematch" data-i18n="end.rematch"></button>
+      <button class="btn" id="btnEndVideo" hidden data-i18n="video.make"></button>
       <button class="btn" id="btnEndCopy" data-i18n="moves.copyAll"></button>
       <button class="btn" id="btnEndMenu" data-i18n="end.toMenu"></button>
     </div>
@@ -807,6 +835,18 @@ body.in-screen .app { visibility: hidden; }
       'online.roomGone': 'La sala ya no existe: el servidor se reinició o pasó mucho tiempo. Creá una nueva.',
       'toast.rematch': 'Nueva partida. Ahora sos el jugador {n}.',
       'end.winResign': '{loser} abandonó. Ganó {name}.',
+      'video.make': 'Video de la partida',
+      'video.title': 'Video de la partida',
+      'video.working': 'Preparando el video… {pct}%. Dejá esta pantalla abierta.',
+      'video.ready': 'Listo. Podés verlo y descargarlo.',
+      'video.unsupported': 'Este navegador no puede grabar video. Probá con Chrome, Edge, Firefox o un Safari actualizado.',
+      'video.error': 'No se pudo grabar el video: {msg}',
+      'video.save': 'Descargar video',
+      'video.share': 'Compartir',
+      'video.back': 'Volver',
+      'video.cancel': 'Cancelar',
+      'video.footer': 'PENTE · jugada {n} de {total}',
+      'video.hint': 'Se arma en tu dispositivo, sin internet, y se borra cuando empieza una partida nueva. Tarda lo que dura la partida repetida.',
       'menu.timer': 'Reloj',
       'menu.timerHint': '10 minutos por jugador para toda la partida y 1 minuto por jugada. Si se acaba cualquiera de los dos, perdés.',
       'end.winTime': '{loser} se quedó sin tiempo. Ganó {name}.',
@@ -1377,6 +1417,7 @@ body.in-screen .app { visibility: hidden; }
   function buzz(ms) { if (window.PenteSound) window.PenteSound.buzz(ms); }
   var LEVELS_OK = ['easy', 'medium', 'hard'];
   var ai = { active: false, level: 'medium', human: 1, bot: 2, timer: 0, token: 0, thinking: false };   // rival offline
+  var replayBusy = false; // true mientras se dibuja un cuadro del video (render no toca la pantalla real)
   var fx = [];            // fichas capturadas que se están desvaneciendo / rompiendo
   var rooms = { open: false, timer: 0 };
   var online = {
@@ -1463,7 +1504,7 @@ body.in-screen .app { visibility: hidden; }
   /* ---------- Partida ---------- */
   function aiStop() { ai.active = false; ai.token++; clearTimeout(ai.timer); ai.thinking = false; }
   function startGame() {
-    aiStop();
+    aiStop(); videoDiscard();
     if (online.net) leaveOnline(false);
     names[1] = ($('name1').value || '').trim() || t('player.1');
     names[2] = ($('name2').value || '').trim() || t('player.2');
@@ -1518,7 +1559,7 @@ body.in-screen .app { visibility: hidden; }
 
   /* ---------- Rival offline ---------- */
   function startAI(level, side) {
-    aiStop();
+    aiStop(); videoDiscard();
     if (online.net) leaveOnline(false);
     var human = side === 'second' ? 2 : side === 'random' ? (Math.random() < 0.5 ? 1 : 2) : 1;
     ai.active = true; ai.level = level; ai.human = human; ai.bot = human === 1 ? 2 : 1;
@@ -1746,9 +1787,9 @@ body.in-screen .app { visibility: hidden; }
   }
 
   /* Hoja de papel arrugado: facetas claras/oscuras + pliegues con su reflejo + un poco de ruido. Se genera una vez por tamaño. */
-  var paperCache = null;
+  var paperCache = {};                                            // por tamaño: el video usa otro tamaño que el tablero en pantalla
   function paperFor(W) {
-    if (paperCache && paperCache.width === W) return paperCache;
+    if (paperCache[W]) return paperCache[W];
     var cv = document.createElement('canvas'); cv.width = cv.height = W; var g = cv.getContext('2d'), rnd = rng(2024);
     var bg = g.createLinearGradient(0, 0, W, W); bg.addColorStop(0, '#fefdfb'); bg.addColorStop(1, '#efece4'); g.fillStyle = bg; g.fillRect(0, 0, W, W);
     var i, k;
@@ -1768,7 +1809,7 @@ body.in-screen .app { visibility: hidden; }
     }
     for (i = 0; i < Math.round(W * W / 380); i++) { g.fillStyle = 'rgba(60,50,40,' + (rnd() * 0.05) + ')'; g.fillRect(rnd() * W, rnd() * W, 1, 1); }
     var v = g.createRadialGradient(W / 2, W / 2, W * 0.35, W / 2, W / 2, W * 0.78); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(70,55,35,.10)'); g.fillStyle = v; g.fillRect(0, 0, W, W);
-    return (paperCache = cv);
+    return (paperCache[W] = cv);
   }
 
   /* ---------- Lupa (opcional): amplía la zona de destino mientras arrastrás una ficha ---------- */
@@ -1885,6 +1926,7 @@ body.in-screen .app { visibility: hidden; }
       ctx.strokeStyle = th.kbd; ctx.lineWidth = Math.max(2, metrics.cell * 0.08);
       ctx.beginPath(); ctx.arc(px(kbd.x), px(kbd.y), metrics.cell * 0.62, 0, Math.PI * 2); ctx.stroke();
     }
+    if (replayBusy) return;
     updateHud();
     var now = performance.now();
     if (!animReq && ((drag && drag.lifted && (cfg.anim || now - drag.liftStart < 150)) || settle || fx.length)) animReq = requestAnimationFrame(function () { animReq = 0; render(); });
@@ -1894,14 +1936,14 @@ body.in-screen .app { visibility: hidden; }
   /* ---------- Fichas capturadas: se rompen en pedacitos o se desvanecen ---------- */
   var SHARDS = 9;
   function fxMode() { return cfg.anim ? cfg.captureFx : 'none'; }
-  function spawnFx(captured, owner) {
+  function spawnFx(captured, owner, arr) {
     var mode = fxMode();
     if (mode === 'none' || !captured || !captured.length) return;
     var t0 = performance.now();
     captured.forEach(function (c, i) {
       var sh = [];
       if (mode === 'shatter') for (var k = 0; k < SHARDS; k++) sh.push({ v: 0.55 + Math.random() * 0.9, rot: (Math.random() - 0.5) * 7, up: 0.2 + Math.random() * 0.6 });
-      fx.push({ x: c.x, y: c.y, p: owner, seed: seedOf(c.x, c.y, owner), t0: t0 + i * 40, dur: mode === 'shatter' ? 720 : 480, mode: mode, shards: sh, jit: Math.random() * Math.PI });
+      (arr || fx).push({ x: c.x, y: c.y, p: owner, seed: seedOf(c.x, c.y, owner), t0: t0 + i * 40, dur: mode === 'shatter' ? 720 : 480, mode: mode, shards: sh, jit: Math.random() * Math.PI });
     });
   }
   function drawFx(now) {
@@ -2014,7 +2056,7 @@ body.in-screen .app { visibility: hidden; }
       $('pname' + p).textContent = (names[p] || '…') + (online.active && online.me === p ? ' ' + t('online.you') : '');
       $('caps' + p).innerHTML = pips(state.captures[p]) + '<span>' + state.captures[p] + '/5</span>';
     });
-    updateSide(); renderClocks();
+    updateSide(); renderClocks(); updateVideoButtons();
     var sb = $('specBar'); sb.hidden = !online.spectator;
     if (online.spectator) sb.textContent = t('spec.badge', { code: online.code, n: online.specN });
     if (!isOver() && !$('status').dataset.toast) $('status').textContent = turnText();
@@ -2070,6 +2112,7 @@ body.in-screen .app { visibility: hidden; }
     leave.textContent = t('online.leave');
   }
   function rematch() {
+    videoDiscard();
     if (ai.active) { ai.token++; clearTimeout(ai.timer); ai.thinking = false; }
     state = P.createGame({ size: state ? state.size : settings.size, tournamentRule: settings.tournamentRule, exactFive: settings.exactFive });
     hover = pending = drag = settle = null; fx.length = 0; kbd = { x: centerIdx(), y: centerIdx() }; clockFresh(); closeAll(); setStatus(''); render();
@@ -2117,7 +2160,7 @@ body.in-screen .app { visibility: hidden; }
   }
 
   function startOnline(intent) {
-    aiStop(); localOver = null;
+    aiStop(); localOver = null; videoDiscard();
     var url = serverUrl();
     if (!url) { onlineMsg(t('online.noServer')); return; }
     intent.name = myName();
@@ -2139,7 +2182,7 @@ body.in-screen .app { visibility: hidden; }
     online.intent = null; online.rejoining = false; online.over = null; online.awaiting = false; online.rivalLeftAt = 0;
     online.connected = { 1: true, 2: true }; online.rematch = { 1: false, 2: false };
     clearSession(); updateOnlineButtons(); updateRematchUi();
-    if (wasActive) { state = null; clk = null; hover = pending = null; setStatus(''); render(); }
+    if (wasActive) { videoDiscard(); state = null; clk = null; hover = pending = null; setStatus(''); render(); }
     updateHud();
   }
 
@@ -2172,6 +2215,7 @@ body.in-screen .app { visibility: hidden; }
   function applySync(m) {
     var wasOver = !!state && online.active && isOver();
     localOver = null; clockFromServer(m.clock);
+    if (!m.moves.length || (state && m.moves.length < state.moves.length)) videoDiscard();
     var g = P.createGame(m.opts);
     for (var i = 0; i < m.moves.length; i++) {
       var r = P.playMove(g, m.moves[i][0], m.moves[i][1]);
@@ -2484,6 +2528,144 @@ body.in-screen .app { visibility: hidden; }
   }
   document.querySelectorAll('#localMode .seg-opt').forEach(function (b) { b.addEventListener('click', function () { localMode = b.dataset.val; try { localStorage.setItem('pente.localMode', localMode); } catch (e) {} syncLocalMode(); }); });
   window.__localStart = function () { if (localMode === 'ai') { var n = ($('name1').value || '').trim(); try { if (n) localStorage.setItem('pente.name', n); } catch (e) {} startAI(aiPref.level, aiPref.side); } else startGame(); };
+
+
+  /* ---------- Video de la partida ----------
+   * Se arma EN EL DISPOSITIVO (sin internet): se repite la partida jugada en un lienzo aparte y se graba con MediaRecorder.
+   * Se guarda en memoria (no en disco) hasta que empieza otra partida: ahí se borra. Graba en tiempo real, así que tarda lo que dura el video. */
+  var VID = { W: 720, HEAD: 112, FOOT: 40, INTRO: 700, MOVE: 480, CAP_EXTRA: 520, HOLD: 700, OUTRO: 3000 };
+  var video = { token: 0, running: false, blob: null, url: '', ext: '', progress: 0, error: '', rec: null, timer: 0, bcv: null };
+  function videoSupported() { return !!(window.MediaRecorder && HTMLCanvasElement.prototype.captureStream); }
+  function videoMime() {
+    var c = ['video/mp4;codecs=avc1.42E01E', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
+    for (var i = 0; i < c.length; i++) { try { if (MediaRecorder.isTypeSupported(c[i])) return c[i]; } catch (e) {} }
+    return '';
+  }
+  function videoDiscard() {
+    video.token++; clearInterval(video.timer);
+    try { if (video.rec && video.rec.state !== 'inactive') { video.rec.ondataavailable = video.rec.onstop = null; video.rec.stop(); } } catch (e) {}
+    video.rec = null; video.running = false;
+    if (video.url) { try { URL.revokeObjectURL(video.url); } catch (e) {} }
+    video.blob = null; video.url = ''; video.progress = 0; video.error = '';
+    var pl = $('videoPlayer'); if (pl) { try { pl.pause(); } catch (e) {} pl.removeAttribute('src'); pl.hidden = true; }
+    updateVideoUi();
+  }
+  // Dibuja un tablero (estado g) en el lienzo bcv reutilizando el mismo render() de la pantalla, sin tocar nada de la pantalla real.
+  function drawBoardInto(bcv, g, fxArr) {
+    var sv = { canvas: canvas, ctx: ctx, w: metrics.w, st: state, fx: fx, pe: pending, ho: hover, dr: drag, se: settle, kb: kbdOn }, out;
+    canvas = bcv; ctx = bcv.getContext('2d'); metrics.w = bcv.width; state = g; fx = fxArr; pending = hover = drag = settle = null; kbdOn = false; replayBusy = true;
+    try { render(); out = fx; }
+    finally {
+      replayBusy = false; canvas = sv.canvas; ctx = sv.ctx; metrics.w = sv.w; state = sv.st; fx = sv.fx; pending = sv.pe; hover = sv.ho; drag = sv.dr; settle = sv.se; kbdOn = sv.kb;
+      layout();
+    }
+    return out;
+  }
+  function rrect(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+  function fitText(c, s, maxW) { if (c.measureText(s).width <= maxW) return s; while (s.length > 1 && c.measureText(s + '…').width > maxW) s = s.slice(0, -1); return s + '…'; }
+  function wrapText(c, s, maxW) {
+    var words = String(s).split(' '), lines = [], cur = '';
+    words.forEach(function (w) { var tryL = cur ? cur + ' ' + w : w; if (c.measureText(tryL).width > maxW && cur) { lines.push(cur); cur = w; } else cur = tryL; });
+    if (cur) lines.push(cur); return lines;
+  }
+  function cssVar(n, d) { var v = getComputedStyle(document.documentElement).getPropertyValue(n); return (v && v.trim()) || d; }
+  function videoCompose(vc, g, rfx, k, total, banner) {
+    var c = vc.getContext('2d'), W = VID.W, H = vc.height, th = theme(), ink = cssVar('--text', '#eef0f4'), muted = cssVar('--muted', '#9aa1ad'), accent = cssVar('--accent', '#e8b04a');
+    rfx = drawBoardInto(video.bcv, g, rfx);
+    c.fillStyle = cssVar('--bg', '#14161b'); c.fillRect(0, 0, W, H);
+    [1, 2].forEach(function (p) {
+      var x = p === 1 ? 14 : W / 2 + 7, w = W / 2 - 21, y = 12, h = VID.HEAD - 24, active = !banner && g.status === 'playing' && g.current === p;
+      c.fillStyle = cssVar('--panel', '#1d2027'); rrect(c, x, y, w, h, 14); c.fill();
+      c.lineWidth = 3; c.strokeStyle = active ? accent : 'rgba(255,255,255,.08)'; rrect(c, x, y, w, h, 14); c.stroke();
+      var st = th.stones[p], gr = c.createRadialGradient(x + 28, y + 26, 2, x + 32, y + 30, 16); gr.addColorStop(0, st.a); gr.addColorStop(1, st.b);
+      c.fillStyle = gr; c.beginPath(); c.arc(x + 32, y + 30, 14, 0, 7); c.fill();
+      c.fillStyle = ink; c.font = '700 24px system-ui, -apple-system, Segoe UI, Roboto, sans-serif'; c.textBaseline = 'middle'; c.textAlign = 'left';
+      c.fillText(fitText(c, names[p] || ('J' + p), w - 70), x + 56, y + 30);
+      for (var i = 0; i < 5; i++) {
+        c.beginPath(); c.arc(x + 22 + i * 24, y + 62, 8, 0, 7);
+        if (i < g.captures[p]) { c.fillStyle = accent; c.fill(); } else { c.lineWidth = 2; c.strokeStyle = muted; c.stroke(); }
+      }
+    });
+    c.drawImage(video.bcv, 0, VID.HEAD);
+    c.fillStyle = muted; c.font = '600 18px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillText(t('video.footer', { n: k, total: total }), W / 2, VID.HEAD + W + VID.FOOT / 2);
+    if (banner) {
+      c.fillStyle = 'rgba(0,0,0,.62)'; c.fillRect(0, VID.HEAD, W, W);
+      c.fillStyle = '#fff'; c.font = '800 38px system-ui, sans-serif'; c.textAlign = 'center';
+      var lines = wrapText(c, banner, W - 120), y0 = VID.HEAD + W / 2 - (lines.length - 1) * 24;
+      lines.forEach(function (ln, i) { c.fillText(ln, W / 2, y0 + i * 48); });
+      c.font = '700 20px system-ui, sans-serif'; c.fillStyle = 'rgba(255,255,255,.7)'; c.fillText('PENTE', W / 2, VID.HEAD + W - 34);
+    }
+    return rfx;
+  }
+  function videoStart() {
+    if (video.running || video.blob || !state || !state.moves.length) return;
+    var mime = videoMime(); if (!videoSupported() || !mime) { updateVideoUi(); return; }
+    var token = ++video.token, vc = $('videoCanvas'), moves = state.moves.slice(), o = state.options, size = state.size, banner = resultText();
+    vc.width = VID.W; vc.height = VID.HEAD + VID.W + VID.FOOT;
+    video.bcv = video.bcv || document.createElement('canvas'); video.bcv.width = video.bcv.height = VID.W;
+    // tiempos de cada jugada (las que capturan duran un poco más para que se vea la rotura)
+    var times = [], tt = VID.INTRO;
+    moves.forEach(function (m) { times.push(tt); tt += VID.MOVE + (m.captured && m.captured.length ? VID.CAP_EXTRA : 0); });
+    var total = tt + VID.HOLD + VID.OUTRO, endAt = tt + VID.HOLD;
+    var g = P.createGame(Object.assign({}, o, { size: size })), rfx = [], applied = 0, chunks = [];
+    var rec;
+    try { rec = new MediaRecorder(vc.captureStream(30), { mimeType: mime, videoBitsPerSecond: 1600000 }); }
+    catch (e) { video.error = String(e && e.message || e); updateVideoUi(); return; }
+    video.rec = rec; video.running = true; video.error = ''; video.progress = 0;
+    rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+    rec.onstop = function () {
+      if (token !== video.token) return;
+      clearInterval(video.timer); video.running = false;
+      var type = mime.split(';')[0]; video.blob = new Blob(chunks, { type: type }); video.url = URL.createObjectURL(video.blob);
+      video.ext = type.indexOf('mp4') >= 0 ? 'mp4' : 'webm'; video.progress = 1; updateVideoUi();
+    };
+    var t0 = performance.now();
+    function frame() {
+      if (token !== video.token) { clearInterval(video.timer); return; }
+      var el = performance.now() - t0;
+      while (applied < moves.length && el >= times[applied]) {                   // llegó la hora de la próxima jugada
+        var m = moves[applied], r = P.playMove(g, m.x, m.y, m.player);
+        if (!r.ok) { videoFail('jugada inválida en la repetición'); return; }
+        g = r.state; applied++;
+        spawnFx(r.captured, m.player === 1 ? 2 : 1, rfx);
+      }
+      var showBanner = el >= endAt && applied === moves.length;
+      try { rfx = videoCompose(vc, g, rfx, applied, moves.length, showBanner ? banner : ''); } catch (e) { videoFail(String(e && e.message || e)); return; }
+      video.progress = Math.min(0.99, el / total); updateVideoUi();
+      if (el >= total) { clearInterval(video.timer); try { rec.stop(); } catch (e) { videoFail(String(e)); } }
+    }
+    try { rec.start(500); } catch (e) { videoFail(String(e && e.message || e)); return; }
+    updateVideoUi(); frame(); video.timer = setInterval(frame, 33);
+  }
+  function videoFail(msg) { clearInterval(video.timer); try { if (video.rec && video.rec.state !== 'inactive') { video.rec.ondataavailable = video.rec.onstop = null; video.rec.stop(); } } catch (e) {} video.rec = null; video.running = false; video.error = msg || '?'; updateVideoUi(); }
+  function updateVideoUi() {
+    var ov = $('videoOverlay'); if (!ov) return;
+    var ready = !!video.blob, work = video.running, unsupported = !videoSupported() || !videoMime();
+    $('videoCanvas').hidden = ready || unsupported || !!video.error;
+    var pl = $('videoPlayer'); pl.hidden = !ready;
+    if (ready && pl.getAttribute('src') !== video.url) pl.src = video.url;
+    $('videoProg').hidden = !work; $('videoBar').style.width = Math.round(video.progress * 100) + '%';
+    $('videoSub').textContent = unsupported ? t('video.unsupported') : video.error ? t('video.error', { msg: video.error }) : ready ? t('video.ready') : work ? t('video.working', { pct: Math.round(video.progress * 100) }) : '';
+    $('btnVideoSave').hidden = !ready;
+    var canShare = false; try { canShare = ready && !!navigator.canShare && navigator.canShare({ files: [new File([video.blob], 'x.' + video.ext, { type: video.blob.type })] }); } catch (e) {}
+    $('btnVideoShare').hidden = !canShare;
+    $('btnVideoBack').textContent = work ? t('video.cancel') : t('video.back');
+    updateVideoButtons();
+  }
+  function updateVideoButtons() { var has = !!state && isOver() && state.moves.length > 0; $('btnEndVideo').hidden = !has; $('btnVideoMoves').hidden = !has; }
+  function videoFileName() { var d = new Date(), pad = function (n) { return (n < 10 ? '0' : '') + n; }; return 'pente-' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + pad(d.getHours()) + pad(d.getMinutes()) + '.' + video.ext; }
+  function openVideo() { open('videoOverlay'); updateVideoUi(); if (!video.blob && !video.running) videoStart(); }
+  $('btnEndVideo').addEventListener('click', openVideo);
+  $('btnVideoMoves').addEventListener('click', openVideo);
+  $('btnVideoBack').addEventListener('click', function () { if (video.running) videoDiscard(); closeAll(); if (state && isOver()) showEnd(); });
+  $('btnVideoSave').addEventListener('click', function () {
+    if (!video.blob) return; var a = document.createElement('a'); a.href = video.url; a.download = videoFileName(); document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  });
+  $('btnVideoShare').addEventListener('click', function () {
+    if (!video.blob || !navigator.share) return;
+    navigator.share({ files: [new File([video.blob], videoFileName(), { type: video.blob.type })], title: 'Pente' }).catch(function () {});
+  });
 
   /* ---------- Opciones de partida compartidas (local y online) ---------- */
   function syncOpts() { document.querySelectorAll('input[data-opt]').forEach(function (i) { i.checked = !!settings[i.getAttribute('data-opt')]; }); }
