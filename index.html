@@ -144,6 +144,65 @@ body.in-screen .app { visibility: hidden; }
 .room .meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
 .room .btn { flex: none; min-height: 44px; padding: 8px 16px; }
 .room-empty { text-align: center; color: var(--muted); padding: 24px 8px; border: 2px dashed #343a46; border-radius: 14px; }
+
+/* ---------- Jugadas y chat ---------- */
+.stage { flex: 1 1 auto; display: flex; gap: 12px; min-height: 0; }
+.stage .board-wrap { flex: 1 1 auto; min-width: 0; }
+.side { flex: none; }
+.side-inner { display: flex; flex-direction: column; gap: 10px; }
+.side-head { display: none; }
+.box { background: var(--panel); border-radius: var(--radius); padding: 10px 12px; display: flex; flex-direction: column; min-height: 0; gap: 8px; }
+.box[hidden], .btn[hidden], .badge[hidden], .tab[hidden] { display: none; }
+.box h3 { margin: 0; font-size: 15px; }
+.box-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.box .hint { margin: 0; font-size: 12px; }
+.btn.small { min-height: 34px; padding: 4px 10px; font-size: 13px; }
+.box-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.box-actions .btn { flex: 1 1 auto; min-height: 40px; padding: 8px 10px; font-size: 14px; }
+.movelist { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1 1 auto; min-height: 90px; font-variant-numeric: tabular-nums; }
+.movelist li { display: grid; grid-template-columns: 2.2em 1fr 1fr; gap: 6px; padding: 3px 4px; border-radius: 8px; font-size: 14px; }
+.movelist li.last { background: var(--panel-2); }
+.movelist .mn { color: var(--muted); }
+.movelist .mv { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.movelist .mv::before { content: ''; width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.movelist .mv[data-p="1"]::before { background: radial-gradient(circle at 35% 30%, var(--s1a), var(--s1b)); }
+.movelist .mv[data-p="2"]::before { background: radial-gradient(circle at 35% 30%, var(--s2a), var(--s2b)); box-shadow: 0 0 0 1px rgba(0,0,0,.25); }
+.movelist .cap { color: var(--accent); font-size: 12px; font-weight: 700; }
+.movelist .empty { display: block; color: var(--muted); }
+.badge { display: inline-block; min-width: 18px; padding: 0 5px; margin-left: 6px; border-radius: 9px; background: var(--danger); color: #fff; font-size: 12px; line-height: 18px; text-align: center; }
+.people { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { min-height: 30px; padding: 2px 10px; border-radius: 15px; border: 1px solid #343a46; background: var(--bg); font-size: 13px; }
+.chip[aria-pressed="true"] { border-color: var(--danger); color: var(--muted); text-decoration: line-through; }
+.chatlog { overflow-y: auto; flex: 1 1 auto; min-height: 110px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; overflow-wrap: anywhere; }
+.chatlog .msg b { font-weight: 700; margin-right: 6px; }
+.chatlog .msg .s1 { color: #8ec5ff; } .chatlog .msg .s2 { color: #ffb38e; } .chatlog .msg .s0 { color: var(--muted); }
+.chatlog .note { color: var(--muted); font-size: 13px; }
+.chatform { display: flex; gap: 8px; }
+.chatform input { flex: 1 1 auto; min-width: 0; padding: 10px; border-radius: 10px; border: 1px solid #343a46; background: var(--bg); color: var(--text); font: inherit; font-size: 16px; }
+.chatform .btn { min-height: 44px; padding: 8px 14px; }
+#btnSide { white-space: nowrap; }
+
+@media (min-width: 900px) {
+  .app { max-width: 1300px; }
+  .side { width: 300px; position: relative; }
+  .side-inner { position: absolute; inset: 0; }                 /* el panel no estira el tablero: se adapta a su alto */
+  #movesBox { flex: 1 1 0; min-height: 0; }
+  #chatBox { flex: 1.3 1 0; min-height: 0; }
+  .sidebar-row { display: none; }
+}
+@media (max-width: 899px) {
+  .side { position: fixed; left: 0; right: 0; bottom: 0; z-index: 15; max-height: 72vh; display: none; background: var(--bg); border-top: 2px solid #343a46; border-radius: 18px 18px 0 0; padding: 10px var(--gutter) calc(10px + env(safe-area-inset-bottom)); box-shadow: 0 -12px 40px rgba(0,0,0,.55); }
+  .side.open { display: block; }
+  .side-inner { max-height: calc(72vh - 24px); }
+  .side-head { display: flex; align-items: center; gap: 8px; }
+  .side-tabs { display: flex; gap: 8px; flex: 1; }
+  .side-tabs .tab { flex: 1; }
+  .btn.x { min-height: 44px; min-width: 44px; padding: 0; }
+  .side[data-tab="moves"] #chatBox, .side[data-tab="moves"] #btnChatShow { display: none; }
+  .side[data-tab="chat"] #movesBox { display: none; }
+  .side .box { overflow: hidden; }
+  .movelist, .chatlog { max-height: 34vh; }
+}
 </style>
 </head>
 <body>
@@ -163,7 +222,41 @@ body.in-screen .app { visibility: hidden; }
 
   <div class="status" id="status" role="status" aria-live="polite"></div>
 
-  <div class="board-wrap"><canvas id="board" tabindex="0" role="application"></canvas></div>
+  <div class="stage">
+    <div class="board-wrap"><canvas id="board" tabindex="0" role="application"></canvas></div>
+
+    <aside class="side" id="side" data-tab="moves" aria-label="Jugadas y chat">
+      <div class="side-inner">
+        <div class="side-head">
+          <div class="side-tabs" role="tablist">
+            <button type="button" class="tab" id="tabMoves" data-side="moves" aria-selected="true" data-i18n="side.moves"></button>
+            <button type="button" class="tab" id="tabChat" data-side="chat" hidden><span data-i18n="chat.title"></span><b class="badge" id="chatBadge" hidden></b></button>
+          </div>
+          <button type="button" class="btn x" id="btnSideClose" aria-label="Cerrar">✕</button>
+        </div>
+        <section class="box" id="movesBox">
+          <h3 data-i18n="side.moves"></h3>
+          <ol class="movelist" id="movesList"></ol>
+          <p class="hint" data-i18n="moves.legend"></p>
+          <div class="box-actions">
+            <button type="button" class="btn" id="btnCopyMoves" data-i18n="moves.copy"></button>
+            <button type="button" class="btn" id="btnSaveMoves" data-i18n="moves.save"></button>
+            <button type="button" class="btn" id="btnShareMoves" hidden data-i18n="moves.share"></button>
+          </div>
+        </section>
+        <section class="box" id="chatBox" hidden>
+          <div class="box-head"><h3 data-i18n="chat.title"></h3><button type="button" class="btn small" id="btnChatHide" data-i18n="chat.hide"></button></div>
+          <div class="people" id="chatPeople"></div>
+          <div class="chatlog" id="chatLog" role="log" aria-live="polite"></div>
+          <form class="chatform" id="chatForm" autocomplete="off">
+            <input type="text" id="chatInput" maxlength="200" data-i18n-ph="chat.placeholder" enterkeyhint="send">
+            <button type="submit" class="btn primary" data-i18n="chat.send"></button>
+          </form>
+        </section>
+        <button type="button" class="btn" id="btnChatShow" hidden data-i18n="chat.show"></button>
+      </div>
+    </aside>
+  </div>
 
   <div class="actions">
     <button class="btn" id="btnMenu" data-i18n="hud.menu"></button>
@@ -171,6 +264,7 @@ body.in-screen .app { visibility: hidden; }
     <button class="btn" id="btnClaim" hidden data-i18n="online.claim"></button>
     <button class="btn primary" id="btnConfirm" hidden data-i18n="hud.confirm"></button>
   </div>
+  <div class="actions sidebar-row"><button class="btn" id="btnSide"><span id="btnSideLbl"></span><b class="badge" id="sideBadge" hidden></b></button></div>
 </div>
 
 <!-- Menú principal (pantalla propia: el juego no se ve detrás) -->
@@ -241,9 +335,11 @@ body.in-screen .app { visibility: hidden; }
         <div class="seg" data-cfg="lift" role="group"><button type="button" class="seg-opt" data-val="low" data-i18n="cfg.lift.low"></button><button type="button" class="seg-opt" data-val="mid" data-i18n="cfg.lift.mid"></button><button type="button" class="seg-opt" data-val="high" data-i18n="cfg.lift.high"></button></div>
         <p class="hint" data-i18n="cfg.liftHint"></p></div>
       <label class="check"><input type="checkbox" data-cfg="guides"><span><span data-i18n="cfg.guides"></span></span></label>
+      <label class="check"><input type="checkbox" data-cfg="loupe"><span><span data-i18n="cfg.loupe"></span><small data-i18n="cfg.loupeHint"></small></span></label>
     </section>
 
     <section class="tabpanel" id="tab-game" role="tabpanel" hidden>
+      <label class="check"><input type="checkbox" data-cfg="chat"><span><span data-i18n="cfg.chat"></span><small data-i18n="cfg.chatHint"></small></span></label>
       <label class="check"><input type="checkbox" data-cfg="zone"><span><span data-i18n="cfg.zone"></span><small data-i18n="cfg.zoneHint"></small></span></label>
       <div class="btns"><button type="button" class="btn" id="btnCfgReset" data-i18n="cfg.reset"></button></div>
     </section>
@@ -326,6 +422,7 @@ body.in-screen .app { visibility: hidden; }
     <p class="sub" id="endHint"></p>
     <div class="btns">
       <button class="btn primary" id="btnRematch" data-i18n="end.rematch"></button>
+      <button class="btn" id="btnEndCopy" data-i18n="moves.copyAll"></button>
       <button class="btn" id="btnEndMenu" data-i18n="end.toMenu"></button>
     </div>
   </div>
@@ -728,6 +825,42 @@ body.in-screen .app { visibility: hidden; }
       'err.SPECTATORS_FULL': 'La sala ya tiene demasiados espectadores.',
       'err.ALREADY_IN_ROOM': 'Ya estás en una sala. Salí primero.',
       'err.NOT_A_PLAYER': 'Estás mirando: no podés hacer eso.',
+      'side.moves': 'Jugadas',
+      'side.openMoves': 'Jugadas',
+      'side.openBoth': 'Jugadas y chat',
+      'moves.empty': 'Todavía no hay jugadas.',
+      'moves.legend': 'x = captura (cuántas fichas).',
+      'moves.copy': 'Copiar',
+      'moves.copied': 'Copiado ✓',
+      'moves.copyAll': 'Copiar jugadas',
+      'moves.save': 'Descargar',
+      'moves.share': 'Compartir',
+      'moves.copyFail': 'No se pudo copiar. Probá con Descargar.',
+      'moves.txtHeader': 'Pente {size}×{size}',
+      'moves.txtRules': 'Reglas: {rules}',
+      'moves.ruleTournament': 'torneo',
+      'moves.ruleExact': 'línea de exactamente 5',
+      'moves.ruleFree': 'sin reglas especiales',
+      'moves.txtResult': 'Resultado: {text}',
+      'moves.txtDate': 'Fecha: {date}',
+      'moves.txtLegend': 'x = captura',
+      'chat.title': 'Chat',
+      'chat.hide': 'Ocultar chat',
+      'chat.show': 'Mostrar chat',
+      'chat.placeholder': 'Escribí un mensaje…',
+      'chat.send': 'Enviar',
+      'chat.people': 'Tocá un nombre para silenciarlo.',
+      'chat.mute': 'Silenciar a {name}',
+      'chat.unmute': 'Dejar de silenciar a {name}',
+      'chat.empty': 'Nadie escribió todavía.',
+      'chat.spec': 'mirando',
+      'chat.you': 'vos',
+      'cfg.chat': 'Activar el chat',
+      'cfg.chatHint': 'Si lo apagás no ves ni mandás mensajes. Solo existe en partidas online.',
+      'cfg.loupe': 'Lupa al arrastrar',
+      'cfg.loupeHint': 'Un cuadrado abajo a la derecha amplía la zona mientras arrastrás una ficha, para ver bien dónde cae. Pensado para celular.',
+      'theme.papel': 'Papel',
+      'err.CHAT_RATE': 'Más despacio: un mensaje por vez.',
       'a11y.board': 'Tablero de Pente',
       'player.1': 'Jugador 1',
       'player.2': 'Jugador 2'
@@ -736,7 +869,7 @@ body.in-screen .app { visibility: hidden; }
   var lang = 'es';
   function t(key, vars) {
     var s = (STRINGS[lang] && STRINGS[lang][key]) || (STRINGS.es && STRINGS.es[key]) || key;
-    if (vars) for (var k in vars) s = s.replace('{' + k + '}', vars[k]);
+    if (vars) for (var k in vars) s = s.split('{' + k + '}').join(vars[k]);
     return s;
   }
   function setLang(l) { if (STRINGS[l]) lang = l; }
@@ -769,6 +902,18 @@ body.in-screen .app { visibility: hidden; }
       last: { ring: '#ffffff', dot: { 1: '#ffffff', 2: '#062030' } },
       zone: { fill: 'rgba(255,255,255,.07)', stroke: 'rgba(160,190,255,.55)' },
       win: '#ffe066', pendingRing: '#ffe066', kbd: '#ffffff'
+    }
+    ,{
+      id: 'papel',
+      css: { '--accent': '#e8b04a', '--s1a': '#8a8a8e', '--s1b': '#2b2b2e', '--s2a': '#7d8aff', '--s2b': '#1f2fc4',
+             '--board-shadow': '0 10px 30px rgba(0,0,0,.45)' },
+      // paper: true -> el fondo es una hoja blanca arrugada generada por código (sin imágenes)
+      board: { paper: true, bg: ['#fdfcf9', '#efece4'], line: 'rgba(18,18,20,.9)', lineGlow: null, star: 'rgba(18,18,20,.92)', label: 'rgba(30,30,34,.6)', labelHi: '#c0261d' },
+      // scribble: las fichas son garabatos que cierran un círculo ('pencil' = grafito, 'pen' = lapicera)
+      stones: { 1: { a: '#8a8a8e', b: '#2b2b2e', glow: null, scribble: 'pencil' }, 2: { a: '#7d8aff', b: '#1f2fc4', glow: null, scribble: 'pen' } },
+      last: { ring: '#d1342b', dot: { 1: '#ffffff', 2: '#ffffff' } },
+      zone: { fill: 'rgba(0,0,0,.07)', stroke: 'rgba(0,0,0,.45)' },
+      win: '#e89a00', pendingRing: '#e8791f', kbd: '#c0261d'
     }
   ];
   var byId = {};
@@ -943,12 +1088,12 @@ body.in-screen .app { visibility: hidden; }
 
   var canvas = $('board'), ctx = canvas.getContext('2d');
   var state = null, names = { 1: '', 2: '' };
-  var settings = { tournamentRule: true, exactFive: false, size: 19 };      // opciones de la partida (menú principal)
+  var settings = { tournamentRule: true, exactFive: true, size: 13 };      // opciones de la partida (menú principal)
   try { var sv = parseInt(localStorage.getItem('pente.size'), 10); if (sv === 13 || sv === 19) settings.size = sv; } catch (e) {}
 
   /* Configuración del dispositivo (pantalla "Configuración"): se guarda en localStorage y se aplica al instante. */
   var coarse = matchMedia('(pointer: coarse)').matches, reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var CFG_DEFAULTS = { confirm: coarse ? 'button' : 'none', lift: 'mid', guides: true, coords: true, lastMove: true, anim: !reduced, stoneSize: 'normal', zone: true, captureFx: reduced ? 'fade' : 'shatter' };
+  var CFG_DEFAULTS = { confirm: 'button', lift: 'mid', guides: true, coords: true, lastMove: true, anim: !reduced, stoneSize: 'normal', zone: true, captureFx: reduced ? 'fade' : 'shatter', chat: true, loupe: false };
   var CFG_ALLOWED = { confirm: ['button', 'double', 'none'], lift: ['low', 'mid', 'high'], stoneSize: ['small', 'normal', 'large'], captureFx: ['shatter', 'fade', 'none'] };
   function loadCfg() {
     var c = {}, k, raw = null;
@@ -971,6 +1116,7 @@ body.in-screen .app { visibility: hidden; }
   var hover = null;       // {x,y} previsualización (mouse / toque pendiente)
   var pending = null;     // toque pendiente de confirmar
   var kbd = null;         // cursor de teclado
+  var kbdOn = false;      // el aro del teclado solo se ve si lo último que usaste fue el teclado (si no, quedaba flotando donde había una ficha comida)
   var toastTimer = null;
   var metrics = { w: 0, cell: 0, off: 0 };
   function boardN() { return state ? state.size : settings.size; }
@@ -980,7 +1126,7 @@ body.in-screen .app { visibility: hidden; }
   var fx = [];            // fichas capturadas que se están desvaneciendo / rompiendo
   var rooms = { open: false, timer: 0 };
   var online = {
-    spectator: false, specN: 0, lastCode: '', isPublic: false,
+    spectator: false, specN: 0, lastCode: '', isPublic: false, cid: '',
     active: false, net: null, url: '', conn: 'closed', code: '', token: '', me: 0, intent: null, rejoining: false,
     over: null, connected: { 1: true, 2: true }, rematch: { 1: false, 2: false },
     rivalLeftAt: 0, claimTimer: null, awaiting: false, awaitTimer: null
@@ -1064,6 +1210,7 @@ body.in-screen .app { visibility: hidden; }
   function easeOut(k) { return 1 - Math.pow(1 - k, 3); }
 
   /* Mouse y lápiz: previsualización al pasar y un clic coloca. */
+  canvas.addEventListener('pointerdown', function () { if (kbdOn) { kbdOn = false; render(); } }, true);
   canvas.addEventListener('pointermove', function (e) {
     if (e.pointerType === 'touch') { if (drag && drag.id === e.pointerId) { e.preventDefault(); dragMove(e); } return; }
     if (!canPlayNow()) return;
@@ -1160,6 +1307,7 @@ body.in-screen .app { visibility: hidden; }
   canvas.addEventListener('keydown', function (e) {
     if (!state) return;
     var d = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key], m = boardN() - 1;
+    if (d || e.key === 'Enter' || e.key === ' ') kbdOn = true;
     if (d) { e.preventDefault(); kbd = kbd || { x: centerIdx(), y: centerIdx() }; kbd = { x: Math.max(0, Math.min(m, kbd.x + d[0])), y: Math.max(0, Math.min(m, kbd.y + d[1])) }; hover = kbd; render(); }
     else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (kbd) tryMove(kbd.x, kbd.y); }
   });
@@ -1178,11 +1326,13 @@ body.in-screen .app { visibility: hidden; }
   }
   function px(i) { return metrics.off + i * metrics.cell; }
 
-  function drawStone(x, y, player, alpha, highlight) { drawStonePx(px(x), px(y), player, alpha, highlight, 1, 0); }
+  function seedOf(x, y, p) { return (x * 7 + y * 13 + p * 5) % 12; }                 // cada casilla tiene su propio garabato (siempre el mismo)
+  function drawStone(x, y, player, alpha, highlight) { drawStonePx(px(x), px(y), player, alpha, highlight, 1, 0, seedOf(x, y, player)); }
   // scale > 1 y lift (0..1) = ficha levantada: más grande y con sombra más lejana
-  function drawStonePx(cx, cy, player, alpha, highlight, scale, lift) {
+  function drawStonePx(cx, cy, player, alpha, highlight, scale, lift, seed) {
     var th = theme(), st = th.stones[player];
     var r = metrics.cell * ({ small: 0.39, normal: 0.44, large: 0.48 }[cfg.stoneSize] || 0.44) * (scale || 1);
+    if (st.scribble) { drawScribble(cx, cy, st, alpha, highlight, scale || 1, lift || 0, seed === undefined ? 3 : seed, r, th); return; }
     ctx.save(); ctx.globalAlpha = alpha;
     if (st.glow) { ctx.shadowColor = st.glow; ctx.shadowBlur = r * (1.2 + (lift || 0) * 0.8); }
     else { ctx.shadowColor = 'rgba(0,0,0,' + (0.45 - 0.1 * (lift || 0)) + ')'; ctx.shadowBlur = r * (0.35 + (lift || 0) * 0.7); ctx.shadowOffsetY = r * (0.12 + (lift || 0) * 0.5); }
@@ -1194,9 +1344,114 @@ body.in-screen .app { visibility: hidden; }
     ctx.restore();
   }
 
+
+  /* ---------- Fichas de garabato (tema Papel) ---------- */
+  var sprites = {}, spriteCount = 0;
+  function rng(seed) { var a = (seed + 1) * 2654435761 >>> 0; return function () { a = (a + 0x6D2B79F5) >>> 0; var t = a; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  // Zigzag de trazos paralelos dentro de un círculo + un aro final que lo cierra, todo con un poco de temblor.
+  function scribbleSprite(kind, seed, r0) {
+    var key = kind + '|' + seed + '|' + Math.round(r0 * 4);
+    if (sprites[key]) return sprites[key];
+    if (spriteCount > 160) { sprites = {}; spriteCount = 0; }
+    var pen = kind === 'pen', pad = Math.ceil(r0 * 0.3) + 2, size = Math.ceil((r0 + pad) * 2), cv = document.createElement('canvas');
+    cv.width = cv.height = size;
+    var g = cv.getContext('2d'), rnd = rng(seed * 17 + (pen ? 101 : 7)), R = r0 * 0.94;
+    g.translate(size / 2, size / 2); g.lineCap = 'round'; g.lineJoin = 'round';
+    function zig(angle, step, width, color, jit) {
+      var ca = Math.cos(angle), sa = Math.sin(angle), pts = [], k = 0;
+      for (var o = -R; o <= R; o += step, k++) {
+        var half = Math.sqrt(Math.max(0, R * R - o * o)) * (0.9 + rnd() * 0.12);
+        var a1 = -half + (rnd() - 0.5) * jit, a2 = half + (rnd() - 0.5) * jit, oo = o + (rnd() - 0.5) * jit;
+        var p1 = [a1 * ca - oo * sa, a1 * sa + oo * ca], p2 = [a2 * ca - oo * sa, a2 * sa + oo * ca];
+        if (k % 2) pts.push(p2, p1); else pts.push(p1, p2);
+      }
+      g.strokeStyle = color; g.lineWidth = width; g.beginPath();
+      pts.forEach(function (q, i) { if (i) g.lineTo(q[0], q[1]); else g.moveTo(q[0], q[1]); });
+      g.stroke();
+    }
+    var base = -0.95 + (rnd() - 0.5) * 0.7;
+    if (pen) {
+      zig(base, R * 0.34, R * 0.21, 'rgba(38,58,222,.72)', R * 0.2);
+      zig(base + 0.5, R * 0.5, R * 0.15, 'rgba(26,44,204,.55)', R * 0.22);
+    } else {
+      zig(base, R * 0.4, R * 0.36, 'rgba(32,32,36,.74)', R * 0.2);
+      zig(base + 0.45, R * 0.6, R * 0.2, 'rgba(24,24,28,.45)', R * 0.22);
+    }
+    // aro final: da la vuelta y un poquito más, con el radio variando suave (así "cierra" el círculo)
+    var turns = 1.12 + rnd() * 0.12, a0 = rnd() * Math.PI * 2, wob = rnd() * 6;
+    g.strokeStyle = pen ? 'rgba(22,36,196,.8)' : 'rgba(24,24,28,.7)'; g.lineWidth = R * (pen ? 0.14 : 0.17); g.beginPath();
+    for (var i = 0; i <= 64; i++) {
+      var f = i / 64, a = a0 + f * Math.PI * 2 * turns, rr = R * (0.97 + 0.045 * Math.sin(f * 9 + wob) - 0.04 * f);
+      if (i) g.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); else g.moveTo(Math.cos(a) * rr, Math.sin(a) * rr);
+    }
+    g.stroke();
+    // grano: el grafito y la tinta no cubren parejo
+    g.globalCompositeOperation = 'destination-out';
+    var n = Math.round(r0 * r0 * (pen ? 0.35 : 0.55));
+    for (var j = 0; j < n; j++) { g.fillStyle = 'rgba(0,0,0,' + (0.2 + rnd() * 0.35) + ')'; var ang = rnd() * 6.283, d = Math.sqrt(rnd()) * (R + 3); g.fillRect(Math.cos(ang) * d, Math.sin(ang) * d, 1 + rnd() * 1.2, 1 + rnd() * 1.2); }
+    spriteCount++;
+    return (sprites[key] = { cv: cv, size: size });
+  }
+  function drawScribble(cx, cy, st, alpha, highlight, scale, lift, seed, rScaled, th) {
+    var r0 = rScaled / scale * 1.12, sp = scribbleSprite(st.scribble, seed, r0), s = sp.size * scale;
+    ctx.save(); ctx.globalAlpha = alpha;
+    if (lift) { ctx.shadowColor = 'rgba(0,0,0,.28)'; ctx.shadowBlur = rScaled * (0.3 + lift * 0.6); ctx.shadowOffsetY = rScaled * lift * 0.5; }
+    ctx.drawImage(sp.cv, cx - s / 2, cy - s / 2, s, s);
+    ctx.restore();
+    if (highlight) { ctx.save(); ctx.lineWidth = Math.max(2, rScaled * .16); ctx.strokeStyle = th.win; ctx.beginPath(); ctx.arc(cx, cy, rScaled * 1.12, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); }
+  }
+
+  /* Hoja de papel arrugado: facetas claras/oscuras + pliegues con su reflejo + un poco de ruido. Se genera una vez por tamaño. */
+  var paperCache = null;
+  function paperFor(W) {
+    if (paperCache && paperCache.width === W) return paperCache;
+    var cv = document.createElement('canvas'); cv.width = cv.height = W; var g = cv.getContext('2d'), rnd = rng(2024);
+    var bg = g.createLinearGradient(0, 0, W, W); bg.addColorStop(0, '#fefdfb'); bg.addColorStop(1, '#efece4'); g.fillStyle = bg; g.fillRect(0, 0, W, W);
+    var i, k;
+    for (i = 0; i < 46; i++) {                                     // facetas
+      var x = rnd() * W, y = rnd() * W, sz = W * (0.18 + rnd() * 0.32), a = rnd() * 6.283;
+      g.beginPath(); for (k = 0; k < 3; k++) { var aa = a + k * 2.1 + rnd() * 0.7; g.lineTo(x + Math.cos(aa) * sz, y + Math.sin(aa) * sz); } g.closePath();
+      g.fillStyle = rnd() < 0.5 ? 'rgba(70,60,45,' + (0.012 + rnd() * 0.03) + ')' : 'rgba(255,255,255,' + (0.25 + rnd() * 0.35) + ')'; g.fill();
+    }
+    g.lineCap = 'round'; g.lineJoin = 'round';
+    for (i = 0; i < 34; i++) {                                     // pliegues
+      var px0 = rnd() * W, py0 = rnd() * W, ang = rnd() * 6.283, len = W * (0.12 + rnd() * 0.5), pts = [[px0, py0]];
+      for (k = 0; k < 3; k++) { ang += (rnd() - 0.5) * 0.9; px0 += Math.cos(ang) * len / 3; py0 += Math.sin(ang) * len / 3; pts.push([px0, py0]); }
+      var dk = 0.05 + rnd() * 0.09, w = Math.max(1, W / 520);
+      [[0, 0, 'rgba(60,50,38,' + dk + ')', w], [w * 1.1, w * 1.1, 'rgba(255,255,255,.85)', w * 1.3]].forEach(function (L) {
+        g.strokeStyle = L[2]; g.lineWidth = L[3]; g.beginPath(); pts.forEach(function (q, j) { if (j) g.lineTo(q[0] + L[0], q[1] + L[1]); else g.moveTo(q[0] + L[0], q[1] + L[1]); }); g.stroke();
+      });
+    }
+    for (i = 0; i < Math.round(W * W / 380); i++) { g.fillStyle = 'rgba(60,50,40,' + (rnd() * 0.05) + ')'; g.fillRect(rnd() * W, rnd() * W, 1, 1); }
+    var v = g.createRadialGradient(W / 2, W / 2, W * 0.35, W / 2, W / 2, W * 0.78); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(70,55,35,.10)'); g.fillStyle = v; g.fillRect(0, 0, W, W);
+    return (paperCache = cv);
+  }
+
+  /* ---------- Lupa (opcional): amplía la zona de destino mientras arrastrás una ficha ---------- */
+  var lcv = null;
+  function drawLoupe(th) {
+    var W = metrics.w, cell = metrics.cell, c = drag.cell, cx = px(c.x), cy = px(c.y), size = Math.round(W * 0.36), span = size / 2;                  // zoom 2x
+    var sx = Math.max(0, Math.min(W - span, cx - span / 2)), sy = Math.max(0, Math.min(W - span, cy - span / 2));
+    if (!lcv) lcv = document.createElement('canvas');
+    if (lcv.width !== size) { lcv.width = lcv.height = size; }
+    var lg = lcv.getContext('2d'); lg.clearRect(0, 0, size, size); lg.drawImage(canvas, sx, sy, span, span, 0, 0, size, size);
+    var m = cell * 0.35, dx = W - size - m, dy = W - size - m;
+    if (cx > dx - cell * 1.5 && cy > dy - cell * 1.5) dx = m;               // si la casilla está cerca de la esquina, la lupa pasa al otro lado
+    var k = size / span, tx = (cx - sx) * k, ty = (cy - sy) * k, rad = Math.max(8, size * 0.07);
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = cell * 0.5; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(dx, dy, size, size, rad) : ctx.rect(dx, dy, size, size); ctx.fill();
+    ctx.shadowColor = 'transparent'; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(dx, dy, size, size, rad) : ctx.rect(dx, dy, size, size); ctx.clip();
+    ctx.drawImage(lcv, dx, dy);
+    ctx.strokeStyle = dragError(c) ? '#e5604f' : th.pendingRing; ctx.lineWidth = Math.max(2, size * 0.01);
+    ctx.beginPath(); ctx.arc(dx + tx, dy + ty, cell * 0.5 * k, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(dx + tx - cell * 0.9 * k, dy + ty); ctx.lineTo(dx + tx + cell * 0.9 * k, dy + ty); ctx.moveTo(dx + tx, dy + ty - cell * 0.9 * k); ctx.lineTo(dx + tx, dy + ty + cell * 0.9 * k); ctx.globalAlpha = 0.3; ctx.lineWidth = Math.max(1, size * 0.005); ctx.stroke();
+    ctx.restore();
+    ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = Math.max(2, size * 0.02); ctx.beginPath(); ctx.roundRect ? ctx.roundRect(dx, dy, size, size, rad) : ctx.rect(dx, dy, size, size); ctx.stroke(); ctx.restore();
+  }
+
   // Letras arriba (A–T, sin I) y números a la izquierda (1–19). Se resalta la fila/columna de la casilla marcada.
   function drawLabels(th) {
-    var c = metrics.cell, active = (drag && drag.lifted ? drag.cell : null) || pending || hover || (document.activeElement === canvas ? kbd : null);
+    var c = metrics.cell, active = (drag && drag.lifted ? drag.cell : null) || pending || hover || (kbdOn && document.activeElement === canvas ? kbd : null);
     ctx.save();
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     for (var i = 0; i < boardN(); i++) {
@@ -1218,9 +1473,12 @@ body.in-screen .app { visibility: hidden; }
     if (drag && drag.lifted) updateDragTarget();
     if (settle && performance.now() - settle.t0 >= settle.dur) settle = null;
     // fondo del tablero
-    var bg = ctx.createLinearGradient(0, 0, W, W);
-    bg.addColorStop(0, th.board.bg[0]); bg.addColorStop(1, th.board.bg[1]);
-    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, W);
+    if (th.board.paper) ctx.drawImage(paperFor(W), 0, 0);
+    else {
+      var bg = ctx.createLinearGradient(0, 0, W, W);
+      bg.addColorStop(0, th.board.bg[0]); bg.addColorStop(1, th.board.bg[1]);
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, W, W);
+    }
     // líneas (con resplandor si el tema lo pide)
     ctx.save();
     ctx.strokeStyle = th.board.line; ctx.lineWidth = Math.max(1, metrics.cell * (th.board.lineGlow ? 0.05 : 0.04));
@@ -1276,10 +1534,10 @@ body.in-screen .app { visibility: hidden; }
       }
     }
     if (fx.length) drawFx(performance.now());
-    if (holding) drawHeld(th);
+    if (holding) { drawHeld(th); if (cfg.loupe) drawLoupe(th); drawHeldStone(); }   // la lupa se saca antes de dibujar la ficha en el aire: así se ve la intersección sin tapar
     else if (settle) drawSettle();
     // cursor de teclado
-    if (document.activeElement === canvas && kbd && !holding) {
+    if (kbdOn && document.activeElement === canvas && kbd && !holding) {
       ctx.strokeStyle = th.kbd; ctx.lineWidth = Math.max(2, metrics.cell * 0.08);
       ctx.beginPath(); ctx.arc(px(kbd.x), px(kbd.y), metrics.cell * 0.62, 0, Math.PI * 2); ctx.stroke();
     }
@@ -1299,7 +1557,7 @@ body.in-screen .app { visibility: hidden; }
     captured.forEach(function (c, i) {
       var sh = [];
       if (mode === 'shatter') for (var k = 0; k < SHARDS; k++) sh.push({ v: 0.55 + Math.random() * 0.9, rot: (Math.random() - 0.5) * 7, up: 0.2 + Math.random() * 0.6 });
-      fx.push({ x: c.x, y: c.y, p: owner, t0: t0 + i * 40, dur: mode === 'shatter' ? 720 : 480, mode: mode, shards: sh, jit: Math.random() * Math.PI });
+      fx.push({ x: c.x, y: c.y, p: owner, seed: seedOf(c.x, c.y, owner), t0: t0 + i * 40, dur: mode === 'shatter' ? 720 : 480, mode: mode, shards: sh, jit: Math.random() * Math.PI });
     });
   }
   function drawFx(now) {
@@ -1307,12 +1565,12 @@ body.in-screen .app { visibility: hidden; }
     for (var i = 0; i < fx.length; i++) {
       var f = fx[i], k = (now - f.t0) / f.dur, cx = px(f.x), cy = px(f.y), th = theme(), st = th.stones[f.p];
       var r = metrics.cell * ({ small: 0.39, normal: 0.44, large: 0.48 }[cfg.stoneSize] || 0.44);
-      if (k < 0) { drawStonePx(cx, cy, f.p, 1, false, 1, 0); continue; }
-      if (f.mode === 'fade') { drawStonePx(cx, cy, f.p, 1 - easeOut(k), false, 1 + 0.12 * k, 0); continue; }
+      if (k < 0) { drawStonePx(cx, cy, f.p, 1, false, 1, 0, f.seed); continue; }
+      if (f.mode === 'fade') { drawStonePx(cx, cy, f.p, 1 - easeOut(k), false, 1 + 0.12 * k, 0, f.seed); continue; }
       var CRACK = 0.2;
       if (k < CRACK) {                                           // se sacude y se resquebraja
         var sh = Math.sin(k * 90) * metrics.cell * 0.025;
-        drawStonePx(cx + sh, cy, f.p, 1, false, 1, 0);
+        drawStonePx(cx + sh, cy, f.p, 1, false, 1, 0, f.seed);
         ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = Math.max(1, metrics.cell * 0.035);
         ctx.beginPath();
         for (var a = 0; a < SHARDS; a++) { var ang = a * Math.PI * 2 / SHARDS; ctx.moveTo(cx + sh, cy); ctx.lineTo(cx + sh + Math.cos(ang) * r * (k / CRACK), cy + Math.sin(ang) * r * (k / CRACK)); }
@@ -1325,10 +1583,16 @@ body.in-screen .app { visibility: hidden; }
         var dist = r * (0.2 + 2.2 * s.v) * e, dx = Math.cos(mid) * dist, dy = Math.sin(mid) * dist + metrics.cell * 0.9 * e * e - metrics.cell * s.up * e * (1 - e) * 2;
         ctx.save(); ctx.globalAlpha = Math.max(0, 1 - e * e * 1.05);
         ctx.translate(cx + ox + dx, cy + oy + dy); ctx.rotate(s.rot * e); ctx.scale(1 - 0.55 * e, 1 - 0.55 * e);
-        var g = ctx.createRadialGradient(-ox - r * .35, -oy - r * .4, r * .1, -ox, -oy, r);
-        g.addColorStop(0, st.a); g.addColorStop(1, st.b); ctx.fillStyle = g;
-        if (st.glow) { ctx.shadowColor = st.glow; ctx.shadowBlur = r * 0.6; }
-        ctx.beginPath(); ctx.moveTo(-ox, -oy); ctx.arc(-ox, -oy, r, a0, a0 + step); ctx.closePath(); ctx.fill();
+        if (st.scribble) {                                       // pedazo del garabato
+          var sp = scribbleSprite(st.scribble, f.seed, metrics.cell * ({ small: 0.39, normal: 0.44, large: 0.48 }[cfg.stoneSize] || 0.44));
+          ctx.beginPath(); ctx.moveTo(-ox, -oy); ctx.arc(-ox, -oy, r * 1.15, a0, a0 + step); ctx.closePath(); ctx.clip();
+          ctx.drawImage(sp.cv, -ox - sp.size / 2, -oy - sp.size / 2);
+        } else {
+          var g = ctx.createRadialGradient(-ox - r * .35, -oy - r * .4, r * .1, -ox, -oy, r);
+          g.addColorStop(0, st.a); g.addColorStop(1, st.b); ctx.fillStyle = g;
+          if (st.glow) { ctx.shadowColor = st.glow; ctx.shadowBlur = r * 0.6; }
+          ctx.beginPath(); ctx.moveTo(-ox, -oy); ctx.arc(-ox, -oy, r, a0, a0 + step); ctx.closePath(); ctx.fill();
+        }
         ctx.restore();
       }
     }
@@ -1348,7 +1612,9 @@ body.in-screen .app { visibility: hidden; }
     ctx.beginPath(); ctx.arc(px(c.x), px(c.y), cell * 0.56, 0, Math.PI * 2); ctx.stroke();
     if (bad) { var q = cell * 0.22; ctx.beginPath(); ctx.moveTo(px(c.x) - q, px(c.y) - q); ctx.lineTo(px(c.x) + q, px(c.y) + q); ctx.moveTo(px(c.x) + q, px(c.y) - q); ctx.lineTo(px(c.x) - q, px(c.y) + q); ctx.stroke(); }
     ctx.restore();
-    var pos = heldPos();
+  }
+  function drawHeldStone() {
+    var pos = heldPos(), bad = !!dragError(drag.cell);
     drawStonePx(pos.x, pos.y, state.current, bad ? 0.65 : 1, false, 1.28, 1);
   }
   function drawSettle() {
@@ -1403,6 +1669,7 @@ body.in-screen .app { visibility: hidden; }
       $('pname' + p).textContent = (names[p] || '…') + (online.active && online.me === p ? ' ' + t('online.you') : '');
       $('caps' + p).innerHTML = pips(state.captures[p]) + '<span>' + state.captures[p] + '/5</span>';
     });
+    updateSide();
     var sb = $('specBar'); sb.hidden = !online.spectator;
     if (online.spectator) sb.textContent = t('spec.badge', { code: online.code, n: online.specN });
     if (!isOver() && !$('status').dataset.toast) $('status').textContent = turnText();
@@ -1425,8 +1692,8 @@ body.in-screen .app { visibility: hidden; }
     document.body.classList.toggle('in-screen', $(id).classList.contains('screen'));
     var sc = $(id); if (sc.scrollTo) sc.scrollTo(0, 0);
   }
-  function showEnd() {
-    if (!state || !isOver()) return;
+  function resultText() {
+    if (!state || !isOver()) return '';
     var tx;
     if (online.spectator && online.over && (online.over.reason === 'resign' || online.over.reason === 'forfeit')) tx = t('spec.over', { name: names[online.over.winner] });
     else if (online.active && online.over && (online.over.reason === 'resign' || online.over.reason === 'forfeit')) {
@@ -1439,7 +1706,11 @@ body.in-screen .app { visibility: hidden; }
         : state.winReasons[0] === 'captures' ? t('end.winCaptures', { name: names[state.winner] })
         : t('end.winLine', { name: names[state.winner] });
     }
-    $('endText').textContent = tx; updateRematchUi(); open('endOverlay');
+    return tx;
+  }
+  function showEnd() {
+    if (!state || !isOver()) return;
+    $('endText').textContent = resultText(); updateRematchUi(); open('endOverlay');
   }
   function updateRematchUi() {
     var btn = $('btnRematch'), hint = $('endHint'), leave = $('btnEndMenu');
@@ -1515,7 +1786,7 @@ body.in-screen .app { visibility: hidden; }
     }
     clearTimeout(online.awaitTimer); clearClaim();
     online.net = null; online.active = false; online.conn = 'closed'; online.code = ''; online.token = ''; online.me = 0;
-    online.spectator = false; online.specN = 0; stopRooms(); fx.length = 0; $('btnSpectateOffer').hidden = true;
+    online.spectator = false; online.specN = 0; online.cid = ''; chatReset(); stopRooms(); fx.length = 0; $('btnSpectateOffer').hidden = true;
     online.intent = null; online.rejoining = false; online.over = null; online.awaiting = false; online.rivalLeftAt = 0;
     online.connected = { 1: true, 2: true }; online.rematch = { 1: false, 2: false };
     clearSession(); updateOnlineButtons(); updateRematchUi();
@@ -1527,12 +1798,15 @@ body.in-screen .app { visibility: hidden; }
     switch (m.t) {
       case 'joined':
         stopRooms(); $('btnSpectateOffer').hidden = true;
-        online.active = true; online.code = m.code; online.me = m.you; online.spectator = !!m.spectator;
+        online.active = true; online.code = m.code; online.me = m.you; online.spectator = !!m.spectator; online.cid = m.spectator ? m.id : 'p' + m.you;
+        if (chat.code !== m.code) { chatReset(); chat.code = m.code; }          // si solo se reconectó, se conservan los silenciados
         if (!m.spectator) { online.token = m.token; saveSession(); }       // los espectadores no tienen lugar que recuperar
         online.intent = null; online.rejoining = false; onlineMsg(''); updateOnlineButtons();
         break;
       case 'rooms': renderRooms(m.rooms); break;
       case 'spectators': online.specN = m.n; updateHud(); break;
+      case 'chat': chatIncoming(m); break;
+      case 'chatlog': chat.msgs = []; chat.people = {}; (m.msgs || []).forEach(function (x) { chatAdd(x, true); }); renderChat(); break;
       case 'sync': applySync(m); break;
       case 'move': applyRemoteMove(m); break;
       case 'presence': online.connected = m.connected; trackRival(0); updateHud(); break;
@@ -1603,6 +1877,7 @@ body.in-screen .app { visibility: hidden; }
   function onNetError(m) {
     online.awaiting = false;
     var txt = t(m.code === 'ILLEGAL' ? 'err.' + m.detail : 'err.' + m.code);
+    if (m.code === 'CHAT_RATE') { chatNote(txt); return; }
     if ((m.code === 'ROOM_NOT_FOUND' || m.code === 'BAD_TOKEN') && online.rejoining) {
       var wasActive = online.active;                 // la sala vieja ya no existe (el servidor se reinició o venció)
       leaveOnline(false);
@@ -1628,10 +1903,156 @@ body.in-screen .app { visibility: hidden; }
     else if (code) { $('onCode').value = code; onlineMsg(url ? '' : t('online.noServer')); open('onlineOverlay'); }
   }
 
+
+  /* ---------- Panel lateral: jugadas y chat ---------- */
+  var side = { state: null, open: false, tab: 'moves', unread: 0 };
+  var chat = { msgs: [], people: {}, muted: {}, hidden: false, code: '' };
+  var wideMq = window.matchMedia('(min-width: 900px)');
+  function chatOn() { return !!cfg.chat && online.active; }
+  function chatVisible() { return chatOn() && !chat.hidden && (wideMq.matches || (side.open && side.tab === 'chat')); }
+
+  function setSideTab(tab) {
+    side.tab = tab; $('side').setAttribute('data-tab', tab);
+    $('tabMoves').setAttribute('aria-selected', String(tab === 'moves')); $('tabChat').setAttribute('aria-selected', String(tab === 'chat'));
+    if (tab === 'chat') { side.unread = 0; renderChat(); }
+    updateSide();
+  }
+  function setSideOpen(v) { side.open = v; $('side').classList.toggle('open', v); if (v && side.tab === 'chat') side.unread = 0; updateSide(); }
+
+  function moveToken(m) { return P.coordName(m.x, m.y); }
+  function renderMoves() {
+    var ol = $('movesList'); ol.innerHTML = '';
+    var mv = state ? state.moves : [];
+    if (!mv.length) { var e = document.createElement('li'); e.className = 'empty'; e.textContent = t('moves.empty'); ol.appendChild(e); return; }
+    for (var i = 0; i < mv.length; i += 2) {
+      var li = document.createElement('li'); if (i + 2 >= mv.length) li.className = 'last';
+      var n = document.createElement('span'); n.className = 'mn'; n.textContent = (i / 2 + 1) + '.'; li.appendChild(n);
+      for (var j = i; j < i + 2; j++) {
+        var cell = document.createElement('span'); cell.className = 'mv';
+        if (j < mv.length) {
+          cell.dataset.p = String(mv[j].player); cell.appendChild(document.createTextNode(moveToken(mv[j])));
+          if (mv[j].captured.length) { var c = document.createElement('span'); c.className = 'cap'; c.textContent = 'x' + mv[j].captured.length; cell.appendChild(c); }
+        }
+        li.appendChild(cell);
+      }
+      ol.appendChild(li);
+    }
+    ol.scrollTop = ol.scrollHeight;
+  }
+
+  // Texto de la partida para copiar o guardar.
+  function movesText() {
+    if (!state) return '';
+    var o = state.options, rules = [];
+    if (o.tournamentRule) rules.push(t('moves.ruleTournament')); if (o.exactFive) rules.push(t('moves.ruleExact'));
+    var d = new Date(), pad = function (n) { return (n < 10 ? '0' : '') + n; };
+    var lines = [t('moves.txtHeader', { size: state.size }), names[1] + ' (1) vs ' + (names[2] || '…') + ' (2)',
+      t('moves.txtRules', { rules: rules.length ? rules.join(', ') : t('moves.ruleFree') }),
+      t('moves.txtDate', { date: d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) })];
+    var res = resultText(); if (res) lines.push(t('moves.txtResult', { text: res }));
+    lines.push('(' + t('moves.txtLegend') + ')', '');
+    for (var i = 0; i < state.moves.length; i += 2) {
+      var row = [];
+      for (var j = i; j < Math.min(i + 2, state.moves.length); j++) {
+        var m = state.moves[j], tok = moveToken(m);
+        if (m.captured.length) tok += 'x[' + m.captured.map(moveToken).join(',') + ']';
+        row.push(tok);
+      }
+      lines.push((i / 2 + 1) + '. ' + row.join('  '));
+    }
+    return lines.join('\n');
+  }
+  function copyText(txt, okBtn) {
+    var done = function () { var b = okBtn, old = b.textContent; b.textContent = t('moves.copied'); setTimeout(function () { b.textContent = old; }, 1600); };
+    var fallback = function () {
+      try { var ta = document.createElement('textarea'); ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); var ok = document.execCommand('copy'); document.body.removeChild(ta); if (ok) done(); else setStatus(t('moves.copyFail'), true); }
+      catch (e) { setStatus(t('moves.copyFail'), true); }
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, fallback); else fallback();
+  }
+  function saveMoves() {
+    var d = new Date(), pad = function (n) { return (n < 10 ? '0' : '') + n; };
+    var a = document.createElement('a'), url = URL.createObjectURL(new Blob([movesText()], { type: 'text/plain;charset=utf-8' }));
+    a.href = url; a.download = 'pente-' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + pad(d.getHours()) + pad(d.getMinutes()) + '.txt';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  /* Chat: el servidor retransmite; acá solo se dibuja. Todo se muestra con textContent (nunca como HTML). */
+  function chatReset() { chat.msgs = []; chat.people = {}; chat.muted = {}; chat.hidden = false; chat.code = ''; side.unread = 0; if ($('chatLog')) renderChat(); }
+  function chatAdd(m, silent) {
+    if (!cfg.chat || !m || typeof m.text !== 'string') return;
+    chat.people[m.id] = { name: m.name, seat: m.seat };
+    chat.msgs.push({ id: m.id, name: String(m.name || ''), seat: m.seat, text: m.text });
+    if (chat.msgs.length > 120) chat.msgs.shift();
+    if (!silent && m.id !== online.cid && !chat.muted[m.id] && !chatVisible()) side.unread++;
+  }
+  function chatIncoming(m) { chatAdd(m, false); renderChat(); updateSide(); }
+  function chatNote(txt) { chat.msgs.push({ note: txt }); renderChat(); }
+  function renderChat() {
+    var log = $('chatLog'), box = log.scrollTop + log.clientHeight >= log.scrollHeight - 30;
+    log.innerHTML = '';
+    var shown = 0;
+    chat.msgs.forEach(function (m) {
+      var d = document.createElement('div');
+      if (m.note) { d.className = 'note'; d.textContent = m.note; log.appendChild(d); return; }
+      if (chat.muted[m.id]) return;
+      d.className = 'msg'; var who = document.createElement('b'); who.className = 's' + m.seat;
+      who.textContent = m.id === online.cid ? t('chat.you') : m.name + (m.seat === 0 ? ' (' + t('chat.spec') + ')' : '');
+      d.appendChild(who); d.appendChild(document.createTextNode(m.text)); log.appendChild(d); shown++;
+    });
+    if (!shown && !chat.msgs.some(function (m) { return m.note; })) { var e = document.createElement('div'); e.className = 'note'; e.textContent = t('chat.empty'); log.appendChild(e); }
+    if (box) log.scrollTop = log.scrollHeight;
+    // personas: jugadores (siempre) + espectadores que escribieron; se puede silenciar a cualquiera menos a uno mismo
+    var pp = $('chatPeople'); pp.innerHTML = '';
+    var ids = {}; [1, 2].forEach(function (p) { if (names[p]) ids['p' + p] = { name: names[p], seat: p }; });
+    for (var k in chat.people) ids[k] = chat.people[k];
+    Object.keys(ids).forEach(function (id) {
+      if (id === online.cid) return;
+      var c = document.createElement('button'); c.type = 'button'; c.className = 'chip'; c.dataset.id = id;
+      c.setAttribute('aria-pressed', String(!!chat.muted[id]));
+      c.textContent = (chat.muted[id] ? '🔇 ' : '') + ids[id].name;
+      c.title = t(chat.muted[id] ? 'chat.unmute' : 'chat.mute', { name: ids[id].name });
+      c.addEventListener('click', function () { chat.muted[id] = !chat.muted[id]; if (!chat.muted[id]) delete chat.muted[id]; renderChat(); });
+      pp.appendChild(c);
+    });
+    if (pp.children.length) { var h = document.createElement('span'); h.className = 'hint'; h.textContent = t('chat.people'); pp.appendChild(h); }
+  }
+
+  function updateSide() {
+    if (side.state !== state) { side.state = state; renderMoves(); }
+    var on = chatOn();
+    $('chatBox').hidden = !(on && !chat.hidden);
+    $('btnChatShow').hidden = !(on && chat.hidden);
+    $('tabChat').hidden = !on;
+    if (!on && side.tab === 'chat') { side.tab = 'moves'; $('side').setAttribute('data-tab', 'moves'); $('tabMoves').setAttribute('aria-selected', 'true'); }
+    if (chatVisible()) side.unread = 0;
+    var u = on ? side.unread : 0;
+    [$('chatBadge'), $('sideBadge')].forEach(function (b) { b.hidden = !u; b.textContent = u > 9 ? '9+' : String(u); });
+    $('btnSideLbl').textContent = t(on ? 'side.openBoth' : 'side.openMoves');
+    $('btnShareMoves').hidden = !navigator.share;
+  }
+  $('btnSide').addEventListener('click', function () { setSideOpen(!side.open); });
+  $('btnSideClose').addEventListener('click', function () { setSideOpen(false); });
+  $('tabMoves').addEventListener('click', function () { setSideTab('moves'); });
+  $('tabChat').addEventListener('click', function () { setSideTab('chat'); });
+  wideMq.addEventListener ? wideMq.addEventListener('change', updateSide) : null;
+  $('btnCopyMoves').addEventListener('click', function () { copyText(movesText(), $('btnCopyMoves')); });
+  $('btnEndCopy').addEventListener('click', function () { copyText(movesText(), $('btnEndCopy')); });
+  $('btnSaveMoves').addEventListener('click', saveMoves);
+  $('btnShareMoves').addEventListener('click', function () { try { navigator.share({ title: 'Pente', text: movesText() }); } catch (e) {} });
+  $('btnChatHide').addEventListener('click', function () { chat.hidden = true; updateSide(); });
+  $('btnChatShow').addEventListener('click', function () { chat.hidden = false; side.unread = 0; renderChat(); updateSide(); });
+  $('chatForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var txt = $('chatInput').value.trim(); if (!txt || !online.net || !chatOn()) return;
+    if (online.net.send({ t: 'chat', text: txt })) $('chatInput').value = '';
+  });
+
   /* ---------- Textos estáticos (i18n) ---------- */
   function applyI18n() {
     document.title = t('app.title');
     document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = t(el.getAttribute('data-i18n')); });
+    document.querySelectorAll('[data-i18n-ph]').forEach(function (el) { el.placeholder = t(el.getAttribute('data-i18n-ph')); });
     canvas.setAttribute('aria-label', t('a11y.board'));
     var ol = $('rulesList'); ol.innerHTML = '';
     for (var i = 1; t('rules.' + i) !== 'rules.' + i; i++) { var li = document.createElement('li'); li.textContent = t('rules.' + i); ol.appendChild(li); }   // muestra todas las reglas que existan (podés sumar o borrar rules.N)
@@ -1766,8 +2187,9 @@ body.in-screen .app { visibility: hidden; }
     $('cfgVolume').disabled = !(S && S.isEnabled());
   }
   function cfgChanged(key) {
+    if (key === 'chat' && !cfg.chat) chatReset();
     if (key === 'confirm') { pending = hover = null; }           // al cambiar de modo se descarta la ficha a medio confirmar
-    saveCfg(); syncCfgUi(); render();
+    saveCfg(); syncCfgUi(); render(); updateSide();
   }
   document.querySelectorAll('.seg[data-cfg] .seg-opt').forEach(function (b) {
     b.addEventListener('click', function () { var k = b.parentNode.getAttribute('data-cfg'); cfg[k] = b.dataset.val; cfgChanged(k); });
@@ -1802,8 +2224,8 @@ body.in-screen .app { visibility: hidden; }
   if (window.ResizeObserver) new ResizeObserver(resize).observe(canvas);
   canvas.addEventListener('focus', render); canvas.addEventListener('blur', render);
 
-  applyI18n(); buildThemePicker(); syncSizePicker(); syncOpts(); syncVis(); resize(); open('menuOverlay'); initOnline();
-  window.__pente = { get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, get fx() { return fx; }, get rooms() { return rooms; } };  // utilidad para pruebas manuales
+  applyI18n(); buildThemePicker(); syncSizePicker(); syncOpts(); syncVis(); resize(); open('menuOverlay'); initOnline(); updateSide();
+  window.__pente = { get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; } };  // utilidad para pruebas manuales
 })();
 </script>
 <script>
