@@ -123,6 +123,27 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
 @media (max-width: 400px) { .modal.settings { padding: 18px 14px; } .tab { font-size: 13px; padding: 8px 2px; } }
 @media (max-width: 340px) { .tab { font-size: 12px; } }
 @media (max-width: 340px) { .tabs { gap: 4px; } .tab { padding: 8px 0; font-size: 12px; } .modal.settings { padding: 16px 10px; } }
+
+/* ---------- Pantallas completas (menú aparte del juego) ---------- */
+.overlay.screen { background: var(--bg); align-items: flex-start; justify-content: center; overflow-y: auto; padding: max(var(--gutter), env(safe-area-inset-top)) var(--gutter) max(var(--gutter), env(safe-area-inset-bottom)); z-index: 20; }
+.screen-body { width: min(100%, 480px); margin: 0 auto; padding: 8px 0 24px; }
+#menuOverlay .screen-body { margin: auto; }
+.screen-body h1, .screen-body h2 { margin: 0 0 6px; }
+.screen-body p.sub { margin: 0 0 16px; color: var(--muted); }
+.screen-body .btns { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+.screen-body.settings { width: min(100%, 520px); }
+.brand { text-align: center; margin: 4vh 0 28px; }
+.brand h1 { font-size: clamp(44px, 14vw, 72px); letter-spacing: .06em; font-weight: 800; }
+body.in-screen .app { visibility: hidden; }
+.specbar { text-align: center; font-size: 14px; color: var(--muted); padding: 2px 0 4px; }
+.specbar[hidden] { display: none; }
+.roomlist { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.room { background: var(--panel); border: 2px solid #343a46; border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; }
+.room .info { flex: 1; min-width: 0; }
+.room .who { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.room .meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.room .btn { flex: none; min-height: 44px; padding: 8px 16px; }
+.room-empty { text-align: center; color: var(--muted); padding: 24px 8px; border: 2px dashed #343a46; border-radius: 14px; }
 </style>
 </head>
 <body>
@@ -138,6 +159,8 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
     </div>
   </div>
 
+  <div class="specbar" id="specBar" hidden></div>
+
   <div class="status" id="status" role="status" aria-live="polite"></div>
 
   <div class="board-wrap"><canvas id="board" tabindex="0" role="application"></canvas></div>
@@ -150,29 +173,40 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
   </div>
 </div>
 
-<!-- Menú -->
-<div class="overlay" id="menuOverlay">
-  <div class="modal" role="dialog" aria-modal="true">
-    <h1 data-i18n="menu.title"></h1>
-    <p class="sub" data-i18n="menu.subtitle"></p>
-    <div class="field"><label class="lbl" for="name1" data-i18n="menu.p1"></label><input type="text" id="name1" maxlength="18" autocomplete="off"></div>
-    <div class="field"><label class="lbl" for="name2" data-i18n="menu.p2"></label><input type="text" id="name2" maxlength="18" autocomplete="off"></div>
-    <div class="field"><span class="lbl" data-i18n="menu.size"></span><div class="seg" id="sizePicker" role="group"><button type="button" class="seg-opt" data-size="13" data-i18n="menu.size13"></button><button type="button" class="seg-opt" data-size="19" data-i18n="menu.size19"></button></div><p class="hint" data-i18n="menu.sizeHint"></p></div>
-    <label class="check"><input type="checkbox" id="optTournament" checked><span><span data-i18n="menu.tournamentRule"></span><small data-i18n="menu.tournamentRuleHint"></small></span></label>
-    <label class="check"><input type="checkbox" id="optExact"><span><span data-i18n="menu.exactFive"></span><small data-i18n="menu.exactFiveHint"></small></span></label>
+<!-- Menú principal (pantalla propia: el juego no se ve detrás) -->
+<div class="overlay screen" id="menuOverlay">
+  <div class="screen-body">
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p></div>
     <div class="btns">
       <button class="btn primary" id="btnResume" hidden data-i18n="menu.resume"></button>
+      <button class="btn primary" id="btnLocal" data-i18n="menu.local"></button>
       <button class="btn primary" id="btnOnline" data-i18n="menu.online"></button>
-      <button class="btn" id="btnStart" data-i18n="menu.start"></button>
       <button class="btn" id="btnSettings" data-i18n="menu.settings"></button>
       <button class="btn" id="btnRules" data-i18n="menu.rules"></button>
     </div>
   </div>
 </div>
 
+<!-- Partida local -->
+<div class="overlay screen" id="localOverlay">
+  <div class="screen-body">
+    <h2 data-i18n="local.title"></h2>
+    <p class="sub" data-i18n="local.sub"></p>
+    <div class="field"><label class="lbl" for="name1" data-i18n="menu.p1"></label><input type="text" id="name1" maxlength="18" autocomplete="off"></div>
+    <div class="field"><label class="lbl" for="name2" data-i18n="menu.p2"></label><input type="text" id="name2" maxlength="18" autocomplete="off"></div>
+    <div class="field"><span class="lbl" data-i18n="menu.size"></span><div class="seg sizePicker" role="group"><button type="button" class="seg-opt" data-size="13" data-i18n="menu.size13"></button><button type="button" class="seg-opt" data-size="19" data-i18n="menu.size19"></button></div><p class="hint" data-i18n="menu.sizeHint"></p></div>
+    <label class="check"><input type="checkbox" data-opt="tournamentRule" checked><span><span data-i18n="menu.tournamentRule"></span><small data-i18n="menu.tournamentRuleHint"></small></span></label>
+    <label class="check"><input type="checkbox" data-opt="exactFive"><span><span data-i18n="menu.exactFive"></span><small data-i18n="menu.exactFiveHint"></small></span></label>
+    <div class="btns">
+      <button class="btn primary" id="btnStart" data-i18n="menu.start"></button>
+      <button class="btn" id="btnLocalBack" data-i18n="menu.back"></button>
+    </div>
+  </div>
+</div>
+
 <!-- Configuración -->
-<div class="overlay" id="settingsOverlay">
-  <div class="modal settings" role="dialog" aria-modal="true" aria-labelledby="cfgTitle">
+<div class="overlay screen" id="settingsOverlay">
+  <div class="screen-body settings">
     <h2 id="cfgTitle" data-i18n="cfg.title"></h2>
     <div class="tabs" role="tablist" id="cfgTabs">
       <button type="button" role="tab" class="tab" data-tab="sound" data-i18n="cfg.tab.sound"></button>
@@ -194,6 +228,9 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
       <label class="check"><input type="checkbox" data-cfg="coords"><span><span data-i18n="cfg.coords"></span><small data-i18n="cfg.coordsHint"></small></span></label>
       <label class="check"><input type="checkbox" data-cfg="lastMove"><span><span data-i18n="cfg.lastMove"></span></span></label>
       <label class="check"><input type="checkbox" data-cfg="anim"><span><span data-i18n="cfg.anim"></span><small data-i18n="cfg.animHint"></small></span></label>
+      <div class="field"><span class="lbl" data-i18n="cfg.captureFx"></span>
+        <div class="seg" data-cfg="captureFx" role="group"><button type="button" class="seg-opt" data-val="shatter" data-i18n="cfg.fx.shatter"></button><button type="button" class="seg-opt" data-val="fade" data-i18n="cfg.fx.fade"></button><button type="button" class="seg-opt" data-val="none" data-i18n="cfg.fx.none"></button></div>
+        <p class="hint" data-i18n="cfg.captureFxHint"></p></div>
     </section>
 
     <section class="tabpanel" id="tab-controls" role="tabpanel" hidden>
@@ -217,29 +254,53 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
 </div>
 
 <!-- Online: crear o unirse -->
-<div class="overlay" id="onlineOverlay">
-  <div class="modal" role="dialog" aria-modal="true">
+<div class="overlay screen" id="onlineOverlay">
+  <div class="screen-body">
     <h2 data-i18n="online.title"></h2>
     <p class="sub" data-i18n="online.sub"></p>
     <div class="field"><label class="lbl" for="onName" data-i18n="online.yourName"></label><input type="text" id="onName" maxlength="18" autocomplete="off"></div>
+    <div class="field"><span class="lbl" data-i18n="online.visibility"></span>
+      <div class="seg" id="visPicker" role="group"><button type="button" class="seg-opt" data-vis="private" data-i18n="online.private"></button><button type="button" class="seg-opt" data-vis="public" data-i18n="online.public"></button></div>
+      <p class="hint" id="visHint"></p></div>
+    <div class="field"><span class="lbl" data-i18n="menu.size"></span><div class="seg sizePicker" role="group"><button type="button" class="seg-opt" data-size="13" data-i18n="menu.size13"></button><button type="button" class="seg-opt" data-size="19" data-i18n="menu.size19"></button></div></div>
+    <label class="check"><input type="checkbox" data-opt="tournamentRule" checked><span><span data-i18n="menu.tournamentRule"></span><small data-i18n="menu.tournamentRuleHint"></small></span></label>
+    <label class="check"><input type="checkbox" data-opt="exactFive"><span><span data-i18n="menu.exactFive"></span><small data-i18n="menu.exactFiveHint"></small></span></label>
     <div class="btns"><button class="btn primary" id="btnCreateRoom" data-i18n="online.create"></button></div>
     <p class="hint" data-i18n="online.createHint"></p>
     <div class="or" data-i18n="online.or"></div>
     <div class="field"><label class="lbl" for="onCode" data-i18n="online.code"></label><input type="text" id="onCode" class="code-input" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false"></div>
     <div class="btns">
       <button class="btn primary" id="btnJoinRoom" data-i18n="online.join"></button>
+      <button class="btn" id="btnSpectateOffer" hidden data-i18n="online.spectateOffer"></button>
+      <button class="btn" id="btnOpenRooms" data-i18n="online.rooms"></button>
       <button class="btn" id="btnOnlineBack" data-i18n="menu.back"></button>
     </div>
     <p class="online-msg" id="onlineMsg" role="status" aria-live="polite"></p>
   </div>
 </div>
 
+<!-- Online: salas públicas -->
+<div class="overlay screen" id="roomsOverlay">
+  <div class="screen-body">
+    <h2 data-i18n="rooms.title"></h2>
+    <p class="sub" data-i18n="rooms.sub"></p>
+    <div class="field"><label class="lbl" for="rName" data-i18n="online.yourName"></label><input type="text" id="rName" maxlength="18" autocomplete="off"></div>
+    <div class="roomlist" id="roomsList" aria-live="polite"></div>
+    <p class="online-msg" id="roomsMsg" role="status" aria-live="polite"></p>
+    <div class="btns">
+      <button class="btn" id="btnRoomsRefresh" data-i18n="rooms.refresh"></button>
+      <button class="btn" id="btnRoomsBack" data-i18n="menu.back"></button>
+    </div>
+  </div>
+</div>
+
 <!-- Online: esperando al rival -->
-<div class="overlay" id="waitOverlay">
-  <div class="modal" role="dialog" aria-modal="true">
+<div class="overlay screen" id="waitOverlay">
+  <div class="screen-body">
     <h2 data-i18n="online.waitTitle"></h2>
     <p class="sub" data-i18n="online.waitSub"></p>
     <div class="roomcode" id="roomCode" aria-label="Código de sala"></div>
+    <p class="hint" id="waitVis"></p>
     <div class="btns">
       <button class="btn primary" id="btnCopyLink" data-i18n="online.copyLink"></button>
       <button class="btn" id="btnShare" hidden data-i18n="online.share"></button>
@@ -250,11 +311,11 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
 </div>
 
 <!-- Reglas -->
-<div class="overlay" id="rulesOverlay">
-  <div class="modal rules" role="dialog" aria-modal="true">
+<div class="overlay screen" id="rulesOverlay">
+  <div class="screen-body rules">
     <h2 data-i18n="rules.title"></h2>
     <ol id="rulesList"></ol>
-    <div class="btns"><button class="btn primary" id="btnRulesClose" data-i18n="menu.close"></button></div>
+    <div class="btns"><button class="btn primary" id="btnRulesClose" data-i18n="menu.back"></button></div>
   </div>
 </div>
 
@@ -621,7 +682,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
       'end.winResign': '{loser} abandonó. Ganó {name}.',
       'end.winForfeit': '{loser} se desconectó. Ganó {name}.',
       'err.ROOM_NOT_FOUND': 'No existe esa sala. Revisá el código.',
-      'err.ROOM_FULL': 'La sala ya tiene dos jugadores.',
+      'err.ROOM_FULL': 'La sala está llena: ya tiene dos jugadores.',
       'err.BAD_TOKEN': 'No se pudo recuperar tu lugar en la sala.',
       'err.SERVER_BUSY': 'El servidor está lleno. Probá en un rato.',
       'err.WAITING_FOR_RIVAL': 'Todavía no entró tu rival.',
@@ -630,6 +691,44 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
       'err.GAME_NOT_OVER': 'La partida todavía no terminó.',
       'err.NOT_IN_ROOM': 'No estás en una sala.',
       'err.BAD_REQUEST': 'Algo salió mal. Probá de nuevo.',
+      'menu.local': 'Jugar local',
+      'local.title': 'Partida local',
+      'local.sub': 'Dos jugadores en el mismo dispositivo.',
+      'cfg.captureFx': 'Fichas capturadas',
+      'cfg.fx.shatter': 'Se rompen',
+      'cfg.fx.fade': 'Se desvanecen',
+      'cfg.fx.none': 'Sin efecto',
+      'cfg.captureFxHint': 'Qué pasa con las fichas que te comen. Con "Animaciones" apagadas no se ve ningún efecto.',
+      'online.visibility': 'Tipo de sala',
+      'online.private': 'Privada',
+      'online.public': 'Pública',
+      'online.privateHint': 'Solo entra quien tenga el código o el enlace. Nadie puede mirarla.',
+      'online.publicHint': 'Aparece en la lista de Salas con tu nombre. Cualquiera puede unirse o mirar.',
+      'online.rooms': 'Ver salas públicas',
+      'online.spectateOffer': 'Mirar la partida',
+      'online.waitPublic': 'Sala pública: aparece en la lista de Salas.',
+      'online.waitPrivate': 'Sala privada: solo entra quien tenga el código.',
+      'rooms.title': 'Salas',
+      'rooms.sub': 'Partidas públicas que hay ahora. Se actualiza solo.',
+      'rooms.refresh': 'Actualizar',
+      'rooms.empty': 'No hay salas públicas en este momento. Creá una pública y que otros se sumen.',
+      'rooms.waiting': '{name} espera rival',
+      'rooms.vs': '{a} vs {b}',
+      'rooms.statusWaiting': 'Esperando rival',
+      'rooms.statusPlaying': 'Jugando · {n} jugadas',
+      'rooms.statusOver': 'Terminada · {n} jugadas',
+      'rooms.watching': '{n} mirando',
+      'rooms.play': 'Jugar',
+      'rooms.watch': 'Mirar',
+      'spec.badge': 'Mirando la sala {code} · {n} mirando',
+      'spec.leave': 'Salir',
+      'spec.noPlay': 'Estás mirando: no podés jugar.',
+      'spec.over': 'Ganó {name}.',
+      'err.PRIVATE_ROOM': 'Esa sala es privada: no se puede mirar.',
+      'err.NOT_STARTED': 'Todavía no empezó: falta el segundo jugador.',
+      'err.SPECTATORS_FULL': 'La sala ya tiene demasiados espectadores.',
+      'err.ALREADY_IN_ROOM': 'Ya estás en una sala. Salí primero.',
+      'err.NOT_A_PLAYER': 'Estás mirando: no podés hacer eso.',
       'a11y.board': 'Tablero de Pente',
       'player.1': 'Jugador 1',
       'player.2': 'Jugador 2'
@@ -850,8 +949,8 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
 
   /* Configuración del dispositivo (pantalla "Configuración"): se guarda en localStorage y se aplica al instante. */
   var coarse = matchMedia('(pointer: coarse)').matches, reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var CFG_DEFAULTS = { confirm: coarse ? 'button' : 'none', lift: 'mid', guides: true, coords: true, lastMove: true, anim: !reduced, stoneSize: 'normal', zone: true };
-  var CFG_ALLOWED = { confirm: ['button', 'double', 'none'], lift: ['low', 'mid', 'high'], stoneSize: ['small', 'normal', 'large'] };
+  var CFG_DEFAULTS = { confirm: coarse ? 'button' : 'none', lift: 'mid', guides: true, coords: true, lastMove: true, anim: !reduced, stoneSize: 'normal', zone: true, captureFx: reduced ? 'fade' : 'shatter' };
+  var CFG_ALLOWED = { confirm: ['button', 'double', 'none'], lift: ['low', 'mid', 'high'], stoneSize: ['small', 'normal', 'large'], captureFx: ['shatter', 'fade', 'none'] };
   function loadCfg() {
     var c = {}, k, raw = null;
     for (k in CFG_DEFAULTS) c[k] = CFG_DEFAULTS[k];
@@ -879,7 +978,10 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
   function centerIdx() { return (boardN() - 1) / 2; }
   function sfx(name) { if (window.PenteSound) window.PenteSound.play(name); }
   function buzz(ms) { if (window.PenteSound) window.PenteSound.buzz(ms); }
+  var fx = [];            // fichas capturadas que se están desvaneciendo / rompiendo
+  var rooms = { open: false, timer: 0 };
   var online = {
+    spectator: false, specN: 0, lastCode: '', isPublic: false,
     active: false, net: null, url: '', conn: 'closed', code: '', token: '', me: 0, intent: null, rejoining: false,
     over: null, connected: { 1: true, 2: true }, rematch: { 1: false, 2: false },
     rivalLeftAt: 0, claimTimer: null, awaiting: false, awaitTimer: null
@@ -892,6 +994,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
     if (!online.active) return t('hud.turn', { name: names[state.current] });
     if (online.conn !== 'open') return t('online.reconnecting');
     if (!names[2]) return '';                       // todavía no entró el rival
+    if (online.spectator) return t('online.theirTurn', { name: names[state.current] });
     var rival = online.me === 1 ? 2 : 1;
     if (!online.connected[rival]) return t('online.rivalOffline', { name: names[rival] });
     return state.current === online.me ? t('online.yourTurn') : t('online.theirTurn', { name: names[state.current] });
@@ -902,10 +1005,8 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
     if (online.net) leaveOnline(false);
     names[1] = ($('name1').value || '').trim() || t('player.1');
     names[2] = ($('name2').value || '').trim() || t('player.2');
-    settings.tournamentRule = $('optTournament').checked;
-    settings.exactFive = $('optExact').checked;
-    state = P.createGame({ size: settings.size, tournamentRule: settings.tournamentRule, exactFive: settings.exactFive });
-    hover = pending = drag = settle = null;
+        state = P.createGame({ size: settings.size, tournamentRule: settings.tournamentRule, exactFive: settings.exactFive });
+    hover = pending = drag = settle = null; fx.length = 0;
     kbd = { x: centerIdx(), y: centerIdx() };
     closeAll(); render(); setStatus('');
   }
@@ -921,7 +1022,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
   function moveFeedback(captured, ended, winner) {
     if (captured.length) { sfx('place'); setTimeout(function () { sfx('capture'); }, 70); buzz([10, 40, 18]); }
     else { sfx('place'); buzz(8); }
-    if (ended) setTimeout(function () { sfx(online.active ? (winner === online.me ? 'win' : 'lose') : 'win'); }, 380);
+    if (ended) setTimeout(function () { sfx(online.active && !online.spectator ? (winner === online.me ? 'win' : 'lose') : 'win'); }, 380);
   }
 
   function tryMove(x, y) {
@@ -929,7 +1030,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
     settle = null;
     if (online.active) {
       // En online el servidor es el árbitro: acá solo se comprueba rápido y se envía; el tablero cambia cuando el servidor lo confirma.
-      if (state.current !== online.me) { setStatus(t('online.wait'), true); sfx('error'); return; }
+      if (state.current !== online.me) { setStatus(t(online.spectator ? 'spec.noPlay' : 'online.wait'), true); sfx('error'); return; }
       if (online.awaiting) return;
       var v = P.validateMove(state, x, y, online.me);
       if (v) { setStatus(t('err.' + v), true); sfx('error'); render(); return; }
@@ -943,6 +1044,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
     if (!r.ok) { setStatus(t('err.' + r.error), true); sfx('error'); render(); return; }
     var mover = state.current;
     state = r.state; pending = hover = null;
+    spawnFx(r.captured, mover === 1 ? 2 : 1);
     announceCaptures(mover, r.captured);
     moveFeedback(r.captured, state.status !== 'playing', state.winner);
     render();
@@ -976,7 +1078,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
     var c = cellFromEvent(e); if (!c) return;
     kbd = c;
     if (isOver()) return;
-    if (online.active && state.current !== online.me) { setStatus(t('online.wait'), true); sfx('error'); return; }
+    if (online.active && state.current !== online.me) { setStatus(t(online.spectator ? 'spec.noPlay' : 'online.wait'), true); sfx('error'); return; }
     tryMove(c.x, c.y);
   });
   canvas.addEventListener('contextmenu', function (e) { e.preventDefault(); });
@@ -1003,7 +1105,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
     e.preventDefault();
     var p = toCanvas(e), c = snap(p.x, p.y, false); if (!c) return;
     kbd = c;
-    if (online.active && state.current !== online.me) { setStatus(t('online.wait'), true); sfx('error'); return; }
+    if (online.active && state.current !== online.me) { setStatus(t(online.spectator ? 'spec.noPlay' : 'online.wait'), true); sfx('error'); return; }
     if (P.get(state, c.x, c.y) !== P.EMPTY) { setStatus(t('err.OCCUPIED'), true); sfx('error'); return; }
     var grab = !!(pending && cfg.confirm !== 'none' && pending.x === c.x && pending.y === c.y);
     drag = { id: e.pointerId, grab: grab, prev: pending, cell: c, f: p, vec: null, lifted: false, liftStart: 0, cssX: e.clientX, cssY: e.clientY };
@@ -1174,6 +1276,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
         ctx.beginPath(); ctx.arc(px(pv.x), px(pv.y), metrics.cell * 0.58, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
       }
     }
+    if (fx.length) drawFx(performance.now());
     if (holding) drawHeld(th);
     else if (settle) drawSettle();
     // cursor de teclado
@@ -1183,7 +1286,53 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
     }
     updateHud();
     var now = performance.now();
-    if (!animReq && ((drag && drag.lifted && now - drag.liftStart < 150) || settle)) animReq = requestAnimationFrame(function () { animReq = 0; render(); });
+    if (!animReq && ((drag && drag.lifted && now - drag.liftStart < 150) || settle || fx.length)) animReq = requestAnimationFrame(function () { animReq = 0; render(); });
+  }
+
+
+  /* ---------- Fichas capturadas: se rompen en pedacitos o se desvanecen ---------- */
+  var SHARDS = 9;
+  function fxMode() { return cfg.anim ? cfg.captureFx : 'none'; }
+  function spawnFx(captured, owner) {
+    var mode = fxMode();
+    if (mode === 'none' || !captured || !captured.length) return;
+    var t0 = performance.now();
+    captured.forEach(function (c, i) {
+      var sh = [];
+      if (mode === 'shatter') for (var k = 0; k < SHARDS; k++) sh.push({ v: 0.55 + Math.random() * 0.9, rot: (Math.random() - 0.5) * 7, up: 0.2 + Math.random() * 0.6 });
+      fx.push({ x: c.x, y: c.y, p: owner, t0: t0 + i * 40, dur: mode === 'shatter' ? 720 : 480, mode: mode, shards: sh, jit: Math.random() * Math.PI });
+    });
+  }
+  function drawFx(now) {
+    fx = fx.filter(function (f) { return now - f.t0 < f.dur; });
+    for (var i = 0; i < fx.length; i++) {
+      var f = fx[i], k = (now - f.t0) / f.dur, cx = px(f.x), cy = px(f.y), th = theme(), st = th.stones[f.p];
+      var r = metrics.cell * ({ small: 0.39, normal: 0.44, large: 0.48 }[cfg.stoneSize] || 0.44);
+      if (k < 0) { drawStonePx(cx, cy, f.p, 1, false, 1, 0); continue; }
+      if (f.mode === 'fade') { drawStonePx(cx, cy, f.p, 1 - easeOut(k), false, 1 + 0.12 * k, 0); continue; }
+      var CRACK = 0.2;
+      if (k < CRACK) {                                           // se sacude y se resquebraja
+        var sh = Math.sin(k * 90) * metrics.cell * 0.025;
+        drawStonePx(cx + sh, cy, f.p, 1, false, 1, 0);
+        ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = Math.max(1, metrics.cell * 0.035);
+        ctx.beginPath();
+        for (var a = 0; a < SHARDS; a++) { var ang = a * Math.PI * 2 / SHARDS; ctx.moveTo(cx + sh, cy); ctx.lineTo(cx + sh + Math.cos(ang) * r * (k / CRACK), cy + Math.sin(ang) * r * (k / CRACK)); }
+        ctx.stroke(); ctx.restore(); continue;
+      }
+      var e = easeOut((k - CRACK) / (1 - CRACK)), step = Math.PI * 2 / SHARDS;
+      for (var j = 0; j < SHARDS; j++) {
+        var s = f.shards[j], a0 = j * step, mid = a0 + step / 2;
+        var ox = Math.cos(mid) * r * 0.6, oy = Math.sin(mid) * r * 0.6;
+        var dist = r * (0.2 + 2.2 * s.v) * e, dx = Math.cos(mid) * dist, dy = Math.sin(mid) * dist + metrics.cell * 0.9 * e * e - metrics.cell * s.up * e * (1 - e) * 2;
+        ctx.save(); ctx.globalAlpha = Math.max(0, 1 - e * e * 1.05);
+        ctx.translate(cx + ox + dx, cy + oy + dy); ctx.rotate(s.rot * e); ctx.scale(1 - 0.55 * e, 1 - 0.55 * e);
+        var g = ctx.createRadialGradient(-ox - r * .35, -oy - r * .4, r * .1, -ox, -oy, r);
+        g.addColorStop(0, st.a); g.addColorStop(1, st.b); ctx.fillStyle = g;
+        if (st.glow) { ctx.shadowColor = st.glow; ctx.shadowBlur = r * 0.6; }
+        ctx.beginPath(); ctx.moveTo(-ox, -oy); ctx.arc(-ox, -oy, r, a0, a0 + step); ctx.closePath(); ctx.fill();
+        ctx.restore();
+      }
+    }
   }
 
   // Ficha en el aire: guías de fila/columna, la intersección donde caería y la ficha levantada sobre el dedo.
@@ -1255,6 +1404,8 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
       $('pname' + p).textContent = (names[p] || '…') + (online.active && online.me === p ? ' ' + t('online.you') : '');
       $('caps' + p).innerHTML = pips(state.captures[p]) + '<span>' + state.captures[p] + '/5</span>';
     });
+    var sb = $('specBar'); sb.hidden = !online.spectator;
+    if (online.spectator) sb.textContent = t('spec.badge', { code: online.code, n: online.specN });
     if (!isOver() && !$('status').dataset.toast) $('status').textContent = turnText();
     $('btnConfirm').hidden = !(pending && cfg.confirm === 'button' && canPlayNow() && !(drag && drag.lifted));
   }
@@ -1266,16 +1417,20 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
   }
 
   /* ---------- Overlays ---------- */
-  function closeAll() { document.querySelectorAll('.overlay').forEach(function (o) { o.classList.remove('open'); }); }
+  // Las pantallas (.screen) tapan todo el juego; el cartel de fin de partida es lo único que se muestra sobre el tablero.
+  function closeAll() { stopRooms(); document.querySelectorAll('.overlay').forEach(function (o) { o.classList.remove('open'); }); document.body.classList.remove('in-screen'); }
   function open(id) {
     closeAll();
     if (id === 'menuOverlay') $('btnResume').hidden = !(state && !isOver());
     $(id).classList.add('open');
+    document.body.classList.toggle('in-screen', $(id).classList.contains('screen'));
+    var sc = $(id); if (sc.scrollTo) sc.scrollTo(0, 0);
   }
   function showEnd() {
     if (!state || !isOver()) return;
     var tx;
-    if (online.active && online.over && (online.over.reason === 'resign' || online.over.reason === 'forfeit')) {
+    if (online.spectator && online.over && (online.over.reason === 'resign' || online.over.reason === 'forfeit')) tx = t('spec.over', { name: names[online.over.winner] });
+    else if (online.active && online.over && (online.over.reason === 'resign' || online.over.reason === 'forfeit')) {
       var w = online.over.winner, l = w === 1 ? 2 : 1;
       tx = t(online.over.reason === 'resign' ? 'end.winResign' : 'end.winForfeit', { name: names[w], loser: names[l] });
     } else if (state.status === 'draw') tx = t('end.draw');
@@ -1289,6 +1444,8 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
   }
   function updateRematchUi() {
     var btn = $('btnRematch'), hint = $('endHint'), leave = $('btnEndMenu');
+    btn.hidden = !!online.spectator;
+    if (online.spectator) { hint.textContent = ''; leave.textContent = t('online.leave'); return; }
     if (!online.active) { btn.disabled = false; btn.textContent = t('end.rematch'); hint.textContent = ''; leave.textContent = t('end.toMenu'); return; }
     var me = online.me, rival = me === 1 ? 2 : 1;
     btn.disabled = !!online.rematch[me];
@@ -1298,7 +1455,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
   }
   function rematch() {
     state = P.createGame({ size: state ? state.size : settings.size, tournamentRule: settings.tournamentRule, exactFive: settings.exactFive });
-    hover = pending = drag = settle = null; kbd = { x: centerIdx(), y: centerIdx() }; closeAll(); setStatus(''); render();
+    hover = pending = drag = settle = null; fx.length = 0; kbd = { x: centerIdx(), y: centerIdx() }; closeAll(); setStatus(''); render();
   }
 
   /* ---------- Online ---------- */
@@ -1319,7 +1476,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
     if (q && serverUrl() === q) u += '&server=' + encodeURIComponent(q);
     return u;
   }
-  function updateOnlineButtons() { $('btnRestart').textContent = online.active ? t('hud.resign') : t('hud.restart'); }
+  function updateOnlineButtons() { $('btnRestart').textContent = online.spectator ? t('spec.leave') : online.active ? t('hud.resign') : t('hud.restart'); }
 
   function ensureNet(url) {
     if (online.net) return;
@@ -1328,11 +1485,14 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
       onState: function (s) {
         online.conn = s;
         if (!online.active && online.intent) onlineMsg(s === 'open' ? '' : s === 'connecting' ? t('online.connecting') : t('online.stillTrying'));
+        if (rooms.open) roomsMsg(s === 'open' ? '' : s === 'connecting' ? t('online.connecting') : t('online.stillTrying'));
         if (online.active) { setStatus(''); updateHud(); }
       },
       onOpen: function () {
         if (online.token && online.code) { online.rejoining = true; online.net.send({ t: 'rejoin', code: online.code, token: online.token }); }
+        else if (online.spectator && online.code) { online.rejoining = true; online.net.send({ t: 'spectate', code: online.code }); }   // se cortó la conexión: vuelve a mirar
         else if (online.intent) online.net.send(online.intent);
+        else if (rooms.open) requestRooms();
       },
       onMessage: onNetMessage
     });
@@ -1351,29 +1511,35 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
   function leaveOnline(resign) {
     var wasActive = online.active, net = online.net;
     if (net) {
-      if (resign && wasActive && state && !isOver() && names[2] && net.isOpen()) net.send({ t: 'resign' });
+      if (resign && wasActive && !online.spectator && state && !isOver() && names[2] && net.isOpen()) net.send({ t: 'resign' });
       net.close();
     }
     clearTimeout(online.awaitTimer); clearClaim();
     online.net = null; online.active = false; online.conn = 'closed'; online.code = ''; online.token = ''; online.me = 0;
+    online.spectator = false; online.specN = 0; stopRooms(); fx.length = 0; $('btnSpectateOffer').hidden = true;
     online.intent = null; online.rejoining = false; online.over = null; online.awaiting = false; online.rivalLeftAt = 0;
     online.connected = { 1: true, 2: true }; online.rematch = { 1: false, 2: false };
     clearSession(); updateOnlineButtons(); updateRematchUi();
     if (wasActive) { state = null; hover = pending = null; setStatus(''); render(); }
+    updateHud();
   }
 
   function onNetMessage(m) {
     switch (m.t) {
       case 'joined':
-        online.active = true; online.code = m.code; online.token = m.token; online.me = m.you;
-        online.intent = null; online.rejoining = false; saveSession(); onlineMsg(''); updateOnlineButtons();
+        stopRooms(); $('btnSpectateOffer').hidden = true;
+        online.active = true; online.code = m.code; online.me = m.you; online.spectator = !!m.spectator;
+        if (!m.spectator) { online.token = m.token; saveSession(); }       // los espectadores no tienen lugar que recuperar
+        online.intent = null; online.rejoining = false; onlineMsg(''); updateOnlineButtons();
         break;
+      case 'rooms': renderRooms(m.rooms); break;
+      case 'spectators': online.specN = m.n; updateHud(); break;
       case 'sync': applySync(m); break;
       case 'move': applyRemoteMove(m); break;
       case 'presence': online.connected = m.connected; trackRival(0); updateHud(); break;
       case 'over':
         online.over = { winner: m.winner, reason: m.reason }; online.awaiting = false; clearClaim(); drag = settle = null;
-        if (m.reason === 'resign' || m.reason === 'forfeit') sfx(m.winner === online.me ? 'win' : 'lose');   // si terminó por jugada, el sonido ya sonó
+        if (m.reason === 'resign' || m.reason === 'forfeit') sfx(online.spectator || m.winner === online.me ? 'win' : 'lose');   // si terminó por jugada, el sonido ya sonó
         render(); setTimeout(showEnd, 450); break;
       case 'rematch': online.rematch = m.votes; updateRematchUi(); break;
       case 'error': onNetError(m); break;
@@ -1391,14 +1557,14 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
     state = g; online.me = m.you; online.over = m.over || null; online.connected = m.connected;
     online.rematch = m.rematch || { 1: false, 2: false }; online.awaiting = false;
     names[1] = m.names[1] || t('player.1'); names[2] = m.names[2] || '';
-    hover = pending = drag = settle = null; kbd = { x: centerIdx(), y: centerIdx() };
+    hover = pending = drag = settle = null; fx.length = 0; kbd = { x: centerIdx(), y: centerIdx() };
     trackRival(m.disconnectedFor ? m.disconnectedFor[m.you === 1 ? 2 : 1] : 0);
     setStatus(''); render();
     if (!m.names[2]) showWait();
     else if (online.over) { open('endOverlay'); showEnd(); }
     else {
       closeAll(); updateRematchUi();
-      if (wasOver && state.moves.length === 0) setStatus(t('toast.rematch', { n: online.me }), true);
+      if (wasOver && state.moves.length === 0 && !online.spectator) setStatus(t('toast.rematch', { n: online.me }), true);
     }
   }
 
@@ -1409,6 +1575,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
     var mover = state.current, r = P.playMove(state, m.x, m.y);
     if (!r.ok) { online.net.send({ t: 'resync' }); return; }
     state = r.state; pending = hover = drag = settle = null;
+    spawnFx(r.captured, mover === 1 ? 2 : 1);
     announceCaptures(mover, r.captured);
     moveFeedback(r.captured, state.status !== 'playing', state.winner);
     render();
@@ -1416,6 +1583,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
 
   // Rival desconectado: tras 60 s aparece "Reclamar victoria" (el servidor vuelve a comprobar el tiempo).
   function trackRival(alreadyOfflineMs) {
+    if (online.spectator) return;
     var rival = online.me === 1 ? 2 : 1;
     if (online.connected[rival]) { online.rivalLeftAt = 0; clearClaim(); return; }
     if (!online.rivalLeftAt) online.rivalLeftAt = Date.now() - (alreadyOfflineMs || 0);
@@ -1429,6 +1597,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
   function showWait() {
     $('roomCode').textContent = online.code; $('waitMsg').textContent = '';
     $('btnShare').hidden = !navigator.share;
+    $('waitVis').textContent = t(online.isPublic ? 'online.waitPublic' : 'online.waitPrivate');
     open('waitOverlay');
   }
 
@@ -1438,10 +1607,15 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
     if ((m.code === 'ROOM_NOT_FOUND' || m.code === 'BAD_TOKEN') && online.rejoining) {
       var wasActive = online.active;                 // la sala vieja ya no existe (el servidor se reinició o venció)
       leaveOnline(false);
-      if (wasActive) { onlineMsg(t('online.roomGone')); open('onlineOverlay'); }
+      if (wasActive) { onlineMsg(t('online.roomGone')); open('onlineOverlay'); } else if (rooms.open) roomsMsg(txt);
       return;
     }
-    if (online.active) setStatus(txt, true); else { online.intent = null; onlineMsg(txt); }
+    if (online.active) { setStatus(txt, true); return; }
+    var intent = online.intent; online.intent = null; onlineMsg(txt);
+    if (rooms.open) { roomsMsg(txt); requestRooms(); }
+    // sala llena al unirse con código: se ofrece mirarla
+    if (m.code === 'ROOM_FULL' && intent && intent.t === 'join') { online.lastCode = intent.code; $('btnSpectateOffer').hidden = false; }
+    else $('btnSpectateOffer').hidden = true;
   }
 
   function initOnline() {
@@ -1471,6 +1645,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
   $('btnRules').addEventListener('click', function () { open('rulesOverlay'); });
   $('btnRulesClose').addEventListener('click', function () { open('menuOverlay'); });
   $('btnRestart').addEventListener('click', function () {
+    if (online.spectator) { leaveOnline(false); open('menuOverlay'); return; }
     if (online.active) { if (!isOver() && online.net && confirm(t('online.resignConfirm'))) online.net.send({ t: 'resign' }); return; }
     if (!state || state.moves.length === 0 || state.status !== 'playing' || confirm(t('confirm.restart'))) rematch();
   });
@@ -1481,17 +1656,19 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
   $('btnEndMenu').addEventListener('click', function () { if (online.active) leaveOnline(false); open('menuOverlay'); });
   $('btnClaim').addEventListener('click', function () { if (online.net) online.net.send({ t: 'claimWin' }); });
   $('btnOnline').addEventListener('click', function () {
-    if (online.net) { if (online.active && !isOver() && names[2] && !confirm(t('online.leaveConfirm'))) return; leaveOnline(true); }
+    if (online.net) { if (online.active && !online.spectator && !isOver() && names[2] && !confirm(t('online.leaveConfirm'))) return; leaveOnline(true); }
+    $('btnSpectateOffer').hidden = true;
     onlineMsg(serverUrl() ? '' : t('online.noServer')); open('onlineOverlay');
   });
   $('btnOnlineBack').addEventListener('click', function () { if (online.net && !online.active) leaveOnline(false); open('menuOverlay'); });
   $('btnCreateRoom').addEventListener('click', function () {
-    startOnline({ t: 'create', opts: { tournamentRule: $('optTournament').checked, exactFive: $('optExact').checked, size: settings.size } });
+    online.isPublic = vis === 'public';
+    startOnline({ t: 'create', opts: { tournamentRule: settings.tournamentRule, exactFive: settings.exactFive, size: settings.size, public: online.isPublic } });
   });
   function joinFromInput() {
     var code = ($('onCode').value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
     if (code.length !== 5) { onlineMsg(t('err.ROOM_NOT_FOUND')); return; }
-    startOnline({ t: 'join', code: code });
+    $('btnSpectateOffer').hidden = true; startOnline({ t: 'join', code: code });
   }
   $('btnJoinRoom').addEventListener('click', joinFromInput);
   $('onCode').addEventListener('keydown', function (e) { if (e.key === 'Enter') joinFromInput(); });
@@ -1503,14 +1680,73 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
   });
   $('btnShare').addEventListener('click', function () { try { navigator.share({ title: 'Pente', url: inviteLink() }); } catch (e) {} });
   // Tamaño del tablero (13 o 19): vale para la próxima partida o sala
-  function syncSizePicker() { document.querySelectorAll('#sizePicker .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(parseInt(b.dataset.size, 10) === settings.size)); }); }
-  document.querySelectorAll('#sizePicker .seg-opt').forEach(function (b) {
+  function syncSizePicker() { document.querySelectorAll('.sizePicker .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(parseInt(b.dataset.size, 10) === settings.size)); }); }
+  document.querySelectorAll('.sizePicker .seg-opt').forEach(function (b) {
     b.addEventListener('click', function () {
       settings.size = parseInt(b.dataset.size, 10);
       try { localStorage.setItem('pente.size', String(settings.size)); } catch (e) {}
       syncSizePicker(); render();
     });
   });
+
+  /* ---------- Opciones de partida compartidas (local y online) ---------- */
+  function syncOpts() { document.querySelectorAll('input[data-opt]').forEach(function (i) { i.checked = !!settings[i.getAttribute('data-opt')]; }); }
+  document.querySelectorAll('input[data-opt]').forEach(function (i) {
+    i.addEventListener('change', function () { settings[i.getAttribute('data-opt')] = i.checked; syncOpts(); });
+  });
+  var vis = 'private';
+  try { if (localStorage.getItem('pente.vis') === 'public') vis = 'public'; } catch (e) {}
+  function syncVis() {
+    document.querySelectorAll('#visPicker .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.vis === vis)); });
+    $('visHint').textContent = t(vis === 'public' ? 'online.publicHint' : 'online.privateHint');
+  }
+  document.querySelectorAll('#visPicker .seg-opt').forEach(function (b) {
+    b.addEventListener('click', function () { vis = b.dataset.vis; try { localStorage.setItem('pente.vis', vis); } catch (e) {} syncVis(); });
+  });
+
+  /* ---------- Salas públicas ---------- */
+  function roomsMsg(txt) { $('roomsMsg').textContent = txt || ''; }
+  function stopRooms() { rooms.open = false; clearInterval(rooms.timer); rooms.timer = 0; }
+  function requestRooms() { if (rooms.open && online.net && online.net.isOpen() && !online.active) online.net.send({ t: 'list' }); }
+  function startRooms() {
+    var url = serverUrl();
+    open('roomsOverlay');
+    renderRooms(null);
+    if (!url) { roomsMsg(t('online.noServer')); return; }
+    rooms.open = true; roomsMsg(online.net && online.net.isOpen() ? '' : t('online.connecting'));
+    if (!online.net) ensureNet(url); else requestRooms();
+    clearInterval(rooms.timer); rooms.timer = setInterval(requestRooms, 5000);
+  }
+  function renderRooms(list) {
+    var box = $('roomsList'); box.innerHTML = '';
+    if (list === null) return;
+    if (!list.length) { var e = document.createElement('div'); e.className = 'room-empty'; e.textContent = t('rooms.empty'); box.appendChild(e); return; }
+    list.forEach(function (r) {
+      var row = document.createElement('div'); row.className = 'room'; row.dataset.code = r.code;
+      var info = document.createElement('div'); info.className = 'info';
+      var who = document.createElement('div'); who.className = 'who';
+      who.textContent = r.status === 'waiting' ? t('rooms.waiting', { name: r.names[0] || '…' }) : t('rooms.vs', { a: r.names[0] || '…', b: r.names[1] || '…' });
+      var meta = document.createElement('div'); meta.className = 'meta';
+      var st = r.status === 'waiting' ? t('rooms.statusWaiting') : t(r.status === 'over' ? 'rooms.statusOver' : 'rooms.statusPlaying', { n: r.moves });
+      meta.textContent = r.size + '×' + r.size + ' · ' + st + (r.spectators ? ' · ' + t('rooms.watching', { n: r.spectators }) : '');
+      info.appendChild(who); info.appendChild(meta);
+      var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'btn' + (r.status === 'waiting' ? ' primary' : '');
+      btn.textContent = t(r.status === 'waiting' ? 'rooms.play' : 'rooms.watch');
+      btn.dataset.act = r.status === 'waiting' ? 'join' : 'spectate';
+      btn.addEventListener('click', function () {
+        roomsMsg(t('online.connecting')); $('onName').value = $('rName').value;
+        startOnline({ t: r.status === 'waiting' ? 'join' : 'spectate', code: r.code });
+      });
+      row.appendChild(info); row.appendChild(btn); box.appendChild(row);
+    });
+  }
+  $('btnOpenRooms').addEventListener('click', function () { $('rName').value = $('onName').value; startRooms(); });
+  $('btnRoomsRefresh').addEventListener('click', function () { requestRooms(); });
+  $('btnRoomsBack').addEventListener('click', function () { if (online.net && !online.active) leaveOnline(false); open('onlineOverlay'); });
+  $('rName').addEventListener('input', function () { $('onName').value = $('rName').value; });
+  $('btnSpectateOffer').addEventListener('click', function () { $('btnSpectateOffer').hidden = true; startOnline({ t: 'spectate', code: online.lastCode }); });
+  $('btnLocal').addEventListener('click', function () { open('localOverlay'); });
+  $('btnLocalBack').addEventListener('click', function () { open('menuOverlay'); });
   $('btnConfirm').addEventListener('click', function () { if (pending && !isOver()) tryMove(pending.x, pending.y); });
   // Sonido: los navegadores solo dejan activarlo después de un toque o clic del usuario
   ['pointerdown', 'touchend', 'click', 'keydown'].forEach(function (ev) { document.addEventListener(ev, function () { if (window.PenteSound) window.PenteSound.unlock(); }, true); });
@@ -1567,8 +1803,8 @@ input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; 
   if (window.ResizeObserver) new ResizeObserver(resize).observe(canvas);
   canvas.addEventListener('focus', render); canvas.addEventListener('blur', render);
 
-  applyI18n(); buildThemePicker(); syncSizePicker(); resize(); open('menuOverlay'); initOnline();
-  window.__pente = { get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame };  // utilidad para pruebas manuales
+  applyI18n(); buildThemePicker(); syncSizePicker(); syncOpts(); syncVis(); resize(); open('menuOverlay'); initOnline();
+  window.__pente = { get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, get fx() { return fx; }, get rooms() { return rooms; } };  // utilidad para pruebas manuales
 })();
 </script>
 <script>
