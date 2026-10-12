@@ -55,7 +55,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .status .toast { color: var(--accent); }
 
 .board-wrap { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; min-height: 0; }
-#board { display: block; width: min(100%, calc(100vh - 225px), 900px); aspect-ratio: 1 / 1; max-width: 100%; border-radius: 10px; touch-action: none; box-shadow: var(--board-shadow, 0 10px 30px rgba(0,0,0,.45)); }
+#board { display: block; width: min(100%, calc(100vh - 255px), 900px); aspect-ratio: 1 / 1; max-width: 100%; border-radius: 10px; touch-action: none; box-shadow: var(--board-shadow, 0 10px 30px rgba(0,0,0,.45)); }
 
 .actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; min-height: 48px; }
 .actions .btn { white-space: nowrap; }
@@ -84,7 +84,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   .app { padding: 8px 6px calc(8px + env(safe-area-inset-bottom)); gap: 8px; }
   #board { border-radius: 6px; }
   .player { padding: 8px 10px; }
-  #board { width: min(100%, calc(100vh - 225px)); }
+  #board { width: min(100%, calc(100vh - 255px)); }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 
@@ -209,6 +209,18 @@ body.in-screen .app { visibility: hidden; }
   .movelist, .chatlog { max-height: 34vh; }
 }
 [data-mode][hidden] { display: none; }
+
+/* ---------- Reloj ---------- */
+.clock { display: flex; align-items: baseline; gap: 10px; margin-top: 6px; font-variant-numeric: tabular-nums; font-weight: 700; white-space: nowrap; }
+.clock[hidden] { display: none; }
+.clock .ctot { font-size: 15px; color: var(--muted); }
+.clock .cturn { font-size: 17px; color: var(--text); }
+.clock .cturn:empty { display: none; }
+.player.active .clock .ctot { color: var(--text); }
+.clock.low .cturn, .clock.low .ctot { color: var(--danger); }
+.clock.low .cturn { animation: clockPulse 1s ease-in-out infinite; }
+@keyframes clockPulse { 50% { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .clock.low .cturn { animation: none; } }
 </style>
 </head>
 <body>
@@ -216,10 +228,12 @@ body.in-screen .app { visibility: hidden; }
   <div class="hud">
     <div class="player" id="player1">
       <div class="row"><span class="stone-ico s1"></span><span class="name" id="pname1"></span></div>
+      <div class="clock" id="clock1" hidden><span class="cturn"></span><span class="ctot"></span></div>
       <div class="caps" id="caps1" aria-label="Pares capturados"></div>
     </div>
     <div class="player" id="player2">
       <div class="row"><span class="stone-ico s2"></span><span class="name" id="pname2"></span></div>
+      <div class="clock" id="clock2" hidden><span class="cturn"></span><span class="ctot"></span></div>
       <div class="caps" id="caps2" aria-label="Pares capturados"></div>
     </div>
   </div>
@@ -304,6 +318,7 @@ body.in-screen .app { visibility: hidden; }
     <div class="field"><span class="lbl" data-i18n="menu.size"></span><div class="seg sizePicker" role="group"><button type="button" class="seg-opt" data-size="13" data-i18n="menu.size13"></button><button type="button" class="seg-opt" data-size="19" data-i18n="menu.size19"></button></div><p class="hint" data-i18n="menu.sizeHint"></p></div>
     <label class="check"><input type="checkbox" data-opt="tournamentRule" checked><span><span data-i18n="menu.tournamentRule"></span><small data-i18n="menu.tournamentRuleHint"></small></span></label>
     <label class="check"><input type="checkbox" data-opt="exactFive"><span><span data-i18n="menu.exactFive"></span><small data-i18n="menu.exactFiveHint"></small></span></label>
+    <label class="check"><input type="checkbox" data-opt="timer" checked><span><span data-i18n="menu.timer"></span><small data-i18n="menu.timerHint"></small></span></label>
     <div class="btns">
       <button class="btn primary" id="btnStart" data-i18n="menu.start"></button>
       <button class="btn" id="btnLocalBack" data-i18n="menu.back"></button>
@@ -375,6 +390,7 @@ body.in-screen .app { visibility: hidden; }
     <div class="field"><span class="lbl" data-i18n="menu.size"></span><div class="seg sizePicker" role="group"><button type="button" class="seg-opt" data-size="13" data-i18n="menu.size13"></button><button type="button" class="seg-opt" data-size="19" data-i18n="menu.size19"></button></div></div>
     <label class="check"><input type="checkbox" data-opt="tournamentRule" checked><span><span data-i18n="menu.tournamentRule"></span><small data-i18n="menu.tournamentRuleHint"></small></span></label>
     <label class="check"><input type="checkbox" data-opt="exactFive"><span><span data-i18n="menu.exactFive"></span><small data-i18n="menu.exactFiveHint"></small></span></label>
+    <label class="check"><input type="checkbox" data-opt="timer" checked><span><span data-i18n="menu.timer"></span><small data-i18n="menu.timerHint"></small></span></label>
     <div class="btns"><button class="btn primary" id="btnCreateRoom" data-i18n="online.create"></button></div>
     <p class="hint" data-i18n="online.createHint"></p>
     <div class="or" data-i18n="online.or"></div>
@@ -791,6 +807,10 @@ body.in-screen .app { visibility: hidden; }
       'online.roomGone': 'La sala ya no existe: el servidor se reinició o pasó mucho tiempo. Creá una nueva.',
       'toast.rematch': 'Nueva partida. Ahora sos el jugador {n}.',
       'end.winResign': '{loser} abandonó. Ganó {name}.',
+      'menu.timer': 'Reloj',
+      'menu.timerHint': '10 minutos por jugador para toda la partida y 1 minuto por jugada. Si se acaba cualquiera de los dos, perdés.',
+      'end.winTime': '{loser} se quedó sin tiempo. Ganó {name}.',
+      'clock.title': 'Tiempo total que le queda (y lo que queda de esta jugada)',
       'end.winForfeit': '{loser} se desconectó. Ganó {name}.',
       'err.ROOM_NOT_FOUND': 'No existe esa sala. Revisá el código.',
       'err.ROOM_FULL': 'La sala está llena: ya tiene dos jugadores.',
@@ -1320,7 +1340,7 @@ body.in-screen .app { visibility: hidden; }
 
   var canvas = $('board'), ctx = canvas.getContext('2d');
   var state = null, names = { 1: '', 2: '' };
-  var settings = { tournamentRule: true, exactFive: true, size: 13 };      // opciones de la partida (menú principal)
+  var settings = { tournamentRule: true, exactFive: true, size: 13, timer: true };      // opciones de la partida (menú principal)
   try { var sv = parseInt(localStorage.getItem('pente.size'), 10); if (sv === 13 || sv === 19) settings.size = sv; } catch (e) {}
 
   /* Configuración del dispositivo (pantalla "Configuración"): se guarda en localStorage y se aplica al instante. */
@@ -1367,7 +1387,8 @@ body.in-screen .app { visibility: hidden; }
   };
 
   // ¿terminó la partida? (en online puede terminar por abandono, sin que el tablero lo muestre)
-  function isOver() { return !state || state.status !== 'playing' || (online.active && !!online.over); }
+  var localOver = null;   // fin por tiempo en partidas locales / contra la máquina: { winner, reason:'timeout' }
+  function isOver() { return !state || state.status !== 'playing' || !!localOver || (online.active && !!online.over); }
   function canPlayNow() { return !!state && !isOver() && (!online.active || state.current === online.me) && (!ai.active || state.current === ai.human); }
   function turnText() {
     if (ai.active && state.current === ai.bot) return t('ai.thinking', { name: names[ai.bot] });
@@ -1380,6 +1401,65 @@ body.in-screen .app { visibility: hidden; }
     return state.current === online.me ? t('online.yourTurn') : t('online.theirTurn', { name: names[state.current] });
   }
 
+  /* ---------- Reloj ----------
+   * clk = { on, total, turnMs, rem:{1,2}, current, since, turnStart, frozen }.  rem = tiempo total restante al instante "since".
+   * Online lo fija el servidor (clockFromServer); local y contra la máquina lo lleva este navegador (se pausa con un menú abierto). */
+  var TOTAL_MS = 600000, TURN_MS = 60000, clk = null, clkPausedAt = 0;
+  function clockFresh() {
+    clkPausedAt = 0; localOver = null;
+    if (!settings.timer) { clk = null; return; }
+    var n = performance.now(); clk = { on: true, total: TOTAL_MS, turnMs: TURN_MS, rem: { 1: TOTAL_MS, 2: TOTAL_MS }, current: 1, since: n, turnStart: n, frozen: false };
+  }
+  function clockFromServer(c) {
+    if (!c || !c.on) { clk = null; return; }
+    var n = performance.now(), cur = c.current;
+    clk = { on: true, total: c.total, turnMs: c.turnMs, rem: { 1: c.rem[1], 2: c.rem[2] }, current: cur || (state ? state.current : 1), since: n, turnStart: n - (c.turnMs - c.turnLeft), frozen: !cur };
+  }
+  function botTurn() { return ai.active && state && state.current === ai.bot; }
+  function clockLive() {                                   // { 1: ms totales, 2: ms totales, turn: ms de la jugada } a este instante
+    if (!clk) return null;
+    var n = clkPausedAt || performance.now(), out = { 1: clk.rem[1], 2: clk.rem[2], turn: clk.turnMs, cur: clk.current };
+    if (!clk.frozen && !(ai.active && clk.current === ai.bot)) { out[clk.current] = Math.max(0, clk.rem[clk.current] - (n - clk.since)); out.turn = Math.max(0, clk.turnMs - (n - clk.turnStart)); }
+    return out;
+  }
+  function clockSwitch() {                                 // se hizo una jugada local: se descuenta lo gastado y pasa el turno
+    if (!clk || clk.frozen) return;
+    var n = performance.now(); if (!(ai.active && clk.current === ai.bot)) clk.rem[clk.current] = Math.max(0, clk.rem[clk.current] - (n - clk.since));
+    clk.current = state.current; clk.since = clk.turnStart = n;
+  }
+  function clockFreeze() { if (!clk || clk.frozen) return; var l = clockLive(); clk.rem[1] = l[1]; clk.rem[2] = l[2]; clk.frozen = true; }
+  function fmtClock(ms) { var s = Math.ceil(ms / 1000), m = Math.floor(s / 60); s = s % 60; return m + ':' + (s < 10 ? '0' : '') + s; }
+  function renderClocks() {
+    var l = (state && clk) ? clockLive() : null;
+    [1, 2].forEach(function (p) {
+      var el = $('clock' + p); if (!el) return;
+      el.hidden = !l; if (!l) return;
+      var active = !clk.frozen && !isOver() && state.current === p && !(ai.active && p === ai.bot);
+      el.querySelector('.ctot').textContent = fmtClock(l[p]);
+      el.querySelector('.cturn').textContent = active ? fmtClock(l.turn) : '';
+      el.classList.toggle('low', active && (l.turn <= 10000 || l[p] <= 30000));
+      el.title = t('clock.title');
+    });
+  }
+  function clockTick() {
+    if (!clk || !state) return;
+    var paused = !online.active && document.body.classList.contains('in-screen') && !isOver();
+    if (paused && !clkPausedAt) clkPausedAt = performance.now();
+    else if (!paused && clkPausedAt) { var d = performance.now() - clkPausedAt; clkPausedAt = 0; clk.since += d; clk.turnStart += d; }
+    renderClocks();
+    if (online.active || paused || isOver() || clk.frozen || botTurn()) return;
+    var l = clockLive();
+    if (l[clk.current] <= 0 || l.turn <= 0) timeoutEnd(clk.current);   // en online decide el servidor
+  }
+  function timeoutEnd(loser) {
+    if (isOver()) return;
+    clockFreeze(); drag = settle = null; pending = hover = null;
+    localOver = { winner: loser === 1 ? 2 : 1, reason: 'timeout' };
+    if (ai.active) { ai.token++; clearTimeout(ai.timer); ai.thinking = false; }
+    setStatus(''); render(); sfx(ai.active && loser === ai.human ? 'lose' : 'win'); setTimeout(showEnd, 450);
+  }
+  setInterval(clockTick, 200);
+
   /* ---------- Partida ---------- */
   function aiStop() { ai.active = false; ai.token++; clearTimeout(ai.timer); ai.thinking = false; }
   function startGame() {
@@ -1388,7 +1468,7 @@ body.in-screen .app { visibility: hidden; }
     names[1] = ($('name1').value || '').trim() || t('player.1');
     names[2] = ($('name2').value || '').trim() || t('player.2');
         state = P.createGame({ size: settings.size, tournamentRule: settings.tournamentRule, exactFive: settings.exactFive });
-    hover = pending = drag = settle = null; fx.length = 0;
+    hover = pending = drag = settle = null; fx.length = 0; clockFresh();
     kbd = { x: centerIdx(), y: centerIdx() };
     closeAll(); render(); setStatus('');
   }
@@ -1427,6 +1507,7 @@ body.in-screen .app { visibility: hidden; }
     if (!r.ok) { setStatus(t('err.' + r.error), true); sfx('error'); render(); return; }
     var mover = state.current;
     state = r.state; pending = hover = null;
+    if (state.status !== 'playing') clockFreeze(); else clockSwitch();
     spawnFx(r.captured, mover === 1 ? 2 : 1);
     announceCaptures(mover, r.captured);
     moveFeedback(r.captured, state.status !== 'playing', state.winner);
@@ -1443,7 +1524,7 @@ body.in-screen .app { visibility: hidden; }
     ai.active = true; ai.level = level; ai.human = human; ai.bot = human === 1 ? 2 : 1;
     names[human] = ($('name1').value || '').trim() || t('ai.you'); names[ai.bot] = t('ai.name.' + level);
     state = P.createGame({ size: settings.size, tournamentRule: settings.tournamentRule, exactFive: settings.exactFive });
-    hover = pending = drag = settle = null; fx.length = 0; kbd = { x: centerIdx(), y: centerIdx() };
+    hover = pending = drag = settle = null; fx.length = 0; clockFresh(); kbd = { x: centerIdx(), y: centerIdx() };
     closeAll(); render(); setStatus(''); aiMaybeMove();
   }
   // Turno de la máquina: un respiro para que se vea que "piensa", y recién ahí calcula (en el dispositivo, sin red).
@@ -1933,7 +2014,7 @@ body.in-screen .app { visibility: hidden; }
       $('pname' + p).textContent = (names[p] || '…') + (online.active && online.me === p ? ' ' + t('online.you') : '');
       $('caps' + p).innerHTML = pips(state.captures[p]) + '<span>' + state.captures[p] + '/5</span>';
     });
-    updateSide();
+    updateSide(); renderClocks();
     var sb = $('specBar'); sb.hidden = !online.spectator;
     if (online.spectator) sb.textContent = t('spec.badge', { code: online.code, n: online.specN });
     if (!isOver() && !$('status').dataset.toast) $('status').textContent = turnText();
@@ -1958,8 +2039,9 @@ body.in-screen .app { visibility: hidden; }
   }
   function resultText() {
     if (!state || !isOver()) return '';
-    var tx;
-    if (online.spectator && online.over && (online.over.reason === 'resign' || online.over.reason === 'forfeit')) tx = t('spec.over', { name: names[online.over.winner] });
+    var tx, ov = online.active ? online.over : localOver;
+    if (ov && ov.reason === 'timeout') { var lw = ov.winner === 1 ? 2 : 1; tx = online.spectator ? t('spec.over', { name: names[ov.winner] }) : t('end.winTime', { name: names[ov.winner], loser: names[lw] }); }
+    else if (online.spectator && online.over && (online.over.reason === 'resign' || online.over.reason === 'forfeit')) tx = t('spec.over', { name: names[online.over.winner] });
     else if (online.active && online.over && (online.over.reason === 'resign' || online.over.reason === 'forfeit')) {
       var w = online.over.winner, l = w === 1 ? 2 : 1;
       tx = t(online.over.reason === 'resign' ? 'end.winResign' : 'end.winForfeit', { name: names[w], loser: names[l] });
@@ -1990,7 +2072,7 @@ body.in-screen .app { visibility: hidden; }
   function rematch() {
     if (ai.active) { ai.token++; clearTimeout(ai.timer); ai.thinking = false; }
     state = P.createGame({ size: state ? state.size : settings.size, tournamentRule: settings.tournamentRule, exactFive: settings.exactFive });
-    hover = pending = drag = settle = null; fx.length = 0; kbd = { x: centerIdx(), y: centerIdx() }; closeAll(); setStatus(''); render();
+    hover = pending = drag = settle = null; fx.length = 0; kbd = { x: centerIdx(), y: centerIdx() }; clockFresh(); closeAll(); setStatus(''); render();
     if (ai.active) aiMaybeMove();
   }
 
@@ -2035,7 +2117,7 @@ body.in-screen .app { visibility: hidden; }
   }
 
   function startOnline(intent) {
-    aiStop();
+    aiStop(); localOver = null;
     var url = serverUrl();
     if (!url) { onlineMsg(t('online.noServer')); return; }
     intent.name = myName();
@@ -2057,7 +2139,7 @@ body.in-screen .app { visibility: hidden; }
     online.intent = null; online.rejoining = false; online.over = null; online.awaiting = false; online.rivalLeftAt = 0;
     online.connected = { 1: true, 2: true }; online.rematch = { 1: false, 2: false };
     clearSession(); updateOnlineButtons(); updateRematchUi();
-    if (wasActive) { state = null; hover = pending = null; setStatus(''); render(); }
+    if (wasActive) { state = null; clk = null; hover = pending = null; setStatus(''); render(); }
     updateHud();
   }
 
@@ -2079,7 +2161,8 @@ body.in-screen .app { visibility: hidden; }
       case 'presence': online.connected = m.connected; trackRival(0); updateHud(); break;
       case 'over':
         online.over = { winner: m.winner, reason: m.reason }; online.awaiting = false; clearClaim(); drag = settle = null;
-        if (m.reason === 'resign' || m.reason === 'forfeit') sfx(online.spectator || m.winner === online.me ? 'win' : 'lose');   // si terminó por jugada, el sonido ya sonó
+        if (m.clock) clockFromServer(m.clock); else clockFreeze();
+        if (m.reason === 'resign' || m.reason === 'forfeit' || m.reason === 'timeout') sfx(online.spectator || m.winner === online.me ? 'win' : 'lose');   // si terminó por jugada, el sonido ya sonó
         render(); setTimeout(showEnd, 450); break;
       case 'rematch': online.rematch = m.votes; updateRematchUi(); break;
       case 'error': onNetError(m); break;
@@ -2088,6 +2171,7 @@ body.in-screen .app { visibility: hidden; }
 
   function applySync(m) {
     var wasOver = !!state && online.active && isOver();
+    localOver = null; clockFromServer(m.clock);
     var g = P.createGame(m.opts);
     for (var i = 0; i < m.moves.length; i++) {
       var r = P.playMove(g, m.moves[i][0], m.moves[i][1]);
@@ -2115,6 +2199,7 @@ body.in-screen .app { visibility: hidden; }
     var mover = state.current, r = P.playMove(state, m.x, m.y);
     if (!r.ok) { online.net.send({ t: 'resync' }); return; }
     state = r.state; pending = hover = drag = settle = null;
+    if (m.clock) clockFromServer(m.clock);
     spawnFx(r.captured, mover === 1 ? 2 : 1);
     announceCaptures(mover, r.captured);
     moveFeedback(r.captured, state.status !== 'playing', state.winner);
@@ -2352,7 +2437,7 @@ body.in-screen .app { visibility: hidden; }
   $('btnOnlineBack').addEventListener('click', function () { if (online.net && !online.active) leaveOnline(false); open('menuOverlay'); });
   $('btnCreateRoom').addEventListener('click', function () {
     online.isPublic = vis === 'public';
-    startOnline({ t: 'create', opts: { tournamentRule: settings.tournamentRule, exactFive: settings.exactFive, size: settings.size, public: online.isPublic } });
+    startOnline({ t: 'create', opts: { tournamentRule: settings.tournamentRule, exactFive: settings.exactFive, size: settings.size, timer: settings.timer, public: online.isPublic } });
   });
   function joinFromInput() {
     var code = ($('onCode').value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
