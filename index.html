@@ -208,6 +208,7 @@ body.in-screen .app { visibility: hidden; }
   .side .box { overflow: hidden; }
   .movelist, .chatlog { max-height: 34vh; }
 }
+[data-mode][hidden] { display: none; }
 </style>
 </head>
 <body>
@@ -279,7 +280,6 @@ body.in-screen .app { visibility: hidden; }
     <div class="btns">
       <button class="btn primary" id="btnResume" hidden data-i18n="menu.resume"></button>
       <button class="btn primary" id="btnLocal" data-i18n="menu.local"></button>
-      <button class="btn primary" id="btnAI" data-i18n="menu.ai"></button>
       <button class="btn primary" id="btnOnline" data-i18n="menu.online"></button>
       <button class="btn" id="btnSettings" data-i18n="menu.settings"></button>
       <button class="btn" id="btnRules" data-i18n="menu.rules"></button>
@@ -292,8 +292,15 @@ body.in-screen .app { visibility: hidden; }
   <div class="screen-body">
     <h2 data-i18n="local.title"></h2>
     <p class="sub" data-i18n="local.sub"></p>
+    <div class="field"><span class="lbl" data-i18n="local.mode"></span>
+      <div class="seg" id="localMode" role="group"><button type="button" class="seg-opt" data-val="person" data-i18n="local.modePerson"></button><button type="button" class="seg-opt" data-val="ai" data-i18n="local.modeAI"></button></div></div>
     <div class="field"><label class="lbl" for="name1" data-i18n="menu.p1"></label><input type="text" id="name1" maxlength="18" autocomplete="off"></div>
-    <div class="field"><label class="lbl" for="name2" data-i18n="menu.p2"></label><input type="text" id="name2" maxlength="18" autocomplete="off"></div>
+    <div class="field" data-mode="person"><label class="lbl" for="name2" data-i18n="menu.p2"></label><input type="text" id="name2" maxlength="18" autocomplete="off"></div>
+    <div class="field" data-mode="ai"><span class="lbl" data-i18n="ai.level"></span>
+      <div class="seg" id="aiLevel" role="group"><button type="button" class="seg-opt" data-val="easy" data-i18n="ai.easy"></button><button type="button" class="seg-opt" data-val="medium" data-i18n="ai.medium"></button><button type="button" class="seg-opt" data-val="hard" data-i18n="ai.hard"></button></div>
+      <p class="hint" id="aiLevelHint"></p></div>
+    <div class="field" data-mode="ai"><span class="lbl" data-i18n="ai.side"></span>
+      <div class="seg" id="aiSide" role="group"><button type="button" class="seg-opt" data-val="first" data-i18n="ai.sideFirst"></button><button type="button" class="seg-opt" data-val="second" data-i18n="ai.sideSecond"></button><button type="button" class="seg-opt" data-val="random" data-i18n="ai.sideRandom"></button></div></div>
     <div class="field"><span class="lbl" data-i18n="menu.size"></span><div class="seg sizePicker" role="group"><button type="button" class="seg-opt" data-size="13" data-i18n="menu.size13"></button><button type="button" class="seg-opt" data-size="19" data-i18n="menu.size19"></button></div><p class="hint" data-i18n="menu.sizeHint"></p></div>
     <label class="check"><input type="checkbox" data-opt="tournamentRule" checked><span><span data-i18n="menu.tournamentRule"></span><small data-i18n="menu.tournamentRuleHint"></small></span></label>
     <label class="check"><input type="checkbox" data-opt="exactFive"><span><span data-i18n="menu.exactFive"></span><small data-i18n="menu.exactFiveHint"></small></span></label>
@@ -301,32 +308,11 @@ body.in-screen .app { visibility: hidden; }
       <button class="btn primary" id="btnStart" data-i18n="menu.start"></button>
       <button class="btn" id="btnLocalBack" data-i18n="menu.back"></button>
     </div>
+    <p class="hint" data-mode="ai" data-i18n="ai.offline"></p>
   </div>
 </div>
 
 <!-- Contra la máquina (offline) -->
-<div class="overlay screen" id="aiOverlay">
-  <div class="screen-body">
-    <h2 data-i18n="ai.title"></h2>
-    <p class="sub" data-i18n="ai.sub"></p>
-    <div class="field"><label class="lbl" for="aiName" data-i18n="ai.yourName"></label><input type="text" id="aiName" maxlength="18" autocomplete="off"></div>
-    <div class="field"><span class="lbl" data-i18n="ai.level"></span>
-      <div class="seg" id="aiLevel" role="group"><button type="button" class="seg-opt" data-val="easy" data-i18n="ai.easy"></button><button type="button" class="seg-opt" data-val="medium" data-i18n="ai.medium"></button><button type="button" class="seg-opt" data-val="hard" data-i18n="ai.hard"></button></div>
-      <p class="hint" id="aiLevelHint"></p></div>
-    <div class="field"><span class="lbl" data-i18n="ai.side"></span>
-      <div class="seg" id="aiSide" role="group"><button type="button" class="seg-opt" data-val="first" data-i18n="ai.sideFirst"></button><button type="button" class="seg-opt" data-val="second" data-i18n="ai.sideSecond"></button><button type="button" class="seg-opt" data-val="random" data-i18n="ai.sideRandom"></button></div></div>
-    <div class="field"><span class="lbl" data-i18n="menu.size"></span><div class="seg sizePicker" role="group"><button type="button" class="seg-opt" data-size="13" data-i18n="menu.size13"></button><button type="button" class="seg-opt" data-size="19" data-i18n="menu.size19"></button></div></div>
-    <label class="check"><input type="checkbox" data-opt="tournamentRule" checked><span><span data-i18n="menu.tournamentRule"></span><small data-i18n="menu.tournamentRuleHint"></small></span></label>
-    <label class="check"><input type="checkbox" data-opt="exactFive"><span><span data-i18n="menu.exactFive"></span><small data-i18n="menu.exactFiveHint"></small></span></label>
-    <div class="btns">
-      <button class="btn primary" id="btnAIStart" data-i18n="ai.start"></button>
-      <button class="btn" id="btnAIBack" data-i18n="menu.back"></button>
-    </div>
-    <p class="hint" data-i18n="ai.offline"></p>
-  </div>
-</div>
-
-<!-- Configuración -->
 <div class="overlay screen" id="settingsOverlay">
   <div class="screen-body settings">
     <h2 id="cfgTitle" data-i18n="cfg.title"></h2>
@@ -818,7 +804,10 @@ body.in-screen .app { visibility: hidden; }
       'err.BAD_REQUEST': 'Algo salió mal. Probá de nuevo.',
       'menu.local': 'Jugar local',
       'local.title': 'Partida local',
-      'local.sub': 'Dos jugadores en el mismo dispositivo.',
+      'local.sub': 'En este dispositivo: contra otra persona o contra la máquina (sin internet).',
+      'local.mode': 'Contra quién',
+      'local.modePerson': 'Otra persona',
+      'local.modeAI': 'La máquina',
       'cfg.captureFx': 'Fichas capturadas',
       'cfg.fx.shatter': 'Se rompen',
       'cfg.fx.fade': 'Se desvanecen',
@@ -1452,7 +1441,7 @@ body.in-screen .app { visibility: hidden; }
     if (online.net) leaveOnline(false);
     var human = side === 'second' ? 2 : side === 'random' ? (Math.random() < 0.5 ? 1 : 2) : 1;
     ai.active = true; ai.level = level; ai.human = human; ai.bot = human === 1 ? 2 : 1;
-    names[human] = ($('aiName').value || '').trim() || t('ai.you'); names[ai.bot] = t('ai.name.' + level);
+    names[human] = ($('name1').value || '').trim() || t('ai.you'); names[ai.bot] = t('ai.name.' + level);
     state = P.createGame({ size: settings.size, tournamentRule: settings.tournamentRule, exactFive: settings.exactFive });
     hover = pending = drag = settle = null; fx.length = 0; kbd = { x: centerIdx(), y: centerIdx() };
     closeAll(); render(); setStatus(''); aiMaybeMove();
@@ -1490,21 +1479,14 @@ body.in-screen .app { visibility: hidden; }
   /* Mouse y lápiz: previsualización al pasar y un clic coloca. */
   canvas.addEventListener('pointerdown', function () { if (kbdOn) { kbdOn = false; render(); } }, true);
   canvas.addEventListener('pointermove', function (e) {
-    if (e.pointerType === 'touch') { if (drag && drag.id === e.pointerId) { e.preventDefault(); dragMove(e); } return; }
+    if (drag && drag.id === e.pointerId) { e.preventDefault(); dragMove(e); return; }
+    if (e.pointerType === 'touch') return;
     if (!canPlayNow()) return;
     var c = cellFromEvent(e);
     if (!c || (hover && c.x === hover.x && c.y === hover.y)) { if (!c && hover) { hover = null; render(); } return; }
     hover = c; render();
   });
-  canvas.addEventListener('pointerleave', function (e) { if (e.pointerType !== 'touch' && hover && !pending) { hover = null; render(); } });
-  canvas.addEventListener('pointerup', function (e) {
-    if (e.pointerType === 'touch') return;                 // el dedo se maneja abajo (pointerdown/up con arrastre)
-    var c = cellFromEvent(e); if (!c) return;
-    kbd = c;
-    if (isOver()) return;
-    if (online.active && state.current !== online.me) { setStatus(t(online.spectator ? 'spec.noPlay' : 'online.wait'), true); sfx('error'); return; }
-    tryMove(c.x, c.y);
-  });
+  canvas.addEventListener('pointerleave', function (e) { if (e.pointerType !== 'touch' && !drag && hover && !pending) { hover = null; render(); } });
   canvas.addEventListener('contextmenu', function (e) { e.preventDefault(); });
 
   /* Dedo: tocar marca una intersección exacta (queda una ficha "pendiente"). Si arrastrás, la ficha se levanta POR ENCIMA del dedo
@@ -1515,7 +1497,7 @@ body.in-screen .app { visibility: hidden; }
   function liftPx() { var l = LIFT[cfg.lift] || LIFT.mid; return Math.max(metrics.cell * l[0], l[1] * kScale()); }   // cuánto sube la ficha por encima del dedo (px de canvas)
   function heldPos() {                                      // centro de la ficha que se arrastra, en px de canvas
     if (!drag.lifted) return { x: px(drag.cell.x), y: px(drag.cell.y) };
-    var e = cfg.anim ? easeOut(Math.min(1, (performance.now() - drag.liftStart) / 120)) : 1, L = liftPx();
+    var e = cfg.anim ? easeOut(Math.min(1, (performance.now() - drag.liftStart) / 120)) : 1, L = drag.mouse ? 0 : liftPx();
     return { x: drag.f.x + drag.vec.x * (1 - e), y: drag.f.y + drag.vec.y * (1 - e) - L * e };
   }
   function updateDragTarget() {
@@ -1525,14 +1507,16 @@ body.in-screen .app { visibility: hidden; }
   function dragError(c) { return state ? P.validateMove(state, c.x, c.y) : 'GAME_OVER'; }
 
   canvas.addEventListener('pointerdown', function (e) {
-    if (e.pointerType !== 'touch' || !state || isOver() || drag) return;
+    if (!state || isOver() || drag) return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (ai.active && state.current !== ai.human) return;
     e.preventDefault();
     var p = toCanvas(e), c = snap(p.x, p.y, false); if (!c) return;
     kbd = c;
     if (online.active && state.current !== online.me) { setStatus(t(online.spectator ? 'spec.noPlay' : 'online.wait'), true); sfx('error'); return; }
     if (P.get(state, c.x, c.y) !== P.EMPTY) { setStatus(t('err.OCCUPIED'), true); sfx('error'); return; }
     var grab = !!(pending && cfg.confirm !== 'none' && pending.x === c.x && pending.y === c.y);
-    drag = { id: e.pointerId, grab: grab, prev: pending, cell: c, f: p, vec: null, lifted: false, liftStart: 0, cssX: e.clientX, cssY: e.clientY };
+    drag = { mouse: e.pointerType !== 'touch', id: e.pointerId, grab: grab, prev: pending, cell: c, f: p, vec: null, lifted: false, liftStart: 0, cssX: e.clientX, cssY: e.clientY };
     try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
     if (!grab) {
       var bad = P.validateMove(state, c.x, c.y);
@@ -1545,7 +1529,7 @@ body.in-screen .app { visibility: hidden; }
   function dragMove(e) {
     var p = toCanvas(e); drag.f = p;
     if (!drag.lifted) {
-      if (Math.hypot(e.clientX - drag.cssX, e.clientY - drag.cssY) < TOUCH_SLOP) return;
+      if (Math.hypot(e.clientX - drag.cssX, e.clientY - drag.cssY) < (drag.mouse ? 4 : TOUCH_SLOP)) return;
       drag.lifted = true; drag.liftStart = performance.now();
       drag.vec = { x: px(drag.cell.x) - p.x, y: px(drag.cell.y) - p.y };   // dónde estaba la ficha respecto del dedo al levantarla
       sfx('pick'); buzz(5);
@@ -1579,8 +1563,8 @@ body.in-screen .app { visibility: hidden; }
     if (dropHints < 2) { dropHints++; setStatus(t(cfg.confirm === 'double' ? 'hud.dragHintDouble' : 'hud.dragHint'), true); } else setStatus('');
     render();
   }
-  canvas.addEventListener('pointerup', function (e) { if (e.pointerType === 'touch') endDrag(e, false); });
-  canvas.addEventListener('pointercancel', function (e) { if (e.pointerType === 'touch') endDrag(e, true); });
+  canvas.addEventListener('pointerup', function (e) { endDrag(e, false); });
+  canvas.addEventListener('pointercancel', function (e) { endDrag(e, true); });
 
   canvas.addEventListener('keydown', function (e) {
     if (!state) return;
@@ -1608,14 +1592,14 @@ body.in-screen .app { visibility: hidden; }
   function drawStone(x, y, player, alpha, highlight) { drawStonePx(px(x), px(y), player, alpha, highlight, 1, 0, seedOf(x, y, player)); }
   // scale > 1 y lift (0..1) = ficha levantada: más grande y con sombra más lejana
   function stoneK() { return ({ small: 0.30, normal: 0.42, large: 0.50 }[cfg.stoneSize] || 0.42); }   // radio de la ficha como fracción de la casilla (0.5 = se tocan)
-  function drawStonePx(cx, cy, player, alpha, highlight, scale, lift, seed) {
+  function drawStonePx(cx, cy, player, alpha, highlight, scale, lift, seed, spin) {
     var th = theme(), st = th.stones[player];
     var r = metrics.cell * stoneK() * (scale || 1);
-    if (st.scribble) { drawScribble(cx, cy, st, alpha, highlight, scale || 1, lift || 0, seed === undefined ? 3 : seed, r, th); return; }
+    if (st.scribble) { drawScribble(cx, cy, st, alpha, highlight, scale || 1, lift || 0, seed === undefined ? 3 : seed, r, th, spin || 0); return; }
     ctx.save(); ctx.globalAlpha = alpha;
     if (st.glow) { ctx.shadowColor = st.glow; ctx.shadowBlur = r * (1.2 + (lift || 0) * 0.8); }
     else { ctx.shadowColor = 'rgba(0,0,0,' + (0.45 - 0.1 * (lift || 0)) + ')'; ctx.shadowBlur = r * (0.35 + (lift || 0) * 0.7); ctx.shadowOffsetY = r * (0.12 + (lift || 0) * 0.5); }
-    var g = ctx.createRadialGradient(cx - r * .35, cy - r * .4, r * .1, cx, cy, r);
+    var ha = 2.3 + (spin || 0), g = ctx.createRadialGradient(cx + Math.cos(ha) * r * .5, cy + Math.sin(ha) * r * .5, r * .1, cx, cy, r);   // al girar, el brillo da la vuelta a la ficha
     g.addColorStop(0, st.a); g.addColorStop(1, st.b);
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
     ctx.shadowColor = 'transparent';
@@ -1671,11 +1655,11 @@ body.in-screen .app { visibility: hidden; }
     spriteCount++;
     return (sprites[key] = { cv: cv, size: size });
   }
-  function drawScribble(cx, cy, st, alpha, highlight, scale, lift, seed, rScaled, th) {
+  function drawScribble(cx, cy, st, alpha, highlight, scale, lift, seed, rScaled, th, spin) {
     var r0 = rScaled / scale * 1.12, sp = scribbleSprite(st.scribble, seed, r0), s = sp.size * scale;
     ctx.save(); ctx.globalAlpha = alpha;
     if (lift) { ctx.shadowColor = 'rgba(0,0,0,.28)'; ctx.shadowBlur = rScaled * (0.3 + lift * 0.6); ctx.shadowOffsetY = rScaled * lift * 0.5; }
-    ctx.drawImage(sp.cv, cx - s / 2, cy - s / 2, s, s);
+    if (spin) { ctx.translate(cx, cy); ctx.rotate(spin); ctx.drawImage(sp.cv, -s / 2, -s / 2, s, s); } else ctx.drawImage(sp.cv, cx - s / 2, cy - s / 2, s, s);
     ctx.restore();
     if (highlight) { ctx.save(); ctx.lineWidth = Math.max(2, rScaled * .16); ctx.strokeStyle = th.win; ctx.beginPath(); ctx.arc(cx, cy, rScaled * 1.12, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); }
   }
@@ -1822,7 +1806,7 @@ body.in-screen .app { visibility: hidden; }
     }
     updateHud();
     var now = performance.now();
-    if (!animReq && ((drag && drag.lifted && now - drag.liftStart < 150) || settle || fx.length)) animReq = requestAnimationFrame(function () { animReq = 0; render(); });
+    if (!animReq && ((drag && drag.lifted && (cfg.anim || now - drag.liftStart < 150)) || settle || fx.length)) animReq = requestAnimationFrame(function () { animReq = 0; render(); });
   }
 
 
@@ -1894,7 +1878,8 @@ body.in-screen .app { visibility: hidden; }
   }
   function drawHeldStone() {
     var pos = heldPos(), bad = !!dragError(drag.cell);
-    drawStonePx(pos.x, pos.y, state.current, bad ? 0.65 : 1, false, 1.28, 1);
+    var tt = cfg.anim ? performance.now() : 0, spin = tt * 0.0009, bob = cfg.anim ? Math.sin(tt * 0.003) : 0;     // flota y gira muy despacito (~7 s por vuelta)
+    drawStonePx(pos.x, pos.y + bob * metrics.cell * 0.05, state.current, bad ? 0.65 : 1, false, 1.28 + bob * 0.03, 1, undefined, spin);
   }
   function drawSettle() {
     var k = Math.min(1, (performance.now() - settle.t0) / settle.dur), e = easeOut(k);
@@ -2341,7 +2326,7 @@ body.in-screen .app { visibility: hidden; }
   }
 
   /* ---------- Eventos ---------- */
-  $('btnStart').addEventListener('click', startGame);
+  $('btnStart').addEventListener('click', function () { window.__localStart(); });
   $('btnResume').addEventListener('click', closeAll);
   $('btnMenu').addEventListener('click', function () { open('menuOverlay'); });
   $('btnRules').addEventListener('click', function () { open('rulesOverlay'); });
@@ -2405,9 +2390,15 @@ body.in-screen .app { visibility: hidden; }
   function saveAiPref() { try { localStorage.setItem('pente.ai', JSON.stringify(aiPref)); } catch (e) {} }
   document.querySelectorAll('#aiLevel .seg-opt').forEach(function (b) { b.addEventListener('click', function () { aiPref.level = b.dataset.val; saveAiPref(); syncAiUi(); }); });
   document.querySelectorAll('#aiSide .seg-opt').forEach(function (b) { b.addEventListener('click', function () { aiPref.side = b.dataset.val; saveAiPref(); syncAiUi(); }); });
-  $('btnAI').addEventListener('click', function () { try { if (!$('aiName').value) $('aiName').value = localStorage.getItem('pente.name') || ''; } catch (e) {} syncAiUi(); open('aiOverlay'); });
-  $('btnAIBack').addEventListener('click', function () { open('menuOverlay'); });
-  $('btnAIStart').addEventListener('click', function () { var n = ($('aiName').value || '').trim(); try { if (n) localStorage.setItem('pente.name', n); } catch (e) {} startAI(aiPref.level, aiPref.side); });
+  // "Jugar local": un solo botón de inicio; según el modo arranca con otra persona o contra la máquina
+  var localMode = 'person'; try { if (localStorage.getItem('pente.localMode') === 'ai') localMode = 'ai'; } catch (e) {}
+  function syncLocalMode() {
+    document.querySelectorAll('#localMode .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.val === localMode)); });
+    document.querySelectorAll('#localOverlay [data-mode]').forEach(function (el) { el.hidden = el.dataset.mode !== localMode; });
+    syncAiUi();
+  }
+  document.querySelectorAll('#localMode .seg-opt').forEach(function (b) { b.addEventListener('click', function () { localMode = b.dataset.val; try { localStorage.setItem('pente.localMode', localMode); } catch (e) {} syncLocalMode(); }); });
+  window.__localStart = function () { if (localMode === 'ai') { var n = ($('name1').value || '').trim(); try { if (n) localStorage.setItem('pente.name', n); } catch (e) {} startAI(aiPref.level, aiPref.side); } else startGame(); };
 
   /* ---------- Opciones de partida compartidas (local y online) ---------- */
   function syncOpts() { document.querySelectorAll('input[data-opt]').forEach(function (i) { i.checked = !!settings[i.getAttribute('data-opt')]; }); }
@@ -2465,7 +2456,7 @@ body.in-screen .app { visibility: hidden; }
   $('btnRoomsBack').addEventListener('click', function () { if (online.net && !online.active) leaveOnline(false); open('onlineOverlay'); });
   $('rName').addEventListener('input', function () { $('onName').value = $('rName').value; });
   $('btnSpectateOffer').addEventListener('click', function () { $('btnSpectateOffer').hidden = true; startOnline({ t: 'spectate', code: online.lastCode }); });
-  $('btnLocal').addEventListener('click', function () { open('localOverlay'); });
+  $('btnLocal').addEventListener('click', function () { syncLocalMode(); open('localOverlay'); });
   $('btnLocalBack').addEventListener('click', function () { open('menuOverlay'); });
   $('btnConfirm').addEventListener('click', function () { if (pending && !isOver()) tryMove(pending.x, pending.y); });
   // Sonido: los navegadores solo dejan activarlo después de un toque o clic del usuario
