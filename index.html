@@ -241,6 +241,41 @@ html[data-theme="papel"] #chatBox, html[data-theme="papel"] #chatBox * , html[da
 html[data-theme="papel"] .btn, html[data-theme="papel"] .tab, html[data-theme="papel"] .seg-opt { font-size: 1.1em; }
 html[data-theme="papel"] .status { font-size: 1.1em; }
 html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; letter-spacing: normal; }   /* los números del reloj, siempre claros */
+
+/* ---------- Tutorial interactivo ---------- */
+.tut-card { display: flex; flex-direction: column; gap: 8px; background: var(--panel); border: 2px solid var(--accent); border-radius: var(--radius); padding: 12px 14px; min-height: 0; overflow-y: auto; }
+.tut-card[hidden] { display: none; }
+.tut-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.tut-step { font-size: 12px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.tut-title { margin: 0; font-size: 17px; line-height: 1.2; }
+.tut-text { margin: 0; font-size: 14.5px; line-height: 1.4; color: var(--text); }
+.tut-fb { margin: 0; font-size: 14px; line-height: 1.35; font-weight: 600; min-height: 1.35em; }
+.tut-fb.good { color: #5fd694; }
+.tut-fb.bad { color: var(--danger); }
+.tut-fb.hint { color: var(--accent); }
+.tut-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: auto; }
+.tut-btns .btn { flex: 1 1 auto; min-height: 44px; padding: 8px 12px; }
+.tut-btns .btn[hidden] { display: none; }
+.tut-btns .btn:disabled { opacity: .4; cursor: default; }
+html[data-theme="papel"] .tut-card { border-color: var(--line); }
+/* En el tutorial no hay jugadas, chat, menú ni reinicio: solo el tablero y la tarjeta */
+body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut #btnClaim, body.in-tut .sidebar-row, body.in-tut #movesBox, body.in-tut #chatBox, body.in-tut #btnChatShow { display: none !important; }
+@media (min-width: 1100px) {
+  .tut-card { grid-column: 1; grid-row: 1; contain: size; }
+}
+@media (max-width: 1099px) {
+  /* Celular: arriba los jugadores, después el tablero (siempre en el mismo lugar), el botón Confirmar y abajo la tarjeta con la lección */
+  body.in-tut .stage { display: contents; }
+  body.in-tut .board-wrap { order: 1; flex: none; }
+  body.in-tut .actions { order: 2; min-height: 0; }
+  body.in-tut .tut-card { order: 3; flex: 1 0 auto; min-height: 150px; padding: 10px 12px; gap: 6px; overflow: visible; }
+  body.in-tut .tut-title { font-size: 15px; }
+  body.in-tut .tut-text { font-size: 13.5px; line-height: 1.32; }
+  body.in-tut .tut-fb { font-size: 13.5px; }
+  body.in-tut .tut-btns { margin-top: 4px; }
+  body.in-tut .tut-btns .btn { min-height: 42px; padding: 4px 8px; font-size: 14px; }
+  body.in-tut #board { width: min(100%, max(260px, calc(100vh - 365px)), 900px); }
+}
 </style>
 </head>
 <body>
@@ -263,6 +298,17 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
   <div class="status" id="status" role="status" aria-live="polite"></div>
 
   <div class="stage">
+    <section class="tut-card" id="tutCard" hidden data-i18n-aria="a11y.tutorial">
+      <div class="tut-top"><span class="tut-step" id="tutStep"></span><button type="button" class="btn small" id="tutExit"></button></div>
+      <h2 class="tut-title" id="tutTitle"></h2>
+      <p class="tut-text" id="tutText"></p>
+      <p class="tut-fb" id="tutFb" role="status" aria-live="polite"></p>
+      <div class="tut-btns">
+        <button type="button" class="btn" id="tutPrev"></button>
+        <button type="button" class="btn" id="tutHint"></button>
+        <button type="button" class="btn" id="tutNext"></button>
+      </div>
+    </section>
     <div class="board-wrap"><canvas id="board" tabindex="0" role="application"></canvas></div>
 
     <aside class="side" id="side" data-tab="moves" data-i18n-aria="a11y.sidePanel">
@@ -317,6 +363,7 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
       <button class="btn primary" id="btnResume" hidden data-i18n="menu.resume"></button>
       <button class="btn primary" id="btnLocal" data-i18n="menu.local"></button>
       <button class="btn primary" id="btnOnline" data-i18n="menu.online"></button>
+      <button class="btn" id="btnTutorial" data-i18n="menu.tutorial"></button>
       <button class="btn" id="btnSettings" data-i18n="menu.settings"></button>
       <button class="btn" id="btnRules" data-i18n="menu.rules"></button>
       <button class="btn" id="btnLang"></button>
@@ -721,6 +768,108 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
     winsNeededForBestOf: winsNeededForBestOf,
     COLS: COLS, coordName: coordName, parseCoord: parseCoord
   };
+});
+</script>
+<script>
+/*
+ * TUTORIAL — datos de las lecciones y su evaluación. Sin DOM: se puede probar en Node.
+ * Los textos viven en i18n (tut.<id>.title / .text / .ok / .wrong / .hint).
+ *
+ * Cada lección arma un tablero con `setup` (jugadas alternadas, empieza el negro = el alumno) y espera UNA jugada del alumno.
+ *   type: 'any'     cualquier jugada válida sirve
+ *         'cells'   sirve una de `cells` (si no, `demo` muestra qué haría el rival)
+ *         'try'     hay que jugar en `cell` y comprobar que pasa lo que dice la lección (sin captura / sin ganar)
+ *         'win'     la jugada tiene que ganar la partida
+ *         'capture' la jugada tiene que capturar `pairs` pares
+ *         'safe'    después de la jugada, el rival no puede capturar nada
+ *         'info'    sin jugada: solo se lee (y se mira el panel de arriba)
+ *   sol / bad: una jugada correcta y una incorrecta (las usan los tests)
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./core/pente.js'));
+  else root.TutorialData = factory(root.PenteCore);
+})(typeof self !== 'undefined' ? self : this, function (P) {
+  'use strict';
+
+  var CAP2 = [[4, 6], [5, 6], [1, 1], [6, 6]];            // negro (4,6) | blanco (5,6) (6,6) | y el negro puede cerrar en (7,6)
+
+  var steps = [
+    { id: 'welcome', type: 'any', setup: [], sol: [6, 6], bad: null },
+    { id: 'five', type: 'win', setup: [[3, 6], [3, 3], [4, 6], [9, 3], [5, 6], [3, 9], [6, 6], [9, 9]], hint: [[2, 6], [7, 6]], sol: [7, 6], bad: [6, 7] },
+    { id: 'capture', type: 'capture', pairs: 1, setup: CAP2, hint: [[7, 6]], sol: [7, 6], bad: [8, 8] },
+    { id: 'pairsOnly', type: 'try', cell: [8, 6], showHint: true, hint: [[8, 6]], setup: [[4, 6], [5, 6], [1, 1], [6, 6], [1, 3], [7, 6]], sol: [8, 6], bad: [10, 10] },
+    { id: 'between', type: 'try', cell: [6, 6], showHint: true, hint: [[6, 6]], setup: [[5, 6], [4, 6], [1, 1], [7, 6]], sol: [6, 6], bad: [10, 10] },
+    { id: 'defend', type: 'safe', setup: [[5, 6], [4, 6], [6, 6], [1, 1]], hint: [[7, 6]], sol: [7, 6], bad: [10, 10] },
+    { id: 'double', type: 'capture', pairs: 2, setup: [[9, 6], [7, 6], [6, 9], [8, 6], [1, 1], [6, 7], [1, 3], [6, 8]], hint: [[6, 6]], sol: [6, 6], bad: [10, 10] },
+    { id: 'capWin', type: 'win', captures: { 1: 4, 2: 0 }, setup: CAP2, hint: [[7, 6]], sol: [7, 6], bad: [8, 8] },
+    { id: 'open3', type: 'cells', cells: [[4, 6], [8, 6]], setup: [[1, 1], [5, 6], [1, 3], [6, 6], [1, 5], [7, 6]], hint: [[4, 6], [8, 6]],
+      demoCands: [{ at: [4, 6], marks: [[3, 6], [8, 6]] }, { at: [8, 6], marks: [[4, 6], [9, 6]] }], sol: [4, 6], bad: [10, 10] },
+    { id: 'attack', type: 'cells', cells: [[4, 6], [7, 6]], setup: [[5, 6], [1, 1], [6, 6], [1, 3]], hint: [[4, 6], [7, 6]], replies: { '7,6': [8, 6], '4,6': [3, 6] }, sol: [7, 6], bad: [10, 10] },
+    { id: 'tCenter', type: 'cells', tournament: true, cells: [[6, 6]], setup: [], hint: [[6, 6]], replies: { '6,6': [3, 3] }, sol: [6, 6], bad: null, badErr: [2, 2] },
+    { id: 'tSecond', type: 'any', tournament: true, setup: [[6, 6], [3, 3]], sol: [3, 6], bad: null, badErr: [6, 7] },
+    { id: 'exact', type: 'try', exactFive: true, noWin: true, cell: [5, 6], showHint: true, hint: [[5, 6]], setup: [[2, 6], [1, 1], [3, 6], [1, 3], [4, 6], [1, 5], [6, 6], [1, 8], [7, 6], [1, 10]], sol: [5, 6], bad: [10, 10] },
+    { id: 'panel', type: 'info', clock: true, captures: { 1: 2, 2: 1 }, setup: CAP2 },
+    { id: 'final', type: 'info', last: true, setup: [[6, 6], [7, 6], [5, 7], [6, 7]] }
+  ];
+
+  function build(step) {
+    var g = P.createGame({ size: 13, tournamentRule: !!step.tournament, exactFive: !!step.exactFive }), p = 1;
+    step.setup.forEach(function (m) { var r = P.playMove(g, m[0], m[1], p); if (!r.ok) throw new Error('setup inválido en ' + step.id + ': ' + r.error); g = r.state; p = P.opponent(p); });
+    if (step.captures) g = Object.assign({}, g, { captures: { 1: step.captures[1], 2: step.captures[2] } });
+    return g;
+  }
+
+  function opponentCaptures(s) {            // ¿existe alguna jugada del que sigue que capture algo?
+    var moves = P.legalMoves(s), me = s.current;
+    for (var i = 0; i < moves.length; i++) {
+      var r = P.playMove(s, moves[i].x, moves[i].y, me);
+      if (r.ok && r.captured.length) return { x: moves[i].x, y: moves[i].y };
+    }
+    return null;
+  }
+
+  function isCell(list, x, y) { return list.some(function (c) { return c[0] === x && c[1] === y; }); }
+
+  /* Evalúa la jugada (x,y) del alumno. `r` = P.playMove(before, x, y) ya calculado y ok.
+   * Devuelve { ok, key: 'ok'|'wrong'|'other', demo: {x,y,marks:[[x,y]...]} | null } */
+  function evaluate(step, before, x, y, r) {
+    var out = { ok: false, key: 'wrong', demo: null }, s = r.state;
+    switch (step.type) {
+      case 'any': out.ok = true; break;
+      case 'cells':
+        if (isCell(step.cells, x, y)) out.ok = true;
+        else if (step.demoCands) {
+          for (var i = 0; i < step.demoCands.length; i++) {
+            var c = step.demoCands[i];
+            if (s.board[c.at[1] * s.size + c.at[0]] === 0 && c.marks.every(function (m) { return s.board[m[1] * s.size + m[0]] === 0; })) { out.demo = { x: c.at[0], y: c.at[1], marks: c.marks }; break; }
+          }
+        }
+        break;
+      case 'try':
+        if (x === step.cell[0] && y === step.cell[1] && !r.captured.length && !(step.noWin && s.status === 'won')) out.ok = true;
+        else out.key = 'other';
+        break;
+      case 'win': out.ok = s.status === 'won' && s.winner === 1; break;
+      case 'capture': out.ok = r.captured.length / 2 >= step.pairs; break;
+      case 'safe':
+        if (s.status !== 'playing') { out.ok = true; break; }
+        var hit = opponentCaptures(s);
+        if (!hit) out.ok = true;
+        else {
+          var cr = P.playMove(s, hit.x, hit.y, s.current);
+          out.demo = { x: hit.x, y: hit.y, marks: cr.captured.map(function (c) { return [c.x, c.y]; }) };
+        }
+        break;
+      default: break;
+    }
+    if (out.ok) out.key = 'ok';
+    return out;
+  }
+
+  // Respuesta automática del rival cuando la lección la tiene prevista
+  function reply(step, x, y) { return step.replies && step.replies[x + ',' + y] ? step.replies[x + ',' + y] : null; }
+
+  return { steps: steps, build: build, evaluate: evaluate, reply: reply };
 });
 </script>
 <script>
@@ -1299,6 +1448,196 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
 })(typeof self !== 'undefined' ? self : this);
 </script>
 <script>
+/* Textos del tutorial interactivo — español. Las claves tut.<id>.* corresponden a las lecciones de src/tutorial-data.js */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.es, {
+    'menu.tutorial': 'Tutorial interactivo',
+    'a11y.tutorial': 'Tutorial',
+    'confirm.leaveForTut': '¿Dejar la partida en curso para hacer el tutorial?',
+    'tut.you': 'Vos',
+    'tut.rival': 'Rival',
+    'tut.step': 'Lección {n} de {total}',
+    'tut.exit': 'Salir',
+    'tut.hint': '💡 Pista',
+    'tut.prev': 'Atrás',
+    'tut.next': 'Siguiente',
+    'tut.skip': 'Saltar',
+    'tut.play': 'Jugar contra la máquina',
+    'tut.hintGeneric': 'Fijate en los puntos marcados.',
+    'tut.generic.other': 'Probá en el punto marcado.',
+    'tut.generic.wrong': 'Esa no. Probá de nuevo.',
+
+    'tut.welcome.title': 'Lo primero: el tablero',
+    'tut.welcome.text': 'Pente se juega sobre las INTERSECCIONES (donde se cruzan las líneas), no en los cuadraditos. Tocá una intersección y poné tu primera ficha.',
+    'tut.welcome.ok': '¡Eso es! Las fichas no se mueven: una vez puestas, quedan ahí (salvo que te las capturen). Se turnan de a una.',
+
+    'tut.five.title': 'Objetivo 1: cinco en línea',
+    'tut.five.text': 'Ganás si juntás cinco fichas seguidas: horizontal, vertical o diagonal. Ya tenés cuatro en fila. Poné la quinta.',
+    'tut.five.ok': '¡Cinco en línea! Así se gana. Mirá cómo se iluminan.',
+    'tut.five.wrong': 'Esa no completa la fila. Tu fila de cuatro tiene un punto libre en cada punta.',
+
+    'tut.capture.title': 'Objetivo 2: capturar',
+    'tut.capture.text': 'Si encerrás EXACTAMENTE dos fichas rivales entre dos tuyas, las capturás y desaparecen. Hay un par rival con una ficha tuya de un lado: poné la otra del otro lado.',
+    'tut.capture.ok': '¡Par capturado! Salió del tablero y sumaste un punto arriba: con 5 pares ganás.',
+    'tut.capture.wrong': 'Esa no encierra al par. Tiene que quedar: tuya, rival, rival, tuya.',
+
+    'tut.pairsOnly.title': 'Solo se capturan PARES',
+    'tut.pairsOnly.text': 'Con tres rivales juntas no pasa nada: solo se capturan pares exactos. Poné tu ficha en el punto marcado y mirá.',
+    'tut.pairsOnly.ok': 'Nada. Tres juntas no se pueden capturar; un par (dos) sí.',
+    'tut.pairsOnly.other': 'Probá en el punto marcado para ver qué pasa.',
+
+    'tut.between.title': 'Entrar en el sándwich es seguro',
+    'tut.between.text': 'Si ponés tu ficha formando un par justo entre dos rivales, NO te capturan: la captura la hace solo quien juega. Poné tu ficha en el punto marcado.',
+    'tut.between.ok': 'Tu par quedó entre dos rivales y sigue ahí. Solo se captura cuando el rival cierra el sándwich con su jugada.',
+    'tut.between.other': 'Probá en el punto marcado.',
+
+    'tut.defend.title': 'Defenderte de una captura',
+    'tut.defend.text': '¡Alerta! Tu par tiene una ficha rival de un lado: si el rival juega del otro, te lo captura. Jugá vos de manera que no pueda.',
+    'tut.defend.ok': 'Bien: tu par pasó a ser un trío, y los tríos no se capturan.',
+    'tut.defend.wrong': 'Mirá lo que hizo el rival: te comió el par. Probá de nuevo.',
+    'tut.defend.hint': 'El rival necesita ese punto libre. Ocupalo vos.',
+
+    'tut.double.title': 'Captura doble',
+    'tut.double.text': 'A veces una sola ficha captura dos pares a la vez. Acá hay dos pares rivales apuntando al mismo punto. Encontralo.',
+    'tut.double.ok': '¡Doble captura! Dos pares de un solo golpe: 2 de los 5 que necesitás.',
+    'tut.double.wrong': 'Con esa no. Buscá el punto donde los dos pares quedan encerrados.',
+    'tut.double.hint': 'Buscá el punto donde se cruzan las dos filas rivales.',
+
+    'tut.capWin.title': 'Ganar por capturas',
+    'tut.capWin.text': 'Otra forma de ganar: capturar 5 pares. Ya tenés 4 (mirá los puntitos de arriba). Conseguí el quinto.',
+    'tut.capWin.ok': '¡Cinco pares! Ganaste por capturas, sin necesidad de ninguna línea.',
+    'tut.capWin.wrong': 'Ese no captura. Buscá el par rival con una ficha tuya de un lado.',
+
+    'tut.open3.title': 'Peligro: tres abiertos',
+    'tut.open3.text': 'El rival tiene tres seguidas con las dos puntas libres. Si lo dejás, arma cuatro con los dos lados libres y ya no podés frenarlo: la cuarta ficha es pérdida inminente. Tapá una punta ahora.',
+    'tut.open3.ok': '¡Bien! Con una punta tapada, el rival ya no puede armar un cuatro libre.',
+    'tut.open3.wrong': 'Mirá: el rival hizo cuatro con los dos lados libres. Es imposible frenarlo; hay que cortar antes. Regla de oro: no dejes tres abiertos.',
+    'tut.open3.hint': 'Tapá cualquiera de las dos puntas de las tres fichas rivales.',
+
+    'tut.attack.title': 'Atacá con tres abiertos',
+    'tut.attack.text': 'Lo mismo, pero a tu favor: si armás tres seguidas con las puntas libres, el rival tiene que bloquear. Sumá una ficha a tu par, en línea.',
+    'tut.attack.ok': '¡Tres abiertos! El rival tuvo que bloquear. Así se mantiene la presión.',
+    'tut.attack.wrong': 'Con esa no armás tres en línea. Sumá una ficha pegada a tu par.',
+
+    'tut.tCenter.title': 'Regla de torneo (1/2)',
+    'tut.tCenter.text': 'En las reglas de torneo la primera ficha del jugador 1 va SIEMPRE al centro. Probá otro lugar y mirá el aviso; después poné la del centro.',
+    'tut.tCenter.ok': 'Listo: centro. Así arranca toda partida de torneo.',
+    'tut.tCenter.wrong': 'La primera ficha tiene que ir al centro.',
+
+    'tut.tSecond.title': 'Regla de torneo (2/2)',
+    'tut.tSecond.text': 'Tu segunda ficha tiene que ir a 3 o más casillas del centro: la zona sombreada está prohibida. Probá adentro y después afuera.',
+    'tut.tSecond.ok': 'Perfecto. Esta regla le saca ventaja a quien juega primero.',
+
+    'tut.exact.title': 'Seis seguidas no ganan',
+    'tut.exact.text': 'Con la opción "seis o más no cuenta", se gana solo con EXACTAMENTE cinco. Poné la ficha marcada: une todo en una fila de seis.',
+    'tut.exact.ok': 'Seis seguidas y no ganaste. Hay que cerrar justo cinco. (Esta opción se elige al empezar la partida.)',
+    'tut.exact.other': 'Poné la ficha marcada para verlo.',
+
+    'tut.panel.title': 'El panel de arriba',
+    'tut.panel.text': 'Los 5 puntitos de cada jugador son los pares capturados: con 5 ganás. Reloj: el número grande es el tiempo de ESTA jugada (1 min) y el chico, lo que le queda en total (10 min). Si cualquiera llega a 0, pierde. Se puede apagar al empezar la partida.',
+
+    'tut.final.title': '¡Listo!',
+    'tut.final.text': 'Ya sabés lo esencial: cinco en línea, capturar pares, defenderte y no dejar tres abiertos. Ahora, a practicar: probá contra la máquina en nivel fácil.'
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
+/* Interactive tutorial texts — English. Keys tut.<id>.* match the lessons in src/tutorial-data.js */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.en, {
+    'menu.tutorial': 'Interactive tutorial',
+    'a11y.tutorial': 'Tutorial',
+    'confirm.leaveForTut': 'Leave the current game to do the tutorial?',
+    'tut.you': 'You',
+    'tut.rival': 'Rival',
+    'tut.step': 'Lesson {n} of {total}',
+    'tut.exit': 'Exit',
+    'tut.hint': '💡 Hint',
+    'tut.prev': 'Back',
+    'tut.next': 'Next',
+    'tut.skip': 'Skip',
+    'tut.play': 'Play against the machine',
+    'tut.hintGeneric': 'Look at the marked spots.',
+    'tut.generic.other': 'Try the marked spot.',
+    'tut.generic.wrong': 'Not that one. Try again.',
+
+    'tut.welcome.title': 'First: the board',
+    'tut.welcome.text': 'Pente is played on the INTERSECTIONS (where the lines cross), not inside the squares. Tap an intersection and place your first stone.',
+    'tut.welcome.ok': 'That\'s it! Stones never move: once placed they stay (unless they get captured). You take turns, one stone at a time.',
+
+    'tut.five.title': 'Goal 1: five in a row',
+    'tut.five.text': 'You win by lining up five stones: horizontally, vertically or diagonally. You already have four. Place the fifth.',
+    'tut.five.ok': 'Five in a row! That\'s how you win. See how they light up.',
+    'tut.five.wrong': 'That doesn\'t complete the row. Your four has a free spot at each end.',
+
+    'tut.capture.title': 'Goal 2: capturing',
+    'tut.capture.text': 'If you trap EXACTLY two rival stones between two of yours, you capture them and they disappear. Here is a rival pair with one of your stones on one side: place the other on the opposite side.',
+    'tut.capture.ok': 'Pair captured! It left the board and you got a point above: 5 pairs wins the game.',
+    'tut.capture.wrong': 'That doesn\'t trap the pair. It must end up: yours, rival, rival, yours.',
+
+    'tut.pairsOnly.title': 'Only PAIRS get captured',
+    'tut.pairsOnly.text': 'With three rival stones in a row nothing happens: only exact pairs are captured. Place your stone on the marked spot and watch.',
+    'tut.pairsOnly.ok': 'Nothing. Three in a row can\'t be captured; a pair (two) can.',
+    'tut.pairsOnly.other': 'Try the marked spot to see what happens.',
+
+    'tut.between.title': 'Walking into the sandwich is safe',
+    'tut.between.text': 'If you place your stone so it forms a pair right between two rivals, you are NOT captured: only the player who moves captures. Place your stone on the marked spot.',
+    'tut.between.ok': 'Your pair sits between two rivals and is still there. A capture only happens when the rival closes the sandwich with their own move.',
+    'tut.between.other': 'Try the marked spot.',
+
+    'tut.defend.title': 'Defending against a capture',
+    'tut.defend.text': 'Careful! Your pair has a rival stone on one side: if the rival plays on the other, they capture it. Move so that they can\'t.',
+    'tut.defend.ok': 'Good: your pair became a three, and threes can\'t be captured.',
+    'tut.defend.wrong': 'Look what the rival did: they ate your pair. Try again.',
+    'tut.defend.hint': 'The rival needs that spot to be free. Take it yourself.',
+
+    'tut.double.title': 'Double capture',
+    'tut.double.text': 'Sometimes a single stone captures two pairs at once. Here two rival pairs point at the same spot. Find it.',
+    'tut.double.ok': 'Double capture! Two pairs in one blow: 2 of the 5 you need.',
+    'tut.double.wrong': 'Not that one. Look for the spot that traps both pairs.',
+    'tut.double.hint': 'Find the spot where the two rival rows cross.',
+
+    'tut.capWin.title': 'Winning by captures',
+    'tut.capWin.text': 'Another way to win: capture 5 pairs. You already have 4 (see the dots above). Get the fifth.',
+    'tut.capWin.ok': 'Five pairs! You won by captures, no line needed.',
+    'tut.capWin.wrong': 'That doesn\'t capture. Look for the rival pair with one of your stones on one side.',
+
+    'tut.open3.title': 'Danger: open three',
+    'tut.open3.text': 'The rival has three in a row with both ends free. If you leave it, they make a four with both sides free and you can\'t stop it: the fourth stone is a lost game. Block one end now.',
+    'tut.open3.ok': 'Good! With one end blocked, the rival can no longer make a free four.',
+    'tut.open3.wrong': 'Look: the rival made a four with both sides free. It can\'t be stopped; you must cut it earlier. Golden rule: don\'t allow open threes.',
+    'tut.open3.hint': 'Block either end of the three rival stones.',
+
+    'tut.attack.title': 'Attack with an open three',
+    'tut.attack.text': 'The same, but in your favor: if you make three in a row with free ends, the rival has to block. Add a stone to your pair, in line.',
+    'tut.attack.ok': 'Open three! The rival had to block. That\'s how you keep the pressure.',
+    'tut.attack.wrong': 'That doesn\'t make three in a row. Add a stone right next to your pair.',
+
+    'tut.tCenter.title': 'Tournament rule (1/2)',
+    'tut.tCenter.text': 'Under tournament rules, player 1\'s first stone ALWAYS goes in the center. Try another spot and read the warning; then play the center.',
+    'tut.tCenter.ok': 'Done: center. That\'s how every tournament game starts.',
+    'tut.tCenter.wrong': 'The first stone must go in the center.',
+
+    'tut.tSecond.title': 'Tournament rule (2/2)',
+    'tut.tSecond.text': 'Your second stone must be 3 or more squares from the center: the shaded zone is forbidden. Try inside, then outside.',
+    'tut.tSecond.ok': 'Perfect. This rule takes away the advantage of moving first.',
+
+    'tut.exact.title': 'Six in a row doesn\'t win',
+    'tut.exact.text': 'With the "six or more doesn\'t count" option you only win with EXACTLY five. Place the marked stone: it joins everything into a row of six.',
+    'tut.exact.ok': 'Six in a row and no win. You have to finish with exactly five. (This option is chosen when the game starts.)',
+    'tut.exact.other': 'Place the marked stone to see it.',
+
+    'tut.panel.title': 'The top panel',
+    'tut.panel.text': 'The 5 dots of each player are captured pairs: with 5 you win. Clock: the big number is the time for THIS move (1 min) and the small one is what they have left in total (10 min). If either hits 0, that player loses. It can be turned off when starting a game.',
+
+    'tut.final.title': 'All set!',
+    'tut.final.text': 'You know the essentials: five in a row, capturing pairs, defending and not allowing open threes. Now practice: try the machine on easy level.'
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
 /* Temas del tablero. Cada tema es solo DATOS: para sumar uno nuevo, agregar un objeto a "list"
  * (y su nombre en i18n como 'theme.<id>'). El dibujo y el menú lo toman solos. */
 (function (root) {
@@ -1750,10 +2089,12 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
   };
 
   // ¿terminó la partida? (en online puede terminar por abandono, sin que el tablero lo muestre)
+  var tut = { active: false, i: 0, solved: false, awaiting: false, marks: [], token: 0, fb: '', fbRaw: '', fbKind: '', timers: [] };   // tutorial interactivo (ver sección al final)
   var localOver = null;   // fin por tiempo en partidas locales / contra la máquina: { winner, reason:'timeout' }
   function isOver() { return !state || state.status !== 'playing' || !!localOver || (online.active && !!online.over); }
-  function canPlayNow() { return !!state && !isOver() && (!online.active || state.current === online.me) && (!ai.active || state.current === ai.human); }
+  function canPlayNow() { return !!state && !isOver() && (!tut.active || tut.awaiting) && (!online.active || state.current === online.me) && (!ai.active || state.current === ai.human); }
   function turnText() {
+    if (tut.active) return '';
     if (ai.active && state.current === ai.bot) return t('ai.thinking', { name: names[ai.bot] });
     if (!online.active) return t('hud.turn', { name: names[state.current] });
     if (online.conn !== 'open') return t('online.reconnecting');
@@ -1807,6 +2148,7 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
   }
   function clockTick() {
     if (!clk || !state) return;
+    if (tut.active) { renderClocks(); return; }           // en el tutorial el reloj es solo de muestra
     var paused = !online.active && document.body.classList.contains('in-screen') && !isOver();
     if (paused && !clkPausedAt) clkPausedAt = performance.now();
     else if (!paused && clkPausedAt) { var d = performance.now() - clkPausedAt; clkPausedAt = 0; clk.since += d; clk.turnStart += d; }
@@ -1827,7 +2169,7 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
   /* ---------- Partida ---------- */
   function aiStop() { ai.active = false; ai.token++; clearTimeout(ai.timer); ai.thinking = false; }
   function startGame() {
-    aiStop(); videoDiscard(); endSeen = false;
+    tutStop(); aiStop(); videoDiscard(); endSeen = false;
     if (online.net) leaveOnline(false);
     names[1] = ($('name1').value || '').trim() || t('player.1');
     names[2] = ($('name2').value || '').trim() || t('player.2');
@@ -1852,6 +2194,7 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
   }
 
   function tryMove(x, y, fromAI) {
+    if (tut.active) { tutHandleMove(x, y); return; }
     if (!state || isOver()) return;
     if (ai.active && !fromAI && state.current !== ai.human) return;       // no se juega por la máquina
     settle = null;
@@ -1882,7 +2225,7 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
 
   /* ---------- Rival offline ---------- */
   function startAI(level, side) {
-    aiStop(); videoDiscard(); endSeen = false;
+    tutStop(); aiStop(); videoDiscard(); endSeen = false;
     if (online.net) leaveOnline(false);
     var human = side === 'second' ? 2 : side === 'random' ? (Math.random() < 0.5 ? 1 : 2) : 1;
     ai.active = true; ai.level = level; ai.human = human; ai.bot = human === 1 ? 2 : 1;
@@ -1955,6 +2298,7 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
     if (!state || isOver() || drag) return;
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     if (ai.active && state.current !== ai.human) return;
+    if (tut.active && !tut.awaiting) return;
     e.preventDefault();
     var p = toCanvas(e), c = snap(p.x, p.y, false); if (!c) return;
     kbd = c;
@@ -2211,7 +2555,7 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
     if (!state) { $('btnConfirm').hidden = true; return; }
 
     // Regla de torneo: en la 2ª ficha del J1 se sombrea el cuadrado de 5x5 del centro (prohibido)
-    if (cfg.zone && !isOver() && state.options.tournamentRule && state.moves.length === 2) {
+    if ((cfg.zone || tut.active) && !isOver() && state.options.tournamentRule && state.moves.length === 2) {
       var c0 = P.center(state), half = metrics.cell * 0.5;
       var x0 = px(c0 - 2) - half, y0 = px(c0 - 2) - half, side = metrics.cell * 5;
       ctx.fillStyle = th.zone.fill; ctx.fillRect(x0, y0, side, side);
@@ -2225,6 +2569,7 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
       var v = P.get(state, x, y);
       if (v) drawStone(x, y, v, 1, !!winSet[x + ',' + y]);
     }
+    drawMarks();
     // última jugada
     if (state.lastMove && cfg.lastMove) {
       var lm = state.lastMove, lv = P.get(state, lm.x, lm.y);
@@ -2254,7 +2599,7 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
     if (replayBusy) return;
     updateHud();
     var now = performance.now();
-    if (!animReq && ((drag && drag.lifted && (cfg.anim || now - drag.liftStart < 150)) || settle || fx.length)) animReq = requestAnimationFrame(function () { animReq = 0; render(); });
+    if (!animReq && ((drag && drag.lifted && (cfg.anim || now - drag.liftStart < 150)) || settle || fx.length || (tut.active && tut.marks.length && cfg.anim))) animReq = requestAnimationFrame(function () { animReq = 0; render(); });
   }
 
 
@@ -2388,6 +2733,7 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
     $('btnConfirm').hidden = !(pending && cfg.confirm === 'button' && canPlayNow() && !(drag && drag.lifted));
   }
   function setStatus(msg, isToast) {
+    if (tut.active) { tutToast(msg, isToast); return; }          // en el tutorial los avisos van a la tarjeta
     var el = $('status'); clearTimeout(toastTimer);
     if (!msg) { delete el.dataset.toast; if (state && !isOver()) el.textContent = turnText(); else if (!state) el.textContent = ''; return; }
     el.dataset.toast = '1'; el.innerHTML = '<span class="toast"></span>'; el.firstChild.textContent = msg;
@@ -2399,7 +2745,7 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
   function closeAll() { stopRooms(); document.querySelectorAll('.overlay').forEach(function (o) { o.classList.remove('open'); }); document.body.classList.remove('in-screen'); }
   function open(id) {
     closeAll();
-    if (id === 'menuOverlay') $('btnResume').hidden = !(state && !isOver());
+    if (id === 'menuOverlay') { $('btnResume').hidden = !(state && !isOver()); $('btnTutorial').classList.toggle('primary', !tutDone()); }
     $(id).classList.add('open');
     document.body.classList.toggle('in-screen', $(id).classList.contains('screen'));
     var sc = $(id); if (sc.scrollTo) sc.scrollTo(0, 0);
@@ -2488,7 +2834,7 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
   }
 
   function startOnline(intent) {
-    aiStop(); localOver = null; videoDiscard(); endSeen = false;
+    tutStop(); aiStop(); localOver = null; videoDiscard(); endSeen = false;
     var url = serverUrl();
     if (!url) { onlineMsg(t('online.noServer')); return; }
     intent.name = myName();
@@ -2791,7 +3137,7 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
   function setLanguage(code) {
     if (!window.I18n.STRINGS[code]) return;
     window.I18n.setLang(code); try { localStorage.setItem(LANG_KEY, code); } catch (e) {}
-    applyI18n(); buildThemePicker(); buildLangList(); syncAiUi(); syncLocalMode();
+    applyI18n(); buildThemePicker(); buildLangList(); syncAiUi(); syncLocalMode(); tutLang();
     updateOnlineButtons(); updateRematchUi(); setStatus(''); renderMoves(); render();
     var r = $('roomsList'); if (r && rooms.open) requestRooms();
   }
@@ -3095,6 +3441,127 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
   $('btnConfirm').addEventListener('click', function () { if (pending && !isOver()) tryMove(pending.x, pending.y); });
   // Sonido: los navegadores solo dejan activarlo después de un toque o clic del usuario
   ['pointerdown', 'touchend', 'click', 'keydown'].forEach(function (ev) { document.addEventListener(ev, function () { if (window.PenteSound) window.PenteSound.unlock(); }, true); });
+  /* ---------- Tutorial interactivo ----------
+   * Corre sobre el tablero real, pero con su propia partida de mentira: cada lección arma una posición (TutorialData.build),
+   * espera UNA jugada del alumno y la evalúa (TutorialData.evaluate). Nada de esto toca el reloj, la máquina ni el online. */
+  var TD = window.TutorialData;
+  function tutDone() { try { return localStorage.getItem('pente.tutDone') === '1'; } catch (e) { return false; } }
+  function tutClearTimers() { tut.timers.forEach(clearTimeout); tut.timers = []; }
+  function tutLater(fn, ms) { var tk = tut.token; tut.timers.push(setTimeout(function () { if (tk === tut.token && tut.active) fn(); }, ms)); }
+  function tutMarks(cells, kind) { return cells.map(function (c) { return { x: c[0], y: c[1], kind: kind }; }); }
+  function tutHas(k) { return t(k) !== k; }
+  function tutSay(key, kind) { tut.fb = key; tut.fbRaw = ''; tut.fbKind = kind; }
+  var ERR_CODES = ['OCCUPIED', 'OUT_OF_BOUNDS', 'GAME_OVER', 'NOT_YOUR_TURN', 'MUST_PLAY_CENTER', 'TOO_CLOSE_TO_CENTER', 'INVALID_COORDS'];
+  function tutToast(msg, isToast) {                          // avisos de la interfaz (jugada no permitida, cómo confirmar…) dentro de la tarjeta
+    if (!msg || !isToast || /^[A-Z]\d{1,2}$/.test(msg)) return;
+    tut.fb = ''; tut.fbRaw = msg; tut.fbKind = ERR_CODES.some(function (c) { return t('err.' + c) === msg; }) ? 'bad' : 'hint';
+    tutRenderCard();
+  }
+  function tutStart() {
+    if (state && !isOver() && !confirm(t('confirm.leaveForTut'))) return;
+    aiStop(); if (online.net) leaveOnline(false);
+    videoDiscard(); endSeen = false; localOver = null; clk = null;
+    tut.active = true; document.body.classList.add('in-tut'); closeAll();
+    $('tutCard').hidden = false;
+    tutLoad(0);
+  }
+  function tutStop() {
+    if (!tut.active) return;
+    tut.active = false; tut.token++; tutClearTimers(); tut.marks = []; tut.awaiting = false;
+    document.body.classList.remove('in-tut'); $('tutCard').hidden = true;
+    clk = null; localOver = null; state = null; names[1] = names[2] = '';
+    hover = pending = drag = settle = null; fx.length = 0;
+    $('status').textContent = ''; renderClocks(); render();
+  }
+  function tutLoad(i, keepFb) {
+    tutClearTimers(); tut.token++;
+    i = Math.max(0, Math.min(TD.steps.length - 1, i)); tut.i = i;
+    var step = TD.steps[i];
+    state = TD.build(step); endSeen = false; localOver = null;
+    names[1] = t('tut.you'); names[2] = t('tut.rival');
+    hover = pending = drag = settle = null; fx.length = 0;
+    tut.solved = step.type === 'info'; tut.awaiting = !tut.solved;
+    tut.marks = step.showHint && step.hint ? tutMarks(step.hint, 'hl') : [];
+    if (step.clock) { var tm = settings.timer; settings.timer = true; clockFresh(); settings.timer = tm; } else clk = null;   // reloj de muestra
+    if (!keepFb) tutSay('', '');
+    if (step.last) { try { localStorage.setItem('pente.tutDone', '1'); } catch (e) {} }
+    kbd = { x: centerIdx(), y: centerIdx() };
+    setStatus(''); tutRenderCard(); render();
+  }
+  function tutRenderCard() {
+    var step = TD.steps[tut.i], total = TD.steps.length, last = tut.i === total - 1, nx = $('tutNext'), fb = $('tutFb');
+    $('tutStep').textContent = t('tut.step', { n: tut.i + 1, total: total });
+    $('tutTitle').textContent = t('tut.' + step.id + '.title');
+    $('tutText').textContent = t('tut.' + step.id + '.text');
+    fb.textContent = tut.fbRaw || (tut.fb ? t(tut.fb) : ''); fb.className = 'tut-fb' + (tut.fbKind ? ' ' + tut.fbKind : '');
+    $('tutExit').textContent = '✕ ' + t('tut.exit');
+    $('tutPrev').textContent = t('tut.prev'); $('tutPrev').disabled = tut.i === 0;
+    $('tutHint').textContent = t('tut.hint'); $('tutHint').hidden = !(step.hint && !tut.solved && step.type !== 'info');
+    nx.textContent = last ? t('tut.play') : tut.solved ? t('tut.next') : t('tut.skip');
+    nx.classList.toggle('primary', tut.solved);
+  }
+  function tutLang() { if (!tut.active) return; names[1] = t('tut.you'); names[2] = t('tut.rival'); tutRenderCard(); }
+  function tutHandleMove(x, y) {
+    if (!tut.active || !tut.awaiting || !state) return;
+    var step = TD.steps[tut.i], before = state, mover = state.current, r = P.playMove(state, x, y, mover);
+    if (!r.ok) { tutSay('err.' + r.error, 'bad'); sfx('error'); pending = hover = null; tutRenderCard(); render(); return; }
+    var ev = TD.evaluate(step, before, x, y, r);
+    state = r.state; pending = hover = null; settle = null; tut.marks = []; tut.awaiting = false;
+    spawnFx(r.captured, mover === 1 ? 2 : 1);
+    moveFeedback(r.captured, state.status !== 'playing', state.winner);
+    if (ev.ok) {
+      tut.solved = true; tutSay('tut.' + step.id + '.ok', 'good');
+      var rp = TD.reply(step, x, y);
+      if (rp && state.status === 'playing') tutLater(function () {
+        var w = P.playMove(state, rp[0], rp[1], state.current);
+        if (w.ok) { state = w.state; spawnFx(w.captured, 1); moveFeedback(w.captured, false); render(); }
+      }, 650);
+    } else {
+      var key = 'tut.' + step.id + '.' + (ev.key === 'other' ? 'other' : 'wrong'), delay = 1900;
+      tutSay(tutHas(key) ? key : (ev.key === 'other' ? 'tut.generic.other' : 'tut.generic.wrong'), 'bad');
+      if (ev.demo) {                                          // el rival muestra qué pasaba por jugar ahí
+        delay = 3600;
+        tutLater(function () {
+          var w = P.playMove(state, ev.demo.x, ev.demo.y, state.current);
+          if (w.ok) { state = w.state; spawnFx(w.captured, 1); moveFeedback(w.captured, false); tut.marks = tutMarks(ev.demo.marks, 'danger'); render(); }
+        }, 800);
+      }
+      tutLater(function () { tutLoad(tut.i, true); }, delay);     // y la lección vuelve a empezar
+    }
+    tutRenderCard(); render();
+  }
+  // Marcas sobre el tablero: verde punteado con punto = "mirá acá"; rojo con cruz = peligro. Distintas en forma, no solo en color.
+  function drawMarks() {
+    if (!tut.active || !tut.marks.length) return;
+    var c = metrics.cell, pulse = cfg.anim ? 0.5 + 0.5 * Math.sin(performance.now() / 260) : 0.5;
+    tut.marks.forEach(function (m) {
+      var cx = px(m.x), cy = px(m.y), bad = m.kind === 'danger', col = bad ? '#e5604f' : '#35d07f';
+      ctx.save(); ctx.globalAlpha = 0.6 + 0.4 * pulse; ctx.lineWidth = Math.max(2.5, c * 0.1); ctx.strokeStyle = col; ctx.fillStyle = col;
+      if (!bad) ctx.setLineDash([c * 0.18, c * 0.12]);
+      ctx.beginPath(); ctx.arc(cx, cy, c * (0.5 + 0.07 * pulse), 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+      if (bad) { var q = c * 0.2; ctx.beginPath(); ctx.moveTo(cx - q, cy - q); ctx.lineTo(cx + q, cy + q); ctx.moveTo(cx + q, cy - q); ctx.lineTo(cx - q, cy + q); ctx.stroke(); }
+      else { ctx.beginPath(); ctx.arc(cx, cy, c * 0.09, 0, Math.PI * 2); ctx.fill(); }
+      ctx.restore();
+    });
+  }
+  $('btnTutorial').addEventListener('click', tutStart);
+  $('tutExit').addEventListener('click', function () { tutStop(); open('menuOverlay'); });
+  $('tutPrev').addEventListener('click', function () { if (tut.active) tutLoad(tut.i - 1); });
+  $('tutHint').addEventListener('click', function () {
+    if (!tut.active || !tut.awaiting) return;
+    var step = TD.steps[tut.i], k = 'tut.' + step.id + '.hint';
+    tut.marks = tutMarks(step.hint, 'hl'); tutSay(tutHas(k) ? k : 'tut.hintGeneric', 'hint');
+    tutRenderCard(); render();
+  });
+  $('tutNext').addEventListener('click', function () {
+    if (!tut.active) return;
+    if (tut.i >= TD.steps.length - 1) {                      // última lección: a practicar contra la máquina (nivel fácil)
+      tutStop(); localMode = 'ai'; aiPref.level = 'easy'; saveAiPref(); try { localStorage.setItem('pente.localMode', 'ai'); } catch (e) {}
+      syncAiUi(); syncLocalMode(); open('localOverlay'); return;
+    }
+    tutLoad(tut.i + 1);
+  });
+
   /* ---------- Configuración ---------- */
   var S = window.PenteSound;
   function confirmHintText() { return t('cfg.confirm.' + cfg.confirm + 'Hint'); }
@@ -3150,7 +3617,7 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
   canvas.addEventListener('focus', render); canvas.addEventListener('blur', render);
 
   applyI18n(); buildThemePicker(); syncSizePicker(); syncOpts(); syncVis(); resize(); open('menuOverlay'); initOnline(); updateSide();
-  window.__pente = { get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, startAI: startAI, get ai() { return ai; }, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; } };  // utilidad para pruebas manuales
+  window.__pente = { get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, startAI: startAI, get ai() { return ai; }, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; }, get tut() { return tut; } };  // utilidad para pruebas manuales
 })();
 </script>
 <script>
