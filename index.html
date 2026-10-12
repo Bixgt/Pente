@@ -93,6 +93,14 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .theme-opt .swatch i:nth-child(1) { left: 28%; }
 .theme-opt .swatch i:nth-child(2) { left: 52%; }
 .btn[hidden] { display: none; }
+
+/* Online */
+.player.offline { opacity: .55; }
+.hint { margin: 6px 0 0; color: var(--muted); font-size: 13px; line-height: 1.4; }
+.or { text-align: center; color: var(--muted); margin: 18px 0 4px; font-size: 13px; }
+.field input.code-input { text-align: center; letter-spacing: .35em; font-weight: 800; font-size: 20px; text-transform: uppercase; }
+.online-msg { min-height: 1.4em; margin: 12px 0 0; color: var(--accent); font-size: 14px; text-align: center; }
+.roomcode { text-align: center; font-size: 40px; font-weight: 800; letter-spacing: .3em; padding: 14px 0 14px .3em; margin: 6px 0 4px; background: var(--bg); border-radius: 12px; border: 2px dashed #343a46; user-select: all; }
 </style>
 </head>
 <body>
@@ -115,6 +123,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   <div class="actions">
     <button class="btn" id="btnMenu" data-i18n="hud.menu"></button>
     <button class="btn" id="btnRestart" data-i18n="hud.restart"></button>
+    <button class="btn" id="btnClaim" hidden data-i18n="online.claim"></button>
   </div>
 </div>
 
@@ -131,9 +140,43 @@ button { font: inherit; color: inherit; cursor: pointer; }
     <label class="check"><input type="checkbox" id="optConfirm"><span><span data-i18n="menu.confirmTap"></span><small data-i18n="menu.confirmTapHint"></small></span></label>
     <div class="btns">
       <button class="btn primary" id="btnResume" hidden data-i18n="menu.resume"></button>
-      <button class="btn primary" id="btnStart" data-i18n="menu.start"></button>
+      <button class="btn primary" id="btnOnline" data-i18n="menu.online"></button>
+      <button class="btn" id="btnStart" data-i18n="menu.start"></button>
       <button class="btn" id="btnRules" data-i18n="menu.rules"></button>
     </div>
+  </div>
+</div>
+
+<!-- Online: crear o unirse -->
+<div class="overlay" id="onlineOverlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h2 data-i18n="online.title"></h2>
+    <p class="sub" data-i18n="online.sub"></p>
+    <div class="field"><label class="lbl" for="onName" data-i18n="online.yourName"></label><input type="text" id="onName" maxlength="18" autocomplete="off"></div>
+    <div class="btns"><button class="btn primary" id="btnCreateRoom" data-i18n="online.create"></button></div>
+    <p class="hint" data-i18n="online.createHint"></p>
+    <div class="or" data-i18n="online.or"></div>
+    <div class="field"><label class="lbl" for="onCode" data-i18n="online.code"></label><input type="text" id="onCode" class="code-input" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false"></div>
+    <div class="btns">
+      <button class="btn primary" id="btnJoinRoom" data-i18n="online.join"></button>
+      <button class="btn" id="btnOnlineBack" data-i18n="menu.back"></button>
+    </div>
+    <p class="online-msg" id="onlineMsg" role="status" aria-live="polite"></p>
+  </div>
+</div>
+
+<!-- Online: esperando al rival -->
+<div class="overlay" id="waitOverlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h2 data-i18n="online.waitTitle"></h2>
+    <p class="sub" data-i18n="online.waitSub"></p>
+    <div class="roomcode" id="roomCode" aria-label="Código de sala"></div>
+    <div class="btns">
+      <button class="btn primary" id="btnCopyLink" data-i18n="online.copyLink"></button>
+      <button class="btn" id="btnShare" hidden data-i18n="online.share"></button>
+      <button class="btn" id="btnWaitCancel" data-i18n="online.cancel"></button>
+    </div>
+    <p class="online-msg" id="waitMsg" role="status" aria-live="polite"></p>
   </div>
 </div>
 
@@ -150,6 +193,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 <div class="overlay" id="endOverlay">
   <div class="modal" role="dialog" aria-modal="true">
     <p class="endtitle" id="endText"></p>
+    <p class="sub" id="endHint"></p>
     <div class="btns">
       <button class="btn primary" id="btnRematch" data-i18n="end.rematch"></button>
       <button class="btn" id="btnEndMenu" data-i18n="end.toMenu"></button>
@@ -389,7 +433,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
       'menu.exactFiveHint': 'Solo gana una línea de exactamente cinco. Si capturan una ficha y la línea de seis queda en cinco, cuenta.',
       'menu.confirmTap': 'Confirmar con segundo toque',
       'menu.confirmTapHint': 'Pensado para celular: el primer toque marca, el segundo coloca.',
-      'menu.start': 'Jugar',
+      'menu.start': 'Jugar en este dispositivo',
+      'menu.online': 'Jugar online',
+      'menu.back': 'Volver',
       'menu.rules': 'Cómo se juega',
       'menu.close': 'Cerrar',
       'hud.turn': 'Turno de {name}',
@@ -421,6 +467,51 @@ button { font: inherit; color: inherit; cursor: pointer; }
       'rules.5': 'Ganás también si capturás cinco pares.',
       'rules.6': 'Con la regla de torneo, el jugador 1 abre en el centro y su segunda ficha va a 3 o más casillas de distancia del centro.',
       'rules.7': 'Variante opcional: una línea de seis o más no cuenta; solo gana una de exactamente cinco.',
+      'hud.resign': 'Abandonar',
+      'online.title': 'Jugar online',
+      'online.sub': 'Creá una sala y mandale el enlace a tu rival, o entrá con el código que te pasaron.',
+      'online.yourName': 'Tu nombre',
+      'online.create': 'Crear sala',
+      'online.createHint': 'Se usan las reglas tildadas en el menú. En la primera partida jugás con las fichas del jugador 1.',
+      'online.or': 'o',
+      'online.code': 'Código de sala',
+      'online.join': 'Unirme',
+      'online.connecting': 'Conectando… si el servidor estaba dormido puede tardar hasta un minuto.',
+      'online.stillTrying': 'Todavía no conecta. Sigo reintentando…',
+      'online.noServer': 'El modo online todavía no está configurado en esta versión.',
+      'online.waitTitle': 'Sala creada',
+      'online.waitSub': 'Mandale este enlace a tu rival. La partida empieza apenas entre.',
+      'online.copyLink': 'Copiar enlace',
+      'online.copied': 'Enlace copiado',
+      'online.copyFail': 'No se pudo copiar. Copialo a mano.',
+      'online.share': 'Compartir',
+      'online.cancel': 'Cancelar',
+      'online.you': '(vos)',
+      'online.yourTurn': 'Tu turno',
+      'online.theirTurn': 'Turno de {name}',
+      'online.wait': 'Esperá tu turno.',
+      'online.rivalOffline': '{name} se desconectó. Esperando que vuelva…',
+      'online.reconnecting': 'Reconectando…',
+      'online.claim': 'Reclamar victoria',
+      'online.resignConfirm': '¿Abandonar la partida? Gana tu rival.',
+      'online.leaveConfirm': '¿Salir de la sala? Cuenta como abandono.',
+      'online.leave': 'Salir de la sala',
+      'online.rematchWait': 'Esperando que tu rival acepte…',
+      'online.rematchRival': '{name} quiere la revancha.',
+      'online.roomGone': 'La sala ya no existe: el servidor se reinició o pasó mucho tiempo. Creá una nueva.',
+      'toast.rematch': 'Nueva partida. Ahora sos el jugador {n}.',
+      'end.winResign': '{loser} abandonó. Ganó {name}.',
+      'end.winForfeit': '{loser} se desconectó. Ganó {name}.',
+      'err.ROOM_NOT_FOUND': 'No existe esa sala. Revisá el código.',
+      'err.ROOM_FULL': 'La sala ya tiene dos jugadores.',
+      'err.BAD_TOKEN': 'No se pudo recuperar tu lugar en la sala.',
+      'err.SERVER_BUSY': 'El servidor está lleno. Probá en un rato.',
+      'err.WAITING_FOR_RIVAL': 'Todavía no entró tu rival.',
+      'err.RATE_LIMIT': 'Vas muy rápido. Esperá un segundo.',
+      'err.CANNOT_CLAIM': 'Todavía no podés reclamar la victoria.',
+      'err.GAME_NOT_OVER': 'La partida todavía no terminó.',
+      'err.NOT_IN_ROOM': 'No estás en una sala.',
+      'err.BAD_REQUEST': 'Algo salió mal. Probá de nuevo.',
       'a11y.board': 'Tablero de Pente',
       'player.1': 'Jugador 1',
       'player.2': 'Jugador 2'
@@ -469,6 +560,86 @@ button { font: inherit; color: inherit; cursor: pointer; }
   root.Themes = { list: list, byId: byId, defaultId: 'clasico' };
 })(typeof self !== 'undefined' ? self : this);
 </script>
+<script src="config.js"></script>
+<script>
+/* Conexión online de Pente: WebSocket con reconexión automática. No conoce las reglas ni la pantalla.
+ *   var conn = PenteNet.connect(url, { onOpen, onMessage(msg), onState(estado) });
+ *   conn.send({...}) -> true si se envió | conn.isOpen() | conn.close()
+ * Estados: 'connecting' (primer intento) | 'open' | 'reconnecting' | 'closed'.
+ * Si el servidor estaba dormido (plan gratuito), los primeros intentos fallan: se reintenta solo con espera creciente. */
+(function (root) {
+  'use strict';
+
+  function connect(url, h) {
+    var ws = null, closed = false, attempt = 0, everOpen = false, retryTimer = null, hbTimer = null;
+
+    function setState(s) { if (h.onState) h.onState(s); }
+
+    function open() {
+      clearTimeout(retryTimer);
+      setState(everOpen || attempt > 0 ? 'reconnecting' : 'connecting');
+      var sock;
+      try { sock = new WebSocket(url); } catch (e) { return schedule(); }
+      ws = sock;
+      sock.onopen = function () {
+        if (ws !== sock) return;
+        attempt = 0; everOpen = true; setState('open'); startHeartbeat();
+        if (h.onOpen) h.onOpen();
+      };
+      sock.onmessage = function (e) {
+        if (ws !== sock) return;
+        var m; try { m = JSON.parse(e.data); } catch (x) { return; }
+        if (h.onMessage) h.onMessage(m);
+      };
+      sock.onclose = function () {
+        if (ws !== sock) return;
+        ws = null; stopHeartbeat();
+        if (closed) setState('closed'); else schedule();
+      };
+      sock.onerror = function () { /* el cierre dispara el reintento */ };
+    }
+
+    function schedule() {
+      if (closed) return;
+      setState('reconnecting');
+      attempt++;
+      var wait = Math.min(10000, 1000 * Math.pow(2, Math.min(attempt - 1, 4)));   // 1s, 2s, 4s, 8s, 10s...
+      clearTimeout(retryTimer);
+      retryTimer = setTimeout(open, wait);
+    }
+
+    // Latido: mantiene viva la conexión a través de proxies y evita que el servidor gratuito se duerma en plena partida.
+    function startHeartbeat() { stopHeartbeat(); hbTimer = setInterval(function () { send({ t: 'ping' }); }, 20000); }
+    function stopHeartbeat() { clearInterval(hbTimer); hbTimer = null; }
+
+    function isOpen() { return !!ws && ws.readyState === 1; }
+    function send(obj) { if (!isOpen()) return false; try { ws.send(JSON.stringify(obj)); return true; } catch (e) { return false; } }
+
+    // Al volver a la pestaña o recuperar internet, reintenta ya en vez de esperar el temporizador.
+    function kick() { if (!closed && !isOpen() && !(ws && ws.readyState === 0)) { attempt = 0; open(); } }
+    function onVisible() { if (!document.hidden) kick(); }
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('online', kick);
+
+    function close() {
+      closed = true; clearTimeout(retryTimer); stopHeartbeat();
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('online', kick);
+      var s = ws; ws = null;
+      if (s) { try { s.close(); } catch (e) {} }
+      setState('closed');
+    }
+
+    open();
+    return { send: send, isOpen: isOpen, close: close };
+  }
+
+  // URL http(s) equivalente a la del WebSocket, para "despertar" al servidor con /health.
+  function httpBase(wsUrl) { return String(wsUrl || '').replace(/^ws/i, 'http').replace(/\/+$/, ''); }
+
+  root.PenteNet = { connect: connect, httpBase: httpBase };
+})(typeof self !== 'undefined' ? self : this);
+</script>
 <script>
 /* UI de Pente — Fase 1: partida local de 2 jugadores. No contiene reglas: todo pasa por PenteCore. */
 (function () {
@@ -484,9 +655,27 @@ button { font: inherit; color: inherit; cursor: pointer; }
   var kbd = null;         // cursor de teclado
   var toastTimer = null;
   var metrics = { w: 0, cell: 0, off: 0 };
+  var online = {
+    active: false, net: null, url: '', conn: 'closed', code: '', token: '', me: 0, intent: null, rejoining: false,
+    over: null, connected: { 1: true, 2: true }, rematch: { 1: false, 2: false },
+    rivalLeftAt: 0, claimTimer: null, awaiting: false, awaitTimer: null
+  };
+
+  // ¿terminó la partida? (en online puede terminar por abandono, sin que el tablero lo muestre)
+  function isOver() { return !state || state.status !== 'playing' || (online.active && !!online.over); }
+  function canPlayNow() { return !!state && !isOver() && (!online.active || state.current === online.me); }
+  function turnText() {
+    if (!online.active) return t('hud.turn', { name: names[state.current] });
+    if (online.conn !== 'open') return t('online.reconnecting');
+    if (!names[2]) return '';                       // todavía no entró el rival
+    var rival = online.me === 1 ? 2 : 1;
+    if (!online.connected[rival]) return t('online.rivalOffline', { name: names[rival] });
+    return state.current === online.me ? t('online.yourTurn') : t('online.theirTurn', { name: names[state.current] });
+  }
 
   /* ---------- Partida ---------- */
   function startGame() {
+    if (online.net) leaveOnline(false);
     names[1] = ($('name1').value || '').trim() || t('player.1');
     names[2] = ($('name2').value || '').trim() || t('player.2');
     settings.tournamentRule = $('optTournament').checked;
@@ -498,16 +687,32 @@ button { font: inherit; color: inherit; cursor: pointer; }
     closeAll(); render(); setStatus('');
   }
 
+  function announceCaptures(mover, captured) {
+    if (captured.length) {
+      var n = captured.length / 2;
+      setStatus(n === 1 ? t('toast.captured', { name: names[mover] }) : t('toast.capturedMany', { name: names[mover], n: n }), true);
+    } else setStatus('');
+  }
+
   function tryMove(x, y) {
-    if (!state || state.status !== 'playing') return;
+    if (!state || isOver()) return;
+    if (online.active) {
+      // En online el servidor es el árbitro: acá solo se comprueba rápido y se envía; el tablero cambia cuando el servidor lo confirma.
+      if (state.current !== online.me) { setStatus(t('online.wait'), true); return; }
+      if (online.awaiting) return;
+      var v = P.validateMove(state, x, y, online.me);
+      if (v) { setStatus(t('err.' + v), true); render(); return; }
+      if (!online.net || !online.net.send({ t: 'move', x: x, y: y })) { setStatus(t('online.reconnecting'), true); return; }
+      online.awaiting = true; clearTimeout(online.awaitTimer);
+      online.awaitTimer = setTimeout(function () { online.awaiting = false; }, 4000);
+      pending = hover = null; render();
+      return;
+    }
     var r = P.playMove(state, x, y, state.current);
     if (!r.ok) { setStatus(t('err.' + r.error), true); render(); return; }
     var mover = state.current;
     state = r.state; pending = hover = null;
-    if (r.captured.length) {
-      var n = r.captured.length / 2;
-      setStatus(n === 1 ? t('toast.captured', { name: names[mover] }) : t('toast.capturedMany', { name: names[mover], n: n }), true);
-    } else setStatus('');
+    announceCaptures(mover, r.captured);
     render();
     if (state.status !== 'playing') setTimeout(showEnd, 450);
   }
@@ -522,7 +727,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
     return { x: x, y: y };
   }
   canvas.addEventListener('pointermove', function (e) {
-    if (e.pointerType === 'touch' || !state || state.status !== 'playing') return;
+    if (e.pointerType === 'touch' || !canPlayNow()) return;
     var c = cellFromEvent(e);
     if (!c || (hover && c.x === hover.x && c.y === hover.y)) { if (!c && hover) { hover = null; render(); } return; }
     hover = c; render();
@@ -531,6 +736,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
   canvas.addEventListener('pointerup', function (e) {
     var c = cellFromEvent(e); if (!c) return;
     kbd = c;
+    if (isOver()) return;
+    if (online.active && state.current !== online.me) { setStatus(t('online.wait'), true); return; }
     var useConfirm = settings.confirmTap && e.pointerType === 'touch';
     if (useConfirm) {
       if (pending && pending.x === c.x && pending.y === c.y) tryMove(c.x, c.y);
@@ -615,7 +822,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
     if (!state) return;
 
     // Regla de torneo: en la 2ª ficha del J1 se sombrea el cuadrado de 5x5 del centro (prohibido)
-    if (state.status === 'playing' && state.options.tournamentRule && state.moves.length === 2) {
+    if (!isOver() && state.options.tournamentRule && state.moves.length === 2) {
       var c0 = P.center(state), half = metrics.cell * 0.5;
       var x0 = px(c0 - 2) - half, y0 = px(c0 - 2) - half, side = metrics.cell * 5;
       ctx.fillStyle = th.zone.fill; ctx.fillRect(x0, y0, side, side);
@@ -638,7 +845,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
       ctx.beginPath(); ctx.arc(px(lm.x), px(lm.y), metrics.cell * 0.2, 0, Math.PI * 2); ctx.stroke();
     }
     // previsualización
-    if (hover && state.status === 'playing' && P.get(state, hover.x, hover.y) === P.EMPTY && !P.validateMove(state, hover.x, hover.y)) {
+    if (hover && canPlayNow() && P.get(state, hover.x, hover.y) === P.EMPTY && !P.validateMove(state, hover.x, hover.y)) {
       drawStone(hover.x, hover.y, state.current, pending ? 0.85 : 0.5, false);
       if (pending) {
         ctx.strokeStyle = th.pendingRing; ctx.lineWidth = Math.max(2, metrics.cell * 0.06); ctx.setLineDash([metrics.cell * .12, metrics.cell * .1]);
@@ -694,38 +901,202 @@ button { font: inherit; color: inherit; cursor: pointer; }
     if (!state) return;
     [1, 2].forEach(function (p) {
       var el = $('player' + p);
-      el.classList.toggle('active', state.status === 'playing' && state.current === p);
-      $('pname' + p).textContent = names[p];
+      el.classList.toggle('active', !isOver() && state.current === p);
+      el.classList.toggle('offline', online.active && !online.connected[p]);
+      $('pname' + p).textContent = (names[p] || '…') + (online.active && online.me === p ? ' ' + t('online.you') : '');
       $('caps' + p).innerHTML = pips(state.captures[p]) + '<span>' + state.captures[p] + '/5</span>';
     });
-    if (state.status === 'playing' && !$('status').dataset.toast) $('status').textContent = t('hud.turn', { name: names[state.current] });
+    if (!isOver() && !$('status').dataset.toast) $('status').textContent = turnText();
   }
   function setStatus(msg, isToast) {
     var el = $('status'); clearTimeout(toastTimer);
-    if (!msg) { delete el.dataset.toast; if (state && state.status === 'playing') el.textContent = t('hud.turn', { name: names[state.current] }); else if (!state) el.textContent = ''; return; }
+    if (!msg) { delete el.dataset.toast; if (state && !isOver()) el.textContent = turnText(); else if (!state) el.textContent = ''; return; }
     el.dataset.toast = '1'; el.innerHTML = '<span class="toast"></span>'; el.firstChild.textContent = msg;
-    toastTimer = setTimeout(function () { delete el.dataset.toast; if (state && state.status === 'playing') el.textContent = t('hud.turn', { name: names[state.current] }); }, 2600);
+    toastTimer = setTimeout(function () { delete el.dataset.toast; if (state && !isOver()) el.textContent = turnText(); }, 2600);
   }
 
   /* ---------- Overlays ---------- */
   function closeAll() { document.querySelectorAll('.overlay').forEach(function (o) { o.classList.remove('open'); }); }
   function open(id) {
     closeAll();
-    if (id === 'menuOverlay') $('btnResume').hidden = !(state && state.status === 'playing');
+    if (id === 'menuOverlay') $('btnResume').hidden = !(state && !isOver());
     $(id).classList.add('open');
   }
   function showEnd() {
+    if (!state || !isOver()) return;
     var tx;
-    if (state.status === 'draw') tx = t('end.draw');
+    if (online.active && online.over && (online.over.reason === 'resign' || online.over.reason === 'forfeit')) {
+      var w = online.over.winner, l = w === 1 ? 2 : 1;
+      tx = t(online.over.reason === 'resign' ? 'end.winResign' : 'end.winForfeit', { name: names[w], loser: names[l] });
+    } else if (state.status === 'draw') tx = t('end.draw');
     else {
       var both = state.winReasons.length === 2;
       tx = both ? t('end.winBoth', { name: names[state.winner] })
         : state.winReasons[0] === 'captures' ? t('end.winCaptures', { name: names[state.winner] })
         : t('end.winLine', { name: names[state.winner] });
     }
-    $('endText').textContent = tx; open('endOverlay');
+    $('endText').textContent = tx; updateRematchUi(); open('endOverlay');
+  }
+  function updateRematchUi() {
+    var btn = $('btnRematch'), hint = $('endHint'), leave = $('btnEndMenu');
+    if (!online.active) { btn.disabled = false; btn.textContent = t('end.rematch'); hint.textContent = ''; leave.textContent = t('end.toMenu'); return; }
+    var me = online.me, rival = me === 1 ? 2 : 1;
+    btn.disabled = !!online.rematch[me];
+    btn.textContent = online.rematch[me] ? t('online.rematchWait') : t('end.rematch');
+    hint.textContent = (!online.rematch[me] && online.rematch[rival]) ? t('online.rematchRival', { name: names[rival] }) : '';
+    leave.textContent = t('online.leave');
   }
   function rematch() { state = P.createGame({ tournamentRule: settings.tournamentRule, exactFive: settings.exactFive }); hover = pending = null; kbd = { x: 9, y: 9 }; closeAll(); setStatus(''); render(); }
+
+  /* ---------- Online ---------- */
+  var SESSION_KEY = 'pente.session';
+  function qs(name) { try { return new URLSearchParams(location.search).get(name); } catch (e) { return null; } }
+  function serverUrl() {
+    var q = qs('server');
+    if (q && /^wss?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/?$/.test(q)) return q;     // ?server= solo vale para pruebas locales
+    return String(window.PENTE_SERVER || '').trim();
+  }
+  function saveSession() { try { localStorage.setItem(SESSION_KEY, JSON.stringify({ code: online.code, token: online.token, url: online.url })); } catch (e) {} }
+  function loadSession() { try { var v = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); return v && v.code && v.token ? v : null; } catch (e) { return null; } }
+  function clearSession() { try { localStorage.removeItem(SESSION_KEY); } catch (e) {} }
+  function onlineMsg(txt) { $('onlineMsg').textContent = txt || ''; }
+  function myName() { var n = ($('onName').value || '').trim(); try { if (n) localStorage.setItem('pente.name', n); } catch (e) {} return n; }
+  function inviteLink() {
+    var u = location.href.split(/[?#]/)[0] + '?sala=' + online.code, q = qs('server');
+    if (q && serverUrl() === q) u += '&server=' + encodeURIComponent(q);
+    return u;
+  }
+  function updateOnlineButtons() { $('btnRestart').textContent = online.active ? t('hud.resign') : t('hud.restart'); }
+
+  function ensureNet(url) {
+    if (online.net) return;
+    online.url = url;
+    online.net = window.PenteNet.connect(url, {
+      onState: function (s) {
+        online.conn = s;
+        if (!online.active && online.intent) onlineMsg(s === 'open' ? '' : s === 'connecting' ? t('online.connecting') : t('online.stillTrying'));
+        if (online.active) { setStatus(''); updateHud(); }
+      },
+      onOpen: function () {
+        if (online.token && online.code) { online.rejoining = true; online.net.send({ t: 'rejoin', code: online.code, token: online.token }); }
+        else if (online.intent) online.net.send(online.intent);
+      },
+      onMessage: onNetMessage
+    });
+  }
+
+  function startOnline(intent) {
+    var url = serverUrl();
+    if (!url) { onlineMsg(t('online.noServer')); return; }
+    intent.name = myName();
+    online.intent = intent; online.token = ''; online.code = '';
+    onlineMsg(t('online.connecting'));
+    if (!online.net) ensureNet(url);
+    else if (online.net.isOpen()) online.net.send(intent);
+  }
+
+  function leaveOnline(resign) {
+    var wasActive = online.active, net = online.net;
+    if (net) {
+      if (resign && wasActive && state && !isOver() && names[2] && net.isOpen()) net.send({ t: 'resign' });
+      net.close();
+    }
+    clearTimeout(online.awaitTimer); clearClaim();
+    online.net = null; online.active = false; online.conn = 'closed'; online.code = ''; online.token = ''; online.me = 0;
+    online.intent = null; online.rejoining = false; online.over = null; online.awaiting = false; online.rivalLeftAt = 0;
+    online.connected = { 1: true, 2: true }; online.rematch = { 1: false, 2: false };
+    clearSession(); updateOnlineButtons(); updateRematchUi();
+    if (wasActive) { state = null; hover = pending = null; setStatus(''); render(); }
+  }
+
+  function onNetMessage(m) {
+    switch (m.t) {
+      case 'joined':
+        online.active = true; online.code = m.code; online.token = m.token; online.me = m.you;
+        online.intent = null; online.rejoining = false; saveSession(); onlineMsg(''); updateOnlineButtons();
+        break;
+      case 'sync': applySync(m); break;
+      case 'move': applyRemoteMove(m); break;
+      case 'presence': online.connected = m.connected; trackRival(0); updateHud(); break;
+      case 'over': online.over = { winner: m.winner, reason: m.reason }; online.awaiting = false; clearClaim(); render(); setTimeout(showEnd, 450); break;
+      case 'rematch': online.rematch = m.votes; updateRematchUi(); break;
+      case 'error': onNetError(m); break;
+    }
+  }
+
+  function applySync(m) {
+    var wasOver = !!state && online.active && isOver();
+    var g = P.createGame(m.opts);
+    for (var i = 0; i < m.moves.length; i++) {
+      var r = P.playMove(g, m.moves[i][0], m.moves[i][1]);
+      if (!r.ok) break;
+      g = r.state;
+    }
+    state = g; online.me = m.you; online.over = m.over || null; online.connected = m.connected;
+    online.rematch = m.rematch || { 1: false, 2: false }; online.awaiting = false;
+    names[1] = m.names[1] || t('player.1'); names[2] = m.names[2] || '';
+    hover = pending = null; kbd = { x: 9, y: 9 };
+    trackRival(m.disconnectedFor ? m.disconnectedFor[m.you === 1 ? 2 : 1] : 0);
+    setStatus(''); render();
+    if (!m.names[2]) showWait();
+    else if (online.over) { open('endOverlay'); showEnd(); }
+    else {
+      closeAll(); updateRematchUi();
+      if (wasOver && state.moves.length === 0) setStatus(t('toast.rematch', { n: online.me }), true);
+    }
+  }
+
+  function applyRemoteMove(m) {
+    if (!state) return;
+    online.awaiting = false;
+    if (m.n !== state.moves.length + 1) { online.net.send({ t: 'resync' }); return; }
+    var mover = state.current, r = P.playMove(state, m.x, m.y);
+    if (!r.ok) { online.net.send({ t: 'resync' }); return; }
+    state = r.state; pending = hover = null;
+    announceCaptures(mover, r.captured);
+    render();
+  }
+
+  // Rival desconectado: tras 60 s aparece "Reclamar victoria" (el servidor vuelve a comprobar el tiempo).
+  function trackRival(alreadyOfflineMs) {
+    var rival = online.me === 1 ? 2 : 1;
+    if (online.connected[rival]) { online.rivalLeftAt = 0; clearClaim(); return; }
+    if (!online.rivalLeftAt) online.rivalLeftAt = Date.now() - (alreadyOfflineMs || 0);
+    clearTimeout(online.claimTimer);
+    var left = 60000 - (Date.now() - online.rivalLeftAt);
+    var show = function () { $('btnClaim').hidden = isOver(); };
+    if (left <= 0) show(); else online.claimTimer = setTimeout(show, left);
+  }
+  function clearClaim() { clearTimeout(online.claimTimer); $('btnClaim').hidden = true; }
+
+  function showWait() {
+    $('roomCode').textContent = online.code; $('waitMsg').textContent = '';
+    $('btnShare').hidden = !navigator.share;
+    open('waitOverlay');
+  }
+
+  function onNetError(m) {
+    online.awaiting = false;
+    var txt = t(m.code === 'ILLEGAL' ? 'err.' + m.detail : 'err.' + m.code);
+    if ((m.code === 'ROOM_NOT_FOUND' || m.code === 'BAD_TOKEN') && online.rejoining) {
+      var wasActive = online.active;                 // la sala vieja ya no existe (el servidor se reinició o venció)
+      leaveOnline(false);
+      if (wasActive) { onlineMsg(t('online.roomGone')); open('onlineOverlay'); }
+      return;
+    }
+    if (online.active) setStatus(txt, true); else { online.intent = null; onlineMsg(txt); }
+  }
+
+  function initOnline() {
+    var url = serverUrl();
+    try { $('onName').value = localStorage.getItem('pente.name') || ''; } catch (e) {}
+    if (url) { try { fetch(window.PenteNet.httpBase(url) + '/health', { mode: 'no-cors' }).catch(function () {}); } catch (e) {} }   // despierta al servidor
+    var code = qs('sala'), ses = loadSession();
+    if (code) { try { history.replaceState(null, '', location.href.replace(/([?&])sala=[^&#]*&?/, '$1').replace(/[?&]$/, '')); } catch (e) {} }
+    code = code ? String(code).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5) : '';
+    if (url && ses && ses.url === url && (!code || ses.code === code)) { online.code = ses.code; online.token = ses.token; ensureNet(url); }   // volver a la sala donde estaba
+    else if (code) { $('onCode').value = code; onlineMsg(url ? '' : t('online.noServer')); open('onlineOverlay'); }
+  }
 
   /* ---------- Textos estáticos (i18n) ---------- */
   function applyI18n() {
@@ -742,15 +1113,44 @@ button { font: inherit; color: inherit; cursor: pointer; }
   $('btnMenu').addEventListener('click', function () { open('menuOverlay'); });
   $('btnRules').addEventListener('click', function () { open('rulesOverlay'); });
   $('btnRulesClose').addEventListener('click', function () { open('menuOverlay'); });
-  $('btnRestart').addEventListener('click', function () { if (!state || state.moves.length === 0 || state.status !== 'playing' || confirm(t('confirm.restart'))) rematch(); });
-  $('btnRematch').addEventListener('click', rematch);
-  $('btnEndMenu').addEventListener('click', function () { open('menuOverlay'); });
+  $('btnRestart').addEventListener('click', function () {
+    if (online.active) { if (!isOver() && online.net && confirm(t('online.resignConfirm'))) online.net.send({ t: 'resign' }); return; }
+    if (!state || state.moves.length === 0 || state.status !== 'playing' || confirm(t('confirm.restart'))) rematch();
+  });
+  $('btnRematch').addEventListener('click', function () {
+    if (online.active) { if (online.net && online.net.send({ t: 'rematch' })) { online.rematch[online.me] = true; updateRematchUi(); } return; }
+    rematch();
+  });
+  $('btnEndMenu').addEventListener('click', function () { if (online.active) leaveOnline(false); open('menuOverlay'); });
+  $('btnClaim').addEventListener('click', function () { if (online.net) online.net.send({ t: 'claimWin' }); });
+  $('btnOnline').addEventListener('click', function () {
+    if (online.net) { if (online.active && !isOver() && names[2] && !confirm(t('online.leaveConfirm'))) return; leaveOnline(true); }
+    onlineMsg(serverUrl() ? '' : t('online.noServer')); open('onlineOverlay');
+  });
+  $('btnOnlineBack').addEventListener('click', function () { if (online.net && !online.active) leaveOnline(false); open('menuOverlay'); });
+  $('btnCreateRoom').addEventListener('click', function () {
+    startOnline({ t: 'create', opts: { tournamentRule: $('optTournament').checked, exactFive: $('optExact').checked } });
+  });
+  function joinFromInput() {
+    var code = ($('onCode').value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (code.length !== 5) { onlineMsg(t('err.ROOM_NOT_FOUND')); return; }
+    startOnline({ t: 'join', code: code });
+  }
+  $('btnJoinRoom').addEventListener('click', joinFromInput);
+  $('onCode').addEventListener('keydown', function (e) { if (e.key === 'Enter') joinFromInput(); });
+  $('btnWaitCancel').addEventListener('click', function () { leaveOnline(false); open('menuOverlay'); });
+  $('btnCopyLink').addEventListener('click', function () {
+    var link = inviteLink();
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(link).then(function () { $('waitMsg').textContent = t('online.copied'); }, function () { $('waitMsg').textContent = link; });
+    else $('waitMsg').textContent = link;
+  });
+  $('btnShare').addEventListener('click', function () { try { navigator.share({ title: 'Pente', url: inviteLink() }); } catch (e) {} });
   window.addEventListener('resize', resize);
   if (window.ResizeObserver) new ResizeObserver(resize).observe(canvas);
   canvas.addEventListener('focus', render); canvas.addEventListener('blur', render);
 
-  applyI18n(); buildThemePicker(); resize(); open('menuOverlay');
-  window.__pente = { get state() { return state; }, tryMove: tryMove, startGame: startGame };  // utilidad para pruebas manuales
+  applyI18n(); buildThemePicker(); resize(); open('menuOverlay'); initOnline();
+  window.__pente = { get state() { return state; }, get online() { return online; }, tryMove: tryMove, startGame: startGame };  // utilidad para pruebas manuales
 })();
 </script>
 <script>
