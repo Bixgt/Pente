@@ -48,13 +48,15 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .pip { width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid var(--muted); }
 .pip.on { background: var(--accent); border-color: var(--accent); }
 
-.status { text-align: center; font-weight: 600; min-height: 1.4em; }
+/* Reserva dos renglones siempre: si el aviso se hace largo, el tablero NO se mueve (con el dedo encima sería un desastre). */
+.status { text-align: center; font-weight: 600; min-height: 2.8em; display: flex; align-items: center; justify-content: center; line-height: 1.35; }
 .status .toast { color: var(--accent); }
 
 .board-wrap { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; min-height: 0; }
-#board { display: block; width: min(100%, calc(100vh - 200px), 900px); aspect-ratio: 1 / 1; max-width: 100%; border-radius: 10px; touch-action: none; box-shadow: var(--board-shadow, 0 10px 30px rgba(0,0,0,.45)); }
+#board { display: block; width: min(100%, calc(100vh - 225px), 900px); aspect-ratio: 1 / 1; max-width: 100%; border-radius: 10px; touch-action: none; box-shadow: var(--board-shadow, 0 10px 30px rgba(0,0,0,.45)); }
 
-.actions { display: flex; gap: 10px; justify-content: center; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; min-height: 48px; }
+.actions .btn { white-space: nowrap; }
 .btn { background: var(--panel-2); border: 1px solid #343a46; border-radius: 12px; padding: 12px 18px; min-height: 48px; font-weight: 600; }
 .btn:hover { background: #2f3440; }
 .btn.primary { background: var(--accent); color: #1a1405; border-color: var(--accent); }
@@ -80,7 +82,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   .app { padding: 8px 6px calc(8px + env(safe-area-inset-bottom)); gap: 8px; }
   #board { border-radius: 6px; }
   .player { padding: 8px 10px; }
-  #board { width: min(100%, calc(100vh - 200px)); }
+  #board { width: min(100%, calc(100vh - 225px)); }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 
@@ -101,6 +103,13 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .field input.code-input { text-align: center; letter-spacing: .35em; font-weight: 800; font-size: 20px; text-transform: uppercase; }
 .online-msg { min-height: 1.4em; margin: 12px 0 0; color: var(--accent); font-size: 14px; text-align: center; }
 .roomcode { text-align: center; font-size: 40px; font-weight: 800; letter-spacing: .3em; padding: 14px 0 14px .3em; margin: 6px 0 4px; background: var(--bg); border-radius: 12px; border: 2px dashed #343a46; user-select: all; }
+
+/* Tamaño del tablero */
+.seg { display: flex; gap: 8px; }
+.seg-opt { flex: 1; min-height: 48px; background: var(--bg); border: 2px solid #343a46; border-radius: 12px; font-weight: 700; }
+.seg-opt[aria-pressed="true"] { border-color: var(--accent); background: var(--panel-2); }
+#btnConfirm { flex: 1 1 auto; max-width: 260px; }
+@media (max-width: 520px) { .actions .btn { padding: 12px 12px; } }
 </style>
 </head>
 <body>
@@ -124,6 +133,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
     <button class="btn" id="btnMenu" data-i18n="hud.menu"></button>
     <button class="btn" id="btnRestart" data-i18n="hud.restart"></button>
     <button class="btn" id="btnClaim" hidden data-i18n="online.claim"></button>
+    <button class="btn primary" id="btnConfirm" hidden data-i18n="hud.confirm"></button>
   </div>
 </div>
 
@@ -133,11 +143,13 @@ button { font: inherit; color: inherit; cursor: pointer; }
     <h1 data-i18n="menu.title"></h1>
     <p class="sub" data-i18n="menu.subtitle"></p>
     <div class="field"><span class="lbl" data-i18n="menu.board"></span><div class="themes" id="themePicker" role="group"></div></div>
+    <div class="field"><span class="lbl" data-i18n="menu.size"></span><div class="seg" id="sizePicker" role="group"><button type="button" class="seg-opt" data-size="13" data-i18n="menu.size13"></button><button type="button" class="seg-opt" data-size="19" data-i18n="menu.size19"></button></div><p class="hint" data-i18n="menu.sizeHint"></p></div>
     <div class="field"><label class="lbl" for="name1" data-i18n="menu.p1"></label><input type="text" id="name1" maxlength="18" autocomplete="off"></div>
     <div class="field"><label class="lbl" for="name2" data-i18n="menu.p2"></label><input type="text" id="name2" maxlength="18" autocomplete="off"></div>
     <label class="check"><input type="checkbox" id="optTournament" checked><span><span data-i18n="menu.tournamentRule"></span><small data-i18n="menu.tournamentRuleHint"></small></span></label>
     <label class="check"><input type="checkbox" id="optExact"><span><span data-i18n="menu.exactFive"></span><small data-i18n="menu.exactFiveHint"></small></span></label>
     <label class="check"><input type="checkbox" id="optConfirm"><span><span data-i18n="menu.confirmTap"></span><small data-i18n="menu.confirmTapHint"></small></span></label>
+    <label class="check"><input type="checkbox" id="optSound" checked><span><span data-i18n="menu.sound"></span><small data-i18n="menu.soundHint"></small></span></label>
     <div class="btns">
       <button class="btn primary" id="btnResume" hidden data-i18n="menu.resume"></button>
       <button class="btn primary" id="btnOnline" data-i18n="menu.online"></button>
@@ -208,7 +220,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
  * Todas las funciones son puras: playMove devuelve un estado nuevo.
  *
  * Reglas implementadas:
- *  - Tablero 19x19, se juega en las intersecciones.
+ *  - Tablero 19x19 (o 13x13 con opts.size), se juega en las intersecciones.
  *  - Jugador 1 (1) mueve primero, luego alternan.
  *  - Captura: solo PARES. Patrón P O O P en línea (8 direcciones) => se retiran las 2 O.
  *  - Jugar dentro de un par propio flanqueado NO es captura (jugada segura).
@@ -389,14 +401,15 @@ button { font: inherit; color: inherit; cursor: pointer; }
   }
 
   /* Notación de coordenadas: columnas A–T SIN la I (evita confundirla con el 1), filas 1–19 de arriba hacia abajo.
-   * El centro del tablero es K10. Solo definida para el tablero estándar de 19x19. */
+   * Las letras se cuentan desde la izquierda: en 19x19 el centro es K10; en 13x13 las columnas llegan hasta la N y el centro es G7. */
   var COLS = 'ABCDEFGHJKLMNOPQRST';
   function coordName(x, y) { return COLS.charAt(x) + (y + 1); }
-  function parseCoord(str) {
+  function parseCoord(str, size) {
+    size = size || 19;
     var m = /^([A-HJ-T])(\d{1,2})$/i.exec(String(str).trim());
     if (!m) return null;
     var x = COLS.indexOf(m[1].toUpperCase()), y = parseInt(m[2], 10) - 1;
-    return (y >= 0 && y < 19) ? { x: x, y: y } : null;
+    return (x < size && y >= 0 && y < size) ? { x: x, y: y } : null;
   }
 
   /** Para el duelo: cuántas victorias hacen falta para ganar un "al mejor de N". */
@@ -427,6 +440,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
       'theme.clasico': 'Tradicional',
       'theme.glow': 'Glow',
       'menu.resume': 'Seguir jugando',
+      'menu.size': 'Tamaño del tablero',
+      'menu.size13': '13×13',
+      'menu.size19': '19×19',
+      'menu.sizeHint': '13×13: casillas más grandes (cómodo en celular) y partidas más cortas. 19×19: el clásico.',
+      'menu.sound': 'Sonidos',
+      'menu.soundHint': 'Efectos provisorios al poner fichas, capturar y ganar.',
       'menu.tournamentRule': 'Regla de torneo',
       'menu.tournamentRuleHint': 'El jugador 1 abre en el centro y su segunda ficha va a 3 o más casillas del centro.',
       'menu.exactFive': 'Seis o más en línea no cuenta',
@@ -441,6 +460,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
       'hud.turn': 'Turno de {name}',
       'hud.captures': 'Pares capturados',
       'hud.restart': 'Reiniciar',
+      'hud.confirm': 'Confirmar',
+      'hud.dragHint': 'Soltala donde quieras y tocá Confirmar.',
       'hud.menu': 'Menú',
       'hud.lastMove': 'Última jugada',
       'toast.captured': '{name} capturó un par',
@@ -460,7 +481,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
       'err.TOO_CLOSE_TO_CENTER': 'Regla de torneo: tu segunda ficha va a 3 o más casillas del centro.',
       'err.INVALID_COORDS': 'Jugada inválida.',
       'rules.title': 'Cómo se juega',
-      'rules.1': 'Se juega sobre las intersecciones de un tablero de 19×19. Se turnan una ficha por vez.',
+      'rules.1': 'Se juega sobre las intersecciones de un tablero de 19×19 (o de 13×13, más corto). Se turnan una ficha por vez.',
       'rules.2': 'Ganás con cinco o más fichas en línea (horizontal, vertical o diagonal).',
       'rules.3': 'Capturás encerrando exactamente dos fichas rivales entre dos tuyas, en cualquier línea. Los pares capturados salen del tablero.',
       'rules.4': 'Si ponés una ficha entre dos rivales que ya la flanquean, no te la capturan.',
@@ -641,6 +662,77 @@ button { font: inherit; color: inherit; cursor: pointer; }
 })(typeof self !== 'undefined' ? self : this);
 </script>
 <script>
+/* Sonidos PROVISORIOS de Pente: se sintetizan con WebAudio, no hay archivos de audio.
+ * Para reemplazarlos por sonidos propios, alcanza con cambiar el cuerpo de cada función en RECIPES.
+ *   PenteSound.unlock()  -> hay que llamarlo desde un toque/clic del usuario (los navegadores lo exigen)
+ *   PenteSound.play('place' | 'pick' | 'capture' | 'win' | 'lose' | 'error')
+ *   PenteSound.setEnabled(bool) / isEnabled()   (se guarda en el dispositivo)
+ * Limitación conocida: en iPhone, el interruptor lateral de silencio también calla estos sonidos. */
+(function (root) {
+  'use strict';
+  var ctx = null, enabled = true, master = null, stats = {};
+  try { enabled = localStorage.getItem('pente.sound') !== '0'; } catch (e) {}
+
+  function ensure() {
+    if (ctx) return ctx;
+    var AC = root.AudioContext || root.webkitAudioContext;
+    if (!AC) return null;
+    try {
+      ctx = new AC();
+      master = ctx.createGain(); master.gain.value = 0.55; master.connect(ctx.destination);
+    } catch (e) { ctx = null; }
+    return ctx;
+  }
+  function unlock() {
+    var c = ensure();
+    if (c && c.state === 'suspended') { try { c.resume(); } catch (e) {} }
+  }
+
+  // Un tono: frecuencia que baja/sube, con volumen que arranca fuerte y se apaga.
+  function tone(freq, freqEnd, dur, type, vol, delay) {
+    var t0 = ctx.currentTime + (delay || 0);
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type || 'sine';
+    o.frequency.setValueAtTime(freq, t0);
+    if (freqEnd) o.frequency.exponentialRampToValueAtTime(freqEnd, t0 + dur);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(vol, t0 + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(master); o.start(t0); o.stop(t0 + dur + 0.02);
+  }
+  // Ruido corto (el "clac" de la ficha contra la madera).
+  function click(dur, vol, cutoff, delay) {
+    var t0 = ctx.currentTime + (delay || 0), n = Math.max(1, Math.floor(ctx.sampleRate * dur));
+    var buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0);
+    for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3);
+    var src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    f.type = 'bandpass'; f.frequency.value = cutoff; f.Q.value = 0.9; g.gain.value = vol;
+    src.buffer = buf; src.connect(f); f.connect(g); g.connect(master); src.start(t0);
+  }
+
+  var RECIPES = {
+    place:   function () { click(0.05, 0.9, 1800); tone(210, 95, 0.09, 'sine', 0.55); },
+    pick:    function () { tone(520, 760, 0.07, 'triangle', 0.16); },
+    capture: function () { click(0.06, 0.7, 1200); tone(640, 240, 0.16, 'triangle', 0.38, 0.03); tone(430, 160, 0.2, 'sine', 0.3, 0.09); },
+    win:     function () { [523, 659, 784, 1047].forEach(function (f, i) { tone(f, 0, 0.28, 'triangle', 0.32, i * 0.11); }); tone(1319, 0, 0.5, 'sine', 0.2, 0.46); },
+    lose:    function () { [392, 330, 262].forEach(function (f, i) { tone(f, 0, 0.3, 'triangle', 0.26, i * 0.14); }); },
+    error:   function () { tone(150, 110, 0.12, 'square', 0.12); }
+  };
+
+  function play(name) {
+    stats[name] = (stats[name] || 0) + 1;            // contador para las pruebas automáticas
+    if (!enabled || !RECIPES[name]) return;
+    var c = ensure(); if (!c) return;
+    if (c.state === 'suspended') { try { c.resume(); } catch (e) {} }
+    try { RECIPES[name](); } catch (e) { stats.lastError = name + ': ' + e; }
+  }
+  function buzz(ms) { try { if (enabled && navigator.vibrate) navigator.vibrate(ms); } catch (e) {} }   // Android; iPhone lo ignora
+  function setEnabled(v) { enabled = !!v; try { localStorage.setItem('pente.sound', enabled ? '1' : '0'); } catch (e) {} }
+
+  root.PenteSound = { unlock: unlock, play: play, buzz: buzz, setEnabled: setEnabled, isEnabled: function () { return enabled; }, stats: stats, state: function () { return ctx ? ctx.state : 'sin-contexto'; } };
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
 /* UI de Pente — Fase 1: partida local de 2 jugadores. No contiene reglas: todo pasa por PenteCore. */
 (function () {
   'use strict';
@@ -649,12 +741,23 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
   var canvas = $('board'), ctx = canvas.getContext('2d');
   var state = null, names = { 1: '', 2: '' };
-  var settings = { tournamentRule: true, exactFive: false, confirmTap: matchMedia('(pointer: coarse)').matches };
+  var settings = { tournamentRule: true, exactFive: false, size: 19, confirmTap: matchMedia('(pointer: coarse)').matches };
+  try {
+    var sv = parseInt(localStorage.getItem('pente.size'), 10); if (sv === 13 || sv === 19) settings.size = sv;
+    var sc = localStorage.getItem('pente.confirm'); if (sc === '1' || sc === '0') settings.confirmTap = sc === '1';
+  } catch (e) {}
+  var drag = null;        // ficha que se está arrastrando con el dedo
+  var settle = null;      // animación de la ficha al soltarla
+  var animReq = 0, dropHints = 0;
   var hover = null;       // {x,y} previsualización (mouse / toque pendiente)
   var pending = null;     // toque pendiente de confirmar
   var kbd = null;         // cursor de teclado
   var toastTimer = null;
   var metrics = { w: 0, cell: 0, off: 0 };
+  function boardN() { return state ? state.size : settings.size; }
+  function centerIdx() { return (boardN() - 1) / 2; }
+  function sfx(name) { if (window.PenteSound) window.PenteSound.play(name); }
+  function buzz(ms) { if (window.PenteSound) window.PenteSound.buzz(ms); }
   var online = {
     active: false, net: null, url: '', conn: 'closed', code: '', token: '', me: 0, intent: null, rejoining: false,
     over: null, connected: { 1: true, 2: true }, rematch: { 1: false, 2: false },
@@ -680,10 +783,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
     names[2] = ($('name2').value || '').trim() || t('player.2');
     settings.tournamentRule = $('optTournament').checked;
     settings.exactFive = $('optExact').checked;
-    settings.confirmTap = $('optConfirm').checked;
-    state = P.createGame({ tournamentRule: settings.tournamentRule, exactFive: settings.exactFive });
-    hover = pending = null;
-    kbd = settings.tournamentRule ? { x: 9, y: 9 } : { x: 9, y: 9 };
+    state = P.createGame({ size: settings.size, tournamentRule: settings.tournamentRule, exactFive: settings.exactFive });
+    hover = pending = drag = settle = null;
+    kbd = { x: centerIdx(), y: centerIdx() };
     closeAll(); render(); setStatus('');
   }
 
@@ -694,14 +796,22 @@ button { font: inherit; color: inherit; cursor: pointer; }
     } else setStatus('');
   }
 
+  // Sonido y vibración de una jugada ya resuelta (captured = lista de fichas capturadas, ended = terminó la partida).
+  function moveFeedback(captured, ended, winner) {
+    if (captured.length) { sfx('place'); setTimeout(function () { sfx('capture'); }, 70); buzz([10, 40, 18]); }
+    else { sfx('place'); buzz(8); }
+    if (ended) setTimeout(function () { sfx(online.active ? (winner === online.me ? 'win' : 'lose') : 'win'); }, 380);
+  }
+
   function tryMove(x, y) {
     if (!state || isOver()) return;
+    settle = null;
     if (online.active) {
       // En online el servidor es el árbitro: acá solo se comprueba rápido y se envía; el tablero cambia cuando el servidor lo confirma.
-      if (state.current !== online.me) { setStatus(t('online.wait'), true); return; }
+      if (state.current !== online.me) { setStatus(t('online.wait'), true); sfx('error'); return; }
       if (online.awaiting) return;
       var v = P.validateMove(state, x, y, online.me);
-      if (v) { setStatus(t('err.' + v), true); render(); return; }
+      if (v) { setStatus(t('err.' + v), true); sfx('error'); render(); return; }
       if (!online.net || !online.net.send({ t: 'move', x: x, y: y })) { setStatus(t('online.reconnecting'), true); return; }
       online.awaiting = true; clearTimeout(online.awaitTimer);
       online.awaitTimer = setTimeout(function () { online.awaiting = false; }, 4000);
@@ -709,48 +819,119 @@ button { font: inherit; color: inherit; cursor: pointer; }
       return;
     }
     var r = P.playMove(state, x, y, state.current);
-    if (!r.ok) { setStatus(t('err.' + r.error), true); render(); return; }
+    if (!r.ok) { setStatus(t('err.' + r.error), true); sfx('error'); render(); return; }
     var mover = state.current;
     state = r.state; pending = hover = null;
     announceCaptures(mover, r.captured);
+    moveFeedback(r.captured, state.status !== 'playing', state.winner);
     render();
     if (state.status !== 'playing') setTimeout(showEnd, 450);
   }
 
   /* ---------- Entrada ---------- */
-  function cellFromEvent(e) {
-    var rect = canvas.getBoundingClientRect();
-    var px = (e.clientX - rect.left) * (metrics.w / rect.width);
-    var py = (e.clientY - rect.top) * (metrics.w / rect.height);
-    var x = Math.round((px - metrics.off) / metrics.cell), y = Math.round((py - metrics.off) / metrics.cell);
-    if (!state || !P.inBounds(state, x, y)) return null;
-    return { x: x, y: y };
+  // px de pantalla -> px del canvas
+  function kScale() { var rect = canvas.getBoundingClientRect(); return rect.width ? metrics.w / rect.width : 1; }
+  function toCanvas(e) { var rect = canvas.getBoundingClientRect(), k = rect.width ? metrics.w / rect.width : 1; return { x: (e.clientX - rect.left) * k, y: (e.clientY - rect.top) * k }; }
+  function snap(cx, cy, clamp) {
+    var n = boardN(), x = Math.round((cx - metrics.off) / metrics.cell), y = Math.round((cy - metrics.off) / metrics.cell);
+    if (clamp) return { x: Math.max(0, Math.min(n - 1, x)), y: Math.max(0, Math.min(n - 1, y)) };
+    return state && P.inBounds(state, x, y) ? { x: x, y: y } : null;
   }
+  function cellFromEvent(e) { var c = toCanvas(e); return snap(c.x, c.y, false); }
+  function coordLabel(c) { return P.coordName(c.x, c.y); }
+  function easeOut(k) { return 1 - Math.pow(1 - k, 3); }
+
+  /* Mouse y lápiz: previsualización al pasar y un clic coloca. */
   canvas.addEventListener('pointermove', function (e) {
-    if (e.pointerType === 'touch' || !canPlayNow()) return;
+    if (e.pointerType === 'touch') { if (drag && drag.id === e.pointerId) { e.preventDefault(); dragMove(e); } return; }
+    if (!canPlayNow()) return;
     var c = cellFromEvent(e);
     if (!c || (hover && c.x === hover.x && c.y === hover.y)) { if (!c && hover) { hover = null; render(); } return; }
     hover = c; render();
   });
-  canvas.addEventListener('pointerleave', function () { if (hover && !pending) { hover = null; render(); } });
+  canvas.addEventListener('pointerleave', function (e) { if (e.pointerType !== 'touch' && hover && !pending) { hover = null; render(); } });
   canvas.addEventListener('pointerup', function (e) {
+    if (e.pointerType === 'touch') return;                 // el dedo se maneja abajo (pointerdown/up con arrastre)
     var c = cellFromEvent(e); if (!c) return;
     kbd = c;
     if (isOver()) return;
-    if (online.active && state.current !== online.me) { setStatus(t('online.wait'), true); return; }
-    var useConfirm = settings.confirmTap && e.pointerType === 'touch';
-    if (useConfirm) {
-      if (pending && pending.x === c.x && pending.y === c.y) tryMove(c.x, c.y);
-      else {
-        if (P.get(state, c.x, c.y) !== P.EMPTY) { setStatus(t('err.OCCUPIED'), true); return; }
-        pending = c; hover = c; setStatus(''); render();
-      }
-    } else tryMove(c.x, c.y);
+    if (online.active && state.current !== online.me) { setStatus(t('online.wait'), true); sfx('error'); return; }
+    tryMove(c.x, c.y);
   });
+  canvas.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+  /* Dedo: tocar marca una intersección exacta (queda una ficha "pendiente"). Si arrastrás, la ficha se levanta POR ENCIMA del dedo
+     (así el dedo no la tapa), se ven guías de fila y columna, y al soltar cae en la intersección más cercana.
+     Tocar de nuevo la ficha pendiente, o el botón Confirmar, juega. Sin "confirmar con segundo toque": soltar juega directo. */
+  var TOUCH_SLOP = 8;                                       // px de pantalla que hay que mover el dedo para que cuente como arrastre
+  function liftPx() { return Math.max(metrics.cell * 1.9, 46 * kScale()); }   // cuánto sube la ficha por encima del dedo (px de canvas)
+  function heldPos() {                                      // centro de la ficha que se arrastra, en px de canvas
+    if (!drag.lifted) return { x: px(drag.cell.x), y: px(drag.cell.y) };
+    var e = easeOut(Math.min(1, (performance.now() - drag.liftStart) / 120)), L = liftPx();
+    return { x: drag.f.x + drag.vec.x * (1 - e), y: drag.f.y + drag.vec.y * (1 - e) - L * e };
+  }
+  function updateDragTarget() {
+    var pos = heldPos(), c = snap(pos.x, pos.y, true);
+    if (c.x !== drag.cell.x || c.y !== drag.cell.y) { drag.cell = c; kbd = c; setStatus(coordLabel(c), true); }
+  }
+  function dragError(c) { return state ? P.validateMove(state, c.x, c.y) : 'GAME_OVER'; }
+
+  canvas.addEventListener('pointerdown', function (e) {
+    if (e.pointerType !== 'touch' || !state || isOver() || drag) return;
+    e.preventDefault();
+    var p = toCanvas(e), c = snap(p.x, p.y, false); if (!c) return;
+    kbd = c;
+    if (online.active && state.current !== online.me) { setStatus(t('online.wait'), true); sfx('error'); return; }
+    if (P.get(state, c.x, c.y) !== P.EMPTY) { setStatus(t('err.OCCUPIED'), true); sfx('error'); return; }
+    var grab = !!(pending && settings.confirmTap && pending.x === c.x && pending.y === c.y);
+    drag = { id: e.pointerId, grab: grab, prev: pending, cell: c, f: p, vec: null, lifted: false, liftStart: 0, cssX: e.clientX, cssY: e.clientY };
+    try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+    if (!grab) {
+      var bad = P.validateMove(state, c.x, c.y);
+      if (bad) { pending = hover = null; setStatus(t('err.' + bad), true); sfx('error'); }
+      else { if (settings.confirmTap) { pending = c; hover = c; } else { pending = null; hover = c; } setStatus(coordLabel(c), true); }
+    }
+    render();
+  });
+
+  function dragMove(e) {
+    var p = toCanvas(e); drag.f = p;
+    if (!drag.lifted) {
+      if (Math.hypot(e.clientX - drag.cssX, e.clientY - drag.cssY) < TOUCH_SLOP) return;
+      drag.lifted = true; drag.liftStart = performance.now();
+      drag.vec = { x: px(drag.cell.x) - p.x, y: px(drag.cell.y) - p.y };   // dónde estaba la ficha respecto del dedo al levantarla
+      sfx('pick'); buzz(5);
+    }
+    render();
+  }
+
+  function endDrag(e, cancelled) {
+    if (!drag || drag.id !== e.pointerId) return;
+    var d = drag; drag = null;
+    try { canvas.releasePointerCapture(d.id); } catch (err) {}
+    if (!state || isOver() || cancelled) { pending = d.prev; hover = null; setStatus(''); render(); return; }
+    if (!d.lifted) {                                          // toque simple, sin arrastrar
+      if (d.grab) { setStatus(''); tryMove(d.cell.x, d.cell.y); return; }            // segundo toque sobre la ficha pendiente: juega
+      if (!settings.confirmTap) { tryMove(d.cell.x, d.cell.y); return; }
+      hover = null; if (pending) sfx('pick'); render(); return;
+    }
+    var c = d.cell, bad = dragError(c), pos = (function () { var keep = drag; drag = d; var q = heldPos(); drag = keep; return q; })();
+    if (bad) {                                                // soltó en un lugar no permitido: vuelve donde estaba
+      pending = d.prev; hover = null; setStatus(t('err.' + bad), true); sfx('error'); render(); return;
+    }
+    if (!settings.confirmTap) { hover = null; tryMove(c.x, c.y); return; }
+    pending = c; hover = null; kbd = c;
+    settle = { x0: pos.x, y0: pos.y, c: c, t0: performance.now(), dur: 130, player: state.current };
+    if (dropHints < 2) { dropHints++; setStatus(t('hud.dragHint'), true); } else setStatus('');
+    render();
+  }
+  canvas.addEventListener('pointerup', function (e) { if (e.pointerType === 'touch') endDrag(e, false); });
+  canvas.addEventListener('pointercancel', function (e) { if (e.pointerType === 'touch') endDrag(e, true); });
+
   canvas.addEventListener('keydown', function (e) {
     if (!state) return;
-    var d = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
-    if (d) { e.preventDefault(); kbd = kbd || { x: 9, y: 9 }; kbd = { x: Math.max(0, Math.min(18, kbd.x + d[0])), y: Math.max(0, Math.min(18, kbd.y + d[1])) }; hover = kbd; render(); }
+    var d = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key], m = boardN() - 1;
+    if (d) { e.preventDefault(); kbd = kbd || { x: centerIdx(), y: centerIdx() }; kbd = { x: Math.max(0, Math.min(m, kbd.x + d[0])), y: Math.max(0, Math.min(m, kbd.y + d[1])) }; hover = kbd; render(); }
     else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (kbd) tryMove(kbd.x, kbd.y); }
   });
 
@@ -758,17 +939,20 @@ button { font: inherit; color: inherit; cursor: pointer; }
   function resize() {
     var cssW = canvas.clientWidth || 600, dpr = window.devicePixelRatio || 1;
     canvas.width = Math.round(cssW * dpr); canvas.height = Math.round(cssW * dpr);
-    metrics.w = canvas.width; metrics.cell = canvas.width / 19.65; metrics.off = metrics.cell * 1.15;   // margen sup./izq. para letras y números
+    metrics.w = canvas.width;
     render();
   }
+  function layout() { metrics.cell = metrics.w / (boardN() + 0.65); metrics.off = metrics.cell * 1.15; }   // margen sup./izq. para letras y números
   function px(i) { return metrics.off + i * metrics.cell; }
 
-  function drawStone(x, y, player, alpha, highlight) {
+  function drawStone(x, y, player, alpha, highlight) { drawStonePx(px(x), px(y), player, alpha, highlight, 1, 0); }
+  // scale > 1 y lift (0..1) = ficha levantada: más grande y con sombra más lejana
+  function drawStonePx(cx, cy, player, alpha, highlight, scale, lift) {
     var th = theme(), st = th.stones[player];
-    var cx = px(x), cy = px(y), r = metrics.cell * 0.44;
+    var r = metrics.cell * 0.44 * (scale || 1);
     ctx.save(); ctx.globalAlpha = alpha;
-    if (st.glow) { ctx.shadowColor = st.glow; ctx.shadowBlur = r * 1.2; }
-    else { ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = r * 0.35; ctx.shadowOffsetY = r * 0.12; }
+    if (st.glow) { ctx.shadowColor = st.glow; ctx.shadowBlur = r * (1.2 + (lift || 0) * 0.8); }
+    else { ctx.shadowColor = 'rgba(0,0,0,' + (0.45 - 0.1 * (lift || 0)) + ')'; ctx.shadowBlur = r * (0.35 + (lift || 0) * 0.7); ctx.shadowOffsetY = r * (0.12 + (lift || 0) * 0.5); }
     var g = ctx.createRadialGradient(cx - r * .35, cy - r * .4, r * .1, cx, cy, r);
     g.addColorStop(0, st.a); g.addColorStop(1, st.b);
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
@@ -779,10 +963,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
   // Letras arriba (A–T, sin I) y números a la izquierda (1–19). Se resalta la fila/columna de la casilla marcada.
   function drawLabels(th) {
-    var c = metrics.cell, active = pending || hover || (document.activeElement === canvas ? kbd : null);
+    var c = metrics.cell, active = (drag && drag.lifted ? drag.cell : null) || pending || hover || (document.activeElement === canvas ? kbd : null);
     ctx.save();
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    for (var i = 0; i < 19; i++) {
+    for (var i = 0; i < boardN(); i++) {
       var hiX = active && active.x === i, hiY = active && active.y === i;
       ctx.font = (hiX ? '800 ' : '600 ') + Math.round(c * 0.5) + 'px system-ui, -apple-system, "Segoe UI", sans-serif';
       ctx.fillStyle = hiX ? th.board.labelHi : th.board.label;
@@ -796,7 +980,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
   function render() {
     if (!metrics.w) return;
-    var th = theme(), W = metrics.w, n = 19, i;
+    layout();
+    var th = theme(), W = metrics.w, n = boardN(), i;
+    if (drag && drag.lifted) updateDragTarget();
+    if (settle && performance.now() - settle.t0 >= settle.dur) settle = null;
     // fondo del tablero
     var bg = ctx.createLinearGradient(0, 0, W, W);
     bg.addColorStop(0, th.board.bg[0]); bg.addColorStop(1, th.board.bg[1]);
@@ -814,12 +1001,13 @@ button { font: inherit; color: inherit; cursor: pointer; }
     // puntos estrella + centro
     ctx.save(); ctx.fillStyle = th.board.star;
     if (th.board.lineGlow) { ctx.shadowColor = th.board.lineGlow; ctx.shadowBlur = metrics.cell * 0.5; }
-    [3, 9, 15].forEach(function (a) { [3, 9, 15].forEach(function (b) {
-      ctx.beginPath(); ctx.arc(px(a), px(b), metrics.cell * (a === 9 && b === 9 ? 0.13 : 0.09), 0, Math.PI * 2); ctx.fill();
+    var stars = n === 13 ? [3, 6, 9] : n === 19 ? [3, 9, 15] : [], mid = (n - 1) / 2;
+    stars.forEach(function (a) { stars.forEach(function (b) {
+      ctx.beginPath(); ctx.arc(px(a), px(b), metrics.cell * (a === mid && b === mid ? 0.13 : 0.09), 0, Math.PI * 2); ctx.fill();
     }); });
     ctx.restore();
     drawLabels(th);
-    if (!state) return;
+    if (!state) { $('btnConfirm').hidden = true; return; }
 
     // Regla de torneo: en la 2ª ficha del J1 se sombrea el cuadrado de 5x5 del centro (prohibido)
     if (!isOver() && state.options.tournamentRule && state.moves.length === 2) {
@@ -844,20 +1032,46 @@ button { font: inherit; color: inherit; cursor: pointer; }
       ctx.strokeStyle = th.last.ring; ctx.lineWidth = Math.max(2, metrics.cell * 0.07);
       ctx.beginPath(); ctx.arc(px(lm.x), px(lm.y), metrics.cell * 0.2, 0, Math.PI * 2); ctx.stroke();
     }
-    // previsualización
-    if (hover && canPlayNow() && P.get(state, hover.x, hover.y) === P.EMPTY && !P.validateMove(state, hover.x, hover.y)) {
+    // previsualización (mouse, o ficha pendiente del dedo)
+    var holding = !!(drag && drag.lifted), showPrev = !holding && !settle;
+    if (showPrev && hover && canPlayNow() && P.get(state, hover.x, hover.y) === P.EMPTY && !P.validateMove(state, hover.x, hover.y)) {
       drawStone(hover.x, hover.y, state.current, pending ? 0.85 : 0.5, false);
       if (pending) {
         ctx.strokeStyle = th.pendingRing; ctx.lineWidth = Math.max(2, metrics.cell * 0.06); ctx.setLineDash([metrics.cell * .12, metrics.cell * .1]);
         ctx.beginPath(); ctx.arc(px(hover.x), px(hover.y), metrics.cell * 0.56, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
       }
     }
+    if (holding) drawHeld(th);
+    else if (settle) drawSettle();
     // cursor de teclado
-    if (document.activeElement === canvas && kbd) {
+    if (document.activeElement === canvas && kbd && !holding) {
       ctx.strokeStyle = th.kbd; ctx.lineWidth = Math.max(2, metrics.cell * 0.08);
       ctx.beginPath(); ctx.arc(px(kbd.x), px(kbd.y), metrics.cell * 0.62, 0, Math.PI * 2); ctx.stroke();
     }
     updateHud();
+    var now = performance.now();
+    if (!animReq && ((drag && drag.lifted && now - drag.liftStart < 150) || settle)) animReq = requestAnimationFrame(function () { animReq = 0; render(); });
+  }
+
+  // Ficha en el aire: guías de fila/columna, la intersección donde caería y la ficha levantada sobre el dedo.
+  function drawHeld(th) {
+    var c = drag.cell, bad = !!dragError(c), n = boardN(), cell = metrics.cell, col = bad ? '#e5604f' : th.pendingRing;
+    ctx.save();
+    ctx.strokeStyle = col; ctx.globalAlpha = 0.5; ctx.lineWidth = Math.max(1.5, cell * 0.06); ctx.setLineDash([cell * 0.25, cell * 0.2]);
+    ctx.beginPath(); ctx.moveTo(px(0), px(c.y)); ctx.lineTo(px(n - 1), px(c.y)); ctx.moveTo(px(c.x), px(0)); ctx.lineTo(px(c.x), px(n - 1)); ctx.stroke();
+    ctx.restore();
+    if (!bad) drawStone(c.x, c.y, state.current, 0.4, false);
+    ctx.save(); ctx.strokeStyle = col; ctx.lineWidth = Math.max(2, cell * 0.07);
+    ctx.beginPath(); ctx.arc(px(c.x), px(c.y), cell * 0.56, 0, Math.PI * 2); ctx.stroke();
+    if (bad) { var q = cell * 0.22; ctx.beginPath(); ctx.moveTo(px(c.x) - q, px(c.y) - q); ctx.lineTo(px(c.x) + q, px(c.y) + q); ctx.moveTo(px(c.x) + q, px(c.y) - q); ctx.lineTo(px(c.x) - q, px(c.y) + q); ctx.stroke(); }
+    ctx.restore();
+    var pos = heldPos();
+    drawStonePx(pos.x, pos.y, state.current, bad ? 0.65 : 1, false, 1.28, 1);
+  }
+  function drawSettle() {
+    var k = Math.min(1, (performance.now() - settle.t0) / settle.dur), e = easeOut(k);
+    var x = settle.x0 + (px(settle.c.x) - settle.x0) * e, y = settle.y0 + (px(settle.c.y) - settle.y0) * e;
+    drawStonePx(x, y, settle.player, 0.85 + 0.15 * e, false, 1.28 - 0.28 * e, 1 - e);
   }
 
   /* ---------- Temas ---------- */
@@ -907,6 +1121,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
       $('caps' + p).innerHTML = pips(state.captures[p]) + '<span>' + state.captures[p] + '/5</span>';
     });
     if (!isOver() && !$('status').dataset.toast) $('status').textContent = turnText();
+    $('btnConfirm').hidden = !(pending && settings.confirmTap && canPlayNow() && !(drag && drag.lifted));
   }
   function setStatus(msg, isToast) {
     var el = $('status'); clearTimeout(toastTimer);
@@ -946,7 +1161,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
     hint.textContent = (!online.rematch[me] && online.rematch[rival]) ? t('online.rematchRival', { name: names[rival] }) : '';
     leave.textContent = t('online.leave');
   }
-  function rematch() { state = P.createGame({ tournamentRule: settings.tournamentRule, exactFive: settings.exactFive }); hover = pending = null; kbd = { x: 9, y: 9 }; closeAll(); setStatus(''); render(); }
+  function rematch() {
+    state = P.createGame({ size: state ? state.size : settings.size, tournamentRule: settings.tournamentRule, exactFive: settings.exactFive });
+    hover = pending = drag = settle = null; kbd = { x: centerIdx(), y: centerIdx() }; closeAll(); setStatus(''); render();
+  }
 
   /* ---------- Online ---------- */
   var SESSION_KEY = 'pente.session';
@@ -1018,7 +1236,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
       case 'sync': applySync(m); break;
       case 'move': applyRemoteMove(m); break;
       case 'presence': online.connected = m.connected; trackRival(0); updateHud(); break;
-      case 'over': online.over = { winner: m.winner, reason: m.reason }; online.awaiting = false; clearClaim(); render(); setTimeout(showEnd, 450); break;
+      case 'over':
+        online.over = { winner: m.winner, reason: m.reason }; online.awaiting = false; clearClaim(); drag = settle = null;
+        if (m.reason === 'resign' || m.reason === 'forfeit') sfx(m.winner === online.me ? 'win' : 'lose');   // si terminó por jugada, el sonido ya sonó
+        render(); setTimeout(showEnd, 450); break;
       case 'rematch': online.rematch = m.votes; updateRematchUi(); break;
       case 'error': onNetError(m); break;
     }
@@ -1035,7 +1256,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
     state = g; online.me = m.you; online.over = m.over || null; online.connected = m.connected;
     online.rematch = m.rematch || { 1: false, 2: false }; online.awaiting = false;
     names[1] = m.names[1] || t('player.1'); names[2] = m.names[2] || '';
-    hover = pending = null; kbd = { x: 9, y: 9 };
+    hover = pending = drag = settle = null; kbd = { x: centerIdx(), y: centerIdx() };
     trackRival(m.disconnectedFor ? m.disconnectedFor[m.you === 1 ? 2 : 1] : 0);
     setStatus(''); render();
     if (!m.names[2]) showWait();
@@ -1052,8 +1273,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
     if (m.n !== state.moves.length + 1) { online.net.send({ t: 'resync' }); return; }
     var mover = state.current, r = P.playMove(state, m.x, m.y);
     if (!r.ok) { online.net.send({ t: 'resync' }); return; }
-    state = r.state; pending = hover = null;
+    state = r.state; pending = hover = drag = settle = null;
     announceCaptures(mover, r.captured);
+    moveFeedback(r.captured, state.status !== 'playing', state.winner);
     render();
   }
 
@@ -1129,7 +1351,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   });
   $('btnOnlineBack').addEventListener('click', function () { if (online.net && !online.active) leaveOnline(false); open('menuOverlay'); });
   $('btnCreateRoom').addEventListener('click', function () {
-    startOnline({ t: 'create', opts: { tournamentRule: $('optTournament').checked, exactFive: $('optExact').checked } });
+    startOnline({ t: 'create', opts: { tournamentRule: $('optTournament').checked, exactFive: $('optExact').checked, size: settings.size } });
   });
   function joinFromInput() {
     var code = ($('onCode').value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -1145,12 +1367,32 @@ button { font: inherit; color: inherit; cursor: pointer; }
     else $('waitMsg').textContent = link;
   });
   $('btnShare').addEventListener('click', function () { try { navigator.share({ title: 'Pente', url: inviteLink() }); } catch (e) {} });
+  // Tamaño del tablero (13 o 19): vale para la próxima partida o sala
+  function syncSizePicker() { document.querySelectorAll('#sizePicker .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(parseInt(b.dataset.size, 10) === settings.size)); }); }
+  document.querySelectorAll('#sizePicker .seg-opt').forEach(function (b) {
+    b.addEventListener('click', function () {
+      settings.size = parseInt(b.dataset.size, 10);
+      try { localStorage.setItem('pente.size', String(settings.size)); } catch (e) {}
+      syncSizePicker(); render();
+    });
+  });
+  $('optConfirm').checked = settings.confirmTap;
+  $('optConfirm').addEventListener('change', function () {
+    settings.confirmTap = $('optConfirm').checked; pending = null;
+    try { localStorage.setItem('pente.confirm', settings.confirmTap ? '1' : '0'); } catch (e) {}
+    render();
+  });
+  $('btnConfirm').addEventListener('click', function () { if (pending && !isOver()) tryMove(pending.x, pending.y); });
+  // Sonido: los navegadores solo dejan activarlo después de un toque o clic del usuario
+  ['pointerdown', 'touchend', 'click', 'keydown'].forEach(function (ev) { document.addEventListener(ev, function () { if (window.PenteSound) window.PenteSound.unlock(); }, true); });
+  $('optSound').checked = window.PenteSound ? window.PenteSound.isEnabled() : false;
+  $('optSound').addEventListener('change', function () { if (!window.PenteSound) return; window.PenteSound.setEnabled($('optSound').checked); sfx('place'); });
   window.addEventListener('resize', resize);
   if (window.ResizeObserver) new ResizeObserver(resize).observe(canvas);
   canvas.addEventListener('focus', render); canvas.addEventListener('blur', render);
 
-  applyI18n(); buildThemePicker(); resize(); open('menuOverlay'); initOnline();
-  window.__pente = { get state() { return state; }, get online() { return online; }, tryMove: tryMove, startGame: startGame };  // utilidad para pruebas manuales
+  applyI18n(); buildThemePicker(); syncSizePicker(); resize(); open('menuOverlay'); initOnline();
+  window.__pente = { get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, tryMove: tryMove, startGame: startGame };  // utilidad para pruebas manuales
 })();
 </script>
 <script>
