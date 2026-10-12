@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#14161b">
 <title>Pente</title>
+<link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+<link rel="shortcut icon" href="favicon.ico">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes">
@@ -245,12 +249,12 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
     <div class="player" id="player1">
       <div class="row"><span class="stone-ico s1"></span><span class="name" id="pname1"></span></div>
       <div class="clock" id="clock1" hidden><span class="cturn"></span><span class="ctot"></span></div>
-      <div class="caps" id="caps1" aria-label="Pares capturados"></div>
+      <div class="caps" id="caps1" data-i18n-aria="a11y.captures"></div>
     </div>
     <div class="player" id="player2">
       <div class="row"><span class="stone-ico s2"></span><span class="name" id="pname2"></span></div>
       <div class="clock" id="clock2" hidden><span class="cturn"></span><span class="ctot"></span></div>
-      <div class="caps" id="caps2" aria-label="Pares capturados"></div>
+      <div class="caps" id="caps2" data-i18n-aria="a11y.captures"></div>
     </div>
   </div>
 
@@ -261,14 +265,14 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
   <div class="stage">
     <div class="board-wrap"><canvas id="board" tabindex="0" role="application"></canvas></div>
 
-    <aside class="side" id="side" data-tab="moves" aria-label="Jugadas y chat">
+    <aside class="side" id="side" data-tab="moves" data-i18n-aria="a11y.sidePanel">
       <div class="side-inner">
         <div class="side-head">
           <div class="side-tabs" role="tablist">
             <button type="button" class="tab" id="tabMoves" data-side="moves" aria-selected="true" data-i18n="side.moves"></button>
             <button type="button" class="tab" id="tabChat" data-side="chat" hidden><span data-i18n="chat.title"></span><b class="badge" id="chatBadge" hidden></b></button>
           </div>
-          <button type="button" class="btn x" id="btnSideClose" aria-label="Cerrar">✕</button>
+          <button type="button" class="btn x" id="btnSideClose" data-i18n-aria="a11y.close">✕</button>
         </div>
         <section class="box" id="movesBox">
           <h3 data-i18n="side.moves"></h3>
@@ -315,6 +319,7 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
       <button class="btn primary" id="btnOnline" data-i18n="menu.online"></button>
       <button class="btn" id="btnSettings" data-i18n="menu.settings"></button>
       <button class="btn" id="btnRules" data-i18n="menu.rules"></button>
+      <button class="btn" id="btnLang"></button>
     </div>
   </div>
 </div>
@@ -461,7 +466,7 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
   <div class="screen-body">
     <h2 data-i18n="online.waitTitle"></h2>
     <p class="sub" data-i18n="online.waitSub"></p>
-    <div class="roomcode" id="roomCode" aria-label="Código de sala"></div>
+    <div class="roomcode" id="roomCode" data-i18n-aria="a11y.roomCode"></div>
     <p class="hint" id="waitVis"></p>
     <div class="btns">
       <button class="btn primary" id="btnCopyLink" data-i18n="online.copyLink"></button>
@@ -469,6 +474,16 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
       <button class="btn" id="btnWaitCancel" data-i18n="online.cancel"></button>
     </div>
     <p class="online-msg" id="waitMsg" role="status" aria-live="polite"></p>
+  </div>
+</div>
+
+<!-- Idioma -->
+<div class="overlay screen" id="langOverlay">
+  <div class="screen-body">
+    <h2 data-i18n="lang.title"></h2>
+    <p class="sub" data-i18n="lang.sub"></p>
+    <div class="btns" id="langList"></div>
+    <div class="btns"><button class="btn" id="btnLangBack" data-i18n="menu.back"></button></div>
   </div>
 </div>
 
@@ -760,7 +775,7 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
       'cfg.confirm.buttonHint': 'Tocás o arrastrás la ficha a su lugar y apretás Confirmar.',
       'cfg.confirm.doubleHint': 'Tocás o arrastrás la ficha a su lugar y volvés a tocar esa misma ficha para jugarla.',
       'cfg.confirm.noneHint': 'Un toque juega al instante. Arrastrar y soltar también juega. Ojo: no hay vuelta atrás.',
-      'cfg.confirmNote': 'Estas opciones son para pantallas táctiles. Con mouse, un clic juega.',
+      'cfg.confirmNote': 'Estas opciones valen para el toque y para el mouse (clic o arrastrar).',
       'cfg.lift': 'Altura de la ficha al arrastrar',
       'cfg.lift.low': 'Baja',
       'cfg.lift.mid': 'Media',
@@ -859,6 +874,14 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
       'video.hint': 'Se arma en tu dispositivo, sin internet, y se borra cuando empieza una partida nueva. Tarda lo que dura la partida repetida.',
       'end.viewBoard': 'Ver el tablero',
       'end.result': 'Resultado y revancha',
+      'menu.language': 'Idioma',
+      'lang.name': 'Español',
+      'lang.title': 'Idioma',
+      'lang.sub': 'Elegí el idioma de la app. Se guarda en este dispositivo.',
+      'a11y.captures': 'Pares capturados',
+      'a11y.sidePanel': 'Jugadas y chat',
+      'a11y.close': 'Cerrar',
+      'a11y.roomCode': 'Código de sala',
       'menu.timer': 'Reloj',
       'menu.timerHint': '10 minutos por jugador para toda la partida y 1 minuto por jugada. Si se acaba cualquiera de los dos, perdés.',
       'end.winTime': '{loser} se quedó sin tiempo. Ganó {name}.',
@@ -985,8 +1008,294 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
     return s;
   }
   function setLang(l) { if (STRINGS[l]) lang = l; }
+  function getLang() { return lang; }
   function available() { return Object.keys(STRINGS); }
-  root.I18n = { t: t, setLang: setLang, available: available, STRINGS: STRINGS };
+  function register(code, strings) { STRINGS[code] = strings; }          // cada idioma vive en src/lang/<código>.js
+  /* Idioma inicial: el guardado; si no hay, el del navegador si lo tenemos; si no, inglés (el más entendido). */
+  function detect(saved, browserLangs) {
+    if (saved && STRINGS[saved]) return saved;
+    var arr = browserLangs || [];
+    for (var i = 0; i < arr.length; i++) { var c = String(arr[i] || '').toLowerCase().split('-')[0]; if (STRINGS[c]) return c; }
+    return STRINGS.en ? 'en' : 'es';
+  }
+  root.I18n = { t: t, setLang: setLang, getLang: getLang, available: available, register: register, detect: detect, STRINGS: STRINGS };
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
+/* English. Same keys as Spanish (src/i18n.js); keep the {placeholders} exactly as they are. */
+(function (root) {
+  root.I18n.register('en', {
+      'lang.name': 'English',
+      'app.title': 'Pente',
+      'menu.title': 'PENTE',
+      'menu.subtitle': 'Learn it, or get schooled.',
+      'menu.p1': 'Player 1',
+      'menu.p2': 'Player 2',
+      'theme.clasico': 'Classic',
+      'theme.glow': 'Neon',
+      'menu.resume': 'Keep playing',
+      'menu.size': 'Board size',
+      'menu.size13': '13×13',
+      'menu.size19': '19×19',
+      'menu.sizeHint': '13×13: bigger cells (comfortable on a phone) and shorter games. 19×19: the classic.',
+      'menu.tournamentRule': 'Tournament rule',
+      'menu.tournamentRuleHint': 'Player 1 opens in the center and their second stone must go 3 or more cells away from the center.',
+      'menu.exactFive': 'Six or more in a row doesn\'t count',
+      'menu.exactFiveHint': 'Only a line of exactly five wins. If a stone is captured and a line of six drops to five, it counts.',
+      'menu.settings': 'Settings',
+      'menu.gameOptions': 'Rules for this game',
+      'cfg.title': 'Settings',
+      'cfg.hintSaved': 'Saved on this device and applied instantly.',
+      'cfg.tab.sound': 'Sound',
+      'cfg.tab.graphics': 'Graphics',
+      'cfg.tab.controls': 'Controls',
+      'cfg.tab.game': 'Game',
+      'cfg.sound': 'Sound effects',
+      'cfg.soundHint': 'Placeholder sounds for placing, capturing and winning.',
+      'cfg.volume': 'Volume',
+      'cfg.vibrate': 'Vibration',
+      'cfg.vibrateHint': 'A small buzz when you play. Android phones only; iPhone doesn\'t allow it.',
+      'cfg.theme': 'Board style',
+      'cfg.coords': 'Show letters and numbers',
+      'cfg.coordsHint': 'The coordinates (A–T, 1–19) on the edges. Turned off, the board gets a bit bigger.',
+      'cfg.lastMove': 'Mark the last move',
+      'cfg.anim': 'Animations',
+      'cfg.animHint': 'The stone lifts and drops softly. Turn it off if your phone is slow or it makes you dizzy.',
+      'cfg.stoneSize': 'Stone size',
+      'cfg.size.small': 'Small',
+      'cfg.size.normal': 'Normal',
+      'cfg.size.large': 'Large',
+      'cfg.confirm': 'How to confirm a move',
+      'cfg.confirm.button': 'Button',
+      'cfg.confirm.double': 'Double tap',
+      'cfg.confirm.none': 'Direct',
+      'cfg.confirm.buttonHint': 'Tap or drag the stone into place, then press Confirm.',
+      'cfg.confirm.doubleHint': 'Tap or drag the stone into place, then tap that same stone again to play it.',
+      'cfg.confirm.noneHint': 'One tap plays instantly. Dragging and dropping also plays. Careful: there\'s no undo.',
+      'cfg.confirmNote': 'These options work with touch and with the mouse (click or drag).',
+      'cfg.lift': 'Stone height while dragging',
+      'cfg.lift.low': 'Low',
+      'cfg.lift.mid': 'Medium',
+      'cfg.lift.high': 'High',
+      'cfg.liftHint': 'How far above your finger the stone floats. Higher = easier to see, but you have to move your finger further down.',
+      'cfg.guides': 'Row and column guides while dragging',
+      'cfg.zone': 'Show the forbidden center zone',
+      'cfg.zoneHint': 'The shaded square of the tournament rule, on player 1\'s second move.',
+      'cfg.reset': 'Reset settings',
+      'cfg.resetConfirm': 'Put every setting on this screen back to the factory defaults?',
+      'cfg.resetDone': 'Settings reset',
+      'menu.start': 'Play',
+      'menu.online': 'Play online',
+      'menu.back': 'Back',
+      'menu.rules': 'How to play',
+      'menu.close': 'Close',
+      'hud.turn': '{name}\'s turn',
+      'hud.captures': 'Captured pairs',
+      'hud.restart': 'Restart',
+      'hud.confirm': 'Confirm',
+      'hud.dragHint': 'Drop it wherever you like and press Confirm.',
+      'hud.dragHintDouble': 'Tap the stone again to play it.',
+      'hud.tapHintDouble': 'Tap the stone again to confirm.',
+      'hud.tapHintButton': 'Press Confirm to play it.',
+      'hud.menu': 'Menu',
+      'hud.lastMove': 'Last move',
+      'toast.captured': '{name} captured a pair',
+      'toast.capturedMany': '{name} captured {n} pairs',
+      'end.winLine': '{name} won with five in a row',
+      'end.winCaptures': '{name} won by capturing five pairs',
+      'end.winBoth': '{name} won: five in a row and five pairs at once',
+      'end.draw': 'Draw: the board is full',
+      'end.rematch': 'Rematch',
+      'end.toMenu': 'Back to menu',
+      'confirm.leaveAI': 'Leave the game against the machine?',
+      'confirm.restart': 'Restart the game in progress?',
+      'err.OCCUPIED': 'That intersection is already taken.',
+      'err.OUT_OF_BOUNDS': 'Outside the board.',
+      'err.GAME_OVER': 'The game is over.',
+      'err.NOT_YOUR_TURN': 'It\'s not your turn.',
+      'err.MUST_PLAY_CENTER': 'The first stone goes in the center.',
+      'err.TOO_CLOSE_TO_CENTER': 'Your second stone must be 3 or more cells from the center.',
+      'err.INVALID_COORDS': 'Invalid move.',
+      'rules.title': 'How to play',
+      'rules.1': 'The goal is to make five stones in a row (horizontal, vertical or diagonal).',
+      'rules.2': 'You play on the intersections of the board, taking turns placing one stone at a time.',
+      'rules.3': 'If you trap exactly two enemy stones between two of yours, you capture them and the captured pair is removed from the board.',
+      'rules.4': 'You can also win by capturing five pairs of stones.',
+      'rules.5': 'With tournament rules, player 1 opens in the center and their second stone goes 3 or more cells away from the center.',
+      'rules.6': 'Depending on the game mode, there is a variant where a line of 6 or more stones does not win.',
+      'hud.resign': 'Resign',
+      'online.title': 'Play online',
+      'online.sub': 'Create a room and send the link to your rival, or join with the code you were given.',
+      'online.yourName': 'Your name',
+      'online.create': 'Create room',
+      'online.createHint': 'The rules ticked in the menu are used. In the first game you play with player 1\'s stones.',
+      'online.or': 'or',
+      'online.code': 'Room code',
+      'online.join': 'Join',
+      'online.connecting': 'Connecting… if the server was asleep it can take up to a minute.',
+      'online.stillTrying': 'Not connected yet. Still trying…',
+      'online.noServer': 'Online mode isn\'t set up in this version yet.',
+      'online.waitTitle': 'Room created',
+      'online.waitSub': 'Send this link to your rival. The game starts as soon as they join.',
+      'online.copyLink': 'Copy link',
+      'online.copied': 'Link copied',
+      'online.copyFail': 'Couldn\'t copy. Copy it by hand.',
+      'online.share': 'Share',
+      'online.cancel': 'Cancel',
+      'online.you': '(you)',
+      'online.yourTurn': 'Your turn',
+      'online.theirTurn': '{name}\'s turn',
+      'online.wait': 'Wait for your turn.',
+      'online.rivalOffline': '{name} disconnected. Waiting for them to come back…',
+      'online.reconnecting': 'Reconnecting…',
+      'online.claim': 'Claim victory',
+      'online.resignConfirm': 'Resign the game? Your rival wins.',
+      'online.leaveConfirm': 'Leave the room? It counts as resigning.',
+      'online.leave': 'Leave room',
+      'online.rematchWait': 'Waiting for your rival to accept…',
+      'online.rematchRival': '{name} wants a rematch.',
+      'online.roomGone': 'The room no longer exists: the server restarted or too much time passed. Create a new one.',
+      'toast.rematch': 'New game. You are now player {n}.',
+      'end.winResign': '{loser} resigned. {name} wins.',
+      'video.make': 'Game video',
+      'video.title': 'Game video',
+      'video.working': 'Preparing the video… {pct}%. Keep this screen open.',
+      'video.ready': 'Done. You can watch it and download it.',
+      'video.unsupported': 'This browser can\'t record video. Try Chrome, Edge, Firefox or an up-to-date Safari.',
+      'video.error': 'Couldn\'t record the video: {msg}',
+      'video.save': 'Download video',
+      'video.share': 'Share',
+      'video.back': 'Back',
+      'video.cancel': 'Cancel',
+      'video.footer': 'PENTE · move {n} of {total}',
+      'video.hint': 'It\'s made on your device, without internet, and deleted when a new game starts. It takes as long as the replayed game.',
+      'end.viewBoard': 'View the board',
+      'end.result': 'Result and rematch',
+      'menu.timer': 'Clock',
+      'menu.timerHint': '10 minutes per player for the whole game and 1 minute per move. If either one runs out, you lose.',
+      'end.winTime': '{loser} ran out of time. {name} wins.',
+      'clock.title': 'Total time left (and what\'s left of this move)',
+      'end.winForfeit': '{loser} disconnected. {name} wins.',
+      'err.ROOM_NOT_FOUND': 'That room doesn\'t exist. Check the code.',
+      'err.ROOM_FULL': 'The room is full: it already has two players.',
+      'err.BAD_TOKEN': 'Couldn\'t recover your seat in the room.',
+      'err.SERVER_BUSY': 'The server is full. Try again in a bit.',
+      'err.WAITING_FOR_RIVAL': 'Your rival hasn\'t joined yet.',
+      'err.RATE_LIMIT': 'You\'re going too fast. Wait a second.',
+      'err.CANNOT_CLAIM': 'You can\'t claim victory yet.',
+      'err.GAME_NOT_OVER': 'The game isn\'t over yet.',
+      'err.NOT_IN_ROOM': 'You\'re not in a room.',
+      'err.BAD_REQUEST': 'Something went wrong. Try again.',
+      'menu.local': 'Play locally',
+      'local.title': 'Local game',
+      'local.sub': 'On this device: against another person or against the machine (no internet needed).',
+      'local.mode': 'Against',
+      'local.modePerson': 'Another person',
+      'local.modeAI': 'The machine',
+      'cfg.captureFx': 'Captured stones',
+      'cfg.fx.shatter': 'Shatter',
+      'cfg.fx.fade': 'Fade away',
+      'cfg.fx.none': 'No effect',
+      'cfg.captureFxHint': 'What happens to the stones that get captured. With "Animations" off, no effect is shown.',
+      'online.visibility': 'Room type',
+      'online.private': 'Private',
+      'online.public': 'Public',
+      'online.privateHint': 'Only people with the code or the link can join. Nobody can watch.',
+      'online.publicHint': 'Shows up in the Rooms list with your name. Anyone can join or watch.',
+      'online.rooms': 'See public rooms',
+      'online.spectateOffer': 'Watch the game',
+      'online.waitPublic': 'Public room: it appears in the Rooms list.',
+      'online.waitPrivate': 'Private room: only people with the code can join.',
+      'rooms.title': 'Rooms',
+      'rooms.sub': 'Public games happening right now. Updates by itself.',
+      'rooms.refresh': 'Refresh',
+      'rooms.empty': 'There are no public rooms right now. Create a public one and let others join.',
+      'rooms.waiting': '{name} is waiting for a rival',
+      'rooms.vs': '{a} vs {b}',
+      'rooms.statusWaiting': 'Waiting for a rival',
+      'rooms.statusPlaying': 'Playing · {n} moves',
+      'rooms.statusOver': 'Finished · {n} moves',
+      'rooms.watching': '{n} watching',
+      'rooms.play': 'Play',
+      'rooms.watch': 'Watch',
+      'spec.badge': 'Watching room {code} · {n} watching',
+      'spec.leave': 'Leave',
+      'spec.noPlay': 'You\'re watching: you can\'t play.',
+      'spec.over': '{name} wins.',
+      'err.PRIVATE_ROOM': 'That room is private: it can\'t be watched.',
+      'err.NOT_STARTED': 'It hasn\'t started: the second player is missing.',
+      'err.SPECTATORS_FULL': 'The room already has too many spectators.',
+      'err.ALREADY_IN_ROOM': 'You\'re already in a room. Leave it first.',
+      'err.NOT_A_PLAYER': 'You\'re watching: you can\'t do that.',
+      'side.moves': 'Moves',
+      'side.openMoves': 'Moves',
+      'side.openBoth': 'Moves and chat',
+      'moves.empty': 'No moves yet.',
+      'moves.legend': 'x = capture (how many stones).',
+      'moves.copy': 'Copy',
+      'moves.copied': 'Copied ✓',
+      'moves.copyAll': 'Copy moves',
+      'moves.save': 'Download',
+      'moves.share': 'Share',
+      'moves.copyFail': 'Couldn\'t copy. Try Download.',
+      'moves.txtHeader': 'Pente {size}×{size}',
+      'moves.txtRules': 'Rules: {rules}',
+      'moves.ruleTournament': 'tournament',
+      'moves.ruleExact': 'line of exactly 5',
+      'moves.ruleFree': 'no special rules',
+      'moves.txtResult': 'Result: {text}',
+      'moves.txtDate': 'Date: {date}',
+      'moves.txtLegend': 'x = capture',
+      'chat.title': 'Chat',
+      'chat.hide': 'Hide chat',
+      'chat.show': 'Show chat',
+      'chat.placeholder': 'Write a message…',
+      'chat.send': 'Send',
+      'chat.people': 'Tap a name to mute them.',
+      'chat.mute': 'Mute {name}',
+      'chat.unmute': 'Unmute {name}',
+      'chat.empty': 'Nobody has written yet.',
+      'chat.spec': 'watching',
+      'chat.you': 'you',
+      'cfg.chat': 'Enable chat',
+      'cfg.chatHint': 'If you turn it off you neither see nor send messages. It only exists in online games.',
+      'cfg.loupe': 'Magnifier while dragging',
+      'cfg.loupeHint': 'A square at the bottom right magnifies the area while you drag a stone, so you can see exactly where it lands. Made for phones.',
+      'theme.papel': 'Paper',
+      'err.CHAT_RATE': 'Slow down: one message at a time.',
+      'menu.ai': 'Play against the machine',
+      'ai.title': 'Against the machine',
+      'ai.sub': 'No internet and no waiting for anyone.',
+      'ai.yourName': 'Your name',
+      'ai.you': 'You',
+      'ai.level': 'Level',
+      'ai.easy': 'Easy',
+      'ai.medium': 'Medium',
+      'ai.hard': 'Hard',
+      'ai.hint.easy': 'It gets distracted and often slips. A warm-up.',
+      'ai.hint.medium': 'Looks two moves ahead: blocks the obvious and doesn\'t give away captures.',
+      'ai.hint.hard': 'Thinks up to 4 moves ahead (up to ~1 second). A decent rival, not an unbeatable one.',
+      'ai.side': 'Who starts',
+      'ai.sideFirst': 'Me',
+      'ai.sideSecond': 'The machine',
+      'ai.sideRandom': 'Random',
+      'ai.start': 'Start',
+      'ai.offline': 'Everything runs on your device: it works offline.',
+      'ai.name.easy': 'Machine (easy)',
+      'ai.name.medium': 'Machine (medium)',
+      'ai.name.hard': 'Machine (hard)',
+      'ai.thinking': '{name} is thinking…',
+      'a11y.board': 'Pente board',
+      'player.1': 'Player 1',
+      'player.2': 'Player 2',
+      'menu.language': 'Language',
+      'lang.title': 'Language',
+      'lang.sub': 'Choose the language of the app. It is saved on this device.',
+      'a11y.captures': 'Captured pairs',
+      'a11y.sidePanel': 'Moves and chat',
+      'a11y.close': 'Close',
+      'a11y.roomCode': 'Room code'
+  });
 })(typeof self !== 'undefined' ? self : this);
 </script>
 <script>
@@ -1388,6 +1697,7 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
 (function () {
   'use strict';
   var P = window.PenteCore, t = window.I18n.t;
+  try { window.I18n.setLang(window.I18n.detect(localStorage.getItem('pente.lang'), navigator.languages || [navigator.language])); } catch (e) { window.I18n.setLang('es'); }   // idioma elegido o el del navegador
   var $ = function (id) { return document.getElementById(id); };
 
   var canvas = $('board'), ctx = canvas.getContext('2d');
@@ -2465,10 +2775,36 @@ html[data-theme="papel"] .clock, html[data-theme="papel"] .clock * { font-family
     if (online.net.send({ t: 'chat', text: txt })) $('chatInput').value = '';
   });
 
+  /* ---------- Idioma ---------- */
+  var LANG_KEY = 'pente.lang';
+  function storedLang() { try { return localStorage.getItem(LANG_KEY); } catch (e) { return null; } }
+  function buildLangList() {
+    var box = $('langList'); box.innerHTML = '';
+    window.I18n.available().forEach(function (code) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'btn lang-opt'; b.dataset.code = code;
+      b.textContent = window.I18n.STRINGS[code]['lang.name'] || code; b.setAttribute('aria-pressed', String(code === window.I18n.getLang()));
+      b.addEventListener('click', function () { setLanguage(code); });
+      box.appendChild(b);
+    });
+  }
+  // Cambia el idioma al instante: textos fijos, y se redibuja todo lo que se arma por código
+  function setLanguage(code) {
+    if (!window.I18n.STRINGS[code]) return;
+    window.I18n.setLang(code); try { localStorage.setItem(LANG_KEY, code); } catch (e) {}
+    applyI18n(); buildThemePicker(); buildLangList(); syncAiUi(); syncLocalMode();
+    updateOnlineButtons(); updateRematchUi(); setStatus(''); renderMoves(); render();
+    var r = $('roomsList'); if (r && rooms.open) requestRooms();
+  }
+  $('btnLang').addEventListener('click', function () { buildLangList(); open('langOverlay'); });
+  $('btnLangBack').addEventListener('click', function () { open('menuOverlay'); });
+
   /* ---------- Textos estáticos (i18n) ---------- */
   function applyI18n() {
     document.title = t('app.title');
     document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = t(el.getAttribute('data-i18n')); });
+    document.querySelectorAll('[data-i18n-aria]').forEach(function (el) { el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria'))); });
+    $('btnLang').textContent = '🌐 ' + t('menu.language') + ' · ' + t('lang.name');
+    document.documentElement.lang = window.I18n.getLang();
     document.querySelectorAll('[data-i18n-ph]').forEach(function (el) { el.placeholder = t(el.getAttribute('data-i18n-ph')); });
     canvas.setAttribute('aria-label', t('a11y.board'));
     var ol = $('rulesList'); ol.innerHTML = '';
