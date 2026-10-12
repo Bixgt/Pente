@@ -274,6 +274,7 @@ body.in-screen .app { visibility: hidden; }
     <div class="btns">
       <button class="btn primary" id="btnResume" hidden data-i18n="menu.resume"></button>
       <button class="btn primary" id="btnLocal" data-i18n="menu.local"></button>
+      <button class="btn primary" id="btnAI" data-i18n="menu.ai"></button>
       <button class="btn primary" id="btnOnline" data-i18n="menu.online"></button>
       <button class="btn" id="btnSettings" data-i18n="menu.settings"></button>
       <button class="btn" id="btnRules" data-i18n="menu.rules"></button>
@@ -295,6 +296,28 @@ body.in-screen .app { visibility: hidden; }
       <button class="btn primary" id="btnStart" data-i18n="menu.start"></button>
       <button class="btn" id="btnLocalBack" data-i18n="menu.back"></button>
     </div>
+  </div>
+</div>
+
+<!-- Contra la máquina (offline) -->
+<div class="overlay screen" id="aiOverlay">
+  <div class="screen-body">
+    <h2 data-i18n="ai.title"></h2>
+    <p class="sub" data-i18n="ai.sub"></p>
+    <div class="field"><label class="lbl" for="aiName" data-i18n="ai.yourName"></label><input type="text" id="aiName" maxlength="18" autocomplete="off"></div>
+    <div class="field"><span class="lbl" data-i18n="ai.level"></span>
+      <div class="seg" id="aiLevel" role="group"><button type="button" class="seg-opt" data-val="easy" data-i18n="ai.easy"></button><button type="button" class="seg-opt" data-val="medium" data-i18n="ai.medium"></button><button type="button" class="seg-opt" data-val="hard" data-i18n="ai.hard"></button></div>
+      <p class="hint" id="aiLevelHint"></p></div>
+    <div class="field"><span class="lbl" data-i18n="ai.side"></span>
+      <div class="seg" id="aiSide" role="group"><button type="button" class="seg-opt" data-val="first" data-i18n="ai.sideFirst"></button><button type="button" class="seg-opt" data-val="second" data-i18n="ai.sideSecond"></button><button type="button" class="seg-opt" data-val="random" data-i18n="ai.sideRandom"></button></div></div>
+    <div class="field"><span class="lbl" data-i18n="menu.size"></span><div class="seg sizePicker" role="group"><button type="button" class="seg-opt" data-size="13" data-i18n="menu.size13"></button><button type="button" class="seg-opt" data-size="19" data-i18n="menu.size19"></button></div></div>
+    <label class="check"><input type="checkbox" data-opt="tournamentRule" checked><span><span data-i18n="menu.tournamentRule"></span><small data-i18n="menu.tournamentRuleHint"></small></span></label>
+    <label class="check"><input type="checkbox" data-opt="exactFive"><span><span data-i18n="menu.exactFive"></span><small data-i18n="menu.exactFiveHint"></small></span></label>
+    <div class="btns">
+      <button class="btn primary" id="btnAIStart" data-i18n="ai.start"></button>
+      <button class="btn" id="btnAIBack" data-i18n="menu.back"></button>
+    </div>
+    <p class="hint" data-i18n="ai.offline"></p>
   </div>
 </div>
 
@@ -727,6 +750,7 @@ body.in-screen .app { visibility: hidden; }
       'end.draw': 'Empate: el tablero se llenó',
       'end.rematch': 'Revancha',
       'end.toMenu': 'Volver al menú',
+      'confirm.leaveAI': '¿Dejar la partida contra la máquina?',
       'confirm.restart': '¿Reiniciar la partida en curso?',
       'err.OCCUPIED': 'Esa intersección ya está ocupada.',
       'err.OUT_OF_BOUNDS': 'Fuera del tablero.',
@@ -861,6 +885,28 @@ body.in-screen .app { visibility: hidden; }
       'cfg.loupeHint': 'Un cuadrado abajo a la derecha amplía la zona mientras arrastrás una ficha, para ver bien dónde cae. Pensado para celular.',
       'theme.papel': 'Papel',
       'err.CHAT_RATE': 'Más despacio: un mensaje por vez.',
+      'menu.ai': 'Jugar contra la máquina',
+      'ai.title': 'Contra la máquina',
+      'ai.sub': 'Sin internet y sin esperar a nadie.',
+      'ai.yourName': 'Tu nombre',
+      'ai.you': 'Vos',
+      'ai.level': 'Nivel',
+      'ai.easy': 'Fácil',
+      'ai.medium': 'Medio',
+      'ai.hard': 'Difícil',
+      'ai.hint.easy': 'Se distrae y se equivoca seguido. Para entrar en calor.',
+      'ai.hint.medium': 'Mira dos jugadas adelante: tapa lo obvio y no regala capturas.',
+      'ai.hint.hard': 'Piensa hasta 4 jugadas adelante (hasta ~1 segundo). Un rival decente, no invencible.',
+      'ai.side': 'Quién empieza',
+      'ai.sideFirst': 'Yo',
+      'ai.sideSecond': 'La máquina',
+      'ai.sideRandom': 'Al azar',
+      'ai.start': 'Empezar',
+      'ai.offline': 'Todo corre en tu dispositivo: funciona sin conexión.',
+      'ai.name.easy': 'Máquina (fácil)',
+      'ai.name.medium': 'Máquina (media)',
+      'ai.name.hard': 'Máquina (difícil)',
+      'ai.thinking': '{name} está pensando…',
       'a11y.board': 'Tablero de Pente',
       'player.1': 'Jugador 1',
       'player.2': 'Jugador 2'
@@ -1080,6 +1126,194 @@ body.in-screen .app { visibility: hidden; }
 })(typeof self !== 'undefined' ? self : this);
 </script>
 <script>
+/* IA de Pente (rival offline). Lógica pura, sin DOM ni red: funciona en el navegador (window.PenteAI) y en Node (require).
+ *
+ *   PenteAI.chooseMove(state, { level: 'easy'|'medium'|'hard', timeMs, rng }) -> {x, y}
+ *
+ * Cómo piensa (en cristiano):
+ *  1. Mira solo las casillas cercanas a fichas ya puestas (si no, serían cientos de jugadas inútiles).
+ *  2. Les pone una nota rápida: cuánto arma una línea propia, cuánto bloquea una del rival, si captura.
+ *  3. Se queda con las mejores y "mira hacia adelante" jugando y respondiendo (búsqueda alfa-beta),
+ *     puntuando el tablero por líneas abiertas, pares capturados y pares propios vulnerables.
+ *  Siempre juega la victoria inmediata si la hay. Respeta las reglas porque juega con el mismo núcleo (PenteCore).
+ *
+ * Niveles:  easy   = mira 1 jugada, con ruido y despistes (se le puede ganar siendo principiante)
+ *           medium = mira 2 jugadas (ve que le ganás en la siguiente y la tapa)
+ *           hard   = profundización iterativa hasta 4 jugadas dentro de un tiempo (por defecto 700 ms)
+ * No es invencible: es un rival decente para jugar sin conexión, no un motor de torneo. */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./core/pente.js'));
+  else root.PenteAI = factory(root.PenteCore);
+})(typeof self !== 'undefined' ? self : this, function (P) {
+  'use strict';
+
+  var AXES = [[1, 0], [0, 1], [1, 1], [1, -1]];
+  var WIN = 1000000;
+
+  var LEVELS = {
+    easy:   { depth: 1, width: 6,  timeMs: 0,   noise: 0.55, slipTop: 5, slipChance: 0.35, seesWin: 0.85 },
+    medium: { depth: 2, width: 10, timeMs: 350, noise: 0.08, slipTop: 1, slipChance: 0,    seesWin: 1 },
+    hard:   { depth: 4, width: 12, timeMs: 700, noise: 0,    slipTop: 1, slipChance: 0,    seesWin: 1 }
+  };
+
+  // Valor de una racha de L fichas con "open" extremos libres (0, 1 o 2).
+  function lineScore(L, open) {
+    if (L >= 5) return 100000;
+    if (open === 0) return 0;
+    if (L === 4) return open === 2 ? 20000 : 4000;
+    if (L === 3) return open === 2 ? 1800 : 220;
+    if (L === 2) return open === 2 ? 120 : 16;
+    return open === 2 ? 6 : 1;
+  }
+
+  function cellAt(s, x, y) { return (x < 0 || y < 0 || x >= s.size || y >= s.size) ? -1 : s.board[y * s.size + x]; }   // -1 = fuera
+
+  /* Nota rápida de poner "p" en (x,y): líneas que arma + líneas del rival que tapa + capturas. Barata: se usa para ordenar jugadas. */
+  function quick(s, x, y, p) {
+    var q = P.opponent(p), total = 0, a, d, L, open, cx, cy, v;
+    for (a = 0; a < 4; a++) {
+      var dx = AXES[a][0], dy = AXES[a][1];
+      for (var side = 0; side < 2; side++) {                 // side 0: yo armo; side 1: tapo al rival (como si él pusiera acá)
+        var who = side ? q : p; L = 1; open = 0;
+        for (d = 1; d < 5; d++) { cx = x + dx * d; cy = y + dy * d; v = cellAt(s, cx, cy); if (v === who) L++; else { if (v === 0) open++; break; } }
+        for (d = 1; d < 5; d++) { cx = x - dx * d; cy = y - dy * d; v = cellAt(s, cx, cy); if (v === who) L++; else { if (v === 0) open++; break; } }
+        total += lineScore(L, open) * (side ? 0.92 : 1);
+      }
+    }
+    var caps = P.findCaptures(s, x, y, p).length / 2;
+    if (caps) total += 1900 * caps + (s.captures[p] + caps >= s.options.capturesToWin ? 90000 : s.captures[p] >= 3 ? 1500 : 0);
+    var theirs = P.findCaptures({ size: s.size, board: s.board }, x, y, q).length / 2;           // si ÉL jugara acá, ¿capturaría? tapar vale
+    if (theirs) total += 1100 * theirs + (s.captures[q] + theirs >= s.options.capturesToWin ? 80000 : 0);
+    var c = (s.size - 1) / 2; total -= (Math.abs(x - c) + Math.abs(y - c)) * 0.3;                 // desempate: el centro vale un poquito
+    return total;
+  }
+
+  /* Evaluación estática del tablero desde el punto de vista de "p": líneas abiertas, pares capturados y pares vulnerables. */
+  function evaluate(s, p) {
+    var n = s.size, b = s.board, score = 0, a, x, y, v;
+    for (a = 0; a < 4; a++) {
+      var dx = AXES[a][0], dy = AXES[a][1];
+      for (y = 0; y < n; y++) for (x = 0; x < n; x++) {
+        v = b[y * n + x]; if (!v) continue;
+        var px = x - dx, py = y - dy;
+        if (px >= 0 && py >= 0 && px < n && py < n && b[py * n + px] === v) continue;       // no es el inicio de la racha
+        var L = 1, cx = x + dx, cy = y + dy;
+        while (cx >= 0 && cy >= 0 && cx < n && cy < n && b[cy * n + cx] === v) { L++; cx += dx; cy += dy; }
+        var after = (cx >= 0 && cy >= 0 && cx < n && cy < n) ? b[cy * n + cx] : -1, before = (px >= 0 && py >= 0 && px < n && py < n) ? b[py * n + px] : -1;
+        var open = (after === 0 ? 1 : 0) + (before === 0 ? 1 : 0), sc = lineScore(L, open);
+        if (L === 2 && ((after === 0 && before > 0 && before !== v) || (before === 0 && after > 0 && after !== v))) sc -= 650;   // par con un rival de un lado y hueco del otro: lo pueden capturar
+        score += (v === p) ? sc : -sc * 1.05;
+      }
+    }
+    var q = P.opponent(p), cd = s.captures[p] - s.captures[q];
+    score += cd * 1000;
+    if (s.captures[p] >= 4) score += 3500; if (s.captures[q] >= 4) score -= 3800;
+    return score;
+  }
+
+  /* Casillas a considerar: vacías, a distancia <= 2 de alguna ficha, y legales (regla de torneo incluida). */
+  function candidates(s) {
+    var n = s.size, b = s.board, mark = new Uint8Array(n * n), any = false, out = [], x, y, i, j;
+    for (y = 0; y < n; y++) for (x = 0; x < n; x++) {
+      if (!b[y * n + x]) continue;
+      any = true;
+      for (j = -2; j <= 2; j++) for (i = -2; i <= 2; i++) {
+        var xx = x + i, yy = y + j;
+        if (xx >= 0 && yy >= 0 && xx < n && yy < n && !b[yy * n + xx]) mark[yy * n + xx] = 1;
+      }
+    }
+    if (!any) { var c = (n - 1) / 2; return P.validateMove(s, c, c) ? P.legalMoves(s).slice(0, 1) : [{ x: c, y: c }]; }
+    for (i = 0; i < n * n; i++) if (mark[i]) { x = i % n; y = (i - x) / n; if (!P.validateMove(s, x, y)) out.push({ x: x, y: y }); }
+    if (!out.length) {                                       // p. ej. 3ª jugada con regla de torneo: lo legal más cerca del centro
+      var all = P.legalMoves(s), cc = (n - 1) / 2;
+      all.sort(function (m1, m2) { return (Math.max(Math.abs(m1.x - cc), Math.abs(m1.y - cc)) - Math.max(Math.abs(m2.x - cc), Math.abs(m2.y - cc))) || (m1.y - m2.y) || (m1.x - m2.x); });
+      out = all.slice(0, 12);
+    }
+    return out;
+  }
+
+  function ordered(s, width, noiseFn) {
+    var p = s.current, cs = candidates(s);
+    cs.forEach(function (m) { m.q = quick(s, m.x, m.y, p) + (noiseFn ? noiseFn() : 0); });
+    cs.sort(function (a, b) { return b.q - a.q; });
+    return width ? cs.slice(0, width) : cs;
+  }
+
+  function chooseMove(state, opts) {
+    opts = opts || {};
+    var lv = LEVELS[opts.level] || LEVELS.medium, rng = opts.rng || Math.random;
+    var budget = opts.timeMs === undefined ? lv.timeMs : opts.timeMs;
+    var me = state.current, t0 = Date.now(), aborted = false, nodes = 0;
+
+    var cands = ordered(state, 0, lv.noise ? function () { return (rng() - 0.5) * lv.noise * 2000; } : null);
+    if (!cands.length) return null;
+
+    // 1) ¿gano ya? (en "fácil" a veces no lo ve)
+    if (rng() < lv.seesWin) {
+      var top = cands.slice(0, 40);
+      for (var i = 0; i < top.length; i++) { var r0 = P.playMove(state, top[i].x, top[i].y); if (r0.ok && r0.won && r0.state.winner === me) return { x: top[i].x, y: top[i].y }; }
+    }
+
+    // 2) fácil: elige entre las mejores por nota rápida (a veces se equivoca)
+    if (lv.depth === 1) {
+      var pick = rng() < lv.slipChance ? Math.min(cands.length, lv.slipTop) : Math.min(cands.length, 2);
+      var m = cands[Math.floor(rng() * pick)];
+      return { x: m.x, y: m.y };
+    }
+
+    // 3) medio / difícil: alfa-beta; en "difícil" con profundización iterativa dentro del tiempo
+    function negamax(s, depth, alpha, beta, ply) {
+      if ((++nodes & 63) === 0 && budget && Date.now() - t0 > budget) aborted = true;
+      if (aborted) return 0;
+      if (depth === 0) return evaluate(s, s.current);
+      var list = ordered(s, lv.width, null), best = -Infinity;
+      if (!list.length) return 0;
+      for (var i = 0; i < list.length; i++) {
+        var r = P.playMove(s, list[i].x, list[i].y);
+        if (!r.ok) continue;
+        var v;
+        if (r.won) v = (r.state.winner === s.current ? WIN - ply : -WIN + ply);
+        else if (r.draw) v = 0;
+        else v = -negamax(r.state, depth - 1, -beta, -alpha, ply + 1);
+        if (aborted) return 0;
+        if (v > best) best = v;
+        if (best > alpha) alpha = best;
+        if (alpha >= beta) break;
+      }
+      return best === -Infinity ? 0 : best;
+    }
+
+    var rootList = cands.slice(0, lv.width + 4), bestMove = rootList[0], maxDepth = lv.depth;
+    for (var depth = 1; depth <= maxDepth; depth++) {
+      var bestV = -Infinity, bestHere = null, alpha = -Infinity;
+      for (var k = 0; k < rootList.length; k++) {
+        var mv = rootList[k], r = P.playMove(state, mv.x, mv.y);
+        if (!r.ok) continue;
+        var v;
+        if (r.won) v = WIN;
+        else if (r.draw) v = 0;
+        else v = -negamax(r.state, depth - 1, -Infinity, -alpha, 1);
+        if (aborted) break;
+        v += lv.noise ? (rng() - 0.5) * lv.noise * 400 : 0;
+        mv.v = v;
+        if (v > bestV) { bestV = v; bestHere = mv; }
+        if (bestV > alpha) alpha = bestV;
+      }
+      if (aborted) break;                                   // se acabó el tiempo: vale lo de la profundidad anterior
+      if (bestHere) {
+        bestMove = bestHere;
+        rootList.sort(function (a, b) { return (b.v === undefined ? -Infinity : b.v) - (a.v === undefined ? -Infinity : a.v); });   // la mejor primero en la próxima vuelta
+      }
+      if (bestV >= WIN - 50) break;                         // ya ve una victoria forzada
+      if (budget && Date.now() - t0 > budget * 0.6) break;  // no alcanza el tiempo para otra capa
+    }
+    return { x: bestMove.x, y: bestMove.y };
+  }
+
+  return { chooseMove: chooseMove, evaluate: evaluate, candidates: candidates, LEVELS: LEVELS };
+});
+</script>
+<script>
 /* UI de Pente — Fase 1: partida local de 2 jugadores. No contiene reglas: todo pasa por PenteCore. */
 (function () {
   'use strict';
@@ -1123,6 +1357,8 @@ body.in-screen .app { visibility: hidden; }
   function centerIdx() { return (boardN() - 1) / 2; }
   function sfx(name) { if (window.PenteSound) window.PenteSound.play(name); }
   function buzz(ms) { if (window.PenteSound) window.PenteSound.buzz(ms); }
+  var LEVELS_OK = ['easy', 'medium', 'hard'];
+  var ai = { active: false, level: 'medium', human: 1, bot: 2, timer: 0, token: 0, thinking: false };   // rival offline
   var fx = [];            // fichas capturadas que se están desvaneciendo / rompiendo
   var rooms = { open: false, timer: 0 };
   var online = {
@@ -1134,8 +1370,9 @@ body.in-screen .app { visibility: hidden; }
 
   // ¿terminó la partida? (en online puede terminar por abandono, sin que el tablero lo muestre)
   function isOver() { return !state || state.status !== 'playing' || (online.active && !!online.over); }
-  function canPlayNow() { return !!state && !isOver() && (!online.active || state.current === online.me); }
+  function canPlayNow() { return !!state && !isOver() && (!online.active || state.current === online.me) && (!ai.active || state.current === ai.human); }
   function turnText() {
+    if (ai.active && state.current === ai.bot) return t('ai.thinking', { name: names[ai.bot] });
     if (!online.active) return t('hud.turn', { name: names[state.current] });
     if (online.conn !== 'open') return t('online.reconnecting');
     if (!names[2]) return '';                       // todavía no entró el rival
@@ -1146,7 +1383,9 @@ body.in-screen .app { visibility: hidden; }
   }
 
   /* ---------- Partida ---------- */
+  function aiStop() { ai.active = false; ai.token++; clearTimeout(ai.timer); ai.thinking = false; }
   function startGame() {
+    aiStop();
     if (online.net) leaveOnline(false);
     names[1] = ($('name1').value || '').trim() || t('player.1');
     names[2] = ($('name2').value || '').trim() || t('player.2');
@@ -1167,11 +1406,12 @@ body.in-screen .app { visibility: hidden; }
   function moveFeedback(captured, ended, winner) {
     if (captured.length) { sfx('place'); setTimeout(function () { sfx('capture'); }, 70); buzz([10, 40, 18]); }
     else { sfx('place'); buzz(8); }
-    if (ended) setTimeout(function () { sfx(online.active && !online.spectator ? (winner === online.me ? 'win' : 'lose') : 'win'); }, 380);
+    if (ended) setTimeout(function () { sfx(online.active && !online.spectator ? (winner === online.me ? 'win' : 'lose') : (ai.active && winner === ai.bot ? 'lose' : 'win')); }, 380);
   }
 
-  function tryMove(x, y) {
+  function tryMove(x, y, fromAI) {
     if (!state || isOver()) return;
+    if (ai.active && !fromAI && state.current !== ai.human) return;       // no se juega por la máquina
     settle = null;
     if (online.active) {
       // En online el servidor es el árbitro: acá solo se comprueba rápido y se envía; el tablero cambia cuando el servidor lo confirma.
@@ -1194,6 +1434,35 @@ body.in-screen .app { visibility: hidden; }
     moveFeedback(r.captured, state.status !== 'playing', state.winner);
     render();
     if (state.status !== 'playing') setTimeout(showEnd, 450);
+    else aiMaybeMove();
+  }
+
+  /* ---------- Rival offline ---------- */
+  function startAI(level, side) {
+    aiStop();
+    if (online.net) leaveOnline(false);
+    var human = side === 'second' ? 2 : side === 'random' ? (Math.random() < 0.5 ? 1 : 2) : 1;
+    ai.active = true; ai.level = level; ai.human = human; ai.bot = human === 1 ? 2 : 1;
+    names[human] = ($('aiName').value || '').trim() || t('ai.you'); names[ai.bot] = t('ai.name.' + level);
+    state = P.createGame({ size: settings.size, tournamentRule: settings.tournamentRule, exactFive: settings.exactFive });
+    hover = pending = drag = settle = null; fx.length = 0; kbd = { x: centerIdx(), y: centerIdx() };
+    closeAll(); render(); setStatus(''); aiMaybeMove();
+  }
+  // Turno de la máquina: un respiro para que se vea que "piensa", y recién ahí calcula (en el dispositivo, sin red).
+  function aiMaybeMove() {
+    if (!ai.active || !state || isOver() || state.current !== ai.bot || ai.thinking || !window.PenteAI) return;
+    ai.thinking = true; pending = hover = null; setStatus(''); render();
+    var tok = ai.token, st = state;
+    ai.timer = setTimeout(function () {
+      if (tok !== ai.token || st !== state) return;
+      var t0 = Date.now(), mv = window.PenteAI.chooseMove(state, { level: ai.level });
+      var wait = Math.max(0, 450 - (Date.now() - t0));
+      ai.timer = setTimeout(function () {
+        if (tok !== ai.token || st !== state) return;
+        ai.thinking = false;
+        if (mv) tryMove(mv.x, mv.y, true);
+      }, wait);
+    }, 80);
   }
 
   /* ---------- Entrada ---------- */
@@ -1724,8 +1993,10 @@ body.in-screen .app { visibility: hidden; }
     leave.textContent = t('online.leave');
   }
   function rematch() {
+    if (ai.active) { ai.token++; clearTimeout(ai.timer); ai.thinking = false; }
     state = P.createGame({ size: state ? state.size : settings.size, tournamentRule: settings.tournamentRule, exactFive: settings.exactFive });
     hover = pending = drag = settle = null; fx.length = 0; kbd = { x: centerIdx(), y: centerIdx() }; closeAll(); setStatus(''); render();
+    if (ai.active) aiMaybeMove();
   }
 
   /* ---------- Online ---------- */
@@ -1769,6 +2040,7 @@ body.in-screen .app { visibility: hidden; }
   }
 
   function startOnline(intent) {
+    aiStop();
     var url = serverUrl();
     if (!url) { onlineMsg(t('online.noServer')); return; }
     intent.name = myName();
@@ -2076,6 +2348,8 @@ body.in-screen .app { visibility: hidden; }
   $('btnEndMenu').addEventListener('click', function () { if (online.active) leaveOnline(false); open('menuOverlay'); });
   $('btnClaim').addEventListener('click', function () { if (online.net) online.net.send({ t: 'claimWin' }); });
   $('btnOnline').addEventListener('click', function () {
+    if (ai.active && state && !isOver() && !confirm(t('confirm.leaveAI'))) return;
+    aiStop();
     if (online.net) { if (online.active && !online.spectator && !isOver() && names[2] && !confirm(t('online.leaveConfirm'))) return; leaveOnline(true); }
     $('btnSpectateOffer').hidden = true;
     onlineMsg(serverUrl() ? '' : t('online.noServer')); open('onlineOverlay');
@@ -2108,6 +2382,22 @@ body.in-screen .app { visibility: hidden; }
       syncSizePicker(); render();
     });
   });
+
+
+  /* ---------- Pantalla "Contra la máquina" ---------- */
+  var aiPref = { level: 'medium', side: 'first' };
+  try { var ap = JSON.parse(localStorage.getItem('pente.ai') || 'null'); if (ap) { if (LEVELS_OK.indexOf(ap.level) >= 0) aiPref.level = ap.level; if (['first', 'second', 'random'].indexOf(ap.side) >= 0) aiPref.side = ap.side; } } catch (e) {}
+  function syncAiUi() {
+    document.querySelectorAll('#aiLevel .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.val === aiPref.level)); });
+    document.querySelectorAll('#aiSide .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.val === aiPref.side)); });
+    $('aiLevelHint').textContent = t('ai.hint.' + aiPref.level);
+  }
+  function saveAiPref() { try { localStorage.setItem('pente.ai', JSON.stringify(aiPref)); } catch (e) {} }
+  document.querySelectorAll('#aiLevel .seg-opt').forEach(function (b) { b.addEventListener('click', function () { aiPref.level = b.dataset.val; saveAiPref(); syncAiUi(); }); });
+  document.querySelectorAll('#aiSide .seg-opt').forEach(function (b) { b.addEventListener('click', function () { aiPref.side = b.dataset.val; saveAiPref(); syncAiUi(); }); });
+  $('btnAI').addEventListener('click', function () { try { if (!$('aiName').value) $('aiName').value = localStorage.getItem('pente.name') || ''; } catch (e) {} syncAiUi(); open('aiOverlay'); });
+  $('btnAIBack').addEventListener('click', function () { open('menuOverlay'); });
+  $('btnAIStart').addEventListener('click', function () { var n = ($('aiName').value || '').trim(); try { if (n) localStorage.setItem('pente.name', n); } catch (e) {} startAI(aiPref.level, aiPref.side); });
 
   /* ---------- Opciones de partida compartidas (local y online) ---------- */
   function syncOpts() { document.querySelectorAll('input[data-opt]').forEach(function (i) { i.checked = !!settings[i.getAttribute('data-opt')]; }); }
@@ -2225,7 +2515,7 @@ body.in-screen .app { visibility: hidden; }
   canvas.addEventListener('focus', render); canvas.addEventListener('blur', render);
 
   applyI18n(); buildThemePicker(); syncSizePicker(); syncOpts(); syncVis(); resize(); open('menuOverlay'); initOnline(); updateSide();
-  window.__pente = { get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; } };  // utilidad para pruebas manuales
+  window.__pente = { get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, startAI: startAI, get ai() { return ai; }, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; } };  // utilidad para pruebas manuales
 })();
 </script>
 <script>
