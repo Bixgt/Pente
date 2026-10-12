@@ -110,6 +110,19 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .seg-opt[aria-pressed="true"] { border-color: var(--accent); background: var(--panel-2); }
 #btnConfirm { flex: 1 1 auto; max-width: 260px; }
 @media (max-width: 520px) { .actions .btn { padding: 12px 12px; } }
+
+/* Configuración */
+.modal.settings { width: min(100%, 480px); }
+.tabs { display: flex; gap: 6px; margin: 12px 0 8px; }
+.tab { flex: 1 1 0; min-width: 0; min-height: 44px; padding: 8px 4px; font-size: 14px; background: var(--bg); border: 2px solid #343a46; border-radius: 12px; font-weight: 700; white-space: nowrap; }
+.tab[aria-selected="true"] { border-color: var(--accent); background: var(--panel-2); }
+.tabpanel { padding-top: 4px; }
+.tabpanel[hidden] { display: none; }
+input[type=range] { width: 100%; accent-color: var(--accent); min-height: 32px; }
+.seg-opt { padding: 8px; }
+@media (max-width: 400px) { .modal.settings { padding: 18px 14px; } .tab { font-size: 13px; padding: 8px 2px; } }
+@media (max-width: 340px) { .tab { font-size: 12px; } }
+@media (max-width: 340px) { .tabs { gap: 4px; } .tab { padding: 8px 0; font-size: 12px; } .modal.settings { padding: 16px 10px; } }
 </style>
 </head>
 <body>
@@ -142,20 +155,64 @@ button { font: inherit; color: inherit; cursor: pointer; }
   <div class="modal" role="dialog" aria-modal="true">
     <h1 data-i18n="menu.title"></h1>
     <p class="sub" data-i18n="menu.subtitle"></p>
-    <div class="field"><span class="lbl" data-i18n="menu.board"></span><div class="themes" id="themePicker" role="group"></div></div>
-    <div class="field"><span class="lbl" data-i18n="menu.size"></span><div class="seg" id="sizePicker" role="group"><button type="button" class="seg-opt" data-size="13" data-i18n="menu.size13"></button><button type="button" class="seg-opt" data-size="19" data-i18n="menu.size19"></button></div><p class="hint" data-i18n="menu.sizeHint"></p></div>
     <div class="field"><label class="lbl" for="name1" data-i18n="menu.p1"></label><input type="text" id="name1" maxlength="18" autocomplete="off"></div>
     <div class="field"><label class="lbl" for="name2" data-i18n="menu.p2"></label><input type="text" id="name2" maxlength="18" autocomplete="off"></div>
+    <div class="field"><span class="lbl" data-i18n="menu.size"></span><div class="seg" id="sizePicker" role="group"><button type="button" class="seg-opt" data-size="13" data-i18n="menu.size13"></button><button type="button" class="seg-opt" data-size="19" data-i18n="menu.size19"></button></div><p class="hint" data-i18n="menu.sizeHint"></p></div>
     <label class="check"><input type="checkbox" id="optTournament" checked><span><span data-i18n="menu.tournamentRule"></span><small data-i18n="menu.tournamentRuleHint"></small></span></label>
     <label class="check"><input type="checkbox" id="optExact"><span><span data-i18n="menu.exactFive"></span><small data-i18n="menu.exactFiveHint"></small></span></label>
-    <label class="check"><input type="checkbox" id="optConfirm"><span><span data-i18n="menu.confirmTap"></span><small data-i18n="menu.confirmTapHint"></small></span></label>
-    <label class="check"><input type="checkbox" id="optSound" checked><span><span data-i18n="menu.sound"></span><small data-i18n="menu.soundHint"></small></span></label>
     <div class="btns">
       <button class="btn primary" id="btnResume" hidden data-i18n="menu.resume"></button>
       <button class="btn primary" id="btnOnline" data-i18n="menu.online"></button>
       <button class="btn" id="btnStart" data-i18n="menu.start"></button>
+      <button class="btn" id="btnSettings" data-i18n="menu.settings"></button>
       <button class="btn" id="btnRules" data-i18n="menu.rules"></button>
     </div>
+  </div>
+</div>
+
+<!-- Configuración -->
+<div class="overlay" id="settingsOverlay">
+  <div class="modal settings" role="dialog" aria-modal="true" aria-labelledby="cfgTitle">
+    <h2 id="cfgTitle" data-i18n="cfg.title"></h2>
+    <div class="tabs" role="tablist" id="cfgTabs">
+      <button type="button" role="tab" class="tab" data-tab="sound" data-i18n="cfg.tab.sound"></button>
+      <button type="button" role="tab" class="tab" data-tab="graphics" data-i18n="cfg.tab.graphics"></button>
+      <button type="button" role="tab" class="tab" data-tab="controls" data-i18n="cfg.tab.controls"></button>
+      <button type="button" role="tab" class="tab" data-tab="game" data-i18n="cfg.tab.game"></button>
+    </div>
+
+    <section class="tabpanel" id="tab-sound" role="tabpanel">
+      <label class="check"><input type="checkbox" id="optSound"><span><span data-i18n="cfg.sound"></span><small data-i18n="cfg.soundHint"></small></span></label>
+      <div class="field"><label class="lbl" for="cfgVolume"><span data-i18n="cfg.volume"></span> <b id="cfgVolumeVal"></b></label><input type="range" id="cfgVolume" min="0" max="100" step="5"></div>
+      <label class="check"><input type="checkbox" id="optVibrate"><span><span data-i18n="cfg.vibrate"></span><small data-i18n="cfg.vibrateHint"></small></span></label>
+    </section>
+
+    <section class="tabpanel" id="tab-graphics" role="tabpanel" hidden>
+      <div class="field"><span class="lbl" data-i18n="cfg.theme"></span><div class="themes" id="themePicker" role="group"></div></div>
+      <div class="field"><span class="lbl" data-i18n="cfg.stoneSize"></span>
+        <div class="seg" data-cfg="stoneSize" role="group"><button type="button" class="seg-opt" data-val="small" data-i18n="cfg.size.small"></button><button type="button" class="seg-opt" data-val="normal" data-i18n="cfg.size.normal"></button><button type="button" class="seg-opt" data-val="large" data-i18n="cfg.size.large"></button></div></div>
+      <label class="check"><input type="checkbox" data-cfg="coords"><span><span data-i18n="cfg.coords"></span><small data-i18n="cfg.coordsHint"></small></span></label>
+      <label class="check"><input type="checkbox" data-cfg="lastMove"><span><span data-i18n="cfg.lastMove"></span></span></label>
+      <label class="check"><input type="checkbox" data-cfg="anim"><span><span data-i18n="cfg.anim"></span><small data-i18n="cfg.animHint"></small></span></label>
+    </section>
+
+    <section class="tabpanel" id="tab-controls" role="tabpanel" hidden>
+      <div class="field"><span class="lbl" data-i18n="cfg.confirm"></span>
+        <div class="seg" data-cfg="confirm" role="group"><button type="button" class="seg-opt" data-val="button" data-i18n="cfg.confirm.button"></button><button type="button" class="seg-opt" data-val="double" data-i18n="cfg.confirm.double"></button><button type="button" class="seg-opt" data-val="none" data-i18n="cfg.confirm.none"></button></div>
+        <p class="hint" id="confirmHint"></p><p class="hint" data-i18n="cfg.confirmNote"></p></div>
+      <div class="field"><span class="lbl" data-i18n="cfg.lift"></span>
+        <div class="seg" data-cfg="lift" role="group"><button type="button" class="seg-opt" data-val="low" data-i18n="cfg.lift.low"></button><button type="button" class="seg-opt" data-val="mid" data-i18n="cfg.lift.mid"></button><button type="button" class="seg-opt" data-val="high" data-i18n="cfg.lift.high"></button></div>
+        <p class="hint" data-i18n="cfg.liftHint"></p></div>
+      <label class="check"><input type="checkbox" data-cfg="guides"><span><span data-i18n="cfg.guides"></span></span></label>
+    </section>
+
+    <section class="tabpanel" id="tab-game" role="tabpanel" hidden>
+      <label class="check"><input type="checkbox" data-cfg="zone"><span><span data-i18n="cfg.zone"></span><small data-i18n="cfg.zoneHint"></small></span></label>
+      <div class="btns"><button type="button" class="btn" id="btnCfgReset" data-i18n="cfg.reset"></button></div>
+    </section>
+
+    <p class="hint" data-i18n="cfg.hintSaved"></p>
+    <div class="btns"><button class="btn primary" id="btnSettingsBack" data-i18n="menu.back"></button></div>
   </div>
 </div>
 
@@ -436,7 +493,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
       'menu.subtitle': 'Cinco en línea, o cinco pares capturados.',
       'menu.p1': 'Jugador 1',
       'menu.p2': 'Jugador 2',
-      'menu.board': 'Tablero',
       'theme.clasico': 'Tradicional',
       'theme.glow': 'Glow',
       'menu.resume': 'Seguir jugando',
@@ -444,14 +500,52 @@ button { font: inherit; color: inherit; cursor: pointer; }
       'menu.size13': '13×13',
       'menu.size19': '19×19',
       'menu.sizeHint': '13×13: casillas más grandes (cómodo en celular) y partidas más cortas. 19×19: el clásico.',
-      'menu.sound': 'Sonidos',
-      'menu.soundHint': 'Efectos provisorios al poner fichas, capturar y ganar.',
       'menu.tournamentRule': 'Regla de torneo',
       'menu.tournamentRuleHint': 'El jugador 1 abre en el centro y su segunda ficha va a 3 o más casillas del centro.',
       'menu.exactFive': 'Seis o más en línea no cuenta',
       'menu.exactFiveHint': 'Solo gana una línea de exactamente cinco. Si capturan una ficha y la línea de seis queda en cinco, cuenta.',
-      'menu.confirmTap': 'Confirmar con segundo toque',
-      'menu.confirmTapHint': 'Pensado para celular: el primer toque marca, el segundo coloca.',
+      'menu.settings': 'Configuración',
+      'menu.gameOptions': 'Reglas de esta partida',
+      'cfg.title': 'Configuración',
+      'cfg.hintSaved': 'Se guarda en este dispositivo y se aplica al instante.',
+      'cfg.tab.sound': 'Sonido',
+      'cfg.tab.graphics': 'Gráficos',
+      'cfg.tab.controls': 'Controles',
+      'cfg.tab.game': 'Juego',
+      'cfg.sound': 'Efectos de sonido',
+      'cfg.soundHint': 'Sonidos provisorios al poner fichas, capturar y ganar.',
+      'cfg.volume': 'Volumen',
+      'cfg.vibrate': 'Vibración',
+      'cfg.vibrateHint': 'Un toquecito al jugar. Solo en celulares Android; el iPhone no la permite.',
+      'cfg.theme': 'Estilo del tablero',
+      'cfg.coords': 'Mostrar letras y números',
+      'cfg.coordsHint': 'Las coordenadas (A–T, 1–19) en los bordes. Apagadas, el tablero gana un poco de tamaño.',
+      'cfg.lastMove': 'Marcar la última jugada',
+      'cfg.anim': 'Animaciones',
+      'cfg.animHint': 'La ficha se levanta y cae suave. Apagalo si tu celular va lento o te marea.',
+      'cfg.stoneSize': 'Tamaño de las fichas',
+      'cfg.size.small': 'Chicas',
+      'cfg.size.normal': 'Normales',
+      'cfg.size.large': 'Grandes',
+      'cfg.confirm': 'Cómo confirmar la jugada',
+      'cfg.confirm.button': 'Botón',
+      'cfg.confirm.double': 'Doble toque',
+      'cfg.confirm.none': 'Directo',
+      'cfg.confirm.buttonHint': 'Tocás o arrastrás la ficha a su lugar y apretás Confirmar.',
+      'cfg.confirm.doubleHint': 'Tocás o arrastrás la ficha a su lugar y volvés a tocar esa misma ficha para jugarla.',
+      'cfg.confirm.noneHint': 'Un toque juega al instante. Arrastrar y soltar también juega. Ojo: no hay vuelta atrás.',
+      'cfg.confirmNote': 'Estas opciones son para pantallas táctiles. Con mouse, un clic juega.',
+      'cfg.lift': 'Altura de la ficha al arrastrar',
+      'cfg.lift.low': 'Baja',
+      'cfg.lift.mid': 'Media',
+      'cfg.lift.high': 'Alta',
+      'cfg.liftHint': 'Qué tan arriba del dedo flota la ficha. Más alta = la ves mejor, pero tenés que bajar más el dedo.',
+      'cfg.guides': 'Guías de fila y columna al arrastrar',
+      'cfg.zone': 'Mostrar la zona prohibida del centro',
+      'cfg.zoneHint': 'El cuadrado sombreado de la regla de torneo, en la segunda jugada del jugador 1.',
+      'cfg.reset': 'Restablecer configuración',
+      'cfg.resetConfirm': '¿Volver todos los ajustes de esta pantalla a como vienen de fábrica?',
+      'cfg.resetDone': 'Configuración restablecida',
       'menu.start': 'Jugar en este dispositivo',
       'menu.online': 'Jugar online',
       'menu.back': 'Volver',
@@ -462,6 +556,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
       'hud.restart': 'Reiniciar',
       'hud.confirm': 'Confirmar',
       'hud.dragHint': 'Soltala donde quieras y tocá Confirmar.',
+      'hud.dragHintDouble': 'Tocá la ficha otra vez para jugarla.',
+      'hud.tapHintDouble': 'Tocá la ficha otra vez para confirmar.',
+      'hud.tapHintButton': 'Tocá Confirmar para jugarla.',
       'hud.menu': 'Menú',
       'hud.lastMove': 'Última jugada',
       'toast.captured': '{name} capturó un par',
@@ -563,7 +660,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
       stones: { 1: { a: '#5a5a5a', b: '#070707', glow: null }, 2: { a: '#ffffff', b: '#c9c2b2', glow: null } },
       last: { ring: '#e5604f', dot: { 1: '#f4f1ea', 2: '#111111' } },
       zone: { fill: 'rgba(0,0,0,.22)', stroke: 'rgba(0,0,0,.55)' },
-      win: '#e8b04a', pendingRing: '#e8b04a', kbd: '#79b8ff'
+      win: '#e8b04a', pendingRing: '#2b6fe8', kbd: '#79b8ff'
     },
     {
       id: 'glow',
@@ -670,8 +767,13 @@ button { font: inherit; color: inherit; cursor: pointer; }
  * Limitación conocida: en iPhone, el interruptor lateral de silencio también calla estos sonidos. */
 (function (root) {
   'use strict';
-  var ctx = null, enabled = true, master = null, stats = {};
-  try { enabled = localStorage.getItem('pente.sound') !== '0'; } catch (e) {}
+  var ctx = null, enabled = true, master = null, stats = {}, volume = 0.8, vibrate = true;
+  try {
+    enabled = localStorage.getItem('pente.sound') !== '0';
+    vibrate = localStorage.getItem('pente.vibrate') !== '0';
+    var v = parseFloat(localStorage.getItem('pente.volume')); if (v >= 0 && v <= 1) volume = v;
+  } catch (e) {}
+  function applyVolume() { if (master) master.gain.value = 0.7 * volume; }
 
   function ensure() {
     if (ctx) return ctx;
@@ -679,7 +781,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
     if (!AC) return null;
     try {
       ctx = new AC();
-      master = ctx.createGain(); master.gain.value = 0.55; master.connect(ctx.destination);
+      master = ctx.createGain(); master.connect(ctx.destination); applyVolume();
     } catch (e) { ctx = null; }
     return ctx;
   }
@@ -726,10 +828,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
     if (c.state === 'suspended') { try { c.resume(); } catch (e) {} }
     try { RECIPES[name](); } catch (e) { stats.lastError = name + ': ' + e; }
   }
-  function buzz(ms) { try { if (enabled && navigator.vibrate) navigator.vibrate(ms); } catch (e) {} }   // Android; iPhone lo ignora
+  function buzz(ms) { try { if (vibrate && navigator.vibrate) navigator.vibrate(ms); } catch (e) {} }   // Android; iPhone lo ignora
+  function setVolume(v) { volume = Math.max(0, Math.min(1, v)); applyVolume(); try { localStorage.setItem('pente.volume', String(volume)); } catch (e) {} }
+  function setVibrate(v) { vibrate = !!v; try { localStorage.setItem('pente.vibrate', vibrate ? '1' : '0'); } catch (e) {} }
   function setEnabled(v) { enabled = !!v; try { localStorage.setItem('pente.sound', enabled ? '1' : '0'); } catch (e) {} }
 
-  root.PenteSound = { unlock: unlock, play: play, buzz: buzz, setEnabled: setEnabled, isEnabled: function () { return enabled; }, stats: stats, state: function () { return ctx ? ctx.state : 'sin-contexto'; } };
+  root.PenteSound = { unlock: unlock, play: play, buzz: buzz, setEnabled: setEnabled, isEnabled: function () { return enabled; }, setVolume: setVolume, getVolume: function () { return volume; }, setVibrate: setVibrate, vibrateOn: function () { return vibrate; }, stats: stats, state: function () { return ctx ? ctx.state : 'sin-contexto'; } };
 })(typeof self !== 'undefined' ? self : this);
 </script>
 <script>
@@ -741,14 +845,31 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
   var canvas = $('board'), ctx = canvas.getContext('2d');
   var state = null, names = { 1: '', 2: '' };
-  var settings = { tournamentRule: true, exactFive: false, size: 19, confirmTap: matchMedia('(pointer: coarse)').matches };
-  try {
-    var sv = parseInt(localStorage.getItem('pente.size'), 10); if (sv === 13 || sv === 19) settings.size = sv;
-    var sc = localStorage.getItem('pente.confirm'); if (sc === '1' || sc === '0') settings.confirmTap = sc === '1';
-  } catch (e) {}
+  var settings = { tournamentRule: true, exactFive: false, size: 19 };      // opciones de la partida (menú principal)
+  try { var sv = parseInt(localStorage.getItem('pente.size'), 10); if (sv === 13 || sv === 19) settings.size = sv; } catch (e) {}
+
+  /* Configuración del dispositivo (pantalla "Configuración"): se guarda en localStorage y se aplica al instante. */
+  var coarse = matchMedia('(pointer: coarse)').matches, reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var CFG_DEFAULTS = { confirm: coarse ? 'button' : 'none', lift: 'mid', guides: true, coords: true, lastMove: true, anim: !reduced, stoneSize: 'normal', zone: true };
+  var CFG_ALLOWED = { confirm: ['button', 'double', 'none'], lift: ['low', 'mid', 'high'], stoneSize: ['small', 'normal', 'large'] };
+  function loadCfg() {
+    var c = {}, k, raw = null;
+    for (k in CFG_DEFAULTS) c[k] = CFG_DEFAULTS[k];
+    try {
+      raw = JSON.parse(localStorage.getItem('pente.cfg') || 'null');
+      if (!raw) { var old = localStorage.getItem('pente.confirm'); if (old === '1') c.confirm = 'button'; else if (old === '0') c.confirm = 'none'; }   // versión anterior
+    } catch (e) { raw = null; }
+    if (raw && typeof raw === 'object') for (k in CFG_DEFAULTS) {
+      if (CFG_ALLOWED[k]) { if (CFG_ALLOWED[k].indexOf(raw[k]) >= 0) c[k] = raw[k]; }
+      else if (typeof raw[k] === 'boolean') c[k] = raw[k];
+    }
+    return c;
+  }
+  function saveCfg() { try { localStorage.setItem('pente.cfg', JSON.stringify(cfg)); } catch (e) {} }
+  var cfg = loadCfg();
   var drag = null;        // ficha que se está arrastrando con el dedo
   var settle = null;      // animación de la ficha al soltarla
-  var animReq = 0, dropHints = 0;
+  var animReq = 0, dropHints = 0, tapHints = 0;
   var hover = null;       // {x,y} previsualización (mouse / toque pendiente)
   var pending = null;     // toque pendiente de confirmar
   var kbd = null;         // cursor de teclado
@@ -864,10 +985,11 @@ button { font: inherit; color: inherit; cursor: pointer; }
      (así el dedo no la tapa), se ven guías de fila y columna, y al soltar cae en la intersección más cercana.
      Tocar de nuevo la ficha pendiente, o el botón Confirmar, juega. Sin "confirmar con segundo toque": soltar juega directo. */
   var TOUCH_SLOP = 8;                                       // px de pantalla que hay que mover el dedo para que cuente como arrastre
-  function liftPx() { return Math.max(metrics.cell * 1.9, 46 * kScale()); }   // cuánto sube la ficha por encima del dedo (px de canvas)
+  var LIFT = { low: [1.2, 30], mid: [1.9, 46], high: [2.6, 62] };            // [casillas, px mínimos de pantalla]
+  function liftPx() { var l = LIFT[cfg.lift] || LIFT.mid; return Math.max(metrics.cell * l[0], l[1] * kScale()); }   // cuánto sube la ficha por encima del dedo (px de canvas)
   function heldPos() {                                      // centro de la ficha que se arrastra, en px de canvas
     if (!drag.lifted) return { x: px(drag.cell.x), y: px(drag.cell.y) };
-    var e = easeOut(Math.min(1, (performance.now() - drag.liftStart) / 120)), L = liftPx();
+    var e = cfg.anim ? easeOut(Math.min(1, (performance.now() - drag.liftStart) / 120)) : 1, L = liftPx();
     return { x: drag.f.x + drag.vec.x * (1 - e), y: drag.f.y + drag.vec.y * (1 - e) - L * e };
   }
   function updateDragTarget() {
@@ -883,13 +1005,13 @@ button { font: inherit; color: inherit; cursor: pointer; }
     kbd = c;
     if (online.active && state.current !== online.me) { setStatus(t('online.wait'), true); sfx('error'); return; }
     if (P.get(state, c.x, c.y) !== P.EMPTY) { setStatus(t('err.OCCUPIED'), true); sfx('error'); return; }
-    var grab = !!(pending && settings.confirmTap && pending.x === c.x && pending.y === c.y);
+    var grab = !!(pending && cfg.confirm !== 'none' && pending.x === c.x && pending.y === c.y);
     drag = { id: e.pointerId, grab: grab, prev: pending, cell: c, f: p, vec: null, lifted: false, liftStart: 0, cssX: e.clientX, cssY: e.clientY };
     try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
     if (!grab) {
       var bad = P.validateMove(state, c.x, c.y);
       if (bad) { pending = hover = null; setStatus(t('err.' + bad), true); sfx('error'); }
-      else { if (settings.confirmTap) { pending = c; hover = c; } else { pending = null; hover = c; } setStatus(coordLabel(c), true); }
+      else { if (cfg.confirm !== 'none') { pending = c; hover = c; } else { pending = null; hover = c; } setStatus(coordLabel(c), true); }
     }
     render();
   });
@@ -911,18 +1033,24 @@ button { font: inherit; color: inherit; cursor: pointer; }
     try { canvas.releasePointerCapture(d.id); } catch (err) {}
     if (!state || isOver() || cancelled) { pending = d.prev; hover = null; setStatus(''); render(); return; }
     if (!d.lifted) {                                          // toque simple, sin arrastrar
-      if (d.grab) { setStatus(''); tryMove(d.cell.x, d.cell.y); return; }            // segundo toque sobre la ficha pendiente: juega
-      if (!settings.confirmTap) { tryMove(d.cell.x, d.cell.y); return; }
-      hover = null; if (pending) sfx('pick'); render(); return;
+      if (d.grab) {                                                                  // toque sobre la ficha pendiente
+        if (cfg.confirm === 'double') { setStatus(''); tryMove(d.cell.x, d.cell.y); }  // doble toque: juega
+        else { hover = null; setStatus(t('hud.tapHintButton'), true); render(); }       // modo botón: no hace nada, avisa
+        return;
+      }
+      if (cfg.confirm === 'none') { tryMove(d.cell.x, d.cell.y); return; }
+      hover = null;
+      if (pending) { sfx('pick'); if (cfg.confirm === 'double' && tapHints < 2) { tapHints++; setStatus(t('hud.tapHintDouble'), true); } }
+      render(); return;
     }
     var c = d.cell, bad = dragError(c), pos = (function () { var keep = drag; drag = d; var q = heldPos(); drag = keep; return q; })();
     if (bad) {                                                // soltó en un lugar no permitido: vuelve donde estaba
       pending = d.prev; hover = null; setStatus(t('err.' + bad), true); sfx('error'); render(); return;
     }
-    if (!settings.confirmTap) { hover = null; tryMove(c.x, c.y); return; }
+    if (cfg.confirm === 'none') { hover = null; tryMove(c.x, c.y); return; }
     pending = c; hover = null; kbd = c;
-    settle = { x0: pos.x, y0: pos.y, c: c, t0: performance.now(), dur: 130, player: state.current };
-    if (dropHints < 2) { dropHints++; setStatus(t('hud.dragHint'), true); } else setStatus('');
+    settle = cfg.anim ? { x0: pos.x, y0: pos.y, c: c, t0: performance.now(), dur: 130, player: state.current } : null;
+    if (dropHints < 2) { dropHints++; setStatus(t(cfg.confirm === 'double' ? 'hud.dragHintDouble' : 'hud.dragHint'), true); } else setStatus('');
     render();
   }
   canvas.addEventListener('pointerup', function (e) { if (e.pointerType === 'touch') endDrag(e, false); });
@@ -942,14 +1070,18 @@ button { font: inherit; color: inherit; cursor: pointer; }
     metrics.w = canvas.width;
     render();
   }
-  function layout() { metrics.cell = metrics.w / (boardN() + 0.65); metrics.off = metrics.cell * 1.15; }   // margen sup./izq. para letras y números
+  function layout() {      // con coordenadas hay margen sup./izq. para letras y números; sin ellas el tablero aprovecha ese espacio
+    var n = boardN();
+    if (cfg.coords) { metrics.cell = metrics.w / (n + 0.65); metrics.off = metrics.cell * 1.15; }
+    else { metrics.cell = metrics.w / n; metrics.off = metrics.cell * 0.5; }
+  }
   function px(i) { return metrics.off + i * metrics.cell; }
 
   function drawStone(x, y, player, alpha, highlight) { drawStonePx(px(x), px(y), player, alpha, highlight, 1, 0); }
   // scale > 1 y lift (0..1) = ficha levantada: más grande y con sombra más lejana
   function drawStonePx(cx, cy, player, alpha, highlight, scale, lift) {
     var th = theme(), st = th.stones[player];
-    var r = metrics.cell * 0.44 * (scale || 1);
+    var r = metrics.cell * ({ small: 0.39, normal: 0.44, large: 0.48 }[cfg.stoneSize] || 0.44) * (scale || 1);
     ctx.save(); ctx.globalAlpha = alpha;
     if (st.glow) { ctx.shadowColor = st.glow; ctx.shadowBlur = r * (1.2 + (lift || 0) * 0.8); }
     else { ctx.shadowColor = 'rgba(0,0,0,' + (0.45 - 0.1 * (lift || 0)) + ')'; ctx.shadowBlur = r * (0.35 + (lift || 0) * 0.7); ctx.shadowOffsetY = r * (0.12 + (lift || 0) * 0.5); }
@@ -1006,11 +1138,11 @@ button { font: inherit; color: inherit; cursor: pointer; }
       ctx.beginPath(); ctx.arc(px(a), px(b), metrics.cell * (a === mid && b === mid ? 0.13 : 0.09), 0, Math.PI * 2); ctx.fill();
     }); });
     ctx.restore();
-    drawLabels(th);
+    if (cfg.coords) drawLabels(th);
     if (!state) { $('btnConfirm').hidden = true; return; }
 
     // Regla de torneo: en la 2ª ficha del J1 se sombrea el cuadrado de 5x5 del centro (prohibido)
-    if (!isOver() && state.options.tournamentRule && state.moves.length === 2) {
+    if (cfg.zone && !isOver() && state.options.tournamentRule && state.moves.length === 2) {
       var c0 = P.center(state), half = metrics.cell * 0.5;
       var x0 = px(c0 - 2) - half, y0 = px(c0 - 2) - half, side = metrics.cell * 5;
       ctx.fillStyle = th.zone.fill; ctx.fillRect(x0, y0, side, side);
@@ -1025,7 +1157,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
       if (v) drawStone(x, y, v, 1, !!winSet[x + ',' + y]);
     }
     // última jugada
-    if (state.lastMove) {
+    if (state.lastMove && cfg.lastMove) {
       var lm = state.lastMove, lv = P.get(state, lm.x, lm.y);
       ctx.fillStyle = th.last.dot[lv];
       ctx.beginPath(); ctx.arc(px(lm.x), px(lm.y), metrics.cell * 0.12, 0, Math.PI * 2); ctx.fill();
@@ -1034,11 +1166,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
     }
     // previsualización (mouse, o ficha pendiente del dedo)
     var holding = !!(drag && drag.lifted), showPrev = !holding && !settle;
-    if (showPrev && hover && canPlayNow() && P.get(state, hover.x, hover.y) === P.EMPTY && !P.validateMove(state, hover.x, hover.y)) {
-      drawStone(hover.x, hover.y, state.current, pending ? 0.85 : 0.5, false);
+    var pv = pending || hover;                                  // la pendiente manda; si no hay, la del mouse
+    if (showPrev && pv && canPlayNow() && P.get(state, pv.x, pv.y) === P.EMPTY && !P.validateMove(state, pv.x, pv.y)) {
+      drawStone(pv.x, pv.y, state.current, pending ? 0.74 : 0.5, false);    // semitransparente: se ve el lugar elegido antes de confirmar
       if (pending) {
-        ctx.strokeStyle = th.pendingRing; ctx.lineWidth = Math.max(2, metrics.cell * 0.06); ctx.setLineDash([metrics.cell * .12, metrics.cell * .1]);
-        ctx.beginPath(); ctx.arc(px(hover.x), px(hover.y), metrics.cell * 0.56, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+        ctx.save(); ctx.strokeStyle = th.pendingRing; ctx.lineWidth = Math.max(2.5, metrics.cell * 0.09); ctx.setLineDash([metrics.cell * .16, metrics.cell * .1]);
+        ctx.beginPath(); ctx.arc(px(pv.x), px(pv.y), metrics.cell * 0.58, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
       }
     }
     if (holding) drawHeld(th);
@@ -1056,10 +1189,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
   // Ficha en el aire: guías de fila/columna, la intersección donde caería y la ficha levantada sobre el dedo.
   function drawHeld(th) {
     var c = drag.cell, bad = !!dragError(c), n = boardN(), cell = metrics.cell, col = bad ? '#e5604f' : th.pendingRing;
-    ctx.save();
-    ctx.strokeStyle = col; ctx.globalAlpha = 0.5; ctx.lineWidth = Math.max(1.5, cell * 0.06); ctx.setLineDash([cell * 0.25, cell * 0.2]);
-    ctx.beginPath(); ctx.moveTo(px(0), px(c.y)); ctx.lineTo(px(n - 1), px(c.y)); ctx.moveTo(px(c.x), px(0)); ctx.lineTo(px(c.x), px(n - 1)); ctx.stroke();
-    ctx.restore();
+    if (cfg.guides) {
+      ctx.save();
+      ctx.strokeStyle = col; ctx.globalAlpha = 0.5; ctx.lineWidth = Math.max(1.5, cell * 0.06); ctx.setLineDash([cell * 0.25, cell * 0.2]);
+      ctx.beginPath(); ctx.moveTo(px(0), px(c.y)); ctx.lineTo(px(n - 1), px(c.y)); ctx.moveTo(px(c.x), px(0)); ctx.lineTo(px(c.x), px(n - 1)); ctx.stroke();
+      ctx.restore();
+    }
     if (!bad) drawStone(c.x, c.y, state.current, 0.4, false);
     ctx.save(); ctx.strokeStyle = col; ctx.lineWidth = Math.max(2, cell * 0.07);
     ctx.beginPath(); ctx.arc(px(c.x), px(c.y), cell * 0.56, 0, Math.PI * 2); ctx.stroke();
@@ -1121,7 +1256,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
       $('caps' + p).innerHTML = pips(state.captures[p]) + '<span>' + state.captures[p] + '/5</span>';
     });
     if (!isOver() && !$('status').dataset.toast) $('status').textContent = turnText();
-    $('btnConfirm').hidden = !(pending && settings.confirmTap && canPlayNow() && !(drag && drag.lifted));
+    $('btnConfirm').hidden = !(pending && cfg.confirm === 'button' && canPlayNow() && !(drag && drag.lifted));
   }
   function setStatus(msg, isToast) {
     var el = $('status'); clearTimeout(toastTimer);
@@ -1376,23 +1511,64 @@ button { font: inherit; color: inherit; cursor: pointer; }
       syncSizePicker(); render();
     });
   });
-  $('optConfirm').checked = settings.confirmTap;
-  $('optConfirm').addEventListener('change', function () {
-    settings.confirmTap = $('optConfirm').checked; pending = null;
-    try { localStorage.setItem('pente.confirm', settings.confirmTap ? '1' : '0'); } catch (e) {}
-    render();
-  });
   $('btnConfirm').addEventListener('click', function () { if (pending && !isOver()) tryMove(pending.x, pending.y); });
   // Sonido: los navegadores solo dejan activarlo después de un toque o clic del usuario
   ['pointerdown', 'touchend', 'click', 'keydown'].forEach(function (ev) { document.addEventListener(ev, function () { if (window.PenteSound) window.PenteSound.unlock(); }, true); });
-  $('optSound').checked = window.PenteSound ? window.PenteSound.isEnabled() : false;
-  $('optSound').addEventListener('change', function () { if (!window.PenteSound) return; window.PenteSound.setEnabled($('optSound').checked); sfx('place'); });
+  /* ---------- Configuración ---------- */
+  var S = window.PenteSound;
+  function confirmHintText() { return t('cfg.confirm.' + cfg.confirm + 'Hint'); }
+  function syncCfgUi() {
+    document.querySelectorAll('.seg[data-cfg]').forEach(function (g) {
+      var k = g.getAttribute('data-cfg');
+      g.querySelectorAll('.seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.val === cfg[k])); });
+    });
+    document.querySelectorAll('input[type=checkbox][data-cfg]').forEach(function (i) { i.checked = !!cfg[i.getAttribute('data-cfg')]; });
+    $('confirmHint').textContent = confirmHintText();
+    $('optSound').checked = S ? S.isEnabled() : false;
+    $('optVibrate').checked = S ? S.vibrateOn() : false;
+    var vol = S ? Math.round(S.getVolume() * 100) : 0;
+    $('cfgVolume').value = vol; $('cfgVolumeVal').textContent = vol + '%';
+    $('cfgVolume').disabled = !(S && S.isEnabled());
+  }
+  function cfgChanged(key) {
+    if (key === 'confirm') { pending = hover = null; }           // al cambiar de modo se descarta la ficha a medio confirmar
+    saveCfg(); syncCfgUi(); render();
+  }
+  document.querySelectorAll('.seg[data-cfg] .seg-opt').forEach(function (b) {
+    b.addEventListener('click', function () { var k = b.parentNode.getAttribute('data-cfg'); cfg[k] = b.dataset.val; cfgChanged(k); });
+  });
+  document.querySelectorAll('input[type=checkbox][data-cfg]').forEach(function (i) {
+    i.addEventListener('change', function () { var k = i.getAttribute('data-cfg'); cfg[k] = i.checked; cfgChanged(k); });
+  });
+  $('optSound').addEventListener('change', function () { if (!S) return; S.setEnabled($('optSound').checked); syncCfgUi(); sfx('place'); });
+  $('optVibrate').addEventListener('change', function () { if (!S) return; S.setVibrate($('optVibrate').checked); syncCfgUi(); buzz(30); });
+  $('cfgVolume').addEventListener('input', function () { if (!S) return; S.setVolume($('cfgVolume').value / 100); $('cfgVolumeVal').textContent = $('cfgVolume').value + '%'; });
+  $('cfgVolume').addEventListener('change', function () { sfx('place'); });       // al soltar el deslizador suena una muestra
+  function showTab(id) {
+    document.querySelectorAll('#cfgTabs .tab').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.tab === id)); });
+    document.querySelectorAll('.tabpanel').forEach(function (p) { p.hidden = p.id !== 'tab-' + id; });
+    try { sessionStorage.setItem('pente.tab', id); } catch (e) {}
+  }
+  document.querySelectorAll('#cfgTabs .tab').forEach(function (b) { b.addEventListener('click', function () { showTab(b.dataset.tab); }); });
+  $('btnSettings').addEventListener('click', function () {
+    var tab = 'sound'; try { tab = sessionStorage.getItem('pente.tab') || 'sound'; } catch (e) {}
+    syncCfgUi(); showTab(tab); open('settingsOverlay');
+  });
+  $('btnSettingsBack').addEventListener('click', function () { open('menuOverlay'); });
+  $('btnCfgReset').addEventListener('click', function () {
+    if (!confirm(t('cfg.resetConfirm'))) return;
+    for (var k in CFG_DEFAULTS) cfg[k] = CFG_DEFAULTS[k];
+    pending = hover = null; saveCfg();
+    if (S) { S.setEnabled(true); S.setVolume(0.8); S.setVibrate(true); }
+    setTheme(window.Themes.defaultId);
+    syncCfgUi(); render(); sfx('place');
+  });
   window.addEventListener('resize', resize);
   if (window.ResizeObserver) new ResizeObserver(resize).observe(canvas);
   canvas.addEventListener('focus', render); canvas.addEventListener('blur', render);
 
   applyI18n(); buildThemePicker(); syncSizePicker(); resize(); open('menuOverlay'); initOnline();
-  window.__pente = { get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, tryMove: tryMove, startGame: startGame };  // utilidad para pruebas manuales
+  window.__pente = { get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame };  // utilidad para pruebas manuales
 })();
 </script>
 <script>
