@@ -947,6 +947,70 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 </div>
 
 <script>
+/* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
+ * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
+ * devolver null. Sin esto, el primer error mata todo el JS y el menú se ve pero no responde.
+ * Debe cargarse primero. */
+(function () {
+  'use strict';
+  function memStore() {
+    var d = {};
+    return {
+      getItem: function (k) { return Object.prototype.hasOwnProperty.call(d, k) ? d[k] : null; },
+      setItem: function (k, v) { d[k] = String(v); },
+      removeItem: function (k) { delete d[k]; },
+      clear: function () { d = {}; },
+      key: function (i) { return Object.keys(d)[i] || null; },
+      get length() { return Object.keys(d).length; }
+    };
+  }
+  window.__penteStorageBlocked = false;
+  ['localStorage', 'sessionStorage'].forEach(function (name) {
+    var ok = true;
+    try { var s = window[name]; s.setItem('pente.__t', '1'); s.removeItem('pente.__t'); } catch (e) { ok = false; }
+    if (ok) return;
+    window.__penteStorageBlocked = true;                                   // el juego funciona, pero no recuerda nada al cerrar
+    try { Object.defineProperty(window, name, { value: memStore(), configurable: true }); } catch (e) {}
+  });
+  /* canvas bloqueado: se devuelve un contexto que no hace nada (el tablero no se ve, pero los menús y el resto siguen vivos) */
+  var noop = new Proxy(function () {}, {
+    get: function (t, k) { return k === Symbol.toPrimitive ? function () { return 0; } : noop; },
+    set: function () { return true; },
+    apply: function () { return noop; }
+  });
+  try {
+    var gc = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function () {
+      var r = null; try { r = gc.apply(this, arguments); } catch (e) {}
+      if (!r && arguments[0] === '2d') { window.__penteCanvasBlocked = true; return noop; }
+      return r;
+    };
+  } catch (e) {}
+  /* si después de cargar nada arrancó, se avisa en vez de dejar botones muertos */
+  window.addEventListener('load', function () {
+    setTimeout(function () {
+      if (window.__pente) {
+        if (window.__penteCanvasBlocked) banner('canvas');
+        return;
+      }
+      banner('dead');
+    }, 1500);
+  });
+  function banner(kind) {
+    if (document.getElementById('penteSafeBanner')) return;
+    var es = /^es/i.test(navigator.language || 'es');
+    var msg = kind === 'canvas'
+      ? (es ? 'Tu navegador bloquea el dibujo del tablero (privacidad avanzada). Abrí el juego en Safari o Chrome normal.' : 'Your browser blocks drawing the board (advanced privacy). Open the game in regular Safari or Chrome.')
+      : (es ? 'El juego no pudo arrancar en este navegador. Abrilo en Safari o Chrome (en WhatsApp/Instagram: menú ··· → "Abrir en el navegador").' : 'The game could not start in this browser. Open it in Safari or Chrome (in WhatsApp/Instagram: ··· menu → "Open in browser").');
+    var b = document.createElement('div'); b.id = 'penteSafeBanner'; b.setAttribute('role', 'alert');
+    b.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;background:#3a2a10;color:#ffe9b8;border:2px solid #e8b04a;border-radius:12px;padding:12px 14px;font:600 15px/1.35 system-ui,sans-serif;box-shadow:0 4px 20px rgba(0,0,0,.5)';
+    b.textContent = msg;
+    b.addEventListener('click', function () { b.remove(); });
+    document.body.appendChild(b);
+  }
+})();
+</script>
+<script>
 /*
  * PENTE CORE — lógica pura, sin DOM, sin red.
  * Funciona en navegador (window.PenteCore) y en Node (require).
@@ -6547,7 +6611,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 /* Registro del service worker. Solo funciona servido por http(s); abriendo el archivo directo se ignora. */
 (function () {
   'use strict';
-  if (!('serviceWorker' in navigator) || location.protocol.indexOf('http') !== 0) return;
+  if (!('serviceWorker' in navigator) || !navigator.serviceWorker || location.protocol.indexOf('http') !== 0) return;
   window.addEventListener('load', function () {
     navigator.serviceWorker.register('sw.js').catch(function () { /* sin SW el juego funciona igual */ });
   });
