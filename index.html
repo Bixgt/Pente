@@ -389,6 +389,10 @@ html[data-theme="glow"] .tn-duel:not(.done) { box-shadow: 0 0 12px rgba(255,79,1
 html[data-theme="papel"] { --tn-card: #2a2b36; --tn-line: #6b70a8; --tn-win: #b9c2ff; --tn-lose: #8789a6; --tn-pend: #8d9bff; --tn-head: #b9c2ff; --tn-zebra: rgba(141,155,255,.06); }
 html[data-theme="papel"] .tn-duel { border-style: dashed; }
 html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-through; text-decoration-thickness: 1px; }
+
+.size-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.size-col .seg-opt { width: 100%; flex: none; }
+.size-sub { text-align: center; color: var(--muted); font-size: 12px; line-height: 1.2; }
 </style>
 </head>
 <body>
@@ -568,7 +572,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       <p class="hint" id="aiLevelHint"></p></div>
     <div class="field" data-mode="ai"><span class="lbl" data-i18n="ai.side"></span>
       <div class="seg" id="aiSide" role="group"><button type="button" class="seg-opt" data-val="first" data-i18n="ai.sideFirst"></button><button type="button" class="seg-opt" data-val="second" data-i18n="ai.sideSecond"></button><button type="button" class="seg-opt" data-val="random" data-i18n="ai.sideRandom"></button></div></div>
-    <div class="field"><span class="lbl" data-i18n="menu.size"></span><div class="seg sizePicker" role="group"><button type="button" class="seg-opt" data-size="13" data-i18n="menu.size13"></button><button type="button" class="seg-opt" data-size="19" data-i18n="menu.size19"></button></div><p class="hint" data-i18n="menu.sizeHint"></p></div>
+    <div class="field"><span class="lbl" data-i18n="menu.size"></span><div class="seg sizePicker" role="group"><div class="size-col"><button type="button" class="seg-opt" data-size="13" data-i18n="menu.size13"></button><small class="size-sub" data-i18n="size.sub13"></small></div><div class="size-col"><button type="button" class="seg-opt" data-size="19" data-i18n="menu.size19"></button><small class="size-sub" data-i18n="size.sub19"></small></div></div></div>
     <label class="check"><input type="checkbox" data-opt="tournamentRule" checked><span><span data-i18n="menu.tournamentRule"></span><small data-i18n="menu.tournamentRuleHint"></small></span></label>
     <label class="check"><input type="checkbox" data-opt="exactFive"><span><span data-i18n="menu.exactFive"></span><small data-i18n="menu.exactFiveHint"></small></span></label>
     <label class="check"><input type="checkbox" data-opt="timer" checked><span><span data-i18n="menu.timer"></span><small data-i18n="menu.timerHint"></small></span></label>
@@ -665,7 +669,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     <div class="field"><span class="lbl" data-i18n="online.visibility"></span>
       <div class="seg" id="visPicker" role="group"><button type="button" class="seg-opt" data-vis="private" data-i18n="online.private"></button><button type="button" class="seg-opt" data-vis="public" data-i18n="online.public"></button></div>
       <p class="hint" id="visHint"></p></div>
-    <div class="field"><span class="lbl" data-i18n="menu.size"></span><div class="seg sizePicker" role="group"><button type="button" class="seg-opt" data-size="13" data-i18n="menu.size13"></button><button type="button" class="seg-opt" data-size="19" data-i18n="menu.size19"></button></div></div>
+    <div class="field"><span class="lbl" data-i18n="menu.size"></span><div class="seg sizePicker" role="group"><div class="size-col"><button type="button" class="seg-opt" data-size="13" data-i18n="menu.size13"></button><small class="size-sub" data-i18n="size.sub13"></small></div><div class="size-col"><button type="button" class="seg-opt" data-size="19" data-i18n="menu.size19"></button><small class="size-sub" data-i18n="size.sub19"></small></div></div></div>
     <label class="check"><input type="checkbox" data-opt="tournamentRule" checked><span><span data-i18n="menu.tournamentRule"></span><small data-i18n="menu.tournamentRuleHint"></small></span></label>
     <label class="check"><input type="checkbox" data-opt="exactFive"><span><span data-i18n="menu.exactFive"></span><small data-i18n="menu.exactFiveHint"></small></span></label>
     <label class="check"><input type="checkbox" data-opt="timer" checked><span><span data-i18n="menu.timer"></span><small data-i18n="menu.timerHint"></small></span></label>
@@ -3050,6 +3054,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 (function (root) {
   'use strict';
   Object.assign(root.I18n.STRINGS.es, {
+    "size.sub13": "Partidas más cortas",
+    "size.sub19": "El clásico",
     "pause.btn": "Pausa",
     "pause.title": "Partida en pausa",
     "pause.text": "El reloj está detenido. Cuando quieras, seguís desde donde estabas.",
@@ -3064,6 +3070,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 (function (root) {
   'use strict';
   Object.assign(root.I18n.STRINGS.en, {
+    "size.sub13": "Shorter games",
+    "size.sub19": "The classic",
     "pause.btn": "Pause",
     "pause.title": "Game paused",
     "pause.text": "The clock is stopped. Pick up whenever you're ready.",
@@ -3375,7 +3383,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 
   /* Para que no trabe el celular: el loop se RENDERIZA UNA SOLA VEZ (OfflineAudioContext, en segundo plano) a un buffer,
    * y después solo se reproduce ese buffer en loop. Reproducir un buffer casi no cuesta nada; sintetizar en vivo sí. */
-  var RATE = 22050, LOOP_S = BARS.length * 8 * EIGHTH, TAIL_S = 2.5;
+  var RATE = 16000, CACHE_V = 'loop-v2-' + RATE + '-' + BARS.length, LOOP_S = BARS.length * 8 * EIGHTH, TAIL_S = 2.5;
   var ctx = null, bus = null, src = null, loopBuf = null, rendering = false, wanted = false, playing = false, paused = false;
   var oc = null, ob = null, verb = null, noiseBuf = null;      // contexto/nodos del render (solo existen mientras se renderiza)
 
@@ -3480,14 +3488,35 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     prerender();
   }
   // Se puede renderizar antes del primer toque (no pide permiso); así cuando toques ya está lista.
+  // El loop ya renderizado se guarda en el dispositivo (IndexedDB): desde la segunda vez arranca al instante.
+  function cacheOpen(cb) {
+    try {
+      var rq = root.indexedDB.open('pente-music', 1);
+      rq.onupgradeneeded = function () { rq.result.createObjectStore('loop'); };
+      rq.onsuccess = function () { cb(rq.result); }; rq.onerror = function () { cb(null); };
+    } catch (e) { cb(null); }
+  }
+  function cacheGet(cb) {
+    cacheOpen(function (db) {
+      if (!db) return cb(null);
+      try { var g = db.transaction('loop').objectStore('loop').get(CACHE_V); g.onsuccess = function () { var v = g.result; cb(v && v.length === Math.floor(LOOP_S * RATE) ? v : null); }; g.onerror = function () { cb(null); }; }
+      catch (e) { cb(null); }
+    });
+  }
+  function cachePut(arr) { cacheOpen(function (db) { if (!db) return; try { db.transaction('loop', 'readwrite').objectStore('loop').put(arr, CACHE_V); } catch (e) {} }); }
+  function ready(buf) {
+    rendering = false; loopBuf = buf;
+    if (buf && wanted && enabled && !paused) { startSource(); fadeTo(targetGain(), 2.5); }
+  }
   function prerender() {
     if (loopBuf || rendering) return;
     rendering = true;
-    render(function (buf) {
-      rendering = false; loopBuf = buf;
-      if (buf && wanted && enabled && !paused) { startSource(); fadeTo(targetGain(), 2.5); }
+    cacheGet(function (cached) {
+      if (cached) { ready(cached); return; }
+      render(function (buf) { if (buf) cachePut(buf); ready(buf); });
     });
   }
+
   function kick() { if (enabled && !paused) { if (!playing) begin(); else fadeTo(targetGain(), 0.4); } }
   function setEnabled(v) {
     enabled = !!v; try { localStorage.setItem('pente.music', enabled ? '1' : '0'); } catch (e) {}
@@ -3504,7 +3533,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     else { paused = false; if (enabled) { if (ctx && ctx.state === 'suspended') { try { ctx.resume(); } catch (e) {} } begin(); } }
   });
 
-  if (typeof setTimeout !== 'undefined') setTimeout(function () { if (enabled) prerender(); }, 2500);
+  if (typeof setTimeout !== 'undefined') setTimeout(function () { if (enabled) prerender(); }, 400);
 
   root.PenteMusic = {
     kick: kick, setEnabled: setEnabled, isEnabled: function () { return enabled; },
@@ -3541,7 +3570,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 
   // block4 / block3: probabilidad de tapar un cuatro (o una captura que gana) / un tres abierto cuando lo ve (solo niveles de 1 jugada)
   var LEVELS = {
-    beginner: { depth: 1, width: 8, timeMs: 0, noise: 1.4, slipTop: 8, slipChance: 0.7, seesWin: 0.35, block4: 0.8, block3: 0.5, ignoreObvious: true },
+    beginner: { depth: 1, width: 8, timeMs: 0, noise: 1.4, slipTop: 8, slipChance: 0.7, seesWin: 0.35, block4: 0.95, block3: 0.7, ignoreObvious: true },
     easy:   { depth: 1, width: 6,  timeMs: 0,   noise: 0.55, slipTop: 5, slipChance: 0.35, seesWin: 0.85, block4: 0.97, block3: 0.75 },
     medium: { depth: 2, width: 10, timeMs: 350, noise: 0.08, slipTop: 1, slipChance: 0,    seesWin: 1 },
     hard:   { depth: 4, width: 12, timeMs: 700, noise: 0,    slipTop: 1, slipChance: 0,    seesWin: 1 }
@@ -3923,8 +3952,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     closeAll(); render(); setStatus(''); aiMaybeMove();
   }
   // Turno de la máquina: un respiro para que se vea que "piensa", y recién ahí calcula (en el dispositivo, sin red).
-  // Cuánto "piensa" la máquina antes de poner la ficha (ms, mínimo y máximo por nivel). Se puede apagar en Ajustes → Partida.
-  var BOT_THINK = { beginner: [800, 1600], easy: [1200, 2400], medium: [2000, 3500], hard: [3000, 5000] };
+  // Cuánto "piensa" la máquina antes de poner la ficha (ms, mínimo y máximo por nivel; los más fuertes juegan más rápido). Se puede apagar en Ajustes → Partida.
+  var BOT_THINK = { beginner: [1000, 2000], easy: [900, 1800], medium: [600, 1200], hard: [250, 600] };
   function botThinkMs() {
     if (!cfg.botDelay) return 450;
     var r = BOT_THINK[ai.level] || BOT_THINK.medium; return r[0] + Math.random() * (r[1] - r[0]);
