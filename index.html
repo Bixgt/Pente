@@ -410,6 +410,18 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 .acc-link { padding: 0; cursor: pointer; color: inherit; font: inherit; }
 .acc-link .acc-chev { transform: rotate(-45deg); margin-bottom: 0; }
 .acc-link:hover { filter: brightness(1.12); }
+
+/* Amigos y perfil de otra persona */
+.fr-row { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel-2); margin: 6px 0; }
+.fr-av { font-size: 24px; line-height: 1; }
+.fr-name { flex: 1; min-width: 0; text-align: left; background: none; border: 0; font-weight: 700; color: inherit; padding: 8px 0; min-height: 40px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fr-btns { display: flex; gap: 6px; flex: none; }
+#frMsg.bad, #pvMsg.bad { color: var(--danger, #e5604f); }
+.pv-head { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+.pv-av { font-size: 54px; line-height: 1; }
+.pv-head h2 { margin: 0; }
+.dlg-btns.col { flex-direction: column; }
+.prof-stats[hidden] { display: none; }
 </style>
 </head>
 <body>
@@ -780,6 +792,48 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   </div>
 </div>
 
+<!-- Amigos -->
+<div class="overlay screen" id="friendsOverlay">
+  <div class="screen-body">
+    <h2 data-i18n="fr.title"></h2>
+    <p class="sub" data-i18n="fr.sub"></p>
+    <p class="hint" id="frNeed" hidden></p>
+    <div id="frMain" hidden>
+      <form class="field" id="frForm" autocomplete="off">
+        <label class="lbl" for="frSearch" data-i18n="fr.search"></label>
+        <div class="claim-row"><input type="text" id="frSearch" maxlength="20" autocomplete="off" autocapitalize="off" spellcheck="false" data-i18n-ph="fr.searchPh"><button type="submit" class="btn primary" id="frSearchBtn" data-i18n="fr.go"></button></div>
+      </form>
+      <p class="hint" id="frMsg" role="status" aria-live="polite"></p>
+      <div id="frIn"></div>
+      <div id="frFriends"></div>
+      <div id="frOut"></div>
+      <div class="field"><span class="lbl" data-i18n="fr.privacy"></span>
+        <div class="seg" id="frPriv" role="group"><button type="button" class="seg-opt" data-val="public" data-i18n="fr.privAll"></button><button type="button" class="seg-opt" data-val="friends" data-i18n="fr.privFriends"></button></div>
+        <p class="hint" data-i18n="fr.privHint"></p></div>
+    </div>
+    <div class="btns"><button class="btn primary" id="btnFriendsBack" data-i18n="menu.back"></button></div>
+  </div>
+</div>
+
+<!-- Perfil de otra persona -->
+<div class="overlay screen" id="pviewOverlay">
+  <div class="screen-body">
+    <div class="pv-head"><span class="pv-av" id="pvAv"></span><div><h2 id="pvName"></h2><p class="sub" id="pvRel"></p></div></div>
+    <div class="field" id="pvStatsBox"><span class="lbl" data-i18n="prof.stats"></span><div class="prof-stats" id="pvStats"></div><p class="hint" id="pvNote"></p></div>
+    <p class="hint" id="pvMsg" role="status" aria-live="polite"></p>
+    <div class="btns" id="pvActions"></div>
+    <div class="btns"><button class="btn primary" id="btnPviewBack" data-i18n="menu.back"></button></div>
+  </div>
+</div>
+
+<!-- Tocar un nombre del lobby -->
+<div class="overlay dialog" id="whoOverlay">
+  <div class="modal dlg" role="alertdialog" aria-modal="true" aria-labelledby="whoName">
+    <h3 id="whoName"></h3>
+    <div class="dlg-btns col"><button type="button" class="btn primary" id="whoView" data-i18n="fr.view"></button><button type="button" class="btn" id="whoMute"></button><button type="button" class="btn" id="whoClose" data-i18n="inst.close"></button></div>
+  </div>
+</div>
+
 <!-- Instalar la app -->
 <div class="overlay dialog" id="installOverlay">
   <div class="modal dlg" role="alertdialog" aria-modal="true" aria-labelledby="instTitle">
@@ -839,6 +893,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       <p class="hint" data-i18n="auth.privacy"></p>
     </div>
     <div class="btns">
+      <button class="btn" id="btnFriends" data-i18n="fr.btn"></button>
       <button class="btn primary" id="btnProfileBack" data-i18n="menu.back"></button>
       <button class="btn" id="btnProfReset" data-i18n="prof.reset"></button>
     </div>
@@ -1294,7 +1349,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     return { profile: normalize(prof), prefs: (!useLocalPrefs && R.at > 0) ? R.prefs : null, push: push, body: body };
   }
 
-  return { merge: merge, mergeStats: mergeStats, AVATARS: AVATARS, MODES: MODES, NAME_MAX: NAME_MAX, emojiOf: emojiOf, cleanName: cleanName, empty: empty, normalize: normalize, record: record, totals: totals };
+  return { merge: merge, mergeStats: mergeStats, cleanStats: cleanStats, AVATARS: AVATARS, MODES: MODES, NAME_MAX: NAME_MAX, emojiOf: emojiOf, cleanName: cleanName, empty: empty, normalize: normalize, record: record, totals: totals };
 });
 </script>
 <script>
@@ -1912,6 +1967,13 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       claimName: function (name) {
         return authed('POST', '/rest/v1/rpc/claim_name', { p: String(name == null ? '' : name) }).then(function (r) { return typeof r === 'string' ? r : ''; });
       },
+      /* Amigos y perfiles de otras personas (supabase/friends.sql). Todo pasa por funciones del servidor. */
+      friendsOverview: function () { return authed('POST', '/rest/v1/rpc/friends_overview', {}); },
+      friendRequest: function (name) { return authed('POST', '/rest/v1/rpc/friend_request', { p: String(name == null ? '' : name) }).then(function (r) { return typeof r === 'string' ? r : ''; }); },
+      friendRespond: function (id, accept) { return authed('POST', '/rest/v1/rpc/friend_respond', { p: String(id || ''), accept: !!accept }).then(function (r) { return typeof r === 'string' ? r : ''; }); },
+      friendRemove: function (id) { return authed('POST', '/rest/v1/rpc/friend_remove', { p: String(id || '') }).then(function (r) { return typeof r === 'string' ? r : ''; }); },
+      profileView: function (name) { return authed('POST', '/rest/v1/rpc/profile_view', { p: String(name == null ? '' : name) }); },
+      setStatsPublic: function (on) { return authed('POST', '/rest/v1/rpc/set_stats_public', { p: !!on }); },
       signOut: function () {
         var tk = session && session.access_token;
         clear();
@@ -3164,6 +3226,108 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     "acc.opts": "Game options",
     "acc.join": "Join a room",
     "acc.create": "Create a room"
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
+/* Textos de amigos y perfiles de otras personas — es */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.es, {
+    'fr.btn': 'Amigos',
+    'fr.title': 'Amigos',
+    'fr.sub': 'Buscá a alguien por su nombre, mirá sus estadísticas y sumalo a tu lista.',
+    'fr.needLogin': 'Para tener amigos necesitás una cuenta. Entrá con tu email desde tu perfil.',
+    'fr.needName': 'Primero elegí tu nombre definitivo en tu perfil: así tus amigos te pueden encontrar.',
+    'fr.search': 'Buscar jugador',
+    'fr.searchPh': 'Nombre exacto',
+    'fr.go': 'Buscar',
+    'fr.in': 'Solicitudes recibidas',
+    'fr.friends': 'Mis amigos',
+    'fr.out': 'Solicitudes enviadas',
+    'fr.none': 'Todavía no tenés amigos agregados.',
+    'fr.accept': 'Aceptar',
+    'fr.reject': 'Rechazar',
+    'fr.cancel': 'Cancelar',
+    'fr.remove': 'Quitar',
+    'fr.view': 'Ver perfil',
+    'fr.add': 'Agregar amigo',
+    'fr.removeConfirm': '¿Quitar a {name} de tus amigos?',
+    'fr.privacy': 'Quién puede ver mis estadísticas',
+    'fr.privAll': 'Cualquiera con cuenta',
+    'fr.privFriends': 'Solo mis amigos',
+    'fr.privHint': 'Tu nombre y tu avatar se ven siempre. Esto cambia solo las estadísticas.',
+    'fr.sent': 'Solicitud enviada a {name}.',
+    'fr.accepted': '¡Ahora vos y {name} son amigos!',
+    'fr.already': 'Ya sos amigo de {name}.',
+    'fr.pending': 'Ya le enviaste una solicitud a {name}.',
+    'fr.self': 'Ese sos vos.',
+    'fr.notFound': 'No encontré a nadie con ese nombre. Tiene que ser exacto y esa persona tiene que tener una cuenta con nombre definitivo.',
+    'fr.tooMany': 'Tenés demasiadas solicitudes pendientes. Esperá a que respondan o cancelá alguna.',
+    'fr.notEnabled': 'Esta función todavía no está activada en el servidor.',
+    'fr.err': 'No se pudo. Probá de nuevo en un rato.',
+    'fr.writeName': 'Escribí un nombre.',
+    'pv.self': 'Este es tu perfil',
+    'pv.friend': 'Son amigos',
+    'pv.pending_in': 'Te envió una solicitud de amistad',
+    'pv.pending_out': 'Le enviaste una solicitud',
+    'pv.none': 'Jugador de Pente',
+    'pv.hidden': 'Esta persona eligió mostrar sus estadísticas solo a sus amigos.',
+    'pv.note': 'Estas estadísticas las informa el dispositivo de cada jugador. Sirven para jugar, no para un ranking.',
+    'pv.noGames': 'Todavía no jugó ninguna partida completa.',
+    'lobby.who': 'Tocaste a {name}',
+    'lobby.noProfile': 'No hay una cuenta con ese nombre (puede ser alguien sin cuenta).'
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
+/* Friends and other players' profiles strings — en */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.en, {
+    'fr.btn': 'Friends',
+    'fr.title': 'Friends',
+    'fr.sub': 'Look someone up by name, check their stats and add them to your list.',
+    'fr.needLogin': 'You need an account to have friends. Sign in with your email from your profile.',
+    'fr.needName': 'First pick your permanent name in your profile, so your friends can find you.',
+    'fr.search': 'Find a player',
+    'fr.searchPh': 'Exact name',
+    'fr.go': 'Search',
+    'fr.in': 'Requests received',
+    'fr.friends': 'My friends',
+    'fr.out': 'Requests sent',
+    'fr.none': 'You haven\'t added any friends yet.',
+    'fr.accept': 'Accept',
+    'fr.reject': 'Decline',
+    'fr.cancel': 'Cancel',
+    'fr.remove': 'Remove',
+    'fr.view': 'View profile',
+    'fr.add': 'Add friend',
+    'fr.removeConfirm': 'Remove {name} from your friends?',
+    'fr.privacy': 'Who can see my stats',
+    'fr.privAll': 'Anyone with an account',
+    'fr.privFriends': 'Only my friends',
+    'fr.privHint': 'Your name and avatar are always visible. This only changes the stats.',
+    'fr.sent': 'Request sent to {name}.',
+    'fr.accepted': 'You and {name} are now friends!',
+    'fr.already': 'You\'re already friends with {name}.',
+    'fr.pending': 'You already sent a request to {name}.',
+    'fr.self': 'That\'s you.',
+    'fr.notFound': 'I couldn\'t find anyone with that name. It has to be exact, and that person needs an account with a permanent name.',
+    'fr.tooMany': 'You have too many pending requests. Wait for replies or cancel some.',
+    'fr.notEnabled': 'This feature isn\'t enabled on the server yet.',
+    'fr.err': 'That didn\'t work. Try again in a while.',
+    'fr.writeName': 'Type a name.',
+    'pv.self': 'This is your profile',
+    'pv.friend': 'You\'re friends',
+    'pv.pending_in': 'They sent you a friend request',
+    'pv.pending_out': 'You sent them a request',
+    'pv.none': 'Pente player',
+    'pv.hidden': 'This person chose to show their stats only to their friends.',
+    'pv.note': 'These stats are reported by each player\'s device. They\'re for fun, not for a ranking.',
+    'pv.noGames': 'No completed games yet.',
+    'lobby.who': 'You tapped {name}',
+    'lobby.noProfile': 'There\'s no account with that name (it may be someone without an account).'
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -5426,7 +5590,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       if (lobby.muted[m.id]) return;
       d.className = 'msg';
       var who = document.createElement('b'), me = m.id === lobby.me; who.className = me ? 's1' : 's0'; who.textContent = me ? t('chat.you') : m.name;
-      if (!me) { who.title = t('lobby.mute', { name: m.name }); who.style.cursor = 'pointer'; who.addEventListener('click', function () { lobby.muted[m.id] = true; renderLobby(); lobbyNote(t('lobby.muted', { name: m.name })); }); }
+      if (!me) { who.title = t('lobby.who', { name: m.name }); who.style.cursor = 'pointer'; who.addEventListener('click', function () { showWho(m); }); }
       d.appendChild(who); d.appendChild(document.createTextNode(m.text)); log.appendChild(d); shown++;
     });
     if (!shown && !lobby.msgs.some(function (m) { return m.note; })) { var e = document.createElement('div'); e.className = 'note'; e.textContent = t('lobby.empty'); log.appendChild(e); }
@@ -5512,6 +5676,16 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     var lock = !!(profile.nameSet && typeof Auth !== 'undefined' && Auth && Auth.user);       // con nombre definitivo, en las partidas online no se puede usar otro
     ['onName', 'rName'].forEach(function (id) { if ($(id)) { $(id).readOnly = lock; $(id).classList.toggle('locked', lock); } });
   }
+  function fillStats(box, stats) {                            // tabla de partidas por modo (propia y de otras personas)
+    box.innerHTML = '';
+    function cell(cls, txt) { var d = document.createElement('div'); d.className = cls; d.textContent = txt; box.appendChild(d); }
+    [['', ''], ['prof.hP', 'prof.played'], ['prof.hW', 'prof.won'], ['prof.hL', 'prof.lost'], ['prof.hD', 'prof.drawn']].forEach(function (k) { cell('h', k[0] ? t(k[0]) : ''); if (k[0]) box.lastChild.title = t(k[1]); });
+    PP.MODES.forEach(function (m) {
+      var s = stats[m] || { p: 0, w: 0, l: 0, d: 0 }, loc = m === 'local';
+      cell('m', t('prof.mode.' + m));
+      [s.p, s.w, s.l, s.d].forEach(function (v, i) { cell('n' + (v ? '' : ' z'), loc && i > 0 ? '–' : String(v)); });
+    });
+  }
   function renderProfile() {
     var g = $('avatarGrid'); g.innerHTML = '';
     PP.AVATARS.forEach(function (a) {
@@ -5524,14 +5698,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     $('nameClaim').hidden = !(logged && !profile.nameSet);
     $('nameHint').textContent = logged ? (profile.nameSet ? t('name.locked') : t('name.pick')) : '';
     $('nameHint').hidden = !logged;
-    var box = $('profStats'); box.innerHTML = '';
-    function cell(cls, txt) { var d = document.createElement('div'); d.className = cls; d.textContent = txt; box.appendChild(d); }
-    [['', ''], ['prof.hP', 'prof.played'], ['prof.hW', 'prof.won'], ['prof.hL', 'prof.lost'], ['prof.hD', 'prof.drawn']].forEach(function (k) { cell('h', k[0] ? t(k[0]) : ''); if (k[0]) box.lastChild.title = t(k[1]); });
-    PP.MODES.forEach(function (m) {
-      var s = profile.stats[m] || { p: 0, w: 0, l: 0, d: 0 }, loc = m === 'local';
-      cell('m', t('prof.mode.' + m));
-      [s.p, s.w, s.l, s.d].forEach(function (v, i) { cell('n' + (v ? '' : ' z'), loc && i > 0 ? '–' : String(v)); });
-    });
+    fillStats($('profStats'), profile.stats);
     var tot = PP.totals(profile);
     $('profNote').textContent = tot.p ? t('prof.localNote') : t('prof.noGames');
   }
@@ -5550,6 +5717,90 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   });
   if (profile.name) applyProfileName();
   renderProfileBtn();
+
+  /* ---------- Amigos y perfiles de otras personas (supabase/friends.sql) ---------- */
+  var social = { ov: null, from: 'friends', view: null };
+  function socialOk() { return !!(Auth && Auth.user && profile.nameSet); }
+  function frErr(e) { return t(e && e.status === 404 ? 'fr.notEnabled' : e && e.code === 'network' ? 'auth.err.network' : e && e.code === 'auth' ? 'auth.err.expired' : 'fr.err'); }
+  function frMsg(txt, bad) { var m = $('frMsg'); m.textContent = txt || ''; m.classList.toggle('bad', !!bad); }
+  function socialNote(txt, bad) { if (social.from === 'lobby') lobbyNote(txt); else if ($('pviewOverlay').classList.contains('open')) { $('pvMsg').textContent = txt || ''; $('pvMsg').classList.toggle('bad', !!bad); } else frMsg(txt, bad); }
+  function frRow(p, buttons) {
+    var row = el('div', 'fr-row'); row.appendChild(el('span', 'fr-av', PP.emojiOf(p.avatar)));
+    var nm = el('button', 'fr-name', p.name); nm.type = 'button'; nm.addEventListener('click', function () { viewPlayer(p.name, 'friends'); }); row.appendChild(nm);
+    var bx = el('span', 'fr-btns');
+    buttons.forEach(function (b) { var x = el('button', 'btn small' + (b.cls ? ' ' + b.cls : ''), b.label); x.type = 'button'; x.addEventListener('click', b.fn); bx.appendChild(x); });
+    row.appendChild(bx); return row;
+  }
+  function frRender() {
+    var ok = socialOk(); $('frNeed').hidden = ok; $('frMain').hidden = !ok;
+    if (!ok) { $('frNeed').textContent = t(Auth && Auth.user ? 'fr.needName' : 'fr.needLogin'); return; }
+    var o = social.ov || { list: [], stats_public: true }, L = o.list || [];
+    var inc = L.filter(function (x) { return x.status === 'pending' && x.dir === 'in'; }), out = L.filter(function (x) { return x.status === 'pending' && x.dir === 'out'; }), fr = L.filter(function (x) { return x.status === 'accepted'; });
+    var bi = $('frIn'), bf = $('frFriends'), bo = $('frOut'); bi.innerHTML = bf.innerHTML = bo.innerHTML = '';
+    if (inc.length) { bi.appendChild(el('h3', 'tn-h', t('fr.in') + ' · ' + inc.length)); inc.forEach(function (p) { bi.appendChild(frRow(p, [{ label: t('fr.accept'), cls: 'primary', fn: function () { frAct(p, 'accept'); } }, { label: t('fr.reject'), cls: 'ghost', fn: function () { frAct(p, 'remove'); } }])); }); }
+    bf.appendChild(el('h3', 'tn-h', t('fr.friends') + ' · ' + fr.length));
+    if (!fr.length) bf.appendChild(el('p', 'hint', t('fr.none')));
+    fr.forEach(function (p) { bf.appendChild(frRow(p, [{ label: t('fr.view'), fn: function () { viewPlayer(p.name, 'friends'); } }, { label: t('fr.remove'), cls: 'ghost', fn: function () { frAct(p, 'confirmRemove'); } }])); });
+    if (out.length) { bo.appendChild(el('h3', 'tn-h', t('fr.out') + ' · ' + out.length)); out.forEach(function (p) { bo.appendChild(frRow(p, [{ label: t('fr.cancel'), cls: 'ghost', fn: function () { frAct(p, 'remove'); } }])); }); }
+    Array.prototype.forEach.call($('frPriv').children, function (b) { b.setAttribute('aria-pressed', String((b.dataset.val === 'public') === (o.stats_public !== false))); });
+  }
+  function frLoad() {
+    frRender(); if (!socialOk()) return;
+    Auth.friendsOverview().then(function (o) { social.ov = o && typeof o === 'object' ? o : { list: [], stats_public: true }; frRender(); }, function (e) { frMsg(frErr(e), true); });
+  }
+  function frAct(p, what) {
+    var done = function () { frMsg(''); frLoad(); }, fail = function (e) { frMsg(frErr(e), true); };
+    if (what === 'accept') return Auth.friendRespond(p.id, true).then(done, fail);
+    if (what === 'confirmRemove') return ask(t('fr.removeConfirm', { name: p.name }), t('fr.remove'), function () { Auth.friendRemove(p.id).then(done, fail); });
+    Auth.friendRemove(p.id).then(done, fail);
+  }
+  var FR_MSG = { sent: 'fr.sent', accepted: 'fr.accepted', already: 'fr.already', pending: 'fr.pending', self: 'fr.self', not_found: 'fr.notFound', need_name: 'fr.needName', too_many: 'fr.tooMany' };
+  function viewPlayer(name, from) {
+    social.from = from || 'friends';
+    if (!socialOk()) { socialNote(t(Auth && Auth.user ? 'fr.needName' : 'fr.needLogin'), true); return Promise.resolve(); }
+    return Auth.profileView(name).then(function (v) {
+      if (!v || !v.found) { socialNote(t(social.from === 'lobby' ? 'lobby.noProfile' : 'fr.notFound'), true); return; }
+      social.view = v; pvRender();
+      if (social.from === 'lobby') $('pviewOverlay').classList.add('open'); else open('pviewOverlay');
+    }, function (e) { socialNote(frErr(e), true); });
+  }
+  function pvRender() {
+    var v = social.view; if (!v) return;
+    $('pvAv').textContent = PP.emojiOf(v.avatar); $('pvName').textContent = v.name; $('pvRel').textContent = t('pv.' + (v.relation || 'none'));
+    var st = PP.cleanStats(v.stats), has = Object.keys(st).length > 0;
+    $('pvStats').hidden = !!v.hidden; if (v.hidden) $('pvStats').innerHTML = ''; else fillStats($('pvStats'), st);
+    $('pvNote').textContent = v.hidden ? t('pv.hidden') : has ? t('pv.note') : t('pv.noGames');
+    var box = $('pvActions'); box.innerHTML = '';
+    function btn(label, cls, fn) { var b = el('button', 'btn' + (cls ? ' ' + cls : ''), label); b.type = 'button'; b.addEventListener('click', fn); box.appendChild(b); }
+    function run(pr) { pr.then(function (r) { var k = FR_MSG[r]; return viewPlayer(v.name, social.from).then(function () { if (k) { $('pvMsg').textContent = t(k, { name: v.name }); $('pvMsg').classList.toggle('bad', k !== 'fr.sent' && k !== 'fr.accepted'); } }); }, function (e) { $('pvMsg').textContent = frErr(e); $('pvMsg').classList.add('bad'); }); }
+    if (v.relation === 'none') btn(t('fr.add'), 'primary', function () { run(Auth.friendRequest(v.name)); });
+    else if (v.relation === 'pending_in') { btn(t('fr.accept'), 'primary', function () { run(Auth.friendRespond(v.id, true).then(function () { return ''; })); }); btn(t('fr.reject'), 'ghost', function () { run(Auth.friendRemove(v.id).then(function () { return ''; })); }); }
+    else if (v.relation === 'pending_out') btn(t('fr.cancel'), 'ghost', function () { run(Auth.friendRemove(v.id).then(function () { return ''; })); });
+    else if (v.relation === 'friend') btn(t('fr.remove'), 'ghost', function () { ask(t('fr.removeConfirm', { name: v.name }), t('fr.remove'), function () { run(Auth.friendRemove(v.id).then(function () { return ''; })); }); });
+  }
+  $('btnFriends').addEventListener('click', function () { frMsg(''); frLoad(); open('friendsOverlay'); });
+  $('btnFriendsBack').addEventListener('click', function () { renderProfile(); renderAcct(); open('profileOverlay'); });
+  $('frForm').addEventListener('submit', function (e) {
+    e.preventDefault(); var n = $('frSearch').value.trim();
+    if (!n) { frMsg(t('fr.writeName'), true); return; }
+    frMsg(''); viewPlayer(n, 'friends');
+  });
+  $('frPriv').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-val]'); if (!b || !socialOk()) return;
+    var on = b.dataset.val === 'public';
+    Auth.setStatsPublic(on).then(function () { if (social.ov) social.ov.stats_public = on; frRender(); }, function (er) { frMsg(frErr(er), true); });
+  });
+  $('btnPviewBack').addEventListener('click', function () {
+    $('pvMsg').textContent = '';
+    if (social.from === 'lobby') { $('pviewOverlay').classList.remove('open'); return; }
+    frLoad(); open('friendsOverlay');
+  });
+  // Tocar un nombre del lobby: ver perfil o silenciar
+  var who = null;
+  function showWho(m) { who = m; $('whoName').textContent = m.name; $('whoMute').textContent = t('lobby.mute', { name: m.name }); $('whoOverlay').classList.add('open'); }
+  $('whoClose').addEventListener('click', function () { $('whoOverlay').classList.remove('open'); });
+  $('whoView').addEventListener('click', function () { $('whoOverlay').classList.remove('open'); if (who) viewPlayer(who.name, 'lobby'); });
+  $('whoMute').addEventListener('click', function () { $('whoOverlay').classList.remove('open'); if (who) { lobby.muted[who.id] = true; renderLobby(); lobbyNote(t('lobby.muted', { name: who.name })); } });
 
   /* ---------- Cuenta (email + código) y sincronización con Supabase ----------
    * Todo el perfil sigue funcionando sin cuenta. Con cuenta, cada cambio se sube (con un respiro de 1-2 s) y al volver a la página se baja lo nuevo.
