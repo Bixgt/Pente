@@ -581,7 +581,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v43</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v44</p></div>
     <div class="btns">
       <button class="btn primary" id="btnResume" hidden data-i18n="menu.resume"></button>
       <button class="btn primary" id="btnPlay" data-i18n="menu.play"></button>
@@ -1026,7 +1026,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 43;</script>
+<script>window.PENTE_VERSION = 44;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -3957,7 +3957,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 (function (root) {
   'use strict';
   var BPM = 92, EIGHTH = 60 / BPM / 2;
-  var enabled = true, volume = 0.3, failed = false;
+  var enabled = true, volume = 0.3, failed = {};
   try {
     enabled = localStorage.getItem('pente.music') !== '0';
     if (root.PENTE_NOMUSIC) enabled = false;
@@ -3969,7 +3969,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     Cmaj7: [52, 55, 59, 62], Am7: [55, 60, 64, 67], Dm7: [53, 57, 60, 64], G7: [53, 59, 62, 65],
     Em7: [55, 59, 62, 66], A7: [55, 61, 64], Fmaj7: [52, 57, 60, 64], Fm6: [56, 60, 62, 65]
   };
-  var BARS = [
+  var BARS_LOUNGE = [
     ['Cmaj7', 48, [[0, 76, 3], [3, 79, 1], [4, 83, 3]]],
     ['Am7', 45, [[0, 81, 2], [2, 79, 2], [4, 76, 3]]],
     ['Dm7', 50, [[1, 77, 1], [2, 74, 2], [4, 72, 2], [6, 69, 2]]],
@@ -3987,6 +3987,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     ['Cmaj7', 48, [[0, 72, 4], [4, 76, 3]]],
     ['G7', 43, [[2, 71, 1], [3, 74, 1], [4, 74, 4]]]
   ];
+  var BARS = BARS_LOUNGE;
 
   /* Para que no trabe el celular: el loop se RENDERIZA UNA SOLA VEZ (OfflineAudioContext, en segundo plano) a un buffer,
    * y después solo se reproduce ese buffer en loop. Reproducir un buffer casi no cuesta nada; sintetizar en vivo sí. */
@@ -4029,7 +4030,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     s.connect(f); f.connect(g); g.connect(ob); s.start(t); s.stop(t + dur + 0.02);
   }
-  function schedule(bar, e, t) {                                  // e = corchea dentro del compás (0-7)
+  function scheduleLounge(bar, e, t) {                                  // e = corchea dentro del compás (0-7)
     var b = BARS[bar], ch = C[b[0]], i;
     if (e === 0) for (i = 0; i < ch.length; i++) rhodes(ch[i], t + i * 0.012, EIGHTH * 5.5, 0.075);
     if (e === 3) for (i = 0; i < ch.length; i++) rhodes(ch[i], t + i * 0.012, EIGHTH * 1.6, 0.05);
@@ -4040,8 +4041,68 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     if (e === 2 || e === 6) hush(t, 0.05, 1900, 0.06, false);
   }
 
+
+  /* ---------- Tema de PARTIDA ("tensión tranquila") ----------
+   * La = menor, 104 BPM, 16 compases. Bajo en pulso constante, golpe grave suave (como un tambor lejano), escobilla en 2 y 4,
+   * un colchón de acordes bien bajito y una melodía de vibráfono con notas "torcidas" (sol#, si bemol) que piden resolver pero nunca gritan. */
+  C.Am = [57, 60, 64]; C.F = [53, 57, 60, 65]; C.E7 = [52, 56, 59, 62]; C.Dm = [53, 57, 62]; C.Cc = [55, 60, 64]; C.G = [55, 59, 62];
+  var BARS_BATTLE = [
+    ['Am', 45, [[0, 76, 3], [4, 81, 2], [6, 79, 2]]],
+    ['Am', 45, [[0, 76, 2], [2, 72, 2], [4, 74, 2], [6, 76, 2]]],
+    ['F', 41, [[0, 77, 3], [4, 81, 2], [6, 84, 2]]],
+    ['E7', 40, [[0, 80, 3], [4, 83, 3], [7, 80, 1]]],
+    ['Am', 45, [[0, 81, 3], [4, 79, 2], [6, 76, 2]]],
+    ['Dm', 50, [[0, 77, 2], [2, 81, 2], [4, 77, 2], [6, 74, 2]]],
+    ['F', 41, [[0, 72, 2], [2, 77, 2], [4, 81, 4]]],
+    ['E7', 40, [[0, 83, 2], [2, 80, 2], [4, 76, 4]]],
+    ['Am', 45, [[0, 76, 2], [2, 81, 2], [4, 84, 3], [7, 83, 1]]],
+    ['Cc', 48, [[0, 79, 3], [4, 76, 2], [6, 72, 2]]],
+    ['G', 43, [[0, 74, 2], [2, 79, 2], [4, 83, 2], [6, 79, 2]]],
+    ['F', 41, [[0, 77, 3], [4, 76, 2], [6, 74, 2]]],
+    ['Dm', 50, [[0, 74, 3], [3, 77, 1], [4, 81, 4]]],
+    ['E7', 40, [[0, 80, 2], [2, 83, 2], [4, 86, 2], [6, 83, 2]]],
+    ['Am', 45, [[0, 81, 4], [4, 76, 4]]],
+    ['E7', 40, [[0, 80, 2], [2, 76, 2], [4, 80, 2], [6, 83, 2]]]
+  ];
+  function thump(t, vol) {                                      // golpe grave: seno que baja de 110 a 46 Hz
+    var o = oc.createOscillator(), g = oc.createGain(), s = oc.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(46, t + 0.14);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.34);
+    var o2 = oc.createOscillator(), g2 = oc.createGain();                                      // armónico agudo: en el parlante del celular el grave puro casi no se oye
+    o2.type = 'triangle'; o2.frequency.setValueAtTime(230, t); o2.frequency.exponentialRampToValueAtTime(110, t + 0.1);
+    g2.gain.setValueAtTime(vol * 0.55, t); g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+    o2.connect(g2); g2.connect(ob); o2.start(t); o2.stop(t + 0.2);
+    o.connect(g); g.connect(ob); s.gain.value = 0.25; g.connect(s); s.connect(verb); o.start(t); o.stop(t + 0.38);
+  }
+  function bassB(m, t, d, v) { note(m, t, d, { vol: v, cut: 1100, send: 0.05, atk: 0.01, parts: [[1, 1], [2, 0.7, 0.35], [3, 0.4, 0.2]] }); }
+  function pluck(m, t, d, v) { note(m, t, d, { vol: v, cut: 1500, send: 0.3, atk: 0.006, parts: [[1, 1], [2, 0.5, 0.25], [3, 0.12, 0.12]] }); }
+  function scheduleBattle(bar, e, t) {
+    var b = BARS[bar], ch = C[b[0]], i, root = b[1], last = bar % 8 === 7;
+    if (e === 0) for (i = 0; i < ch.length; i++) rhodes(ch[i], t + i * 0.012, EIGHTH * 7.5, 0.04);        // colchón bajito
+    if (e === 0) { bassB(root, t, EIGHTH * 1.7, 0.2); thump(t, 0.45); }
+    if (e === 2) bassB(root, t, EIGHTH * 1.2, 0.12);
+    if (e === 3) bassB(root + 12, t, EIGHTH * 0.9, 0.08);
+    if (e === 4) { bassB(root, t, EIGHTH * 1.7, 0.17); thump(t, 0.3); }
+    if (e === 6) bassB(root + 7, t, EIGHTH * 1.2, 0.11);
+    if (e === 7 && last) thump(t + 0.02, 0.18);                                                       // pequeño empujón antes de repetir
+    b[2].forEach(function (m) { if (m[0] === e) pluck(m[1], t, Math.min(1.4, EIGHTH * m[2] + 0.4), 0.08); });
+    hush(t, 0.05, 7000, e % 2 ? 0.018 : 0.028, true);                                                 // hi-hat suave en cada corchea
+    if (e === 2 || e === 6) hush(t, 0.09, 1700, 0.075, false);                                        // escobilla en 2 y 4
+    if (last && e >= 4) hush(t, 0.07, 2200, 0.03 + (e - 4) * 0.02, false);                            // redoble que sube al cerrar cada 8 compases
+  }
+  var TRACKS = {
+    lounge: { bpm: 92, bars: BARS_LOUNGE, sched: scheduleLounge, file: 'audio/loop-16k.wav' },
+    battle: { bpm: 104, bars: BARS_BATTLE, sched: scheduleBattle, file: 'audio/battle-16k.wav' }
+  };
+  var schedule = scheduleLounge;
+  function useTrack(name) {
+    var T = TRACKS[name] || TRACKS.lounge;
+    BPM = T.bpm; EIGHTH = 60 / BPM / 2; BARS = T.bars; schedule = T.sched; LOOP_S = BARS.length * 8 * EIGHTH;
+  }
+
   // Renderiza el loop completo (mono). La cola de la reverb se suma al principio para que el corte sea invisible.
-  function render(done) {
+  function render(name, done) {
+    useTrack(name);
     var OAC = root.OfflineAudioContext || root.webkitOfflineAudioContext;
     if (!OAC) { done(null); return; }
     var len = Math.ceil((LOOP_S + TAIL_S) * RATE);
@@ -4076,13 +4137,24 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     })();
   }
 
+  /* Dos temas: "lounge" (menú, ratos de calma) y "battle" (partida en curso). Cada uno es un archivo ya armado
+   * (audio/*.wav, mono, 16 kHz, 16 bits): el celular solo lo descarga y lo lee. Sintetizarlos en el dispositivo
+   * (OfflineAudioContext) trababa el iPhone, por eso ya no se hace en uso normal. */
+  var bufs = {}, loading = {}, want = 'lounge', cur = 'lounge', swapping = false;
   function startSource() {
-    if (!ctx || !loopBuf || src) return;
-    var b = ctx.createBuffer(1, loopBuf.length, RATE); b.getChannelData(0).set(loopBuf);
+    var lb = bufs[want];
+    if (!ctx || !lb || src) return;
+    var b = ctx.createBuffer(1, lb.length, RATE); b.getChannelData(0).set(lb);
     src = ctx.createBufferSource(); src.buffer = b; src.loop = true; src.connect(bus); src.start();
-    playing = true;
+    playing = true; cur = want;
   }
   function stopSource() { if (src) { try { src.stop(); } catch (e) {} try { src.disconnect(); } catch (e) {} src = null; } playing = false; }
+  // cambio de tema: baja el volumen, cambia el buffer y vuelve a subir (un fundido simple, sin tocar el contexto de audio)
+  function swap() {
+    if (swapping || !playing) return;
+    swapping = true; fadeTo(0, 1.0);
+    setTimeout(function () { swapping = false; stopSource(); if (enabled && !paused && bufs[want]) { startSource(); fadeTo(targetGain(), 1.6); } }, 1100);
+  }
 
   function begin() {
     if (playing || !enabled || paused) return;
@@ -4091,16 +4163,16 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     if (ctx.state === 'suspended') { try { ctx.resume(); } catch (e) {} }
     if (!bus) { bus = ctx.createGain(); bus.gain.value = 0; bus.connect(ctx.destination); }
     wanted = true;
-    if (loopBuf) { startSource(); fadeTo(targetGain(), 2.5); return; }
-    prerender();
+    if (bufs[want]) { startSource(); fadeTo(targetGain(), 2.5); return; }
+    prerender(want);
   }
-  function ready(buf) {
-    rendering = false; loopBuf = buf;
-    if (buf && wanted && enabled && !paused) { startSource(); fadeTo(targetGain(), 2.5); }
+  function ready(name, buf) {
+    loading[name] = false; rendering = false;
+    if (!buf) return;
+    bufs[name] = buf;
+    if (name !== want || !wanted || !enabled || paused) return;
+    if (!playing) { startSource(); fadeTo(targetGain(), 2.5); } else if (cur !== want) swap();
   }
-  // El loop ya viene ARMADO como archivo (audio/loop-16k.wav, mono, 16 kHz, 16 bits): el celular solo lo descarga y lo lee.
-  // Sintetizarlo en el dispositivo (OfflineAudioContext) trababa el iPhone, por eso ya no se hace en uso normal.
-  var LOOP_URL = 'audio/loop-16k.wav';
   function parseWav(ab) {
     var dv = new DataView(ab), pos = 12, n = dv.byteLength;
     if (n < 44 || dv.getUint32(0, false) !== 0x52494646) return null;                  // "RIFF"
@@ -4115,18 +4187,26 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     }
     return null;
   }
-  function prerender() {
-    if (loopBuf || rendering || failed || root.PENTE_NOMUSIC || typeof fetch !== 'function') return;
-    rendering = true;
-    var fail = function () { failed = true; ready(null); };
+  function prerender(name) {
+    name = name || want;
+    if (bufs[name] || loading[name] || failed[name] || root.PENTE_NOMUSIC || typeof fetch !== 'function' || !TRACKS[name]) return;
+    loading[name] = true; rendering = true;
+    var fail = function () { failed[name] = true; ready(name, null); };
     try {
-      fetch(LOOP_URL).then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.arrayBuffer(); })
-        .then(function (ab) { var d = parseWav(ab); if (!d || d.length < RATE * 5) throw new Error('wav'); ready(d); })
+      fetch(TRACKS[name].file).then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.arrayBuffer(); })
+        .then(function (ab) { var d = parseWav(ab); if (!d || d.length < RATE * 5) throw new Error('wav'); ready(name, d); })
         .catch(fail);
     } catch (e) { fail(); }
   }
+  // Qué tema corresponde: la pantalla del juego lo avisa ('battle' mientras hay una partida en curso, 'lounge' en el resto)
+  function setTrack(name) {
+    if (!TRACKS[name] || name === want) return;
+    want = name;
+    if (!enabled) return;
+    if (bufs[name]) { if (playing && cur !== want) swap(); } else prerender(name);        // si todavía no llegó, ready() hace el cambio
+  }
 
-  function kick() { if (enabled && !paused && !failed) { if (!playing) begin(); else fadeTo(targetGain(), 0.4); } }
+  function kick() { if (enabled && !paused && !failed[want]) { if (!playing) begin(); else fadeTo(targetGain(), 0.4); } }
   function setEnabled(v) {
     enabled = !!v; try { localStorage.setItem('pente.music', enabled ? '1' : '0'); } catch (e) {}
     if (enabled) { begin(); fadeTo(targetGain(), 1.2); }
@@ -4147,15 +4227,16 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   var armed = false;
   function arm() {
     if (armed) return; armed = true;
-    setTimeout(function () { if (enabled && !paused) prerender(); }, 500);
+    setTimeout(function () { if (enabled && !paused) prerender(want); }, 500);
   }
   if (typeof document !== 'undefined') ['pointerdown', 'touchend', 'click', 'keydown'].forEach(function (ev) { document.addEventListener(ev, arm, { capture: true, passive: true, once: true }); });
 
   root.PenteMusic = {
-    _render: render,            // solo para tools/make_music.py (genera el archivo de audio); no se usa en el juego
+    _render: render,            // solo para tools/make_music.py (render(nombre, cb): genera el archivo de audio); no se usa en el juego
+    setTrack: setTrack, track: function () { return want; },
     kick: kick, setEnabled: setEnabled, isEnabled: function () { return enabled; },
     setVolume: setVolume, getVolume: function () { return volume; },
-    isPlaying: function () { return playing; }, isRendering: function () { return rendering; }, peak: function () { if (!loopBuf) return -1; var m = 0; for (var i = 0; i < loopBuf.length; i++) { var a = Math.abs(loopBuf[i]); if (a > m) m = a; } return m; }, bars: BARS.length, bpm: BPM
+    isPlaying: function () { return playing; }, isRendering: function () { return rendering; }, peak: function (n) { var lb = bufs[n || cur]; if (!lb) return -1; var m = 0; for (var i = 0; i < lb.length; i++) { var a = Math.abs(lb[i]); if (a > m) m = a; } return m; }, bars: BARS.length, bpm: BPM
   };
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -5280,7 +5361,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       $('pname' + p).textContent = (mine ? PP.emojiOf(profile.avatar) + ' ' : '') + (names[p] || '…') + (online.active && online.me === p && online.players !== 4 ? ' ' + t('online.you') : '');
       $('caps' + p).innerHTML = pips(state.captures[p]) + '<span>' + state.captures[p] + '/5</span>';
     });
-    updateSide(); renderClocks(); updateVideoButtons(); updateResultBtn();
+    updateSide(); renderClocks(); updateVideoButtons(); updateResultBtn(); musicScene();
     var sb = $('specBar'); sb.hidden = !online.spectator;
     if (online.spectator) sb.textContent = t('spec.badge', { code: online.code, n: online.specN });
     if (!isOver() && !$('status').dataset.toast) $('status').textContent = turnText();
@@ -5299,7 +5380,12 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 
   /* ---------- Overlays ---------- */
   // Las pantallas (.screen) tapan todo el juego; el cartel de fin de partida es lo único que se muestra sobre el tablero.
-  function closeAll() { stopRooms(); document.querySelectorAll('.overlay').forEach(function (o) { o.classList.remove('open'); }); document.body.classList.remove('in-screen'); }
+  // Música: tema de "partida" mientras hay una partida en curso a la vista; el de calma en el menú, al terminar y en el tutorial
+  function musicScene() {
+    var m = window.PenteMusic; if (!m || !m.setTrack) return;
+    m.setTrack(state && !isOver() && !tut.active && !document.body.classList.contains('in-screen') ? 'battle' : 'lounge');
+  }
+  function closeAll() { stopRooms(); document.querySelectorAll('.overlay').forEach(function (o) { o.classList.remove('open'); }); document.body.classList.remove('in-screen'); musicScene(); }
   function open(id) {
     closeAll();
     if (id === 'menuOverlay') $('btnResume').hidden = !(state && !isOver());
@@ -5307,6 +5393,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     $(id).classList.add('open');
     document.body.classList.toggle('in-screen', $(id).classList.contains('screen'));
     var sc = $(id); if (sc.scrollTo) sc.scrollTo(0, 0);
+    musicScene();
   }
   function resultText() {
     if (!state || !isOver()) return '';
