@@ -467,6 +467,13 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 .ch-fill { display: block; height: 100%; border-radius: 6px; background: var(--st-w); }
 .ch-fill.alt { background: var(--accent); }
 .ch-val { font-variant-numeric: tabular-nums; color: var(--muted); text-align: right; min-width: 4.5em; }
+
+/* Modo 4 jugadores: asientos en la sala de espera */
+.seats { display: grid; gap: 6px; margin: 10px 0; }
+.seats[hidden] { display: none; }
+.seats .seat { padding: 9px 12px; border-radius: 10px; border: 1px solid var(--line, #3a3f4b); opacity: .6; font-weight: 600; }
+.seats .seat.on { opacity: 1; }
+.seats .seat.me { border-color: var(--accent, #e8b04a); }
 </style>
 </head>
 <body>
@@ -559,7 +566,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v40</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v41</p></div>
     <div class="btns">
       <button class="btn primary" id="btnResume" hidden data-i18n="menu.resume"></button>
       <button class="btn primary" id="btnPlay" data-i18n="menu.play"></button>
@@ -764,6 +771,9 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     <section class="acc" data-grp="online" id="accCreate">
       <button type="button" class="acc-head" aria-expanded="false" aria-controls="accCreateBody"><span data-i18n="acc.create"></span><span class="acc-chev" aria-hidden="true"></span></button>
       <div class="acc-body" id="accCreateBody" hidden>
+    <div class="field"><span class="lbl" data-i18n="four.pick"></span>
+      <div class="seg" id="plPicker" role="group"><button type="button" class="seg-opt" data-pl="2" data-i18n="four.p2"></button><button type="button" class="seg-opt" data-pl="4" data-i18n="four.p4"></button></div>
+      <p class="hint" id="plHint"></p></div>
     <div class="field"><span class="lbl" data-i18n="online.visibility"></span>
       <div class="seg" id="visPicker" role="group"><button type="button" class="seg-opt" data-vis="private" data-i18n="online.private"></button><button type="button" class="seg-opt" data-vis="public" data-i18n="online.public"></button></div>
       <p class="hint" id="visHint"></p></div>
@@ -812,7 +822,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 <div class="overlay screen" id="waitOverlay">
   <div class="screen-body">
     <h2 data-i18n="online.waitTitle"></h2>
-    <p class="sub" data-i18n="online.waitSub"></p>
+    <p class="sub" id="waitSub" data-i18n="online.waitSub"></p>
+    <div class="seats" id="waitSeats" hidden></div>
     <div class="roomcode" id="roomCode" data-i18n-aria="a11y.roomCode"></div>
     <p class="hint" id="waitVis"></p>
     <div class="btns">
@@ -992,7 +1003,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 40;</script>
+<script>window.PENTE_VERSION = 41;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -3268,6 +3279,42 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 })(typeof self !== 'undefined' ? self : this);
 </script>
 <script>
+/* Modo 4 jugadores — es */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.es, {
+    "four.pick": "Jugadores",
+    "four.p2": "2 jugadores",
+    "four.p4": "4 jugadores (2 contra 2)",
+    "four.hint4": "Equipos por orden de llegada: quien crea la sala y el 3.º en entrar juegan juntos; el 2.º y el 4.º, juntos. Los turnos van 1, 2, 3, 4. Las capturas y la victoria son del equipo.",
+    "four.waitSub": "Pasá el código o el enlace. Hacen falta 4 personas para empezar.",
+    "four.team": "Equipo {n}",
+    "four.empty": "esperando…",
+    "four.mateTurn": "Le toca a tu compañero/a: {name}",
+    "four.roomWaiting": "Sala de 4 de {name} ({n}/4)",
+    "four.badge": "2 contra 2"
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
+/* Modo 4 jugadores — en */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.en, {
+    "four.pick": "Players",
+    "four.p2": "2 players",
+    "four.p4": "4 players (2 vs 2)",
+    "four.hint4": "Teams by join order: the room creator and the 3rd to join play together; the 2nd and the 4th, together. Turns go 1, 2, 3, 4. Captures and the win belong to the team.",
+    "four.waitSub": "Share the code or the link. We need 4 people to start.",
+    "four.team": "Team {n}",
+    "four.empty": "waiting…",
+    "four.mateTurn": "Your teammate's turn: {name}",
+    "four.roomWaiting": "{name}'s 4-player room ({n}/4)",
+    "four.badge": "2 vs 2"
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
 /* Textos de torneos — es (los mensajes del motor de reglas siguen en español) */
 (function (root) {
   'use strict';
@@ -4330,25 +4377,40 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   var online = {
     spectator: false, specN: 0, lastCode: '', isPublic: false, cid: '',
     active: false, net: null, url: '', conn: 'closed', code: '', token: '', me: 0, intent: null, rejoining: false,
-    over: null, connected: { 1: true, 2: true }, rematch: { 1: false, 2: false },
+    over: null, connected: { 1: true, 2: true, 3: true, 4: true }, rematch: { 1: false, 2: false, 3: false, 4: false }, seat: 0, players: 2,
     rivalLeftAt: 0, claimTimer: null, awaiting: false, awaitTimer: null
   };
+
+  /* Modo 4 jugadores (2 contra 2): asientos 1-4; 1 y 3 son el equipo 1, 2 y 4 el equipo 2. `online.me` sigue siendo el EQUIPO (1|2),
+   * `online.seat` es el asiento. names[1] / names[2] son los nombres de EQUIPO (en 4 jugadores: "Ana + Carla"); seatNames[s] los de cada asiento. */
+  var seatNames = {};
+  function teamOfSeat(s) { return s % 2 === 1 ? 1 : 2; }
+  function nSeats() { return online.players === 4 ? 4 : 2; }
+  function seatsOf(team) { return online.players === 4 ? (team === 1 ? [1, 3] : [2, 4]) : [team]; }
+  function onlineFull() { for (var s = 1; s <= nSeats(); s++) if (!seatNames[s]) return false; return true; }
+  function turnSeat() { return state ? P.seatToMove(state) : 0; }
+  function teamName(team) { return seatsOf(team).map(function (s) { return seatNames[s] || ''; }).filter(Boolean).join(' + '); }
+  function rivalSeats() { return seatsOf(online.me === 1 ? 2 : 1); }
+  function offlineRivals() { return rivalSeats().filter(function (x) { return !online.connected[x]; }); }
+  function rematchOther() { for (var x = 1; x <= nSeats(); x++) if (x !== online.seat && online.rematch[x]) return x; return 0; }
 
   // ¿terminó la partida? (en online puede terminar por abandono, sin que el tablero lo muestre)
   var tut = { active: false, i: 0, solved: false, awaiting: false, marks: [], token: 0, fb: '', fbRaw: '', fbKind: '', timers: [] };   // tutorial interactivo (ver sección al final)
   var localOver = null;   // fin por tiempo en partidas locales / contra la máquina: { winner, reason:'timeout' }
   function isOver() { return !state || state.status !== 'playing' || !!localOver || (online.active && !!online.over); }
-  function canPlayNow() { return !!state && !isOver() && (!tut.active || tut.awaiting) && (!online.active || state.current === online.me) && (!ai.active || state.current === ai.human); }
+  function canPlayNow() { return !!state && !isOver() && (!tut.active || tut.awaiting) && (!online.active || turnSeat() === online.seat) && (!ai.active || state.current === ai.human); }
   function turnText() {
     if (tut.active) return '';
     if (ai.active && state.current === ai.bot) return t('ai.thinking', { name: names[ai.bot] });
     if (!online.active) return t('hud.turn', { name: names[state.current] });
     if (online.conn !== 'open') return t('online.reconnecting');
-    if (!names[2]) return '';                       // todavía no entró el rival
-    if (online.spectator) return t('online.theirTurn', { name: names[state.current] });
-    var rival = online.me === 1 ? 2 : 1;
-    if (!online.connected[rival]) return t('online.rivalOffline', { name: names[rival] });
-    return state.current === online.me ? t('online.yourTurn') : t('online.theirTurn', { name: names[state.current] });
+    if (!onlineFull()) return '';                   // todavía no entraron todos
+    if (online.spectator) return t('online.theirTurn', { name: seatNames[turnSeat()] });
+    var gone = offlineRivals();
+    if (gone.length) return t('online.rivalOffline', { name: seatNames[gone[0]] });
+    if (turnSeat() === online.seat) return t('online.yourTurn');
+    if (online.players === 4 && state.current === online.me) return t('four.mateTurn', { name: seatNames[turnSeat()] });
+    return t('online.theirTurn', { name: seatNames[turnSeat()] });
   }
 
   /* ---------- Reloj ----------
@@ -4446,7 +4508,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     settle = null;
     if (online.active) {
       // En online el servidor es el árbitro: acá solo se comprueba rápido y se envía; el tablero cambia cuando el servidor lo confirma.
-      if (state.current !== online.me) { setStatus(t(online.spectator ? 'spec.noPlay' : 'online.wait'), true); sfx('error'); return; }
+      if (turnSeat() !== online.seat) { setStatus(t(online.spectator ? 'spec.noPlay' : 'online.wait'), true); sfx('error'); return; }
       if (online.awaiting) return;
       var v = P.validateMove(state, x, y, online.me);
       if (v) { setStatus(t('err.' + v), true); sfx('error'); render(); return; }
@@ -4614,7 +4676,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     e.preventDefault();
     var p = toCanvas(e), c = snap(p.x, p.y, false); if (!c) return;
     kbd = c;
-    if (online.active && state.current !== online.me) { setStatus(t(online.spectator ? 'spec.noPlay' : 'online.wait'), true); sfx('error'); return; }
+    if (online.active && turnSeat() !== online.seat) { setStatus(t(online.spectator ? 'spec.noPlay' : 'online.wait'), true); sfx('error'); return; }
     if (P.get(state, c.x, c.y) !== P.EMPTY) { setStatus(t('err.OCCUPIED'), true); sfx('error'); return; }
     var grab = !!(pending && cfg.confirm !== 'none' && pending.x === c.x && pending.y === c.y);
     drag = { mouse: e.pointerType !== 'touch', id: e.pointerId, grab: grab, prev: pending, cell: c, f: p, vec: null, lifted: false, liftStart: 0, cssX: e.clientX, cssY: e.clientY };
@@ -5150,9 +5212,9 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     [1, 2].forEach(function (p) {
       var el = $('player' + p);
       el.classList.toggle('active', !isOver() && state.current === p);
-      el.classList.toggle('offline', online.active && !online.connected[p]);
+      el.classList.toggle('offline', online.active && seatsOf(p).some(function (x) { return !online.connected[x]; }));
       var mine = !tut.active && ((ai.active && p === ai.human) || (online.active && !online.spectator && p === online.me));
-      $('pname' + p).textContent = (mine ? PP.emojiOf(profile.avatar) + ' ' : '') + (names[p] || '…') + (online.active && online.me === p ? ' ' + t('online.you') : '');
+      $('pname' + p).textContent = (mine ? PP.emojiOf(profile.avatar) + ' ' : '') + (names[p] || '…') + (online.active && online.me === p && online.players !== 4 ? ' ' + t('online.you') : '');
       $('caps' + p).innerHTML = pips(state.captures[p]) + '<span>' + state.captures[p] + '/5</span>';
     });
     updateSide(); renderClocks(); updateVideoButtons(); updateResultBtn();
@@ -5226,10 +5288,10 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     btn.hidden = !!online.spectator;
     if (online.spectator) { hint.textContent = ''; leave.textContent = t('online.leave'); return; }
     if (!online.active) { btn.disabled = false; btn.textContent = t('end.rematch'); hint.textContent = ''; leave.textContent = t('end.toMenu'); return; }
-    var me = online.me, rival = me === 1 ? 2 : 1;
+    var me = online.seat, other = rematchOther();
     btn.disabled = !!online.rematch[me];
     btn.textContent = online.rematch[me] ? t('online.rematchWait') : t('end.rematch');
-    hint.textContent = (!online.rematch[me] && online.rematch[rival]) ? t('online.rematchRival', { name: names[rival] }) : '';
+    hint.textContent = (!online.rematch[me] && other) ? t('online.rematchRival', { name: seatNames[other] }) : '';
     leave.textContent = t('online.leave');
   }
   function rematch() {
@@ -5295,14 +5357,14 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   function leaveOnline(resign) {
     var wasActive = online.active, net = online.net;
     if (net) {
-      if (resign && wasActive && !online.spectator && state && !isOver() && names[2] && net.isOpen()) net.send({ t: 'resign' });
+      if (resign && wasActive && !online.spectator && state && !isOver() && onlineFull() && net.isOpen()) net.send({ t: 'resign' });
       net.close();
     }
     clearTimeout(online.awaitTimer); clearClaim();
     online.net = null; online.active = false; online.conn = 'closed'; online.code = ''; online.token = ''; online.me = 0;
     online.spectator = false; online.specN = 0; online.cid = ''; chatReset(); stopRooms(); fx.length = 0; $('btnSpectateOffer').hidden = true;
     online.intent = null; online.rejoining = false; online.over = null; online.awaiting = false; online.rivalLeftAt = 0;
-    online.connected = { 1: true, 2: true }; online.rematch = { 1: false, 2: false };
+    online.connected = { 1: true, 2: true, 3: true, 4: true }; online.rematch = { 1: false, 2: false, 3: false, 4: false }; online.seat = 0; online.players = 2; seatNames = {};
     clearSession(); updateOnlineButtons(); updateRematchUi();
     if (wasActive) { videoDiscard(); state = null; clk = null; hover = pending = null; setStatus(''); render(); }
     updateHud();
@@ -5312,7 +5374,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     switch (m.t) {
       case 'joined':
         stopRooms(); $('btnSpectateOffer').hidden = true;
-        online.active = true; online.code = m.code; online.me = m.you; online.spectator = !!m.spectator; online.cid = m.spectator ? m.id : 'p' + m.you;
+        online.active = true; online.code = m.code; online.seat = m.you; online.me = m.you ? teamOfSeat(m.you) : 0; online.spectator = !!m.spectator; online.cid = m.spectator ? m.id : 'p' + m.you;
         if (chat.code !== m.code) { chatReset(); chat.code = m.code; }          // si solo se reconectó, se conservan los silenciados
         if (!m.spectator) { online.token = m.token; saveSession(); }       // los espectadores no tienen lugar que recuperar
         online.intent = null; online.rejoining = false; onlineMsg(''); updateOnlineButtons();
@@ -5333,7 +5395,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
         if (m.reason === 'resign' || m.reason === 'forfeit' || m.reason === 'timeout') sfx(online.spectator || m.winner === online.me ? 'win' : 'lose');   // si terminó por jugada, el sonido ya sonó
         render(); setTimeout(showEnd, 450); break;
       case 'rematch': online.rematch = m.votes; updateRematchUi();
-        if (isOver() && !online.spectator && !$('endOverlay').classList.contains('open') && !document.body.classList.contains('in-screen')) { var rv = online.me === 1 ? 2 : 1; if (m.votes[rv] && !m.votes[online.me]) setStatus(t('online.rematchRival', { name: names[rv] }), true); }
+        if (isOver() && !online.spectator && !$('endOverlay').classList.contains('open') && !document.body.classList.contains('in-screen')) { var rv = rematchOther(); if (rv && !m.votes[online.seat]) setStatus(t('online.rematchRival', { name: seatNames[rv] }), true); }
         updateResultBtn(); break;
       case 'error': onNetError(m); break;
     }
@@ -5350,17 +5412,19 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       if (!r.ok) break;
       g = r.state;
     }
-    state = g; online.me = m.you; online.over = m.over || null; online.connected = m.connected;
+    state = g; online.seat = m.you; online.me = m.you ? teamOfSeat(m.you) : 0; online.over = m.over || null; online.connected = m.connected;
+    online.players = (m.opts && m.opts.players === 4) ? 4 : 2;
     online.rematch = m.rematch || { 1: false, 2: false }; online.awaiting = false;
-    names[1] = m.names[1] || t('player.1'); names[2] = m.names[2] || '';
+    seatNames = {}; for (var si = 1; si <= nSeats(); si++) seatNames[si] = (m.names && m.names[si]) || '';
+    names[1] = teamName(1) || t('player.1'); names[2] = teamName(2);
     hover = pending = drag = settle = null; fx.length = 0; kbd = { x: centerIdx(), y: centerIdx() };
-    trackRival(m.disconnectedFor ? m.disconnectedFor[m.you === 1 ? 2 : 1] : 0);
+    trackRival(m.disconnectedFor ? Math.max.apply(null, rivalSeats().map(function (x) { return m.disconnectedFor[x] || 0; })) : 0);
     setStatus(''); render();
-    if (!m.names[2]) showWait();
+    if (!onlineFull()) showWait();
     else if (online.over) { open('endOverlay'); showEnd(); }
     else {
       closeAll(); updateRematchUi();
-      if (wasOver && state.moves.length === 0 && !online.spectator) setStatus(t('toast.rematch', { n: online.me }), true);
+      if (wasOver && state.moves.length === 0 && !online.spectator) setStatus(t('toast.rematch', { n: online.seat }), true);
     }
   }
 
@@ -5381,8 +5445,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   // Rival desconectado: tras 60 s aparece "Reclamar victoria" (el servidor vuelve a comprobar el tiempo).
   function trackRival(alreadyOfflineMs) {
     if (online.spectator) return;
-    var rival = online.me === 1 ? 2 : 1;
-    if (online.connected[rival]) { online.rivalLeftAt = 0; clearClaim(); return; }
+    if (!offlineRivals().length) { online.rivalLeftAt = 0; clearClaim(); return; }
     if (!online.rivalLeftAt) online.rivalLeftAt = Date.now() - (alreadyOfflineMs || 0);
     clearTimeout(online.claimTimer);
     var left = 60000 - (Date.now() - online.rivalLeftAt);
@@ -5395,6 +5458,13 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     $('roomCode').textContent = online.code; $('waitMsg').textContent = '';
     $('btnShare').hidden = !navigator.share;
     $('waitVis').textContent = t(online.isPublic ? 'online.waitPublic' : 'online.waitPrivate');
+    $('waitSub').textContent = t(online.players === 4 ? 'four.waitSub' : 'online.waitSub');
+    var box = $('waitSeats'); box.innerHTML = ''; box.hidden = online.players !== 4;
+    if (online.players === 4) for (var sw = 1; sw <= 4; sw++) {
+      var li = document.createElement('div'); li.className = 'seat' + (seatNames[sw] ? ' on' : '') + (sw === online.seat ? ' me' : '');
+      li.textContent = t('four.team', { n: teamOfSeat(sw) }) + ' · ' + (seatNames[sw] || t('four.empty')) + (sw === online.seat ? ' ' + t('online.you') : '');
+      box.appendChild(li);
+    }
     open('waitOverlay');
   }
 
@@ -5529,7 +5599,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     if (box) log.scrollTop = log.scrollHeight;
     // personas: jugadores (siempre) + espectadores que escribieron; se puede silenciar a cualquiera menos a uno mismo
     var pp = $('chatPeople'); pp.innerHTML = '';
-    var ids = {}; [1, 2].forEach(function (p) { if (names[p]) ids['p' + p] = { name: names[p], seat: p }; });
+    var ids = {}; for (var sj = 1; sj <= nSeats(); sj++) if (seatNames[sj]) ids['p' + sj] = { name: seatNames[sj], seat: sj };
     for (var k in chat.people) ids[k] = chat.people[k];
     Object.keys(ids).forEach(function (id) {
       if (id === online.cid) return;
@@ -5655,7 +5725,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     if (!state || state.moves.length === 0 || state.status !== 'playing') rematch(); else ask(t('confirm.restart'), t('dlg.restart'), rematch);
   });
   $('btnRematch').addEventListener('click', function () {
-    if (online.active) { if (online.net && online.net.send({ t: 'rematch' })) { online.rematch[online.me] = true; updateRematchUi(); } return; }
+    if (online.active) { if (online.net && online.net.send({ t: 'rematch' })) { online.rematch[online.seat] = true; updateRematchUi(); } return; }
     rematch();
   });
   $('btnEndMenu').addEventListener('click', function () { if (online.active) leaveOnline(false); open('menuOverlay'); });
@@ -5665,7 +5735,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     function go() {
       aiStop();
       if (online.net) {
-        if (online.active && !online.spectator && !isOver() && names[2]) { ask(t('online.leaveConfirm'), t('dlg.leave'), function () { leaveOnline(true); showOnlineMenu(); }); return; }
+        if (online.active && !online.spectator && !isOver() && onlineFull()) { ask(t('online.leaveConfirm'), t('dlg.leave'), function () { leaveOnline(true); showOnlineMenu(); }); return; }
         leaveOnline(true);
       }
       showOnlineMenu();
@@ -5675,7 +5745,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   $('btnOnlineBack').addEventListener('click', function () { if (online.net && !online.active) leaveOnline(false); open('playOverlay'); });
   $('btnCreateRoom').addEventListener('click', function () {
     online.isPublic = vis === 'public';
-    startOnline({ t: 'create', opts: { tournamentRule: settings.tournamentRule, exactFive: settings.exactFive, size: settings.size, timer: settings.timer, public: online.isPublic } });
+    startOnline({ t: 'create', opts: { tournamentRule: settings.tournamentRule, exactFive: settings.exactFive, size: settings.size, timer: settings.timer, players: plPick, public: online.isPublic } });
   });
   function joinFromInput() {
     var code = ($('onCode').value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -5876,11 +5946,21 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   document.querySelectorAll('input[data-opt]').forEach(function (i) {
     i.addEventListener('change', function () { settings[i.getAttribute('data-opt')] = i.checked; syncOpts(); });
   });
+  var plPick = 2;
+  try { if (localStorage.getItem('pente.players') === '4') plPick = 4; } catch (e) {}
+  function syncPl() {
+    document.querySelectorAll('#plPicker .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(Number(b.dataset.pl) === plPick)); });
+    $('plHint').textContent = plPick === 4 ? t('four.hint4') : '';
+  }
+  document.querySelectorAll('#plPicker .seg-opt').forEach(function (b) {
+    b.addEventListener('click', function () { plPick = Number(b.dataset.pl) === 4 ? 4 : 2; try { localStorage.setItem('pente.players', String(plPick)); } catch (e) {} syncPl(); });
+  });
   var vis = 'private';
   try { if (localStorage.getItem('pente.vis') === 'public') vis = 'public'; } catch (e) {}
   function syncVis() {
     document.querySelectorAll('#visPicker .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.vis === vis)); });
     $('visHint').textContent = t(vis === 'public' ? 'online.publicHint' : 'online.privateHint');
+    syncPl();
   }
   document.querySelectorAll('#visPicker .seg-opt').forEach(function (b) {
     b.addEventListener('click', function () { vis = b.dataset.vis; try { localStorage.setItem('pente.vis', vis); } catch (e) {} syncVis(); });
@@ -5934,10 +6014,12 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       var row = document.createElement('div'); row.className = 'room'; row.dataset.code = r.code;
       var info = document.createElement('div'); info.className = 'info';
       var who = document.createElement('div'); who.className = 'who';
-      who.textContent = r.status === 'waiting' ? t('rooms.waiting', { name: r.names[0] || '…' }) : t('rooms.vs', { a: r.names[0] || '…', b: r.names[1] || '…' });
+      var nm = function (i) { return r.names[i] || '…'; };
+      if (r.players === 4) who.textContent = r.status === 'waiting' ? t('four.roomWaiting', { name: nm(0), n: r.names.filter(Boolean).length }) : t('rooms.vs', { a: nm(0) + ' + ' + nm(2), b: nm(1) + ' + ' + nm(3) });
+      else who.textContent = r.status === 'waiting' ? t('rooms.waiting', { name: r.names[0] || '…' }) : t('rooms.vs', { a: r.names[0] || '…', b: r.names[1] || '…' });
       var meta = document.createElement('div'); meta.className = 'meta';
       var st = r.status === 'waiting' ? t('rooms.statusWaiting') : t(r.status === 'over' ? 'rooms.statusOver' : 'rooms.statusPlaying', { n: r.moves });
-      meta.textContent = r.size + '×' + r.size + ' · ' + st + (r.spectators ? ' · ' + t('rooms.watching', { n: r.spectators }) : '');
+      meta.textContent = (r.players === 4 ? t('four.badge') + ' · ' : '') + r.size + '×' + r.size + ' · ' + st + (r.spectators ? ' · ' + t('rooms.watching', { n: r.spectators }) : '');
       info.appendChild(who); info.appendChild(meta);
       var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'btn' + (r.status === 'waiting' ? ' primary' : '');
       btn.textContent = t(r.status === 'waiting' ? 'rooms.play' : 'rooms.watch');
