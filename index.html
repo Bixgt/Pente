@@ -346,6 +346,27 @@ input.locked { opacity: .75; cursor: not-allowed; }
 .lobby-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .lobbylog { min-height: 120px; max-height: 220px; flex: none; }
 .lobby[hidden] { display: none; }
+
+/* ---------- Torneos ---------- */
+.screen-body.wide { max-width: 760px; }
+.tn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0 12px; }
+.screen-body select, .screen-body textarea { width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px; color: var(--text); font: inherit; }
+.screen-body textarea { resize: vertical; }
+.tn-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin: 8px 0; } .tn-row select { width: auto; flex: 1 1 140px; padding: 8px; }
+.btn.small { min-height: 0; padding: 8px 12px; font-size: 14px; } .btn.ghost { background: transparent; } .btn.danger { color: var(--danger, #e5604f); }
+.btn.tn-sug { display: block; width: 100%; text-align: left; margin: 6px 0; min-height: 0; }
+.tn-h { font-size: 15px; margin: 14px 0 6px; } .tn-line { font-size: 14px; } .tn-ok { color: var(--ok, #6fcf8e); font-size: 14px; margin: 3px 0; } .tn-err { color: var(--danger, #e5604f); margin: 4px 0; } .tn-warn { color: var(--accent); font-size: 13px; margin: 4px 0; }
+.tn-tabs { display: flex; gap: 6px; margin: 12px 0; } .tn-tabs button { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; font-weight: 600; min-height: 40px; }
+.tn-tabs button[aria-pressed=true] { background: var(--accent); color: #1a1405; border-color: var(--accent); }
+.tn-champ { font-size: 22px; color: var(--accent); margin: 6px 0; font-weight: 800; }
+.tn-round { margin: 10px 0 14px; }
+.tn-duel { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; margin: 6px 0; font-size: 14px; }
+.tn-duel.done { opacity: .88; } .tn-p { display: flex; justify-content: space-between; gap: 8px; } .tn-p.w b { color: var(--ok, #6fcf8e); } .tn-p.l { color: var(--muted); } .tn-tbd { color: var(--muted); font-style: italic; }
+.tn-meta { font-size: 12px; color: var(--muted); margin-top: 4px; } .tn-acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.tn-bracket { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; } .tn-col { flex: 1 0 200px; min-width: 200px; display: flex; flex-direction: column; } .tn-col h4 { text-align: center; margin: 0 0 6px; font-size: 14px; }
+.tn-colin { flex: 1; display: flex; flex-direction: column; justify-content: space-around; }
+.tn-tw { overflow-x: auto; } .tn-tw table { width: 100%; border-collapse: collapse; font-size: 14px; } .tn-tw th, .tn-tw td { padding: 7px 6px; text-align: right; border-bottom: 1px solid var(--line); } .tn-tw th:nth-child(2), .tn-tw td:nth-child(2) { text-align: left; } .tn-tw th { color: var(--muted); font-weight: 600; font-size: 12px; }
+.tn-tw tr.champ td { color: var(--accent); font-weight: 700; } .tn-tw tr.out td { color: var(--muted); }
 </style>
 </head>
 <body>
@@ -434,10 +455,63 @@ input.locked { opacity: .75; cursor: not-allowed; }
     <div class="btns">
       <button class="btn primary" id="btnResume" hidden data-i18n="menu.resume"></button>
       <button class="btn primary" id="btnPlay" data-i18n="menu.play"></button>
+      <button class="btn" id="btnTourn" data-i18n="tn.menu"></button>
       <button class="btn" id="btnProfile"></button>
       <button class="btn" id="btnSettings" data-i18n="menu.settings"></button>
       <button class="btn" id="btnRules" data-i18n="menu.rules"></button>
       <button class="btn" id="btnLang"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Torneos: lista -->
+<div class="overlay screen" id="tnOverlay">
+  <div class="screen-body">
+    <h2 data-i18n="tn.title"></h2>
+    <p class="sub" data-i18n="tn.sub"></p>
+    <div class="btns"><button class="btn primary" id="tnCreate" data-i18n="tn.create"></button></div>
+    <div class="roomlist" id="tnList"></div>
+    <div class="btns"><button class="btn" id="tnBack" data-i18n="menu.back"></button></div>
+  </div>
+</div>
+
+<!-- Torneos: nuevo -->
+<div class="overlay screen" id="tnNewOverlay">
+  <div class="screen-body">
+    <h2 data-i18n="tn.new"></h2>
+    <div class="field"><label class="lbl" for="tnName" data-i18n="tn.name"></label><input type="text" id="tnName" maxlength="40" autocomplete="off"></div>
+    <div class="tn-grid">
+      <div class="field"><label class="lbl" for="tnFormat" data-i18n="tn.format"></label><select id="tnFormat"></select></div>
+      <div class="field"><label class="lbl" for="tnBest" data-i18n="tn.bestOf"></label><select id="tnBest"></select></div>
+      <div class="field"><label class="lbl" for="tnMin" data-i18n="tn.min"></label><input type="number" id="tnMin" min="1" max="63" value="2" inputmode="numeric"></div>
+      <div class="field" id="tnCutBox"><label class="lbl" for="tnCut" data-i18n="tn.cut"></label><select id="tnCut"><option>2</option><option selected>4</option><option>8</option><option>16</option></select></div>
+    </div>
+    <div class="field"><label class="lbl" for="tnPlayers" data-i18n="tn.players"></label><textarea id="tnPlayers" rows="7" autocomplete="off" spellcheck="false"></textarea>
+      <div class="tn-row"><span class="hint" id="tnCount"></span><button type="button" class="btn small" id="tnShuffle" data-i18n="tn.shuffle"></button></div></div>
+    <div id="tnCheck" aria-live="polite"></div>
+    <div class="btns">
+      <button class="btn primary" id="tnStart" data-i18n="tn.start"></button>
+      <button class="btn" id="tnNewBack" data-i18n="menu.back"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Torneos: un torneo -->
+<div class="overlay screen" id="tnViewOverlay">
+  <div class="screen-body wide">
+    <h2 id="tnTitle"></h2>
+    <p class="hint" id="tnInfo"></p>
+    <div id="tnChamp"></div>
+    <div class="tn-row">
+      <button class="btn small" id="tnUndo" data-i18n="tn.undo"></button>
+      <select id="tnWd"></select><button class="btn small" id="tnWdBtn" data-i18n="tn.withdraw"></button>
+    </div>
+    <div class="tn-tabs" id="tnTabs"><button type="button" data-t="fx" aria-pressed="true" data-i18n="tn.fixture"></button><button type="button" data-t="st" aria-pressed="false" data-i18n="tn.table"></button></div>
+    <div id="tnBody"></div>
+    <p class="hint" data-i18n="tn.local"></p>
+    <div class="btns">
+      <button class="btn" id="tnViewBack" data-i18n="menu.back"></button>
+      <button class="btn danger" id="tnDelete" data-i18n="tn.delete"></button>
     </div>
   </div>
 </div>
@@ -1135,6 +1209,500 @@ input.locked { opacity: .75; cursor: not-allowed; }
   }
 
   return { merge: merge, mergeStats: mergeStats, AVATARS: AVATARS, MODES: MODES, NAME_MAX: NAME_MAX, emojiOf: emojiOf, cleanName: cleanName, empty: empty, normalize: normalize, record: record, totals: totals };
+});
+</script>
+<script>
+/* PENTE · motor de torneos (lógica pura, sin pantalla ni red).
+ *
+ * Estructura:  TORNEO → RONDA → DUELO → PARTIDAS.   Un "duelo" es un enfrentamiento entre dos personas (mejor de 1/3/5/7 partidas).
+ * El motor NO juega Pente: solo arma cruces, recibe quién ganó cada partida y calcula quién sigue / la tabla.
+ * Las partidas reales se juegan con el mismo sistema online de siempre.
+ *
+ * Formatos:
+ *   elim       eliminación directa (el que pierde un duelo, se va). Garantiza 1 duelo por jugador.
+ *   rr         todos contra todos. Garantiza n-1 duelos.
+ *   swiss      sistema suizo: R rondas, cada ronda enfrenta gente con rendimiento parecido y nadie repite rival.
+ *   swiss_cut  suizo + los mejores 2/4/8/16 juegan una eliminatoria final.
+ *
+ * "Mínimo de duelos": se garantiza por construcción (suizo/todos contra todos) y se comprueba ANTES de empezar.
+ * Un descanso ("bye", cuando la cantidad es impar) NO cuenta como duelo: por eso con cantidad impar el suizo juega una ronda extra.
+ *
+ * El estado es un objeto JSON común (se puede guardar y mandar por red). Todas las funciones devuelven estados nuevos.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.PenteTournament = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  var FORMATS = ['elim', 'rr', 'swiss', 'swiss_cut'];
+  var BEST_OF = [1, 3, 5, 7];
+  var MAX_PLAYERS = 64, NAME_MAX = 20, BYE = '__bye';
+  var FORMAT_NAME = { elim: 'Eliminación directa', rr: 'Todos contra todos', swiss: 'Suizo', swiss_cut: 'Suizo + eliminatoria final' };
+
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function isPow2(x) { return x >= 1 && (x & (x - 1)) === 0; }
+  function ceilLog2(x) { var k = 0; while ((1 << k) < x) k++; return k; }
+  function floorPow2(x) { var p = 1; while (p * 2 <= x) p *= 2; return p; }
+  function evenUp(n) { return n % 2 ? n + 1 : n; }
+  function cleanName(s, max) { return String(s == null ? '' : s).replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, max || NAME_MAX); }
+
+  /* ---------- jugadores ---------- */
+  function normPlayers(list) {
+    var out = [], names = {}, ids = {}, err = '';
+    (Array.isArray(list) ? list : []).forEach(function (p, i) {
+      var o = typeof p === 'string' ? { name: p } : (p || {});
+      var name = cleanName(o.name), id = String(o.id != null ? o.id : 'p' + (i + 1));
+      if (!name) { err = err || 'Hay un jugador sin nombre.'; return; }
+      if (names[name.toLowerCase()]) { err = err || 'El nombre "' + name + '" está repetido.'; return; }
+      if (ids[id] || id === BYE) { err = err || 'Hay ids repetidos.'; return; }
+      names[name.toLowerCase()] = 1; ids[id] = 1; out.push({ id: id, name: name, seed: out.length + 1 });
+    });
+    return { players: out, error: err };
+  }
+
+  /* ---------- configuración ---------- */
+  function normCfg(cfg) {
+    cfg = cfg || {};
+    var pts = cfg.points || {};
+    return {
+      name: cleanName(cfg.name, 40) || 'Torneo de Pente',
+      format: cfg.format, bestOf: Number(cfg.bestOf == null ? 3 : cfg.bestOf), minDuels: Math.floor(Number(cfg.minDuels == null ? 1 : cfg.minDuels)),
+      cut: Math.floor(Number(cfg.cut == null ? 4 : cfg.cut)),
+      points: { win: pts.win == null ? 3 : Number(pts.win), loss: pts.loss == null ? 0 : Number(pts.loss) }
+    };
+  }
+
+  /* Cantidad de rondas del suizo para garantizar `min` duelos. Con cantidad impar, quien descansa pierde un duelo → una ronda de más. */
+  function swissRounds(n, min) { return min + (n % 2 ? 1 : 0); }
+  /* El suizo sin repetir rival siempre se puede armar mientras R <= m/2 (m = cantidad par ≥ n): un grafo regular de grado ≥ m/2 tiene emparejamiento perfecto (Dirac). */
+  function swissFeasible(n, R) { return n >= 2 && R >= 1 && R <= evenUp(n) / 2; }
+  function swissMaxMin(n) { return Math.max(0, evenUp(n) / 2 - (n % 2 ? 1 : 0)); }
+
+  function roundName(r, K) {
+    var left = K - r;                                   // rondas que faltan después de esta
+    return left === 0 ? 'Final' : left === 1 ? 'Semifinal' : left === 2 ? 'Cuartos de final' : left === 3 ? 'Octavos de final' : left === 4 ? 'Dieciseisavos de final' : 'Ronda ' + r;
+  }
+
+  /* Plan matemático del torneo: cuántas rondas, cuántos duelos y cuántos le tocan como mínimo / máximo a cada jugador. */
+  function planOf(n, c) {
+    var f = c.format, R, K;
+    if (f === 'elim') { K = ceilLog2(n); return { rounds: K, duels: n - 1, min: 1, max: K }; }
+    if (f === 'rr') { var m = evenUp(n); return { rounds: m - 1, duels: n * (n - 1) / 2, min: n - 1, max: n - 1 }; }
+    R = swissRounds(n, c.minDuels);
+    var sw = { rounds: R, duels: R * Math.floor(n / 2), min: n % 2 ? R - 1 : R, max: R };
+    if (f === 'swiss') return sw;
+    K = ceilLog2(c.cut);
+    return { rounds: R + K, duels: sw.duels + c.cut - 1, min: sw.min, max: R + K, swissRounds: R, cutRounds: K };
+  }
+
+  function check(cfg, players) {
+    var c = normCfg(cfg), errors = [], warnings = [];
+    var n = Array.isArray(players) ? players.length : Math.floor(Number(players));
+    function err(code, msg) { errors.push({ code: code, msg: msg }); }
+    if (FORMATS.indexOf(c.format) < 0) err('format', 'Elegí un formato de torneo.');
+    if (!(n >= 2)) err('players', 'Hacen falta al menos 2 jugadores.');
+    else if (n > MAX_PLAYERS) err('players', 'El máximo es ' + MAX_PLAYERS + ' jugadores.');
+    if (BEST_OF.indexOf(c.bestOf) < 0) err('bestOf', 'Cada duelo puede ser al mejor de 1, 3, 5 o 7 partidas.');
+    if (!(c.minDuels >= 1)) err('minDuels', 'El mínimo de duelos tiene que ser 1 o más.');
+    if (c.points.win < c.points.loss) err('points', 'La victoria no puede dar menos puntos que la derrota.');
+    if (errors.length) return { ok: false, errors: errors, warnings: warnings, plan: null, cfg: c, n: n };
+
+    if (c.minDuels > n - 1) err('minDuels', 'Con ' + n + ' jugadores nadie puede enfrentar a más de ' + (n - 1) + ' rivales distintos: el mínimo no puede ser ' + c.minDuels + '.');
+    else if (c.format === 'elim' && c.minDuels > 1) err('minDuels', 'La eliminación directa solo garantiza 1 duelo: quien pierde la primera vez queda afuera.');
+    else if (c.format === 'rr' && c.minDuels > n - 1) err('minDuels', 'Todos contra todos da ' + (n - 1) + ' duelos a cada jugador.');
+    else if ((c.format === 'swiss' || c.format === 'swiss_cut') && !swissFeasible(n, swissRounds(n, c.minDuels))) {
+      err('minDuels', 'Con ' + n + ' jugadores el suizo garantiza como máximo ' + swissMaxMin(n) + ' duelo' + (swissMaxMin(n) === 1 ? '' : 's') + ' (para más conviene todos contra todos).');
+    }
+    if (c.format === 'swiss_cut') {
+      if (!isPow2(c.cut) || c.cut < 2) err('cut', 'Los que pasan a la eliminatoria tienen que ser 2, 4, 8 o 16.');
+      else if (c.cut >= n) err('cut', 'Tienen que pasar menos jugadores que los que participan (' + n + ').');
+    }
+    if (errors.length) return { ok: false, errors: errors, warnings: warnings, plan: null, cfg: c, n: n };
+
+    var plan = planOf(n, c);
+    if ((c.format === 'swiss' || c.format === 'swiss_cut') && plan.rounds && (c.format === 'swiss' ? plan.rounds : plan.swissRounds) < ceilLog2(n)) {
+      warnings.push('Con tan pocas rondas puede no quedar un campeón claro; se desempata por victorias, diferencia de partidas y resultado entre empatados.');
+    }
+    if (n % 2 && c.format !== 'elim') warnings.push('Con cantidad impar, en cada ronda alguien descansa. El descanso da los puntos de una victoria pero no cuenta como duelo.');
+    if (c.format === 'elim' && !isPow2(n)) warnings.push('Con ' + n + ' jugadores los mejores sembrados empiezan con descanso en la primera ronda.');
+    return { ok: true, errors: [], warnings: warnings, plan: plan, cfg: c, n: n };
+  }
+
+  /* Alternativas válidas cuando la configuración pedida no se puede cumplir. */
+  function suggest(cfg, players) {
+    var c = normCfg(cfg), n = Array.isArray(players) ? players.length : Math.floor(Number(players)), out = [];
+    if (!(n >= 2)) return out;
+    function add(label, over) {
+      var cand = Object.assign({}, c, over);
+      var v = check(cand, n);
+      if (v.ok && !out.some(function (o) { return JSON.stringify(o.cfg) === JSON.stringify(v.cfg); })) out.push({ label: label, cfg: v.cfg, plan: v.plan });
+    }
+    var want = Math.max(1, c.minDuels), cutDef = Math.max(2, Math.min(floorPow2(Math.max(2, Math.floor(n / 2))), 8));
+    if (want <= n - 1) add('Todos contra todos (cada uno juega ' + (n - 1) + ' duelos)', { format: 'rr', minDuels: Math.min(want, n - 1) });
+    add('Suizo con ' + want + ' duelos garantizados', { format: 'swiss', minDuels: want });
+    add('Suizo (' + want + ' duelos) y eliminatoria final con los mejores ' + cutDef, { format: 'swiss_cut', minDuels: want, cut: cutDef });
+    var mx = swissMaxMin(n);
+    if (mx >= 1 && mx < want) {
+      add('Suizo con ' + mx + ' duelos (el máximo posible)', { format: 'swiss', minDuels: mx });
+      add('Suizo (' + mx + ' duelos) y eliminatoria final', { format: 'swiss_cut', minDuels: mx, cut: cutDef });
+    }
+    if (want > 1) add('Eliminación directa (1 duelo garantizado)', { format: 'elim', minDuels: 1 });
+    return out.slice(0, 4);
+  }
+
+  function validate(cfg, players) {
+    var v = check(cfg, players);
+    v.suggestions = v.ok ? [] : suggest(cfg, players);
+    return v;
+  }
+
+  /* Texto para la pantalla de confirmación ("vista previa"). */
+  function preview(cfg, players) {
+    var v = validate(cfg, players);
+    if (!v.ok) return { ok: false, title: v.cfg.name, lines: [], promises: [], errors: v.errors, suggestions: v.suggestions };
+    var c = v.cfg, p = v.plan, need = (c.bestOf + 1) / 2, lines = [], promises = [];
+    lines.push('Jugadores: ' + v.n);
+    lines.push('Formato: ' + FORMAT_NAME[c.format] + (c.format === 'swiss' ? ' (' + p.rounds + ' rondas)' : c.format === 'swiss_cut' ? ' (' + p.swissRounds + ' rondas + top ' + c.cut + ')' : ''));
+    lines.push('Duelo: ' + (c.bestOf === 1 ? 'una sola partida' : 'mejor de ' + c.bestOf + ' (gana quien llegue a ' + need + ' partidas)'));
+    lines.push('Puntos: ' + c.points.win + ' por duelo ganado, ' + c.points.loss + ' por perdido');
+    lines.push('En total: ' + p.duels + ' duelos en ' + p.rounds + ' rondas');
+    promises.push('Todos jugarán al menos ' + p.min + ' duelo' + (p.min === 1 ? '' : 's') + '.');
+    if (c.format === 'elim') promises.push('Quien pierda un duelo queda eliminado.');
+    promises.push('Un duelo es un enfrentamiento entre dos personas; puede tener varias partidas. Perder 0-3 cuenta como 1 duelo, no como 3.');
+    promises.push('Quien empieza la primera partida de cada duelo se alterna para que nadie tenga siempre la ventaja de mover primero.');
+    return { ok: true, title: c.name, lines: lines, promises: promises, warnings: v.warnings, plan: p };
+  }
+
+  /* ---------- armado de rondas ---------- */
+  function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  /* Mezcla reproducible: la misma semilla da siempre el mismo orden (sirve para sembrar al azar y poder auditarlo). */
+  function shuffle(list, seed) {
+    var a = list.slice(), rnd = mulberry32(Math.floor(Number(seed)) || 1);
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(rnd() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+
+  function newDuel(S, round, idx, a, b) {
+    return { id: S.phasePrefix + round + '-' + (idx + 1), a: a, b: b, bye: false, bestOf: S.cfg.bestOf, games: [], score: { a: 0, b: 0 }, winner: null, walkover: false, status: 'pending', opens: (S.duelSeq++ % 2) ? 'b' : 'a' };
+  }
+  function makeBye(S, round, idx, p) { var d = newDuel(S, round, idx, p, null); d.bye = true; d.status = 'done'; d.winner = p; return d; }
+
+  /* Emparejamiento sin repetir rival: busca el primero (en orden de ranking) que complete a todos. Siempre existe mientras R <= m/2. */
+  function matchDFS(list, played) {
+    var used = {}, out = [], steps = 0;
+    function go() {
+      if (++steps > 400000) return false;
+      var i = 0; while (i < list.length && used[list[i]]) i++;
+      if (i === list.length) return true;
+      var p = list[i]; used[p] = 1;
+      for (var j = i + 1; j < list.length; j++) {
+        var q = list[j];
+        if (used[q] || (played[p] && played[p][q])) continue;
+        used[q] = 1; out.push([p, q]);
+        if (go()) return true;
+        out.pop(); used[q] = 0;
+      }
+      used[p] = 0; return false;
+    }
+    return go() ? out : null;
+  }
+  function playedMap(S) {
+    var m = {};
+    S.rounds.forEach(function (r) { if (r.phase !== 'swiss') return; r.duels.forEach(function (d) {
+      var b = d.b == null ? BYE : d.b; (m[d.a] = m[d.a] || {})[b] = 1; (m[b] = m[b] || {})[d.a] = 1;
+    }); });
+    return m;
+  }
+  function swissRound(S) {
+    var r = S.rounds.length + 1, n = S.players.length, order, pairs;
+    var swissDone = S.rounds.filter(function (x) { return x.phase === 'swiss'; }).length;
+    var rno = swissDone + 1;
+    if (rno === 1) {
+      order = S.players.map(function (p) { return p.id; });
+      var bye1 = n % 2 ? order.pop() : null, half = order.length / 2;
+      pairs = []; for (var i = 0; i < half; i++) pairs.push([order[i], order[i + half]]);
+      if (bye1) pairs.push([bye1, BYE]);
+    } else {
+      var tbl = standings(S, { phase: 'swiss' });
+      order = tbl.map(function (x) { return x.id; });
+      if (n % 2) order.push(BYE);
+      pairs = matchDFS(order, playedMap(S));
+      if (!pairs) throw new Error('No se pudo armar la ronda ' + rno + ' sin repetir rivales.');
+    }
+    var duels = [], idx = 0;
+    pairs.forEach(function (pr) {
+      if (pr[1] === BYE) duels.push(makeBye(S, r, idx++, pr[0]));
+      else if (pr[0] === BYE) duels.push(makeBye(S, r, idx++, pr[1]));
+      else duels.push(newDuel(S, r, idx++, pr[0], pr[1]));
+    });
+    S.phasePrefix = 'S'; duels.forEach(function (d, i) { d.id = 'S' + rno + '-' + (i + 1); });
+    S.rounds.push({ n: r, phase: 'swiss', name: 'Ronda ' + rno, duels: duels });
+  }
+
+  function rrRounds(S) {
+    var ids = S.players.map(function (p) { return p.id; });
+    if (ids.length % 2) ids.push(BYE);
+    var m = ids.length, arr = ids.slice();
+    for (var r = 0; r < m - 1; r++) {
+      var duels = [], idx = 0;
+      for (var i = 0; i < m / 2; i++) {
+        var a = arr[i], b = arr[m - 1 - i];
+        var d;
+        if (a === BYE || b === BYE) { d = makeBye(S, r + 1, idx++, a === BYE ? b : a); d.rest = true; }
+        else { d = (r + i) % 2 ? newDuel(S, r + 1, idx++, b, a) : newDuel(S, r + 1, idx++, a, b); }
+        d.id = 'R' + (r + 1) + '-' + (idx);
+        duels.push(d);
+      }
+      S.rounds.push({ n: r + 1, phase: 'rr', name: 'Fecha ' + (r + 1), duels: duels });
+      arr.splice(1, 0, arr.pop());                       // método del círculo: el primero queda fijo, el resto rota
+    }
+  }
+
+  function bracketSeeds(m) { var s = [1, 2]; while (s.length < m) { var next = [], len = s.length * 2; s.forEach(function (x) { next.push(x); next.push(len + 1 - x); }); s = next; } return s.slice(0, m); }
+  /* Arma el cuadro completo de eliminación para `ids` (ya ordenados por siembra). Los duelos de rondas posteriores se llenan a medida que hay ganadores. */
+  function buildElim(S, ids) {
+    var n = ids.length, m = 1; while (m < n) m *= 2;
+    var K = ceilLog2(m), base = S.rounds.length, seeds = bracketSeeds(m), cur = [], rounds = [];
+    function id(seed) { return seed <= n ? ids[seed - 1] : null; }
+    var first = [];
+    for (var i = 0; i < m / 2; i++) {
+      var a = id(seeds[2 * i]), b = id(seeds[2 * i + 1]), d;
+      if (a && b) d = newDuel(S, base + 1, i, a, b);
+      else d = makeBye(S, base + 1, i, a || b);
+      d.id = 'E1-' + (i + 1); first.push(d);
+    }
+    rounds.push(first); cur = first;
+    for (var r = 2; r <= K; r++) {
+      var next = [];
+      for (var j = 0; j < cur.length / 2; j++) {
+        var nd = newDuel(S, base + r, j, null, null); nd.id = 'E' + r + '-' + (j + 1); next.push(nd);
+        cur[2 * j].next = { id: nd.id, slot: 'a' }; cur[2 * j + 1].next = { id: nd.id, slot: 'b' };
+      }
+      rounds.push(next); cur = next;
+    }
+    rounds.forEach(function (ds, k) { S.rounds.push({ n: base + k + 1, phase: 'elim', name: roundName(k + 1, K), duels: ds }); });
+    // los descansos de la primera ronda ya tienen ganador: se acomodan en la ronda siguiente
+    first.forEach(function (d) { if (d.status === 'done') place(S, d); });
+  }
+
+  function findDuel(S, id) {
+    for (var i = 0; i < S.rounds.length; i++) for (var j = 0; j < S.rounds[i].duels.length; j++) if (S.rounds[i].duels[j].id === id) return S.rounds[i].duels[j];
+    return null;
+  }
+  function place(S, d) {                                  // pasa el ganador de un duelo de eliminación al siguiente cruce
+    if (!d.next || !d.winner) return;
+    var nx = findDuel(S, d.next.id); nx[d.next.slot] = d.winner;
+  }
+
+  /* ---------- creación ---------- */
+  function create(cfg, playersIn) {
+    var np = normPlayers(playersIn);
+    if (np.error) throw new Error(np.error);
+    var v = validate(cfg, np.players);
+    if (!v.ok) { var e = new Error(v.errors[0].msg); e.validation = v; throw e; }
+    var S = { v: 1, cfg: v.cfg, plan: v.plan, players: np.players, rounds: [], status: 'running', phase: v.cfg.format === 'elim' ? 'elim' : v.cfg.format === 'rr' ? 'rr' : 'swiss', champion: null, withdrawn: [], duelSeq: 0, phasePrefix: 'S', log: [] };
+    if (v.cfg.format === 'rr') rrRounds(S);
+    else if (v.cfg.format === 'elim') buildElim(S, S.players.map(function (p) { return p.id; }));
+    else swissRound(S);
+    autoWalkover(S); advance(S);
+    return S;
+  }
+
+  /* ---------- resultados ---------- */
+  function need(S) { return (S.cfg.bestOf + 1) / 2; }
+  function finishDuel(S, d, winner, walkover) {
+    d.winner = winner; d.status = 'done'; d.walkover = !!walkover;
+    if (S.phase === 'elim' || d.id.charAt(0) === 'E') place(S, d);
+  }
+  /* games: lista con el id de quien ganó cada partida, en orden. Se puede ir cargando de a una (el duelo queda "en juego"). */
+  function recordGames(state, duelId, games) {
+    var S = clone(state);
+    if (S.status !== 'running') throw new Error('El torneo no está en curso.');
+    var d = findDuel(S, duelId);
+    if (!d) throw new Error('No existe ese duelo.');
+    if (d.bye) throw new Error('Ese cruce es un descanso.');
+    if (d.status === 'done') throw new Error('Ese duelo ya terminó.');
+    if (!d.a || !d.b) throw new Error('Ese duelo todavía no tiene los dos jugadores.');
+    var n = need(S), sa = 0, sb = 0, list = [];
+    (games || []).forEach(function (w) {
+      if (sa >= n || sb >= n) throw new Error('Sobran partidas: el duelo ya estaba definido.');
+      if (w !== d.a && w !== d.b) throw new Error('El ganador de una partida tiene que ser uno de los dos jugadores del duelo.');
+      if (w === d.a) sa++; else sb++;
+      list.push(w);
+    });
+    d.games = list; d.score = { a: sa, b: sb }; d.status = list.length ? 'playing' : 'pending';
+    if (sa >= n || sb >= n) finishDuel(S, d, sa >= n ? d.a : d.b, false);
+    logGames(S, duelId, list);
+    autoWalkover(S); advance(S);
+    return S;
+  }
+  /* Cada acción queda en un registro: sirve para deshacer (se rearma el torneo repitiendo todo menos lo último). */
+  function logGames(S, id, list) {
+    var l = S.log[S.log.length - 1];
+    if (l && l.t === 'games' && l.id === id) { if (list.length) l.games = list.slice(); else S.log.pop(); }
+    else if (list.length) S.log.push({ t: 'games', id: id, games: list.slice() });
+  }
+
+  /* El organizador resuelve un duelo a mano (abandono, problema técnico…). Queda marcado como walkover. */
+  function forfeit(state, duelId, winnerId) {
+    var S = clone(state), d = findDuel(S, duelId);
+    if (!d || d.bye || d.status === 'done' || !d.a || !d.b) throw new Error('Ese duelo no se puede resolver así.');
+    if (winnerId !== d.a && winnerId !== d.b) throw new Error('El ganador tiene que ser uno de los dos jugadores.');
+    finishDuel(S, d, winnerId, true); S.log.push({ t: 'forfeit', id: duelId, winner: winnerId });
+    autoWalkover(S); advance(S);
+    return S;
+  }
+
+  /* Un jugador se retira: pierde por walkover todos sus duelos pendientes (los presentes y los que lleguen). */
+  function withdraw(state, playerId) {
+    var S = clone(state);
+    if (!S.players.some(function (p) { return p.id === playerId; })) throw new Error('Ese jugador no está en el torneo.');
+    if (S.withdrawn.indexOf(playerId) < 0) { S.withdrawn.push(playerId); S.log.push({ t: 'withdraw', id: playerId }); }
+    autoWalkover(S); advance(S);
+    return S;
+  }
+  /* Rearma el torneo desde cero repitiendo el registro. */
+  function replay(state, log) {
+    var S = create(state.cfg, state.players);
+    log.forEach(function (e) {
+      if (e.t === 'games') S = recordGames(S, e.id, e.games);
+      else if (e.t === 'forfeit') S = forfeit(S, e.id, e.winner);
+      else if (e.t === 'withdraw') S = withdraw(S, e.id);
+    });
+    if (state.meta) S.meta = state.meta;
+    return S;
+  }
+  /* Deshace lo último: la última partida cargada, el último resultado resuelto a mano o el último retiro. */
+  function undo(state) {
+    var log = (state.log || []).slice(); if (!log.length) return state;
+    var last = log.pop();
+    if (last.t === 'games' && last.games.length > 1) log.push({ t: 'games', id: last.id, games: last.games.slice(0, -1) });
+    return replay(state, log);
+  }
+  function autoWalkover(S) {
+    var changed = true;
+    while (changed) {
+      changed = false;
+      S.rounds.forEach(function (r) { r.duels.forEach(function (d) {
+        if (d.status === 'done' || d.bye || !d.a || !d.b) return;
+        var wa = S.withdrawn.indexOf(d.a) >= 0, wb = S.withdrawn.indexOf(d.b) >= 0;
+        if (!wa && !wb) return;
+        var win = wa && wb ? (seedOf(S, d.a) < seedOf(S, d.b) ? d.a : d.b) : (wa ? d.b : d.a);
+        finishDuel(S, d, win, true); changed = true;
+      }); });
+    }
+  }
+  function seedOf(S, id) { for (var i = 0; i < S.players.length; i++) if (S.players[i].id === id) return S.players[i].seed; return 999; }
+
+  function roundsDone(S, phase) { return S.rounds.filter(function (r) { return r.phase === phase; }); }
+  function allDone(r) { return r.duels.every(function (d) { return d.status === 'done'; }); }
+
+  /* Avanza el torneo: siguiente ronda de suizo, paso a la eliminatoria final o cierre con campeón. */
+  function advance(S) {
+    var guard = 0;
+    while (S.status === 'running' && guard++ < 200) {
+      var f = S.cfg.format, last = S.rounds[S.rounds.length - 1];
+      if (f === 'rr') {
+        if (S.rounds.every(allDone)) { finish(S); }
+        return;
+      }
+      if (f === 'elim') {
+        if (S.rounds.every(allDone)) finish(S);
+        return;
+      }
+      // suizo / suizo + corte
+      if (S.phase === 'swiss') {
+        if (!allDone(last)) return;
+        var played = roundsDone(S, 'swiss').length, R = S.plan.swissRounds || S.plan.rounds;
+        if (played < R) { swissRound(S); autoWalkover(S); continue; }
+        if (f === 'swiss') { finish(S); return; }
+        var tbl = standings(S, { phase: 'swiss' }).filter(function (x) { return S.withdrawn.indexOf(x.id) < 0; });
+        var cut = Math.min(S.cfg.cut, floorPow2(tbl.length));
+        if (cut < 2) { finish(S); return; }
+        S.phase = 'elim'; S.phasePrefix = 'E';
+        buildElim(S, tbl.slice(0, cut).map(function (x) { return x.id; }));
+        autoWalkover(S); continue;
+      }
+      if (S.rounds.every(allDone)) finish(S);
+      return;
+    }
+  }
+  function finish(S) {
+    S.status = 'finished';
+    var r = ranking(S);
+    S.champion = r.length ? r[0].id : null;
+  }
+
+  /* ---------- clasificación ---------- */
+  function emptyRow(p) { return { id: p.id, name: p.name, seed: p.seed, duels: 0, dw: 0, dl: 0, gw: 0, gl: 0, diff: 0, pts: 0, byes: 0 }; }
+  /* Tabla con desempates fijos y sin ambigüedad:
+   *   1) puntos  2) duelos ganados  3) diferencia de partidas  4) partidas ganadas
+   *   5) resultado entre los empatados (duelos ganados solo entre ellos)  6) orden de siembra. */
+  function standings(state, opts) {
+    var S = state, phase = (opts && opts.phase) || (S.cfg.format === 'elim' ? 'elim' : S.cfg.format === 'rr' ? 'rr' : 'swiss');
+    var rows = {}, h2h = {};
+    S.players.forEach(function (p) { rows[p.id] = emptyRow(p); });
+    S.rounds.forEach(function (r) { if (r.phase !== phase) return; r.duels.forEach(function (d) {
+      if (d.status !== 'done') return;
+      if (d.bye) { if (d.rest) return; var rb = rows[d.a]; rb.byes++; if (phase === 'swiss') rb.pts += S.cfg.points.win; return; }
+      var A = rows[d.a], B = rows[d.b], win = d.winner === d.a ? A : B, lose = win === A ? B : A;
+      A.duels++; B.duels++; win.dw++; lose.dl++; win.pts += S.cfg.points.win; lose.pts += S.cfg.points.loss;
+      if (!d.walkover) { A.gw += d.score.a; A.gl += d.score.b; B.gw += d.score.b; B.gl += d.score.a; }
+      (h2h[win.id] = h2h[win.id] || {})[lose.id] = (h2h[win.id][lose.id] || 0) + 1;
+    }); });
+    var list = Object.keys(rows).map(function (k) { var r = rows[k]; r.diff = r.gw - r.gl; return r; });
+    function key(r) { return [r.pts, r.dw, r.diff, r.gw]; }
+    function cmpKey(a, b) { var ka = key(a), kb = key(b); for (var i = 0; i < ka.length; i++) if (ka[i] !== kb[i]) return kb[i] - ka[i]; return 0; }
+    list.sort(function (a, b) { return cmpKey(a, b) || a.seed - b.seed; });
+    // resultado entre empatados (mini-liga dentro de cada grupo empatado)
+    var out = [], i = 0;
+    while (i < list.length) {
+      var j = i; while (j + 1 < list.length && cmpKey(list[j + 1], list[i]) === 0) j++;
+      var grp = list.slice(i, j + 1);
+      if (grp.length > 1) {
+        var ids = {}; grp.forEach(function (g) { ids[g.id] = 1; });
+        grp.forEach(function (g) { g.h2h = 0; Object.keys(h2h[g.id] || {}).forEach(function (o) { if (ids[o]) g.h2h += h2h[g.id][o]; }); });
+        grp.sort(function (a, b) { return b.h2h - a.h2h || a.seed - b.seed; });
+      }
+      out = out.concat(grp); i = j + 1;
+    }
+    out.forEach(function (r, k) { r.pos = k + 1; });
+    return out;
+  }
+
+  /* Posición final de todos. Con eliminatoria manda hasta dónde llegó cada uno; el resto va por la tabla previa. */
+  function ranking(state) {
+    var S = state, f = S.cfg.format;
+    var base = f === 'elim' ? S.players.map(emptyRow) : standings(S, { phase: f === 'rr' ? 'rr' : 'swiss' });
+    if (f === 'elim' || f === 'swiss_cut') {
+      var elimRounds = S.rounds.filter(function (r) { return r.phase === 'elim'; }), K = elimRounds.length, reach = {}, inElim = {};
+      elimRounds.forEach(function (r, k) { r.duels.forEach(function (d) {
+        [d.a, d.b].forEach(function (p) { if (p) { inElim[p] = 1; reach[p] = Math.max(reach[p] || 0, k + 1); } });
+        if (d.status === 'done' && d.winner && !d.bye) reach[d.winner] = Math.max(reach[d.winner] || 0, k + 2);
+        if (d.bye && d.winner) reach[d.winner] = Math.max(reach[d.winner] || 0, k + 2);
+      }); });
+      var seedPos = {}; base.forEach(function (r, i) { seedPos[r.id] = i; });
+      if (f === 'elim') base.forEach(function (r, i) { seedPos[r.id] = r.seed; });
+      var withElim = base.filter(function (r) { return inElim[r.id]; }), rest = base.filter(function (r) { return !inElim[r.id]; });
+      withElim.sort(function (a, b) { return (reach[b.id] || 0) - (reach[a.id] || 0) || seedPos[a.id] - seedPos[b.id]; });
+      base = withElim.concat(rest);
+    }
+    return base.map(function (r, i) { var o = Object.assign({}, r); o.pos = i + 1; return o; });
+  }
+
+  /* Quién abre la partida número k (0, 1, 2…) de un duelo: se alterna. */
+  function opener(duel, k) { var first = duel.opens === 'b' ? duel.b : duel.a, second = first === duel.a ? duel.b : duel.a; return k % 2 === 0 ? first : second; }
+  /* Próximos duelos que se pueden jugar ya (los dos jugadores definidos y sin terminar). */
+  function pending(state) { var out = []; state.rounds.forEach(function (r) { r.duels.forEach(function (d) { if (d.status !== 'done' && !d.bye && d.a && d.b) out.push({ round: r.name, duel: d }); }); }); return out; }
+  function nameOf(state, id) { for (var i = 0; i < state.players.length; i++) if (state.players[i].id === id) return state.players[i].name; return id == null ? '' : String(id); }
+
+  return {
+    FORMATS: FORMATS, BEST_OF: BEST_OF, MAX_PLAYERS: MAX_PLAYERS, FORMAT_NAME: FORMAT_NAME,
+    validate: validate, preview: preview, create: create, recordGames: recordGames, forfeit: forfeit, withdraw: withdraw, undo: undo,
+    standings: standings, ranking: ranking, pending: pending, opener: opener, nameOf: nameOf, shuffle: shuffle,
+    swissMaxMin: swissMaxMin
+  };
 });
 </script>
 <script>
@@ -2252,6 +2820,150 @@ input.locked { opacity: .75; cursor: not-allowed; }
     "lobby.muted": "You hid {name} until you leave the lobby.",
     "err.LINK_BLOCKED": "Links are not allowed in the lobby.",
     "err.NOT_IN_LOBBY": "Join the lobby to write."
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
+/* Textos de torneos — es (los mensajes del motor de reglas siguen en español) */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.es, {
+    "tn.menu": "Torneos",
+    "tn.title": "Torneos",
+    "tn.sub": "Armá un torneo y cargá los resultados a medida que se juegan las partidas.",
+    "tn.create": "Crear torneo",
+    "tn.empty": "Todavía no creaste ningún torneo.",
+    "tn.new": "Nuevo torneo",
+    "tn.name": "Nombre",
+    "tn.format": "Formato",
+    "tn.bestOf": "Cada duelo",
+    "tn.bo1": "Una sola partida",
+    "tn.bo": "Mejor de {n}",
+    "tn.min": "Mínimo de duelos por jugador",
+    "tn.cut": "Pasan a la eliminatoria final",
+    "tn.players": "Jugadores (uno por línea; el orden es la siembra)",
+    "tn.shuffle": "Mezclar al azar",
+    "tn.count": "{n} jugadores",
+    "tn.preview": "Vista previa",
+    "tn.guarantee": "El sistema garantiza",
+    "tn.options": "Opciones que sí se pueden cumplir:",
+    "tn.dupe": "Hay nombres repetidos.",
+    "tn.start": "Crear torneo",
+    "tn.running": "En curso",
+    "tn.finished": "Finalizado",
+    "tn.champ": "Campeón: {name}",
+    "tn.fixture": "Fixture",
+    "tn.table": "Clasificación",
+    "tn.withdraw": "Retirar jugador",
+    "tn.withdrawConfirm": "¿Retirar a {name}? Pierde por walkover todos sus duelos pendientes.",
+    "tn.undo": "Deshacer lo último",
+    "tn.delete": "Borrar torneo",
+    "tn.deleteConfirm": "¿Borrar «{name}»? No se puede deshacer.",
+    "tn.deleteYes": "Borrar",
+    "tn.win": "Partida: gana {name}",
+    "tn.wo": "Da por ganado a {name}",
+    "tn.woConfirm": "¿Dar el duelo por ganado a {name}? Queda marcado como decisión del organizador.",
+    "tn.woYes": "Sí, darlo por ganado",
+    "tn.opens": "Abre la partida {n}: {name}",
+    "tn.bye": "descansa",
+    "tn.tbd": "por definir",
+    "tn.walkover": "Ganó por retiro o decisión del organizador",
+    "tn.games": "Mejor de {b} · {n} partidas",
+    "tn.game1": "Mejor de {b} · 1 partida",
+    "tn.need": "gana quien llegue a {n}",
+    "tn.elim": "Eliminatoria",
+    "tn.cutWait": "La eliminatoria final se arma cuando terminen todas las rondas.",
+    "tn.finalPos": "Posiciones finales (hasta ahora)",
+    "tn.hPos": "#",
+    "tn.hName": "Jugador",
+    "tn.hDuels": "Duelos",
+    "tn.hW": "Gan.",
+    "tn.hL": "Perd.",
+    "tn.hGW": "Part. +",
+    "tn.hGL": "Part. −",
+    "tn.hDiff": "Dif.",
+    "tn.hPts": "Pts",
+    "tn.retired": "retirado",
+    "tn.tiebreak": "Desempate: puntos → duelos ganados → diferencia de partidas → partidas ganadas → resultado entre los empatados → orden de siembra.",
+    "tn.local": "Este torneo vive en este aparato: vos sos el organizador y cargás los resultados. Las partidas se juegan como siempre (online o local).",
+    "tn.meta": "{format} · {n} jugadores · {state}",
+    "tn.info": "{format} · {n} jugadores · mejor de {b} · mínimo garantizado: {min}",
+    "tn.f.elim": "Eliminación directa",
+    "tn.f.rr": "Todos contra todos",
+    "tn.f.swiss": "Suizo",
+    "tn.f.swiss_cut": "Suizo + eliminatoria final"
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
+/* Textos de torneos — en (los mensajes del motor de reglas siguen en español) */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.en, {
+    "tn.menu": "Tournaments",
+    "tn.title": "Tournaments",
+    "tn.sub": "Set up a tournament and enter the results as the games are played.",
+    "tn.create": "Create tournament",
+    "tn.empty": "You haven't created any tournament yet.",
+    "tn.new": "New tournament",
+    "tn.name": "Name",
+    "tn.format": "Format",
+    "tn.bestOf": "Each match",
+    "tn.bo1": "A single game",
+    "tn.bo": "Best of {n}",
+    "tn.min": "Minimum matches per player",
+    "tn.cut": "Players advancing to the final bracket",
+    "tn.players": "Players (one per line; the order is the seeding)",
+    "tn.shuffle": "Shuffle",
+    "tn.count": "{n} players",
+    "tn.preview": "Preview",
+    "tn.guarantee": "The system guarantees",
+    "tn.options": "Options that can be met:",
+    "tn.dupe": "There are repeated names.",
+    "tn.start": "Create tournament",
+    "tn.running": "In progress",
+    "tn.finished": "Finished",
+    "tn.champ": "Champion: {name}",
+    "tn.fixture": "Bracket",
+    "tn.table": "Standings",
+    "tn.withdraw": "Withdraw player",
+    "tn.withdrawConfirm": "Withdraw {name}? They lose all their pending matches by walkover.",
+    "tn.undo": "Undo last",
+    "tn.delete": "Delete tournament",
+    "tn.deleteConfirm": "Delete \"{name}\"? This can't be undone.",
+    "tn.deleteYes": "Delete",
+    "tn.win": "Game: {name} wins",
+    "tn.wo": "Award the match to {name}",
+    "tn.woConfirm": "Award the match to {name}? It will be marked as an organizer decision.",
+    "tn.woYes": "Yes, award it",
+    "tn.opens": "Game {n} opened by: {name}",
+    "tn.bye": "rests",
+    "tn.tbd": "to be decided",
+    "tn.walkover": "Won by withdrawal or organizer decision",
+    "tn.games": "Best of {b} · {n} games",
+    "tn.game1": "Best of {b} · 1 game",
+    "tn.need": "first to {n} wins",
+    "tn.elim": "Final bracket",
+    "tn.cutWait": "The final bracket is set up when all the rounds are over.",
+    "tn.finalPos": "Final positions (so far)",
+    "tn.hPos": "#",
+    "tn.hName": "Player",
+    "tn.hDuels": "Matches",
+    "tn.hW": "W",
+    "tn.hL": "L",
+    "tn.hGW": "Games +",
+    "tn.hGL": "Games −",
+    "tn.hDiff": "Diff.",
+    "tn.hPts": "Pts",
+    "tn.retired": "withdrawn",
+    "tn.tiebreak": "Tiebreak: points → matches won → game difference → games won → head-to-head among tied players → seeding order.",
+    "tn.local": "This tournament lives on this device: you are the organizer and enter the results. Games are played as usual (online or local).",
+    "tn.meta": "{format} · {n} players · {state}",
+    "tn.info": "{format} · {n} players · best of {b} · guaranteed minimum: {min}",
+    "tn.f.elim": "Single elimination",
+    "tn.f.rr": "Round robin",
+    "tn.f.swiss": "Swiss",
+    "tn.f.swiss_cut": "Swiss + final bracket"
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -3975,6 +4687,7 @@ input.locked { opacity: .75; cursor: not-allowed; }
     document.querySelectorAll('[data-i18n-aria]').forEach(function (el) { el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria'))); });
     $('btnLang').textContent = t('menu.language') + ' · ' + t('lang.name');
     renderProfileBtn(); if (Auth !== undefined) renderAcct();
+    if (PT) { tnBuildSelects(); if ($('tnViewOverlay').classList.contains('open')) tnRenderView(); if ($('tnOverlay').classList.contains('open')) tnRenderList(); if ($('tnNewOverlay').classList.contains('open')) tnRenderCheck(); }
     document.documentElement.lang = window.I18n.getLang();
     document.querySelectorAll('[data-i18n-ph]').forEach(function (el) { el.placeholder = t(el.getAttribute('data-i18n-ph')); });
     canvas.setAttribute('aria-label', t('a11y.board'));
@@ -4713,8 +5426,172 @@ input.locked { opacity: .75; cursor: not-allowed; }
   if (window.ResizeObserver) new ResizeObserver(resize).observe(canvas);
   canvas.addEventListener('focus', render); canvas.addEventListener('blur', render);
 
+
+  /* ---------- Torneos ----------
+   * El torneo vive en este aparato (localStorage): quien lo crea es el organizador y carga los resultados.
+   * Las reglas (fixture, mínimo de duelos, tabla) están en src/core/tournament.js. */
+  var PT = window.PenteTournament, TN_KEY = 'pente.torneos', tn = { list: [], cur: null, tab: 'fx' };
+  function tnLoad() {
+    try { var a = JSON.parse(localStorage.getItem(TN_KEY) || '[]'); tn.list = Array.isArray(a) ? a.filter(function (s) { return s && s.v === 1 && s.cfg && Array.isArray(s.rounds) && Array.isArray(s.players) && s.meta && s.meta.id; }).slice(0, 30) : []; } catch (e) { tn.list = []; }
+  }
+  function tnSave() { try { localStorage.setItem(TN_KEY, JSON.stringify(tn.list)); } catch (e) {} }
+  function tnGet() { for (var i = 0; i < tn.list.length; i++) if (tn.list[i].meta.id === tn.cur) return tn.list[i]; return null; }
+  function tnPut(S) { for (var i = 0; i < tn.list.length; i++) if (tn.list[i].meta.id === S.meta.id) { tn.list[i] = S; tnSave(); return; } tn.list.unshift(S); tnSave(); }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function tnFmt(f) { return t('tn.f.' + f); }
+  function tnBestLabel(b) { return b === 1 ? t('tn.bo1') : t('tn.bo', { n: b }); }
+  function tnName(S, id) { return id ? PT.nameOf(S, id) : ''; }
+
+  /* --- lista --- */
+  function tnRenderList() {
+    var box = $('tnList'); box.innerHTML = '';
+    if (!tn.list.length) { box.appendChild(el('div', 'room-empty', t('tn.empty'))); return; }
+    tn.list.forEach(function (S) {
+      var row = el('div', 'room'), info = el('div', 'info');
+      info.appendChild(el('div', 'who', S.cfg.name));
+      info.appendChild(el('div', 'meta', t('tn.meta', { format: tnFmt(S.cfg.format), n: S.players.length, state: S.status === 'finished' ? t('tn.champ', { name: tnName(S, S.champion) }) : t('tn.running') })));
+      var b = el('button', 'btn' + (S.status === 'running' ? ' primary' : ''), '›'); b.type = 'button'; b.dataset.id = S.meta.id; b.setAttribute('aria-label', S.cfg.name);
+      b.addEventListener('click', function () { tn.cur = S.meta.id; tn.tab = 'fx'; tnRenderView(); open('tnViewOverlay'); });
+      row.appendChild(info); row.appendChild(b); box.appendChild(row);
+    });
+  }
+  $('btnTourn').addEventListener('click', function () { tnLoad(); tnRenderList(); open('tnOverlay'); });
+  $('tnBack').addEventListener('click', function () { open('menuOverlay'); });
+  $('tnCreate').addEventListener('click', function () { tnOpenNew(); });
+
+  /* --- nuevo --- */
+  var TN_SAMPLE = ['Tobi', 'Ro', 'Cami', 'Juan', 'Lu', 'Mati', 'Sofi', 'Nico', 'Vale', 'Fede', 'Ana', 'Beto', 'Dani', 'Eli', 'Gus', 'Hugo'];
+  function tnPlayers() { return $('tnPlayers').value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean); }
+  function tnCfg() { return { name: $('tnName').value, format: $('tnFormat').value, bestOf: +$('tnBest').value, minDuels: +$('tnMin').value, cut: +$('tnCut').value }; }
+  function tnSetCfg(c) { $('tnFormat').value = c.format; $('tnBest').value = c.bestOf; $('tnMin').value = c.minDuels; $('tnCut').value = c.cut; tnRenderCheck(); }
+  function tnBuildSelects() {
+    var f = $('tnFormat'); if (!f.options.length) PT.FORMATS.forEach(function (k) { var o = el('option', '', ''); o.value = k; f.appendChild(o); });
+    Array.prototype.forEach.call(f.options, function (o) { o.textContent = tnFmt(o.value); });
+    var b = $('tnBest'), cur = b.value || '3'; b.innerHTML = '';
+    PT.BEST_OF.forEach(function (n) { var o = el('option', '', tnBestLabel(n)); o.value = n; b.appendChild(o); }); b.value = cur;
+  }
+  function tnOpenNew() {
+    tnBuildSelects(); $('tnName').value = ''; $('tnName').placeholder = t('tn.name'); $('tnFormat').value = 'swiss_cut'; $('tnBest').value = '3'; $('tnMin').value = '2'; $('tnCut').value = '4';
+    var me = profile.name && !/^Invitado/.test(profile.name) ? profile.name : '';
+    var base = TN_SAMPLE.slice(0, 8); if (me) base[0] = me;
+    $('tnPlayers').value = base.join('\n'); tnRenderCheck(); open('tnNewOverlay');
+  }
+  function tnRenderCheck() {
+    $('tnCutBox').hidden = $('tnFormat').value !== 'swiss_cut';
+    var pl = tnPlayers(), box = $('tnCheck'); box.innerHTML = ''; $('tnCount').textContent = t('tn.count', { n: pl.length });
+    var lower = pl.map(function (x) { return x.toLowerCase(); });
+    if (lower.some(function (x, i) { return lower.indexOf(x) !== i; })) { box.appendChild(el('div', 'tn-err', t('tn.dupe'))); $('tnStart').disabled = true; return; }
+    var p = PT.preview(tnCfg(), pl);
+    if (!p.ok) {
+      p.errors.forEach(function (e) { box.appendChild(el('div', 'tn-err', '✗ ' + e.msg)); });
+      if (p.suggestions.length) box.appendChild(el('div', 'hint', t('tn.options')));
+      p.suggestions.forEach(function (s) { var b = el('button', 'btn tn-sug', '→ ' + s.label); b.type = 'button'; b.addEventListener('click', function () { tnSetCfg(s.cfg); }); box.appendChild(b); });
+      $('tnStart').disabled = true; return;
+    }
+    box.appendChild(el('h3', 'tn-h', t('tn.preview')));
+    p.lines.forEach(function (l) { box.appendChild(el('div', 'tn-line', l)); });
+    box.appendChild(el('h3', 'tn-h', t('tn.guarantee')));
+    p.promises.forEach(function (l) { box.appendChild(el('div', 'tn-ok', '✓ ' + l)); });
+    (p.warnings || []).forEach(function (l) { box.appendChild(el('div', 'tn-warn', '! ' + l)); });
+    $('tnStart').disabled = false;
+  }
+  ['tnName', 'tnFormat', 'tnBest', 'tnMin', 'tnCut', 'tnPlayers'].forEach(function (id) { $(id).addEventListener('input', tnRenderCheck); });
+  $('tnShuffle').addEventListener('click', function () { $('tnPlayers').value = PT.shuffle(tnPlayers(), Date.now() % 100000).join('\n'); tnRenderCheck(); });
+  $('tnNewBack').addEventListener('click', function () { tnRenderList(); open('tnOverlay'); });
+  $('tnStart').addEventListener('click', function () {
+    var S; try { S = PT.create(tnCfg(), tnPlayers()); } catch (e) { $('tnCheck').appendChild(el('div', 'tn-err', e.message)); return; }
+    S.meta = { id: 't' + Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36), at: Date.now() };
+    tnPut(S); tn.cur = S.meta.id; tn.tab = 'fx'; tnRenderView(); open('tnViewOverlay');
+  });
+
+  /* --- un torneo --- */
+  function tnDuelEl(S, d) {
+    var box = el('div', 'tn-duel' + (d.status === 'done' ? ' done' : '')); box.dataset.id = d.id;
+    function side(id, sc, win) { var r = el('div', 'tn-p' + (d.status === 'done' ? (win ? ' w' : ' l') : '')); r.appendChild(el(win ? 'b' : 'span', '', id ? tnName(S, id) : t('tn.tbd'))); if (!id) r.firstChild.className = 'tn-tbd'; r.appendChild(el('span', '', id ? String(sc) : '')); return r; }
+    if (d.bye) { var r0 = el('div', 'tn-p w'); r0.appendChild(el('b', '', tnName(S, d.a))); r0.appendChild(el('span', '', t('tn.bye'))); box.appendChild(r0); box.classList.add('done'); return box; }
+    box.appendChild(side(d.a, d.score.a, d.winner === d.a)); box.appendChild(side(d.b, d.score.b, d.winner === d.b));
+    var need = (S.cfg.bestOf + 1) / 2;
+    if (d.status === 'done') box.appendChild(el('div', 'tn-meta', d.walkover ? t('tn.walkover') : (d.games.length === 1 ? t('tn.game1', { b: S.cfg.bestOf }) : t('tn.games', { b: S.cfg.bestOf, n: d.games.length }))));
+    else if (d.a && d.b) {
+      box.appendChild(el('div', 'tn-meta', t('tn.opens', { n: d.games.length + 1, name: tnName(S, PT.opener(d, d.games.length)) }) + (S.cfg.bestOf > 1 ? ' · ' + t('tn.need', { n: need }) : '')));
+      var acts = el('div', 'tn-acts');
+      [['a', d.a], ['b', d.b]].forEach(function (x) { var b = el('button', 'btn small', t('tn.win', { name: tnName(S, x[1]) })); b.type = 'button'; b.dataset.act = x[0]; acts.appendChild(b); });
+      if (S.cfg.bestOf > 1) [['wa', d.a], ['wb', d.b]].forEach(function (x) { var b = el('button', 'btn small ghost', t('tn.wo', { name: tnName(S, x[1]) })); b.type = 'button'; b.dataset.act = x[0]; acts.appendChild(b); });
+      box.appendChild(acts);
+    }
+    return box;
+  }
+  function tnFixture(S) {
+    var f = document.createDocumentFragment(), pre = S.rounds.filter(function (r) { return r.phase !== 'elim'; }), el2 = S.rounds.filter(function (r) { return r.phase === 'elim'; });
+    pre.forEach(function (r) {
+      var sec = el('div', 'tn-round'), n = r.duels.filter(function (d) { return d.status === 'done'; }).length;
+      sec.appendChild(el('h3', 'tn-h', r.name + ' · ' + n + '/' + r.duels.length)); r.duels.forEach(function (d) { sec.appendChild(tnDuelEl(S, d)); }); f.appendChild(sec);
+    });
+    if (el2.length) {
+      f.appendChild(el('h3', 'tn-h', t('tn.elim')));
+      var br = el('div', 'tn-bracket');
+      el2.forEach(function (r) { var col = el('div', 'tn-col'); col.appendChild(el('h4', '', r.name)); var inner = el('div', 'tn-colin'); r.duels.forEach(function (d) { inner.appendChild(tnDuelEl(S, d)); }); col.appendChild(inner); br.appendChild(col); });
+      f.appendChild(br);
+    } else if (S.cfg.format === 'swiss_cut') f.appendChild(el('p', 'hint', t('tn.cutWait')));
+    return f;
+  }
+  function tnTable(S) {
+    var f = document.createDocumentFragment(), phase = S.cfg.format === 'elim' ? 'elim' : S.cfg.format === 'rr' ? 'rr' : 'swiss';
+    var rows = S.cfg.format === 'elim' ? PT.ranking(S) : PT.standings(S, { phase: phase });
+    var wrap = el('div', 'tn-tw'), tb = el('table'), head = el('tr');
+    ['tn.hPos', 'tn.hName', 'tn.hDuels', 'tn.hW', 'tn.hL', 'tn.hGW', 'tn.hGL', 'tn.hDiff', 'tn.hPts'].forEach(function (k) { head.appendChild(el('th', '', t(k))); }); tb.appendChild(head);
+    rows.forEach(function (r) {
+      var tr = el('tr', S.champion === r.id ? 'champ' : S.withdrawn.indexOf(r.id) >= 0 ? 'out' : '');
+      [r.pos, r.name + (S.withdrawn.indexOf(r.id) >= 0 ? ' (' + t('tn.retired') + ')' : ''), r.duels, r.dw, r.dl, r.gw, r.gl, (r.diff > 0 ? '+' : '') + r.diff, r.pts].forEach(function (v) { tr.appendChild(el('td', '', String(v))); }); tb.appendChild(tr);
+    });
+    wrap.appendChild(tb); f.appendChild(wrap); f.appendChild(el('p', 'hint', t('tn.tiebreak')));
+    if (S.cfg.format === 'swiss_cut' && S.phase === 'elim') {
+      f.appendChild(el('h3', 'tn-h', t('tn.finalPos')));
+      var t2 = el('table'); PT.ranking(S).forEach(function (r) { var tr = el('tr'); tr.appendChild(el('td', '', String(r.pos))); tr.appendChild(el('td', '', r.name)); t2.appendChild(tr); }); var w2 = el('div', 'tn-tw'); w2.appendChild(t2); f.appendChild(w2);
+    }
+    return f;
+  }
+  function tnRenderView() {
+    var S = tnGet(); if (!S) return;
+    $('tnTitle').textContent = S.cfg.name;
+    $('tnInfo').textContent = t('tn.info', { format: tnFmt(S.cfg.format), n: S.players.length, b: S.cfg.bestOf, min: S.plan.min }) + ' · ' + (S.status === 'finished' ? t('tn.finished') : t('tn.running'));
+    $('tnChamp').innerHTML = ''; if (S.status === 'finished') $('tnChamp').appendChild(el('div', 'tn-champ', '🏆 ' + t('tn.champ', { name: tnName(S, S.champion) })));
+    var wd = $('tnWd'); wd.innerHTML = '';
+    S.players.filter(function (p) { return S.withdrawn.indexOf(p.id) < 0; }).forEach(function (p) { var o = el('option', '', p.name); o.value = p.id; wd.appendChild(o); });
+    var run = S.status === 'running'; $('tnWd').disabled = !run || !wd.options.length; $('tnWdBtn').disabled = $('tnWd').disabled; $('tnUndo').disabled = !(S.log && S.log.length);
+    Array.prototype.forEach.call($('tnTabs').children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.t === tn.tab)); });
+    var body = $('tnBody'), sx = body.scrollLeft; body.innerHTML = ''; body.appendChild(tn.tab === 'fx' ? tnFixture(S) : tnTable(S));
+  }
+  function tnApply(fn) {
+    var S = tnGet(); if (!S) return;
+    var y = window.scrollY, bx = $('tnBody').querySelector('.tn-bracket'), sx = bx ? bx.scrollLeft : 0;
+    try { var N = fn(S); N.meta = S.meta; tnPut(N); } catch (e) { alert(e.message); }
+    tnRenderView(); var nb = $('tnBody').querySelector('.tn-bracket'); if (nb) nb.scrollLeft = sx;
+    var sc = $('tnViewOverlay').querySelector('.screen-body'); if (sc) { /* se mantiene el scroll */ }
+  }
+  $('tnBody').addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-act]'); if (!btn) return;
+    var id = btn.closest('.tn-duel').dataset.id, act = btn.dataset.act, S = tnGet(), d = null;
+    S.rounds.forEach(function (r) { r.duels.forEach(function (x) { if (x.id === id) d = x; }); });
+    if (act === 'a' || act === 'b') return tnApply(function (st) { return PT.recordGames(st, id, d.games.concat([act === 'a' ? d.a : d.b])); });
+    var w = act === 'wa' ? d.a : d.b;
+    ask(t('tn.woConfirm', { name: tnName(S, w) }), t('tn.woYes'), function () { tnApply(function (st) { return PT.forfeit(st, id, w); }); });
+  });
+  $('tnUndo').addEventListener('click', function () { tnApply(function (st) { return PT.undo(st); }); });
+  $('tnWdBtn').addEventListener('click', function () {
+    var id = $('tnWd').value, S = tnGet(); if (!id || !S) return;
+    ask(t('tn.withdrawConfirm', { name: tnName(S, id) }), t('tn.withdraw'), function () { tnApply(function (st) { return PT.withdraw(st, id); }); });
+  });
+  $('tnTabs').addEventListener('click', function (e) { var b = e.target.closest('button[data-t]'); if (b) { tn.tab = b.dataset.t; tnRenderView(); } });
+  $('tnViewBack').addEventListener('click', function () { tnRenderList(); open('tnOverlay'); });
+  $('tnDelete').addEventListener('click', function () {
+    var S = tnGet(); if (!S) return;
+    ask(t('tn.deleteConfirm', { name: S.cfg.name }), t('tn.deleteYes'), function () { tn.list = tn.list.filter(function (x) { return x.meta.id !== S.meta.id; }); tnSave(); tnRenderList(); open('tnOverlay'); });
+  });
+  tnLoad();
+
   applyI18n(); buildThemePicker(); syncSizePicker(); syncOpts(); syncVis(); resize(); open('menuOverlay'); initOnline(); updateSide();
-  window.__pente = { get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, startAI: startAI, get ai() { return ai; }, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; }, get tut() { return tut; }, get profile() { return profile; }, get auth() { return Auth; }, get sync() { return sync; }, setChatW: setChatW, syncProfile: syncProfile };  // utilidad para pruebas manuales
+  window.__pente = { get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, startAI: startAI, get ai() { return ai; }, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; }, get tut() { return tut; }, get profile() { return profile; }, get auth() { return Auth; }, get sync() { return sync; }, setChatW: setChatW, syncProfile: syncProfile, get tn() { return tn; } };  // utilidad para pruebas manuales
 })();
 </script>
 <script>

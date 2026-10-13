@@ -362,7 +362,7 @@ tr.champ td { color: var(--accent); font-weight: 700; } tr.out td { color: var(-
     if (np.error) throw new Error(np.error);
     var v = validate(cfg, np.players);
     if (!v.ok) { var e = new Error(v.errors[0].msg); e.validation = v; throw e; }
-    var S = { v: 1, cfg: v.cfg, plan: v.plan, players: np.players, rounds: [], status: 'running', phase: v.cfg.format === 'elim' ? 'elim' : v.cfg.format === 'rr' ? 'rr' : 'swiss', champion: null, withdrawn: [], duelSeq: 0, phasePrefix: 'S' };
+    var S = { v: 1, cfg: v.cfg, plan: v.plan, players: np.players, rounds: [], status: 'running', phase: v.cfg.format === 'elim' ? 'elim' : v.cfg.format === 'rr' ? 'rr' : 'swiss', champion: null, withdrawn: [], duelSeq: 0, phasePrefix: 'S', log: [] };
     if (v.cfg.format === 'rr') rrRounds(S);
     else if (v.cfg.format === 'elim') buildElim(S, S.players.map(function (p) { return p.id; }));
     else swissRound(S);
@@ -394,8 +394,15 @@ tr.champ td { color: var(--accent); font-weight: 700; } tr.out td { color: var(-
     });
     d.games = list; d.score = { a: sa, b: sb }; d.status = list.length ? 'playing' : 'pending';
     if (sa >= n || sb >= n) finishDuel(S, d, sa >= n ? d.a : d.b, false);
+    logGames(S, duelId, list);
     autoWalkover(S); advance(S);
     return S;
+  }
+  /* Cada acción queda en un registro: sirve para deshacer (se rearma el torneo repitiendo todo menos lo último). */
+  function logGames(S, id, list) {
+    var l = S.log[S.log.length - 1];
+    if (l && l.t === 'games' && l.id === id) { if (list.length) l.games = list.slice(); else S.log.pop(); }
+    else if (list.length) S.log.push({ t: 'games', id: id, games: list.slice() });
   }
 
   /* El organizador resuelve un duelo a mano (abandono, problema técnico…). Queda marcado como walkover. */
@@ -403,7 +410,7 @@ tr.champ td { color: var(--accent); font-weight: 700; } tr.out td { color: var(-
     var S = clone(state), d = findDuel(S, duelId);
     if (!d || d.bye || d.status === 'done' || !d.a || !d.b) throw new Error('Ese duelo no se puede resolver así.');
     if (winnerId !== d.a && winnerId !== d.b) throw new Error('El ganador tiene que ser uno de los dos jugadores.');
-    finishDuel(S, d, winnerId, true);
+    finishDuel(S, d, winnerId, true); S.log.push({ t: 'forfeit', id: duelId, winner: winnerId });
     autoWalkover(S); advance(S);
     return S;
   }
@@ -412,9 +419,27 @@ tr.champ td { color: var(--accent); font-weight: 700; } tr.out td { color: var(-
   function withdraw(state, playerId) {
     var S = clone(state);
     if (!S.players.some(function (p) { return p.id === playerId; })) throw new Error('Ese jugador no está en el torneo.');
-    if (S.withdrawn.indexOf(playerId) < 0) S.withdrawn.push(playerId);
+    if (S.withdrawn.indexOf(playerId) < 0) { S.withdrawn.push(playerId); S.log.push({ t: 'withdraw', id: playerId }); }
     autoWalkover(S); advance(S);
     return S;
+  }
+  /* Rearma el torneo desde cero repitiendo el registro. */
+  function replay(state, log) {
+    var S = create(state.cfg, state.players);
+    log.forEach(function (e) {
+      if (e.t === 'games') S = recordGames(S, e.id, e.games);
+      else if (e.t === 'forfeit') S = forfeit(S, e.id, e.winner);
+      else if (e.t === 'withdraw') S = withdraw(S, e.id);
+    });
+    if (state.meta) S.meta = state.meta;
+    return S;
+  }
+  /* Deshace lo último: la última partida cargada, el último resultado resuelto a mano o el último retiro. */
+  function undo(state) {
+    var log = (state.log || []).slice(); if (!log.length) return state;
+    var last = log.pop();
+    if (last.t === 'games' && last.games.length > 1) log.push({ t: 'games', id: last.id, games: last.games.slice(0, -1) });
+    return replay(state, log);
   }
   function autoWalkover(S) {
     var changed = true;
@@ -535,7 +560,7 @@ tr.champ td { color: var(--accent); font-weight: 700; } tr.out td { color: var(-
 
   return {
     FORMATS: FORMATS, BEST_OF: BEST_OF, MAX_PLAYERS: MAX_PLAYERS, FORMAT_NAME: FORMAT_NAME,
-    validate: validate, preview: preview, create: create, recordGames: recordGames, forfeit: forfeit, withdraw: withdraw,
+    validate: validate, preview: preview, create: create, recordGames: recordGames, forfeit: forfeit, withdraw: withdraw, undo: undo,
     standings: standings, ranking: ranking, pending: pending, opener: opener, nameOf: nameOf, shuffle: shuffle,
     swissMaxMin: swissMaxMin
   };
