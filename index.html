@@ -276,6 +276,20 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
   body.in-tut .tut-btns .btn { min-height: 42px; padding: 4px 8px; font-size: 14px; }
   body.in-tut #board { width: min(100%, max(260px, calc(100vh - 365px)), 900px); }
 }
+
+/* ---------- Perfil ---------- */
+.avatar-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+.avatar-opt { aspect-ratio: 1; min-height: 44px; font-size: 26px; line-height: 1; background: var(--bg); border: 2px solid var(--line); border-radius: 12px; padding: 0; }
+.avatar-opt[aria-pressed="true"] { border-color: var(--accent); background: var(--panel-2); }
+.prof-stats { display: grid; grid-template-columns: 1fr repeat(4, 3.6em); gap: 4px 6px; font-size: 14px; align-items: center; font-variant-numeric: tabular-nums; }
+.prof-stats .h { color: var(--muted); font-size: 12px; text-align: right; font-weight: 700; }
+.prof-stats .h:first-child { text-align: left; }
+.prof-stats .m { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.prof-stats .n { text-align: right; }
+.prof-stats .n.z { color: var(--muted); }
+.prof-stats .row-sep { grid-column: 1 / -1; height: 1px; background: var(--line); }
+#profNote { margin: 8px 0 0; }
+@media (max-width: 360px) { .prof-stats { font-size: 13px; grid-template-columns: 1fr repeat(4, 3em); } .prof-stats .h { font-size: 11px; } }
 </style>
 </head>
 <body>
@@ -363,6 +377,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
       <button class="btn primary" id="btnResume" hidden data-i18n="menu.resume"></button>
       <button class="btn primary" id="btnLocal" data-i18n="menu.local"></button>
       <button class="btn primary" id="btnOnline" data-i18n="menu.online"></button>
+      <button class="btn" id="btnProfile"></button>
       <button class="btn" id="btnTutorial" data-i18n="menu.tutorial"></button>
       <button class="btn" id="btnSettings" data-i18n="menu.settings"></button>
       <button class="btn" id="btnRules" data-i18n="menu.rules"></button>
@@ -531,6 +546,21 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
     <p class="sub" data-i18n="lang.sub"></p>
     <div class="btns" id="langList"></div>
     <div class="btns"><button class="btn" id="btnLangBack" data-i18n="menu.back"></button></div>
+  </div>
+</div>
+
+<!-- Perfil -->
+<div class="overlay screen" id="profileOverlay">
+  <div class="screen-body">
+    <h2 data-i18n="prof.title"></h2>
+    <p class="sub" data-i18n="prof.sub"></p>
+    <div class="field"><label class="lbl" for="profName" data-i18n="prof.name"></label><input type="text" id="profName" maxlength="20" autocomplete="off" data-i18n-ph="prof.namePh"></div>
+    <div class="field"><span class="lbl" data-i18n="prof.avatar"></span><div class="avatar-grid" id="avatarGrid"></div></div>
+    <div class="field"><span class="lbl" data-i18n="prof.stats"></span><div class="prof-stats" id="profStats"></div><p class="hint" id="profNote"></p></div>
+    <div class="btns">
+      <button class="btn primary" id="btnProfileBack" data-i18n="menu.back"></button>
+      <button class="btn" id="btnProfReset" data-i18n="prof.reset"></button>
+    </div>
   </div>
 </div>
 
@@ -870,6 +900,64 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
   function reply(step, x, y) { return step.replies && step.replies[x + ',' + y] ? step.replies[x + ',' + y] : null; }
 
   return { steps: steps, build: build, evaluate: evaluate, reply: reply };
+});
+</script>
+<script>
+/*
+ * PERFIL — datos y reglas del perfil de jugador. Sin DOM ni red: se prueba en Node.
+ * Forma: { v:1, name:'', avatar:'a1', stats:{ <modo>:{p,w,l,d} } }
+ * Modos: ai_easy · ai_medium · ai_hard · local · online. En "local" solo se cuentan partidas jugadas (son dos personas en el mismo aparato).
+ * OJO: las estadísticas de máquina y local las informa el navegador, así que no sirven para un ranking; las online las va a verificar el servidor.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.PenteProfile = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  var AVATARS = [['a1', '🦊'], ['a2', '🐼'], ['a3', '🐯'], ['a4', '🦉'], ['a5', '🐙'], ['a6', '🦄'], ['a7', '🐢'], ['a8', '🦋'], ['a9', '🐸'], ['a10', '🐧'], ['a11', '🦁'], ['a12', '🐳']];
+  var MODES = ['ai_easy', 'ai_medium', 'ai_hard', 'local', 'online'];
+  var NAME_MAX = 20, CAP = 1000000;
+
+  function emojiOf(id) { for (var i = 0; i < AVATARS.length; i++) if (AVATARS[i][0] === id) return AVATARS[i][1]; return AVATARS[0][1]; }
+  function cleanName(s) { return String(s == null ? '' : s).replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, NAME_MAX); }
+  function num(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? Math.min(v, CAP) : 0; }
+  function empty() { return { v: 1, name: '', avatar: 'a1', stats: {} }; }
+
+  function normalize(raw) {                     // acepta cualquier cosa (localStorage viejo, roto o editado a mano) y devuelve un perfil válido
+    var p = empty();
+    if (!raw || typeof raw !== 'object') return p;
+    p.name = cleanName(raw.name);
+    p.avatar = AVATARS.some(function (a) { return a[0] === raw.avatar; }) ? raw.avatar : 'a1';
+    var st = raw.stats && typeof raw.stats === 'object' ? raw.stats : {};
+    MODES.forEach(function (m) {
+      var s = st[m]; if (!s || typeof s !== 'object') return;
+      var r = { p: num(s.p), w: num(s.w), l: num(s.l), d: num(s.d) };
+      if (m === 'local') { r.w = r.l = r.d = 0; }
+      else r.p = Math.max(r.p, r.w + r.l + r.d);
+      if (r.p) p.stats[m] = r;
+    });
+    return p;
+  }
+
+  // result: 'win' | 'loss' | 'draw' | 'played' (local). Devuelve un perfil nuevo.
+  function record(profile, mode, result) {
+    var p = normalize(profile);
+    if (MODES.indexOf(mode) < 0) return p;
+    var s = p.stats[mode] || { p: 0, w: 0, l: 0, d: 0 };
+    s.p = num(s.p + 1);
+    if (mode !== 'local') { var k = result === 'win' ? 'w' : result === 'loss' ? 'l' : result === 'draw' ? 'd' : ''; if (k) s[k] = num(s[k] + 1); }
+    p.stats[mode] = s;
+    return p;
+  }
+
+  function totals(profile) {
+    var t = { p: 0, w: 0, l: 0, d: 0 };
+    MODES.forEach(function (m) { var s = profile.stats[m]; if (s) { t.p += s.p; t.w += s.w; t.l += s.l; t.d += s.d; } });
+    return t;
+  }
+
+  return { AVATARS: AVATARS, MODES: MODES, NAME_MAX: NAME_MAX, emojiOf: emojiOf, cleanName: cleanName, empty: empty, normalize: normalize, record: record, totals: totals };
 });
 </script>
 <script>
@@ -1638,6 +1726,64 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
 })(typeof self !== 'undefined' ? self : this);
 </script>
 <script>
+/* Textos del perfil — español */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.es, {
+    'menu.profile': 'Perfil',
+    'prof.title': 'Tu perfil',
+    'prof.sub': 'Por ahora se guarda en este dispositivo.',
+    'prof.name': 'Tu nombre',
+    'prof.namePh': 'Cómo te llaman',
+    'prof.avatar': 'Avatar',
+    'prof.stats': 'Estadísticas',
+    'prof.played': 'Jugadas',
+    'prof.won': 'Ganadas',
+    'prof.lost': 'Perdidas',
+    'prof.drawn': 'Empates',
+    'prof.hP': 'Jug.', 'prof.hW': 'Gan.', 'prof.hL': 'Perd.', 'prof.hD': 'Emp.',
+    'prof.noGames': 'Todavía no jugaste ninguna partida completa.',
+    'prof.localNote': 'En "Local" solo se cuentan las jugadas: son dos personas en el mismo aparato.',
+    'prof.mode.ai_easy': 'Máquina · Fácil',
+    'prof.mode.ai_medium': 'Máquina · Media',
+    'prof.mode.ai_hard': 'Máquina · Difícil',
+    'prof.mode.local': 'Local (2 personas)',
+    'prof.mode.online': 'Online',
+    'prof.reset': 'Borrar mis datos',
+    'prof.resetConfirm': '¿Borrar nombre, avatar y estadísticas de este dispositivo? No se puede deshacer.'
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
+/* Profile texts — English */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.en, {
+    'menu.profile': 'Profile',
+    'prof.title': 'Your profile',
+    'prof.sub': 'For now it is saved on this device.',
+    'prof.name': 'Your name',
+    'prof.namePh': 'What people call you',
+    'prof.avatar': 'Avatar',
+    'prof.stats': 'Stats',
+    'prof.played': 'Played',
+    'prof.won': 'Won',
+    'prof.lost': 'Lost',
+    'prof.drawn': 'Draws',
+    'prof.hP': 'Pl.', 'prof.hW': 'Won', 'prof.hL': 'Lost', 'prof.hD': 'Draw',
+    'prof.noGames': 'You haven\'t finished any game yet.',
+    'prof.localNote': 'In "Local" only games played are counted: it is two people on the same device.',
+    'prof.mode.ai_easy': 'Machine · Easy',
+    'prof.mode.ai_medium': 'Machine · Medium',
+    'prof.mode.ai_hard': 'Machine · Hard',
+    'prof.mode.local': 'Local (2 people)',
+    'prof.mode.online': 'Online',
+    'prof.reset': 'Delete my data',
+    'prof.resetConfirm': 'Delete name, avatar and stats from this device? This can\'t be undone.'
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
 /* Temas del tablero. Cada tema es solo DATOS: para sumar uno nuevo, agregar un objeto a "list"
  * (y su nombre en i18n como 'theme.<id>'). El dibujo y el menú lo toman solos. */
 (function (root) {
@@ -2063,6 +2209,10 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
   }
   function saveCfg() { try { localStorage.setItem('pente.cfg', JSON.stringify(cfg)); } catch (e) {} }
   var cfg = loadCfg();
+  /* Perfil del jugador (src/profile.js): nombre, avatar y estadísticas. Por ahora vive en este dispositivo. */
+  var PP = window.PenteProfile, profile = PP.empty(), recorded = false;
+  try { profile = PP.normalize(JSON.parse(localStorage.getItem('pente.profile') || 'null')); if (!profile.name) profile.name = PP.cleanName(localStorage.getItem('pente.name')); } catch (e) { profile = PP.empty(); }
+  function saveProfile() { try { localStorage.setItem('pente.profile', JSON.stringify(profile)); } catch (e) {} }
   var drag = null;        // ficha que se está arrastrando con el dedo
   var settle = null;      // animación de la ficha al soltarla
   var animReq = 0, dropHints = 0, tapHints = 0;
@@ -2169,7 +2319,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
   /* ---------- Partida ---------- */
   function aiStop() { ai.active = false; ai.token++; clearTimeout(ai.timer); ai.thinking = false; }
   function startGame() {
-    tutStop(); aiStop(); videoDiscard(); endSeen = false;
+    tutStop(); aiStop(); videoDiscard(); endSeen = recorded = false;
     if (online.net) leaveOnline(false);
     names[1] = ($('name1').value || '').trim() || t('player.1');
     names[2] = ($('name2').value || '').trim() || t('player.2');
@@ -2225,7 +2375,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
 
   /* ---------- Rival offline ---------- */
   function startAI(level, side) {
-    tutStop(); aiStop(); videoDiscard(); endSeen = false;
+    tutStop(); aiStop(); videoDiscard(); endSeen = recorded = false;
     if (online.net) leaveOnline(false);
     var human = side === 'second' ? 2 : side === 'random' ? (Math.random() < 0.5 ? 1 : 2) : 1;
     ai.active = true; ai.level = level; ai.human = human; ai.bot = human === 1 ? 2 : 1;
@@ -2723,7 +2873,8 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
       var el = $('player' + p);
       el.classList.toggle('active', !isOver() && state.current === p);
       el.classList.toggle('offline', online.active && !online.connected[p]);
-      $('pname' + p).textContent = (names[p] || '…') + (online.active && online.me === p ? ' ' + t('online.you') : '');
+      var mine = !tut.active && ((ai.active && p === ai.human) || (online.active && !online.spectator && p === online.me));
+      $('pname' + p).textContent = (mine ? PP.emojiOf(profile.avatar) + ' ' : '') + (names[p] || '…') + (online.active && online.me === p ? ' ' + t('online.you') : '');
       $('caps' + p).innerHTML = pips(state.captures[p]) + '<span>' + state.captures[p] + '/5</span>';
     });
     updateSide(); renderClocks(); updateVideoButtons(); updateResultBtn();
@@ -2769,8 +2920,18 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
   }
   var endSeen = false;    // el cartel final ya se mostró (si se cierra con "Ver el tablero" queda el botón "Resultado")
   function updateResultBtn() { $('btnResult').hidden = !(state && isOver() && endSeen && !$('endOverlay').classList.contains('open') && !document.body.classList.contains('in-screen')); }
+  // Suma la partida terminada a las estadísticas (una sola vez por partida; el tutorial y mirar online no cuentan)
+  function recordResult() {
+    if (recorded || tut.active || !state || !isOver() || online.spectator) return;
+    recorded = true;
+    var w = online.active ? (online.over ? online.over.winner : state.winner) : localOver ? localOver.winner : state.winner;
+    var mode = online.active ? 'online' : ai.active ? 'ai_' + ai.level : 'local', me = online.active ? online.me : ai.active ? ai.human : 0;
+    profile = PP.record(profile, mode, !me ? 'played' : !w ? 'draw' : w === me ? 'win' : 'loss');
+    saveProfile();
+  }
   function showEnd() {
     if (!state || !isOver()) return;
+    recordResult();
     endSeen = true;
     $('endText').textContent = resultText(); updateRematchUi(); open('endOverlay');
   }
@@ -2786,7 +2947,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
     leave.textContent = t('online.leave');
   }
   function rematch() {
-    videoDiscard(); endSeen = false;
+    videoDiscard(); endSeen = recorded = false;
     if (ai.active) { ai.token++; clearTimeout(ai.timer); ai.thinking = false; }
     state = P.createGame({ size: state ? state.size : settings.size, tournamentRule: settings.tournamentRule, exactFive: settings.exactFive });
     hover = pending = drag = settle = null; fx.length = 0; kbd = { x: centerIdx(), y: centerIdx() }; clockFresh(); closeAll(); setStatus(''); render();
@@ -2834,7 +2995,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
   }
 
   function startOnline(intent) {
-    tutStop(); aiStop(); localOver = null; videoDiscard(); endSeen = false;
+    tutStop(); aiStop(); localOver = null; videoDiscard(); endSeen = recorded = false;
     var url = serverUrl();
     if (!url) { onlineMsg(t('online.noServer')); return; }
     intent.name = myName();
@@ -2890,7 +3051,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
 
   function applySync(m) {
     var wasOver = !!state && online.active && isOver();
-    localOver = null; clockFromServer(m.clock); if (!(m.over || (state && isOver() && false))) endSeen = false;
+    localOver = null; clockFromServer(m.clock); if (!m.over) { endSeen = false; recorded = false; }
     if (!m.moves.length) clockLog = []; else clockLog.length = Math.min(clockLog.length, m.moves.length);
     if (!m.moves.length || (state && m.moves.length < state.moves.length)) videoDiscard();
     var g = P.createGame(m.opts);
@@ -2967,7 +3128,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
 
   function initOnline() {
     var url = serverUrl();
-    try { $('onName').value = localStorage.getItem('pente.name') || ''; } catch (e) {}
+    try { $('onName').value = profile.name || localStorage.getItem('pente.name') || ''; } catch (e) {}
     if (url) { try { fetch(window.PenteNet.httpBase(url) + '/health', { mode: 'no-cors' }).catch(function () {}); } catch (e) {} }   // despierta al servidor
     var code = qs('sala'), ses = loadSession();
     if (code) { try { history.replaceState(null, '', location.href.replace(/([?&])sala=[^&#]*&?/, '$1').replace(/[?&]$/, '')); } catch (e) {} }
@@ -3150,6 +3311,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
     document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = t(el.getAttribute('data-i18n')); });
     document.querySelectorAll('[data-i18n-aria]').forEach(function (el) { el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria'))); });
     $('btnLang').textContent = '🌐 ' + t('menu.language') + ' · ' + t('lang.name');
+    renderProfileBtn();
     document.documentElement.lang = window.I18n.getLang();
     document.querySelectorAll('[data-i18n-ph]').forEach(function (el) { el.placeholder = t(el.getAttribute('data-i18n-ph')); });
     canvas.setAttribute('aria-label', t('a11y.board'));
@@ -3441,6 +3603,44 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
   $('btnConfirm').addEventListener('click', function () { if (pending && !isOver()) tryMove(pending.x, pending.y); });
   // Sonido: los navegadores solo dejan activarlo después de un toque o clic del usuario
   ['pointerdown', 'touchend', 'click', 'keydown'].forEach(function (ev) { document.addEventListener(ev, function () { if (window.PenteSound) window.PenteSound.unlock(); }, true); });
+  /* ---------- Perfil ---------- */
+  function renderProfileBtn() { $('btnProfile').textContent = PP.emojiOf(profile.avatar) + ' ' + (profile.name ? t('menu.profile') + ' · ' + profile.name : t('menu.profile')); }
+  function applyProfileName() {                               // el nombre del perfil rellena los campos de nombre (se pueden cambiar partida por partida)
+    ['name1', 'onName', 'rName'].forEach(function (id) { if ($(id)) $(id).value = profile.name; });
+  }
+  function renderProfile() {
+    var g = $('avatarGrid'); g.innerHTML = '';
+    PP.AVATARS.forEach(function (a) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'avatar-opt'; b.textContent = a[1]; b.setAttribute('aria-pressed', String(a[0] === profile.avatar)); b.dataset.id = a[0];
+      b.addEventListener('click', function () { profile.avatar = a[0]; saveProfile(); renderProfile(); renderProfileBtn(); });
+      g.appendChild(b);
+    });
+    $('profName').value = profile.name;
+    var box = $('profStats'); box.innerHTML = '';
+    function cell(cls, txt) { var d = document.createElement('div'); d.className = cls; d.textContent = txt; box.appendChild(d); }
+    [['', ''], ['prof.hP', 'prof.played'], ['prof.hW', 'prof.won'], ['prof.hL', 'prof.lost'], ['prof.hD', 'prof.drawn']].forEach(function (k) { cell('h', k[0] ? t(k[0]) : ''); if (k[0]) box.lastChild.title = t(k[1]); });
+    PP.MODES.forEach(function (m) {
+      var s = profile.stats[m] || { p: 0, w: 0, l: 0, d: 0 }, loc = m === 'local';
+      cell('m', t('prof.mode.' + m));
+      [s.p, s.w, s.l, s.d].forEach(function (v, i) { cell('n' + (v ? '' : ' z'), loc && i > 0 ? '–' : String(v)); });
+    });
+    var tot = PP.totals(profile);
+    $('profNote').textContent = tot.p ? t('prof.localNote') : t('prof.noGames');
+  }
+  $('btnProfile').addEventListener('click', function () { renderProfile(); open('profileOverlay'); });
+  $('btnProfileBack').addEventListener('click', function () { open('menuOverlay'); });
+  $('profName').addEventListener('input', function () {
+    profile.name = PP.cleanName($('profName').value); saveProfile(); renderProfileBtn(); applyProfileName();
+    try { localStorage.setItem('pente.name', profile.name); } catch (e) {}
+  });
+  $('btnProfReset').addEventListener('click', function () {
+    if (!confirm(t('prof.resetConfirm'))) return;
+    profile = PP.empty(); saveProfile(); try { localStorage.removeItem('pente.name'); } catch (e) {}
+    renderProfile(); renderProfileBtn(); applyProfileName(); updateHud();
+  });
+  if (profile.name) applyProfileName();
+  renderProfileBtn();
+
   /* ---------- Tutorial interactivo ----------
    * Corre sobre el tablero real, pero con su propia partida de mentira: cada lección arma una posición (TutorialData.build),
    * espera UNA jugada del alumno y la evalúa (TutorialData.evaluate). Nada de esto toca el reloj, la máquina ni el online. */
@@ -3460,7 +3660,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
   function tutStart() {
     if (state && !isOver() && !confirm(t('confirm.leaveForTut'))) return;
     aiStop(); if (online.net) leaveOnline(false);
-    videoDiscard(); endSeen = false; localOver = null; clk = null;
+    videoDiscard(); endSeen = recorded = false; localOver = null; clk = null;
     tut.active = true; document.body.classList.add('in-tut'); closeAll();
     $('tutCard').hidden = false;
     tutLoad(0);
@@ -3477,7 +3677,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
     tutClearTimers(); tut.token++;
     i = Math.max(0, Math.min(TD.steps.length - 1, i)); tut.i = i;
     var step = TD.steps[i];
-    state = TD.build(step); endSeen = false; localOver = null;
+    state = TD.build(step); endSeen = recorded = false; localOver = null;
     names[1] = t('tut.you'); names[2] = t('tut.rival');
     hover = pending = drag = settle = null; fx.length = 0;
     tut.solved = step.type === 'info'; tut.awaiting = !tut.solved;
@@ -3617,7 +3817,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
   canvas.addEventListener('focus', render); canvas.addEventListener('blur', render);
 
   applyI18n(); buildThemePicker(); syncSizePicker(); syncOpts(); syncVis(); resize(); open('menuOverlay'); initOnline(); updateSide();
-  window.__pente = { get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, startAI: startAI, get ai() { return ai; }, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; }, get tut() { return tut; } };  // utilidad para pruebas manuales
+  window.__pente = { get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, startAI: startAI, get ai() { return ai; }, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; }, get tut() { return tut; }, get profile() { return profile; } };  // utilidad para pruebas manuales
 })();
 </script>
 <script>
