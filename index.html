@@ -290,6 +290,23 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
 .prof-stats .row-sep { grid-column: 1 / -1; height: 1px; background: var(--line); }
 #profNote { margin: 8px 0 0; }
 @media (max-width: 360px) { .prof-stats { font-size: 13px; grid-template-columns: 1fr repeat(4, 3em); } .prof-stats .h { font-size: 11px; } }
+
+/* ---------- Cartel de confirmación y niveles ---------- */
+.overlay.dialog { z-index: 40; background: rgba(8,9,12,.78); }
+.modal.dlg { width: min(100%, 380px); padding: 20px; border: 2px solid var(--line); }
+.modal.dlg p { margin: 0 0 18px; font-size: 17px; line-height: 1.4; font-weight: 600; }
+.dlg-btns { display: flex; gap: 10px; }
+.dlg-btns .btn { flex: 1 1 0; min-width: 0; }
+.seg.seg4 { display: grid; grid-template-columns: 1fr 1fr; }
+html[data-theme="papel"] .modal.dlg p { font-size: 1.15em; }
+
+/* ---------- Color de las piedras (tablero Tradicional) ---------- */
+.gem-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
+.gem-who { flex: 0 0 5.6em; font-size: 14px; color: var(--muted); font-weight: 600; }
+.gem-picker { display: flex; flex-wrap: wrap; gap: 8px; }
+.gem-opt { width: 40px; height: 40px; border-radius: 50%; border: 3px solid var(--line); padding: 0; position: relative; box-shadow: inset 0 -3px 5px rgba(0,0,0,.35); }
+.gem-opt::after { content: ''; position: absolute; left: 22%; top: 16%; width: 34%; height: 20%; border-radius: 50%; background: rgba(255,255,255,.8); transform: rotate(-35deg); }
+.gem-opt[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent), inset 0 -3px 5px rgba(0,0,0,.35); }
 </style>
 </head>
 <body>
@@ -396,7 +413,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
     <div class="field"><label class="lbl" for="name1" data-i18n="menu.p1"></label><input type="text" id="name1" maxlength="18" autocomplete="off"></div>
     <div class="field" data-mode="person"><label class="lbl" for="name2" data-i18n="menu.p2"></label><input type="text" id="name2" maxlength="18" autocomplete="off"></div>
     <div class="field" data-mode="ai"><span class="lbl" data-i18n="ai.level"></span>
-      <div class="seg" id="aiLevel" role="group"><button type="button" class="seg-opt" data-val="easy" data-i18n="ai.easy"></button><button type="button" class="seg-opt" data-val="medium" data-i18n="ai.medium"></button><button type="button" class="seg-opt" data-val="hard" data-i18n="ai.hard"></button></div>
+      <div class="seg seg4" id="aiLevel" role="group"><button type="button" class="seg-opt" data-val="beginner" data-i18n="ai.beginner"></button><button type="button" class="seg-opt" data-val="easy" data-i18n="ai.easy"></button><button type="button" class="seg-opt" data-val="medium" data-i18n="ai.medium"></button><button type="button" class="seg-opt" data-val="hard" data-i18n="ai.hard"></button></div>
       <p class="hint" id="aiLevelHint"></p></div>
     <div class="field" data-mode="ai"><span class="lbl" data-i18n="ai.side"></span>
       <div class="seg" id="aiSide" role="group"><button type="button" class="seg-opt" data-val="first" data-i18n="ai.sideFirst"></button><button type="button" class="seg-opt" data-val="second" data-i18n="ai.sideSecond"></button><button type="button" class="seg-opt" data-val="random" data-i18n="ai.sideRandom"></button></div></div>
@@ -449,6 +466,10 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
 
     <section class="tabpanel" id="tab-graphics" role="tabpanel" hidden>
       <div class="field"><span class="lbl" data-i18n="cfg.theme"></span><div class="themes" id="themePicker" role="group"></div></div>
+      <div class="field" id="gemField" hidden><span class="lbl" data-i18n="cfg.gems"></span>
+        <div class="gem-row"><span class="gem-who" data-i18n="player.1"></span><div class="gem-picker" id="gemPicker1" role="group"></div></div>
+        <div class="gem-row"><span class="gem-who" data-i18n="player.2"></span><div class="gem-picker" id="gemPicker2" role="group"></div></div>
+        <p class="hint" data-i18n="cfg.gemsHint"></p></div>
       <div class="field"><span class="lbl" data-i18n="cfg.stoneSize"></span>
         <div class="seg" data-cfg="stoneSize" role="group"><button type="button" class="seg-opt" data-val="small" data-i18n="cfg.size.small"></button><button type="button" class="seg-opt" data-val="normal" data-i18n="cfg.size.normal"></button><button type="button" class="seg-opt" data-val="large" data-i18n="cfg.size.large"></button></div></div>
       <label class="check"><input type="checkbox" data-cfg="coords"><span><span data-i18n="cfg.coords"></span><small data-i18n="cfg.coordsHint"></small></span></label>
@@ -546,6 +567,14 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
     <p class="sub" data-i18n="lang.sub"></p>
     <div class="btns" id="langList"></div>
     <div class="btns"><button class="btn" id="btnLangBack" data-i18n="menu.back"></button></div>
+  </div>
+</div>
+
+<!-- Cartel de confirmación -->
+<div class="overlay dialog" id="dlgOverlay">
+  <div class="modal dlg" role="alertdialog" aria-modal="true" aria-labelledby="dlgMsg">
+    <p id="dlgMsg"></p>
+    <div class="dlg-btns"><button type="button" class="btn" id="dlgNo"></button><button type="button" class="btn primary" id="dlgYes"></button></div>
   </div>
 </div>
 
@@ -906,7 +935,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
 /*
  * PERFIL — datos y reglas del perfil de jugador. Sin DOM ni red: se prueba en Node.
  * Forma: { v:1, name:'', avatar:'a1', stats:{ <modo>:{p,w,l,d} } }
- * Modos: ai_easy · ai_medium · ai_hard · local · online. En "local" solo se cuentan partidas jugadas (son dos personas en el mismo aparato).
+ * Modos: ai_beginner · ai_easy · ai_medium · ai_hard (en pantalla: Fácil · Normal · Difícil · Muy difícil) · local · online. En "local" solo se cuentan partidas jugadas (son dos personas en el mismo aparato).
  * OJO: las estadísticas de máquina y local las informa el navegador, así que no sirven para un ranking; las online las va a verificar el servidor.
  */
 (function (root, factory) {
@@ -916,7 +945,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
   'use strict';
 
   var AVATARS = [['a1', '🦊'], ['a2', '🐼'], ['a3', '🐯'], ['a4', '🦉'], ['a5', '🐙'], ['a6', '🦄'], ['a7', '🐢'], ['a8', '🦋'], ['a9', '🐸'], ['a10', '🐧'], ['a11', '🦁'], ['a12', '🐳']];
-  var MODES = ['ai_easy', 'ai_medium', 'ai_hard', 'local', 'online'];
+  var MODES = ['ai_beginner', 'ai_easy', 'ai_medium', 'ai_hard', 'local', 'online'];
   var NAME_MAX = 20, CAP = 1000000;
 
   function emojiOf(id) { for (var i = 0; i < AVATARS.length; i++) if (AVATARS[i][0] === id) return AVATARS[i][1]; return AVATARS[0][1]; }
@@ -971,7 +1000,11 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
       'menu.subtitle': 'Aprendés o te hacen aprender.',
       'menu.p1': 'Jugador 1',
       'menu.p2': 'Jugador 2',
-      'theme.clasico': 'Tradicional',
+      'theme.clasico': 'Simple',
+      'theme.tradicional': 'Tradicional',
+      'cfg.gems': 'Color de las piedras',
+      'cfg.gemsHint': 'Cada jugador elige su color. Se usa en el tablero Tradicional.',
+      'gem.azul': 'Azul', 'gem.verde': 'Verde', 'gem.rojo': 'Rojo', 'gem.ambar': 'Ámbar', 'gem.violeta': 'Violeta', 'gem.turquesa': 'Turquesa', 'gem.rosa': 'Rosa', 'gem.humo': 'Humo', 'gem.cristal': 'Cristal',
       'theme.glow': 'Neón',
       'menu.resume': 'Seguir jugando',
       'menu.size': 'Tamaño del tablero',
@@ -1217,10 +1250,12 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
       'ai.yourName': 'Tu nombre',
       'ai.you': 'Vos',
       'ai.level': 'Nivel',
-      'ai.easy': 'Fácil',
-      'ai.medium': 'Medio',
-      'ai.hard': 'Difícil',
-      'ai.hint.easy': 'Se distrae y se equivoca seguido. Para entrar en calor.',
+      'ai.beginner': 'Fácil',
+      'ai.easy': 'Normal',
+      'ai.medium': 'Difícil',
+      'ai.hard': 'Muy difícil',
+      'ai.hint.beginner': 'Para aprender: se despista mucho y deja pasar jugadas obvias, hasta cuatro en línea.',
+      'ai.hint.easy': 'Se distrae y se equivoca seguido, pero tapa lo obvio. Para entrar en calor.',
       'ai.hint.medium': 'Mira dos jugadas adelante: tapa lo obvio y no regala capturas.',
       'ai.hint.hard': 'Piensa hasta 4 jugadas adelante (hasta ~1 segundo). Un rival decente, no invencible.',
       'ai.side': 'Quién empieza',
@@ -1229,9 +1264,17 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
       'ai.sideRandom': 'Al azar',
       'ai.start': 'Empezar',
       'ai.offline': 'Todo corre en tu dispositivo: funciona sin conexión.',
-      'ai.name.easy': 'Máquina (fácil)',
-      'ai.name.medium': 'Máquina (media)',
-      'ai.name.hard': 'Máquina (difícil)',
+      'ai.name.beginner': 'Máquina (fácil)',
+      'ai.name.easy': 'Máquina (normal)',
+      'ai.name.medium': 'Máquina (difícil)',
+      'ai.name.hard': 'Máquina (muy difícil)',
+      'dlg.ok': 'Aceptar',
+      'dlg.cancel': 'Cancelar',
+      'dlg.restart': 'Reiniciar',
+      'dlg.leave': 'Salir',
+      'dlg.delete': 'Borrar',
+      'dlg.reset': 'Restablecer',
+      'dlg.tutorial': 'Ir al tutorial',
       'ai.thinking': '{name} está pensando…',
       'a11y.board': 'Tablero de Pente',
       'player.1': 'Jugador 1',
@@ -1268,7 +1311,11 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
       'menu.subtitle': 'Learn it, or get schooled.',
       'menu.p1': 'Player 1',
       'menu.p2': 'Player 2',
-      'theme.clasico': 'Classic',
+      'theme.clasico': 'Simple',
+      'theme.tradicional': 'Traditional',
+      'cfg.gems': 'Stone color',
+      'cfg.gemsHint': 'Each player picks their color. Used on the Traditional board.',
+      'gem.azul': 'Blue', 'gem.verde': 'Green', 'gem.rojo': 'Red', 'gem.ambar': 'Amber', 'gem.violeta': 'Violet', 'gem.turquesa': 'Turquoise', 'gem.rosa': 'Pink', 'gem.humo': 'Smoke', 'gem.cristal': 'Crystal',
       'theme.glow': 'Neon',
       'menu.resume': 'Keep playing',
       'menu.size': 'Board size',
@@ -1506,10 +1553,12 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
       'ai.yourName': 'Your name',
       'ai.you': 'You',
       'ai.level': 'Level',
-      'ai.easy': 'Easy',
-      'ai.medium': 'Medium',
-      'ai.hard': 'Hard',
-      'ai.hint.easy': 'It gets distracted and often slips. A warm-up.',
+      'ai.beginner': 'Easy',
+      'ai.easy': 'Normal',
+      'ai.medium': 'Hard',
+      'ai.hard': 'Very hard',
+      'ai.hint.beginner': 'For learning: it gets very distracted and lets obvious moves pass, even four in a row.',
+      'ai.hint.easy': 'It gets distracted and often slips, but blocks the obvious. A warm-up.',
       'ai.hint.medium': 'Looks two moves ahead: blocks the obvious and doesn\'t give away captures.',
       'ai.hint.hard': 'Thinks up to 4 moves ahead (up to ~1 second). A decent rival, not an unbeatable one.',
       'ai.side': 'Who starts',
@@ -1518,9 +1567,17 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
       'ai.sideRandom': 'Random',
       'ai.start': 'Start',
       'ai.offline': 'Everything runs on your device: it works offline.',
-      'ai.name.easy': 'Machine (easy)',
-      'ai.name.medium': 'Machine (medium)',
-      'ai.name.hard': 'Machine (hard)',
+      'ai.name.beginner': 'Machine (easy)',
+      'ai.name.easy': 'Machine (normal)',
+      'ai.name.medium': 'Machine (hard)',
+      'ai.name.hard': 'Machine (very hard)',
+      'dlg.ok': 'OK',
+      'dlg.cancel': 'Cancel',
+      'dlg.restart': 'Restart',
+      'dlg.leave': 'Leave',
+      'dlg.delete': 'Delete',
+      'dlg.reset': 'Reset',
+      'dlg.tutorial': 'Go to tutorial',
       'ai.thinking': '{name} is thinking…',
       'a11y.board': 'Pente board',
       'player.1': 'Player 1',
@@ -1540,7 +1597,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
 (function (root) {
   'use strict';
   Object.assign(root.I18n.STRINGS.es, {
-    'menu.tutorial': 'Tutorial interactivo',
+    'menu.tutorial': 'Tutorial',
     'a11y.tutorial': 'Tutorial',
     'confirm.leaveForTut': '¿Dejar la partida en curso para hacer el tutorial?',
     'tut.you': 'Vos',
@@ -1626,7 +1683,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
     'tut.panel.text': 'Los 5 puntitos de cada jugador son los pares capturados: con 5 ganás. Reloj: el número grande es el tiempo de ESTA jugada (1 min) y el chico, lo que le queda en total (10 min). Si cualquiera llega a 0, pierde. Se puede apagar al empezar la partida.',
 
     'tut.final.title': '¡Listo!',
-    'tut.final.text': 'Ya sabés lo esencial: cinco en línea, capturar pares, defenderte y no dejar tres abiertos. Ahora, a practicar: probá contra la máquina en nivel fácil.'
+    'tut.final.text': 'Ya sabés lo esencial: cinco en línea, capturar pares, defenderte y no dejar tres abiertos. Ahora, a practicar: probá contra la máquina en nivel Fácil.'
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -1635,7 +1692,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
 (function (root) {
   'use strict';
   Object.assign(root.I18n.STRINGS.en, {
-    'menu.tutorial': 'Interactive tutorial',
+    'menu.tutorial': 'Tutorial',
     'a11y.tutorial': 'Tutorial',
     'confirm.leaveForTut': 'Leave the current game to do the tutorial?',
     'tut.you': 'You',
@@ -1721,7 +1778,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
     'tut.panel.text': 'The 5 dots of each player are captured pairs: with 5 you win. Clock: the big number is the time for THIS move (1 min) and the small one is what they have left in total (10 min). If either hits 0, that player loses. It can be turned off when starting a game.',
 
     'tut.final.title': 'All set!',
-    'tut.final.text': 'You know the essentials: five in a row, capturing pairs, defending and not allowing open threes. Now practice: try the machine on easy level.'
+    'tut.final.text': 'You know the essentials: five in a row, capturing pairs, defending and not allowing open threes. Now practice: try the machine on Easy level.'
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -1744,9 +1801,10 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
     'prof.hP': 'Jug.', 'prof.hW': 'Gan.', 'prof.hL': 'Perd.', 'prof.hD': 'Emp.',
     'prof.noGames': 'Todavía no jugaste ninguna partida completa.',
     'prof.localNote': 'En "Local" solo se cuentan las jugadas: son dos personas en el mismo aparato.',
-    'prof.mode.ai_easy': 'Máquina · Fácil',
-    'prof.mode.ai_medium': 'Máquina · Media',
-    'prof.mode.ai_hard': 'Máquina · Difícil',
+    'prof.mode.ai_beginner': 'Máquina · Fácil',
+    'prof.mode.ai_easy': 'Máquina · Normal',
+    'prof.mode.ai_medium': 'Máquina · Difícil',
+    'prof.mode.ai_hard': 'Máquina · Muy difícil',
     'prof.mode.local': 'Local (2 personas)',
     'prof.mode.online': 'Online',
     'prof.reset': 'Borrar mis datos',
@@ -1773,9 +1831,10 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
     'prof.hP': 'Pl.', 'prof.hW': 'Won', 'prof.hL': 'Lost', 'prof.hD': 'Draw',
     'prof.noGames': 'You haven\'t finished any game yet.',
     'prof.localNote': 'In "Local" only games played are counted: it is two people on the same device.',
-    'prof.mode.ai_easy': 'Machine · Easy',
-    'prof.mode.ai_medium': 'Machine · Medium',
-    'prof.mode.ai_hard': 'Machine · Hard',
+    'prof.mode.ai_beginner': 'Machine · Easy',
+    'prof.mode.ai_easy': 'Machine · Normal',
+    'prof.mode.ai_medium': 'Machine · Hard',
+    'prof.mode.ai_hard': 'Machine · Very hard',
     'prof.mode.local': 'Local (2 people)',
     'prof.mode.online': 'Online',
     'prof.reset': 'Delete my data',
@@ -1788,6 +1847,23 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
  * (y su nombre en i18n como 'theme.<id>'). El dibujo y el menú lo toman solos. */
 (function (root) {
   'use strict';
+  /* Piedras de vidrio del tablero "Tradicional": cada color tiene tres tonos (centro claro, cuerpo, borde oscuro). Se eligen en Configuración. */
+  var gems = [
+    { id: 'azul',     base: [38, 92, 232],  light: [160, 198, 255], dark: [8, 24, 120] },
+    { id: 'verde',    base: [36, 176, 72],  light: [170, 245, 170], dark: [6, 80, 28] },
+    { id: 'rojo',     base: [214, 40, 52],  light: [255, 170, 160], dark: [100, 8, 20] },
+    { id: 'ambar',    base: [244, 160, 30], light: [255, 224, 150], dark: [130, 60, 4] },
+    { id: 'violeta',  base: [140, 64, 220], light: [222, 180, 255], dark: [60, 14, 110] },
+    { id: 'turquesa', base: [24, 186, 196], light: [170, 244, 244], dark: [4, 84, 100] },
+    { id: 'rosa',     base: [240, 92, 170], light: [255, 196, 226], dark: [130, 24, 80] },
+    { id: 'humo',     base: [52, 54, 66],   light: [160, 164, 184], dark: [6, 6, 12] },
+    { id: 'cristal',  base: [226, 236, 246], light: [255, 255, 255], dark: [120, 140, 170] }
+  ];
+  function hex(c) { return '#' + c.map(function (v) { return ('0' + v.toString(16)).slice(-2); }).join(''); }
+  function gemStone(id) {
+    var g = gems.filter(function (x) { return x.id === id; })[0] || gems[0];
+    return { a: hex(g.light), b: hex(g.dark), glow: null, gem: g };
+  }
   var list = [
     {
       id: 'clasico',
@@ -1810,6 +1886,17 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
       win: '#ffe066', pendingRing: '#ffe066', kbd: '#ffffff'
     }
     ,{
+      id: 'tradicional',
+      css: { '--bg': '#1b1411', '--panel': '#271d17', '--panel-2': '#33261e', '--line': '#5a4333', '--accent-ink': '#1a1005', '--accent': '#e0a458', '--s1a': '#a0c6ff', '--s1b': '#081878', '--s2a': '#aaf5aa', '--s2b': '#06501c',
+             '--board-shadow': '0 12px 34px rgba(0,0,0,.6)' },
+      // wood: true -> la madera se genera por código (veta, vetas claras y oscuras, viñeta). stones: se completan con gemStone() según los colores elegidos.
+      board: { wood: true, bg: ['#a8733f', '#8a5b30'], line: 'rgba(32,15,4,.82)', lineGlow: null, star: 'rgba(32,15,4,.9)', label: 'rgba(245,220,175,.78)', labelHi: '#ffffff' },
+      stones: { 1: gemStone('azul'), 2: gemStone('verde') },
+      last: { ring: '#fff0b8', dot: { 1: '#ffffff', 2: '#ffffff' } },
+      zone: { fill: 'rgba(20,8,0,.30)', stroke: 'rgba(255,232,185,.6)' },
+      win: '#ffd45a', pendingRing: '#ffe08a', kbd: '#ffffff'
+    }
+    ,{
       id: 'papel',
       css: { '--bg': '#1a1b23', '--panel': '#24252f', '--panel-2': '#30323f', '--line': '#6b70a8', '--accent-ink': '#0b0f33', '--accent': '#8d9bff', '--s1a': '#8a8a8e', '--s1b': '#2b2b2e', '--s2a': '#7d8aff', '--s2b': '#1f2fc4',
              '--board-shadow': '0 10px 30px rgba(0,0,0,.45)' },
@@ -1822,9 +1909,11 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
       win: '#e89a00', pendingRing: '#e8791f', kbd: '#c0261d'
     }
   ];
+  var ORDER = ['clasico', 'tradicional', 'glow', 'papel'];       // orden en el selector
+  list.sort(function (x, y) { return ORDER.indexOf(x.id) - ORDER.indexOf(y.id); });
   var byId = {};
   list.forEach(function (th) { byId[th.id] = th; });
-  root.Themes = { list: list, byId: byId, defaultId: 'clasico' };
+  root.Themes = { list: list, byId: byId, defaultId: 'clasico', gems: gems, gemStone: gemStone };
 })(typeof self !== 'undefined' ? self : this);
 </script>
 <script src="config.js"></script>
@@ -1988,7 +2077,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
 <script>
 /* IA de Pente (rival offline). Lógica pura, sin DOM ni red: funciona en el navegador (window.PenteAI) y en Node (require).
  *
- *   PenteAI.chooseMove(state, { level: 'easy'|'medium'|'hard', timeMs, rng }) -> {x, y}
+ *   PenteAI.chooseMove(state, { level: 'beginner'|'easy'|'medium'|'hard', timeMs, rng }) -> {x, y}
  *
  * Cómo piensa (en cristiano):
  *  1. Mira solo las casillas cercanas a fichas ya puestas (si no, serían cientos de jugadas inútiles).
@@ -1997,7 +2086,8 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
  *     puntuando el tablero por líneas abiertas, pares capturados y pares propios vulnerables.
  *  Siempre juega la victoria inmediata si la hay. Respeta las reglas porque juega con el mismo núcleo (PenteCore).
  *
- * Niveles:  easy   = mira 1 jugada, con ruido y despistes (se le puede ganar siendo principiante)
+ * Niveles:  beginner = mira 1 jugada y casi no tapa nada: deja pasar cuatros y se despista seguido (en pantalla: "Fácil")
+ *           easy   = mira 1 jugada, con ruido y despistes (se le puede ganar siendo principiante)
  *           medium = mira 2 jugadas (ve que le ganás en la siguiente y la tapa)
  *           hard   = profundización iterativa hasta 4 jugadas dentro de un tiempo (por defecto 700 ms)
  * No es invencible: es un rival decente para jugar sin conexión, no un motor de torneo. */
@@ -2010,8 +2100,10 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
   var AXES = [[1, 0], [0, 1], [1, 1], [1, -1]];
   var WIN = 1000000;
 
+  // block4 / block3: probabilidad de tapar un cuatro (o una captura que gana) / un tres abierto cuando lo ve (solo niveles de 1 jugada)
   var LEVELS = {
-    easy:   { depth: 1, width: 6,  timeMs: 0,   noise: 0.55, slipTop: 5, slipChance: 0.35, seesWin: 0.85 },
+    beginner: { depth: 1, width: 8, timeMs: 0, noise: 1.4, slipTop: 8, slipChance: 0.7, seesWin: 0.35, block4: 0.2, block3: 0.1, ignoreObvious: true },
+    easy:   { depth: 1, width: 6,  timeMs: 0,   noise: 0.55, slipTop: 5, slipChance: 0.35, seesWin: 0.85, block4: 0.97, block3: 0.75 },
     medium: { depth: 2, width: 10, timeMs: 350, noise: 0.08, slipTop: 1, slipChance: 0,    seesWin: 1 },
     hard:   { depth: 4, width: 12, timeMs: 700, noise: 0,    slipTop: 1, slipChance: 0,    seesWin: 1 }
   };
@@ -2118,9 +2210,13 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
     if (lv.depth === 1) {
       // lo obvio no se le escapa: tapar un 4 (o ganar por capturas) casi siempre, y tapar/armar un 3 abierto la mayoría de las veces
       var best0 = cands.reduce(function (a, b) { return b.q0 > a.q0 ? b : a; }, cands[0]);
-      if (best0.q0 >= 80000 && rng() < 0.97) return { x: best0.x, y: best0.y };
-      if (best0.q0 >= 1500 && rng() < 0.75) return { x: best0.x, y: best0.y };
-      var pick = rng() < lv.slipChance ? Math.min(cands.length, lv.slipTop) : Math.min(cands.length, 2);
+      if (best0.q0 >= 80000 && rng() < lv.block4) return { x: best0.x, y: best0.y };
+      if (best0.q0 >= 1500 && rng() < lv.block3) return { x: best0.x, y: best0.y };
+      if (lv.ignoreObvious && best0.q0 >= 1500 && cands.length > 1) {         // si no lo tapó, tampoco lo "elige de casualidad": mira para otro lado
+        var others = cands.filter(function (c) { return c !== best0; }).slice(0, lv.slipTop), mo = others[Math.floor(rng() * others.length)];
+        return { x: mo.x, y: mo.y };
+      }
+      var pick = rng() < lv.slipChance ? Math.min(cands.length, lv.slipTop) : Math.min(cands.length, lv.depth === 1 && lv.noise > 1 ? 3 : 2);
       var m = cands[Math.floor(rng() * pick)];
       return { x: m.x, y: m.y };
     }
@@ -2192,8 +2288,8 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
 
   /* Configuración del dispositivo (pantalla "Configuración"): se guarda en localStorage y se aplica al instante. */
   var coarse = matchMedia('(pointer: coarse)').matches, reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var CFG_DEFAULTS = { confirm: 'button', lift: 'mid', guides: true, coords: true, lastMove: true, anim: true, stoneSize: 'normal', zone: true, captureFx: 'shatter', chat: true, loupe: false };
-  var CFG_ALLOWED = { confirm: ['button', 'double', 'none'], lift: ['low', 'mid', 'high'], stoneSize: ['small', 'normal', 'large'], captureFx: ['shatter', 'fade', 'none'] };
+  var CFG_DEFAULTS = { confirm: 'button', lift: 'mid', guides: true, coords: true, lastMove: true, anim: true, stoneSize: 'normal', zone: true, captureFx: 'shatter', chat: true, loupe: false, gem1: 'azul', gem2: 'verde' };
+  var CFG_ALLOWED = { confirm: ['button', 'double', 'none'], lift: ['low', 'mid', 'high'], stoneSize: ['small', 'normal', 'large'], captureFx: ['shatter', 'fade', 'none'], gem1: window.Themes.gems.map(function (g) { return g.id; }), gem2: window.Themes.gems.map(function (g) { return g.id; }) };
   function loadCfg() {
     var c = {}, k, raw = null;
     for (k in CFG_DEFAULTS) c[k] = CFG_DEFAULTS[k];
@@ -2226,7 +2322,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
   function centerIdx() { return (boardN() - 1) / 2; }
   function sfx(name) { if (window.PenteSound) window.PenteSound.play(name); }
   function buzz(ms) { if (window.PenteSound) window.PenteSound.buzz(ms); }
-  var LEVELS_OK = ['easy', 'medium', 'hard'];
+  var LEVELS_OK = ['beginner', 'easy', 'medium', 'hard'];
   var ai = { active: false, level: 'medium', human: 1, bot: 2, timer: 0, token: 0, thinking: false };   // rival offline
   var replayBusy = false; // true mientras se dibuja un cuadro del video (render no toca la pantalla real)
   var fx = [];            // fichas capturadas que se están desvaneciendo / rompiendo
@@ -2299,7 +2395,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
   function clockTick() {
     if (!clk || !state) return;
     if (tut.active) { renderClocks(); return; }           // en el tutorial el reloj es solo de muestra
-    var paused = !online.active && document.body.classList.contains('in-screen') && !isOver();
+    var paused = !online.active && (document.body.classList.contains('in-screen') || $('dlgOverlay').classList.contains('open')) && !isOver();
     if (paused && !clkPausedAt) clkPausedAt = performance.now();
     else if (!paused && clkPausedAt) { var d = performance.now() - clkPausedAt; clkPausedAt = 0; clk.since += d; clk.turnStart += d; }
     renderClocks();
@@ -2534,6 +2630,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
   function drawStonePx(cx, cy, player, alpha, highlight, scale, lift, seed, spin) {
     var th = theme(), st = th.stones[player];
     var r = metrics.cell * stoneK() * (scale || 1);
+    if (st.gem) { drawGem(cx, cy, r, st.gem, alpha, highlight, lift || 0, spin || 0); return; }
     if (st.scribble) { drawScribble(cx, cy, st, alpha, highlight, scale || 1, lift || 0, seed === undefined ? 3 : seed, r, th, spin || 0); return; }
     ctx.save(); ctx.globalAlpha = alpha;
     if (st.glow) { ctx.shadowColor = st.glow; ctx.shadowBlur = r * (1.2 + (lift || 0) * 0.8); }
@@ -2601,6 +2698,76 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
     if (spin) { ctx.translate(cx, cy); ctx.rotate(spin); ctx.drawImage(sp.cv, -s / 2, -s / 2, s, s); } else ctx.drawImage(sp.cv, cx - s / 2, cy - s / 2, s, s);
     ctx.restore();
     if (highlight) { ctx.save(); ctx.lineWidth = Math.max(2, rScaled * .16); ctx.strokeStyle = th.win; ctx.beginPath(); ctx.arc(cx, cy, rScaled * 1.12, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); }
+  }
+
+  /* ---------- Piedras de vidrio (tablero Tradicional) ---------- */
+  function rgba(c, a) { return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')'; }
+  // Vidrio translúcido: cuerpo con degradé, luz que lo atraviesa del lado opuesto, borde más oscuro y un brillo blanco que da la vuelta al girar (spin).
+  function drawGem(cx, cy, r, gem, alpha, highlight, lift, spin) {
+    var th = theme(), ha = -2.35 + (spin || 0), ox = Math.cos(ha), oy = Math.sin(ha), g, i;
+    ctx.save(); ctx.globalAlpha = alpha;
+    ctx.shadowColor = 'rgba(0,0,0,' + (0.5 - 0.12 * lift) + ')'; ctx.shadowBlur = r * (0.45 + lift * 0.8); ctx.shadowOffsetY = r * (0.16 + lift * 0.5); ctx.shadowOffsetX = r * 0.05;
+    g = ctx.createRadialGradient(cx - r * 0.25, cy - r * 0.3, r * 0.05, cx, cy, r);
+    g.addColorStop(0, rgba(gem.light, 0.9)); g.addColorStop(0.45, rgba(gem.base, 0.8)); g.addColorStop(1, rgba(gem.dark, 0.9));   // algo translúcido: se insinúan las líneas del tablero
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetX = ctx.shadowOffsetY = 0;
+    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.clip();
+    var lx = cx - ox * r * 0.45, ly = cy - oy * r * 0.45;
+    g = ctx.createRadialGradient(lx, ly, 0, lx, ly, r * 0.75); g.addColorStop(0, rgba(gem.light, 0.5)); g.addColorStop(1, rgba(gem.light, 0));
+    ctx.fillStyle = g; ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+    ctx.lineWidth = r * 0.14; ctx.strokeStyle = rgba(gem.dark, 0.55); ctx.beginPath(); ctx.arc(cx, cy, r * 0.95, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+    ctx.save(); ctx.translate(cx + ox * r * 0.5, cy + oy * r * 0.5); ctx.rotate(ha + Math.PI / 2);
+    g = ctx.createLinearGradient(0, -r * 0.2, 0, r * 0.2); g.addColorStop(0, 'rgba(255,255,255,.95)'); g.addColorStop(1, 'rgba(255,255,255,.35)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(0, 0, r * 0.36, r * 0.17, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+    ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.beginPath(); ctx.arc(cx - ox * r * 0.52, cy - oy * r * 0.52, r * 0.07, 0, Math.PI * 2); ctx.fill();
+    if (highlight) { ctx.lineWidth = Math.max(2, r * 0.16); ctx.strokeStyle = th.win; ctx.beginPath(); ctx.arc(cx, cy, r + ctx.lineWidth * 0.4, 0, Math.PI * 2); ctx.stroke(); }
+    ctx.restore();
+  }
+  function buildGemPickers() {
+    [1, 2].forEach(function (p) {
+      var box = $('gemPicker' + p); box.innerHTML = '';
+      window.Themes.gems.forEach(function (gm) {
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'gem-opt'; b.dataset.id = gm.id; b.title = t('gem.' + gm.id); b.setAttribute('aria-label', t('gem.' + gm.id));
+        b.style.background = 'radial-gradient(circle at 35% 30%,' + rgba(gm.light, 1) + ',' + rgba(gm.base, 1) + ' 55%,' + rgba(gm.dark, 1) + ')';
+        b.setAttribute('aria-pressed', String(cfg['gem' + p] === gm.id));
+        b.addEventListener('click', function () {
+          var other = p === 1 ? 2 : 1;
+          if (cfg['gem' + other] === gm.id) cfg['gem' + other] = cfg['gem' + p];      // no pueden ser iguales: si elegís el del otro, se cambian
+          cfg['gem' + p] = gm.id; saveCfg(); applyThemeCss(); buildThemePicker(); sfx('pick');
+        });
+        box.appendChild(b);
+      });
+    });
+  }
+
+  /* Madera: veta ondulada clara y oscura, juntas de tablas, un poco de ruido y viñeta. Se genera una vez por tamaño. */
+  var woodCache = {};
+  function woodFor(W) {
+    if (woodCache[W]) return woodCache[W];
+    var cv = document.createElement('canvas'); cv.width = cv.height = W; var g = cv.getContext('2d'), rnd = rng(31337), i, x, k;
+    var bg = g.createLinearGradient(0, 0, W, W); bg.addColorStop(0, '#a0703f'); bg.addColorStop(0.5, '#8a5c32'); bg.addColorStop(1, '#774e28'); g.fillStyle = bg; g.fillRect(0, 0, W, W);
+    var planks = 4, ph = W / planks;
+    for (k = 0; k < planks; k++) {                                   // cada tabla con su tono
+      g.fillStyle = rnd() < 0.5 ? 'rgba(255,215,160,' + (0.02 + rnd() * 0.05) + ')' : 'rgba(40,18,4,' + (0.03 + rnd() * 0.07) + ')'; g.fillRect(0, k * ph, W, ph);
+    }
+    g.lineCap = 'round';
+    for (i = 0; i < Math.round(W / 2.2); i++) {                      // veta
+      var y0 = rnd() * W, amp = W * (0.002 + rnd() * 0.012), fr = (2 + rnd() * 5) * Math.PI / W, phs = rnd() * 6.28, dark = rnd() < 0.62;
+      g.strokeStyle = dark ? 'rgba(50,24,6,' + (0.04 + rnd() * 0.1) + ')' : 'rgba(255,225,175,' + (0.03 + rnd() * 0.07) + ')';
+      g.lineWidth = Math.max(0.6, W / 900 * (0.5 + rnd() * 1.6)); g.beginPath();
+      for (x = 0; x <= W; x += W / 30) { var y = y0 + Math.sin(x * fr + phs) * amp + Math.sin(x * fr * 2.7 + phs) * amp * 0.35; if (x) g.lineTo(x, y); else g.moveTo(x, y); }
+      g.stroke();
+    }
+    for (k = 1; k < planks; k++) {                                   // juntas entre tablas
+      g.fillStyle = 'rgba(30,12,2,.32)'; g.fillRect(0, k * ph - 1, W, Math.max(1.5, W / 500));
+      g.fillStyle = 'rgba(255,220,170,.16)'; g.fillRect(0, k * ph + Math.max(1.5, W / 500) - 1, W, Math.max(1, W / 700));
+    }
+    for (i = 0; i < Math.round(W * W / 420); i++) { g.fillStyle = 'rgba(30,12,2,' + (rnd() * 0.06) + ')'; g.fillRect(rnd() * W, rnd() * W, 1, 1); }
+    var v = g.createRadialGradient(W / 2, W / 2, W * 0.32, W / 2, W / 2, W * 0.78); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(25,10,0,.38)'); g.fillStyle = v; g.fillRect(0, 0, W, W);
+    g.strokeStyle = 'rgba(30,12,2,.55)'; g.lineWidth = Math.max(2, W / 260); g.strokeRect(W * 0.012, W * 0.012, W * 0.976, W * 0.976);    // marco grabado
+    g.strokeStyle = 'rgba(255,225,175,.22)'; g.lineWidth = Math.max(1, W / 600); g.strokeRect(W * 0.012 + g.lineWidth * 2, W * 0.012 + g.lineWidth * 2, W * 0.976 - g.lineWidth * 4, W * 0.976 - g.lineWidth * 4);
+    return (woodCache[W] = cv);
   }
 
   /* Hoja de papel arrugado: facetas claras/oscuras + pliegues con su reflejo + un poco de ruido. Se genera una vez por tamaño. */
@@ -2678,6 +2845,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
     if (settle && performance.now() - settle.t0 >= settle.dur) settle = null;
     // fondo del tablero
     if (th.board.paper) ctx.drawImage(paperFor(W), 0, 0);
+    else if (th.board.wood) ctx.drawImage(woodFor(W), 0, 0);
     else {
       var bg = ctx.createLinearGradient(0, 0, W, W);
       bg.addColorStop(0, th.board.bg[0]); bg.addColorStop(1, th.board.bg[1]);
@@ -2836,7 +3004,12 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
     return window.Themes.defaultId;
   })();
   function theme() { return window.Themes.byId[themeId]; }
+  function applyGems() {                                      // las piedras del tablero Tradicional toman los colores elegidos en Configuración
+    var th = window.Themes.byId.tradicional; if (!th) return;
+    [1, 2].forEach(function (p) { var st = window.Themes.gemStone(cfg['gem' + p]); th.stones[p] = st; th.css['--s' + p + 'a'] = st.a; th.css['--s' + p + 'b'] = st.b; });
+  }
   function applyThemeCss() {
+    applyGems();
     var css = theme().css; for (var k in css) document.documentElement.style.setProperty(k, css[k]);
     document.documentElement.setAttribute('data-theme', themeId);
   }
@@ -2845,6 +3018,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
     themeId = id; applyThemeCss();
     try { localStorage.setItem('pente.theme', id); } catch (e) {}
     document.querySelectorAll('.theme-opt').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.id === id ? 'true' : 'false'); });
+    $('gemField').hidden = id !== 'tradicional'; buildGemPickers();
     render();
   }
   function buildThemePicker() {
@@ -3327,8 +3501,8 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
   $('btnRulesClose').addEventListener('click', function () { open('menuOverlay'); });
   $('btnRestart').addEventListener('click', function () {
     if (online.spectator) { leaveOnline(false); open('menuOverlay'); return; }
-    if (online.active) { if (!isOver() && online.net && confirm(t('online.resignConfirm'))) online.net.send({ t: 'resign' }); return; }
-    if (!state || state.moves.length === 0 || state.status !== 'playing' || confirm(t('confirm.restart'))) rematch();
+    if (online.active) { if (!isOver() && online.net) ask(t('online.resignConfirm'), t('hud.resign'), function () { if (!isOver() && online.net) online.net.send({ t: 'resign' }); }); return; }
+    if (!state || state.moves.length === 0 || state.status !== 'playing') rematch(); else ask(t('confirm.restart'), t('dlg.restart'), rematch);
   });
   $('btnRematch').addEventListener('click', function () {
     if (online.active) { if (online.net && online.net.send({ t: 'rematch' })) { online.rematch[online.me] = true; updateRematchUi(); } return; }
@@ -3337,11 +3511,16 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
   $('btnEndMenu').addEventListener('click', function () { if (online.active) leaveOnline(false); open('menuOverlay'); });
   $('btnClaim').addEventListener('click', function () { if (online.net) online.net.send({ t: 'claimWin' }); });
   $('btnOnline').addEventListener('click', function () {
-    if (ai.active && state && !isOver() && !confirm(t('confirm.leaveAI'))) return;
-    aiStop();
-    if (online.net) { if (online.active && !online.spectator && !isOver() && names[2] && !confirm(t('online.leaveConfirm'))) return; leaveOnline(true); }
-    $('btnSpectateOffer').hidden = true;
-    onlineMsg(serverUrl() ? '' : t('online.noServer')); open('onlineOverlay');
+    function showOnlineMenu() { $('btnSpectateOffer').hidden = true; onlineMsg(serverUrl() ? '' : t('online.noServer')); open('onlineOverlay'); }
+    function go() {
+      aiStop();
+      if (online.net) {
+        if (online.active && !online.spectator && !isOver() && names[2]) { ask(t('online.leaveConfirm'), t('dlg.leave'), function () { leaveOnline(true); showOnlineMenu(); }); return; }
+        leaveOnline(true);
+      }
+      showOnlineMenu();
+    }
+    if (ai.active && state && !isOver()) ask(t('confirm.leaveAI'), t('dlg.leave'), go); else go();
   });
   $('btnOnlineBack').addEventListener('click', function () { if (online.net && !online.active) leaveOnline(false); open('menuOverlay'); });
   $('btnCreateRoom').addEventListener('click', function () {
@@ -3374,7 +3553,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
 
 
   /* ---------- Pantalla "Contra la máquina" ---------- */
-  var aiPref = { level: 'medium', side: 'first' };
+  var aiPref = { level: 'easy', side: 'first' };
   try { var ap = JSON.parse(localStorage.getItem('pente.ai') || 'null'); if (ap) { if (LEVELS_OK.indexOf(ap.level) >= 0) aiPref.level = ap.level; if (['first', 'second', 'random'].indexOf(ap.side) >= 0) aiPref.side = ap.side; } } catch (e) {}
   function syncAiUi() {
     document.querySelectorAll('#aiLevel .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.val === aiPref.level)); });
@@ -3603,6 +3782,28 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
   $('btnConfirm').addEventListener('click', function () { if (pending && !isOver()) tryMove(pending.x, pending.y); });
   // Sonido: los navegadores solo dejan activarlo después de un toque o clic del usuario
   ['pointerdown', 'touchend', 'click', 'keydown'].forEach(function (ev) { document.addEventListener(ev, function () { if (window.PenteSound) window.PenteSound.unlock(); }, true); });
+  /* ---------- Cartel de confirmación (reemplaza al confirm() del navegador, que se ve ajeno y frena el juego) ---------- */
+  var dlgYes = null, dlgFocus = null;
+  function ask(msg, yesLabel, onYes) {
+    $('dlgMsg').textContent = msg; $('dlgYes').textContent = yesLabel || t('dlg.ok'); $('dlgNo').textContent = t('dlg.cancel');
+    dlgYes = onYes; dlgFocus = document.activeElement;
+    $('dlgOverlay').classList.add('open'); $('dlgNo').focus();            // el foco queda en Cancelar: un Enter sin querer no borra nada
+  }
+  function dlgClose(yes) {
+    var cb = yes ? dlgYes : null; dlgYes = null;
+    $('dlgOverlay').classList.remove('open');
+    try { if (dlgFocus && dlgFocus.focus) dlgFocus.focus(); } catch (e) {}
+    if (cb) cb();
+  }
+  $('dlgYes').addEventListener('click', function () { dlgClose(true); });
+  $('dlgNo').addEventListener('click', function () { dlgClose(false); });
+  $('dlgOverlay').addEventListener('pointerdown', function (e) { if (e.target === $('dlgOverlay')) dlgClose(false); });
+  document.addEventListener('keydown', function (e) {
+    if (!$('dlgOverlay').classList.contains('open')) return;
+    if (e.key === 'Escape') { e.preventDefault(); dlgClose(false); }
+    else if (e.key === 'Tab') { e.preventDefault(); ($('dlgNo') === document.activeElement ? $('dlgYes') : $('dlgNo')).focus(); }
+  }, true);
+
   /* ---------- Perfil ---------- */
   function renderProfileBtn() { $('btnProfile').textContent = PP.emojiOf(profile.avatar) + ' ' + (profile.name ? t('menu.profile') + ' · ' + profile.name : t('menu.profile')); }
   function applyProfileName() {                               // el nombre del perfil rellena los campos de nombre (se pueden cambiar partida por partida)
@@ -3634,9 +3835,10 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
     try { localStorage.setItem('pente.name', profile.name); } catch (e) {}
   });
   $('btnProfReset').addEventListener('click', function () {
-    if (!confirm(t('prof.resetConfirm'))) return;
-    profile = PP.empty(); saveProfile(); try { localStorage.removeItem('pente.name'); } catch (e) {}
-    renderProfile(); renderProfileBtn(); applyProfileName(); updateHud();
+    ask(t('prof.resetConfirm'), t('dlg.delete'), function () {
+      profile = PP.empty(); saveProfile(); try { localStorage.removeItem('pente.name'); } catch (e) {}
+      renderProfile(); renderProfileBtn(); applyProfileName(); updateHud();
+    });
   });
   if (profile.name) applyProfileName();
   renderProfileBtn();
@@ -3657,8 +3859,8 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
     tut.fb = ''; tut.fbRaw = msg; tut.fbKind = ERR_CODES.some(function (c) { return t('err.' + c) === msg; }) ? 'bad' : 'hint';
     tutRenderCard();
   }
-  function tutStart() {
-    if (state && !isOver() && !confirm(t('confirm.leaveForTut'))) return;
+  function tutStart() { if (state && !isOver()) ask(t('confirm.leaveForTut'), t('dlg.tutorial'), tutBegin); else tutBegin(); }
+  function tutBegin() {
     aiStop(); if (online.net) leaveOnline(false);
     videoDiscard(); endSeen = recorded = false; localOver = null; clk = null;
     tut.active = true; document.body.classList.add('in-tut'); closeAll();
@@ -3756,7 +3958,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
   $('tutNext').addEventListener('click', function () {
     if (!tut.active) return;
     if (tut.i >= TD.steps.length - 1) {                      // última lección: a practicar contra la máquina (nivel fácil)
-      tutStop(); localMode = 'ai'; aiPref.level = 'easy'; saveAiPref(); try { localStorage.setItem('pente.localMode', 'ai'); } catch (e) {}
+      tutStop(); localMode = 'ai'; aiPref.level = 'beginner'; saveAiPref(); try { localStorage.setItem('pente.localMode', 'ai'); } catch (e) {}
       syncAiUi(); syncLocalMode(); open('localOverlay'); return;
     }
     tutLoad(tut.i + 1);
@@ -3805,12 +4007,13 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
   });
   $('btnSettingsBack').addEventListener('click', function () { open('menuOverlay'); });
   $('btnCfgReset').addEventListener('click', function () {
-    if (!confirm(t('cfg.resetConfirm'))) return;
-    for (var k in CFG_DEFAULTS) cfg[k] = CFG_DEFAULTS[k];
-    pending = hover = null; saveCfg();
-    if (S) { S.setEnabled(true); S.setVolume(0.8); S.setVibrate(true); }
-    setTheme(window.Themes.defaultId);
-    syncCfgUi(); render(); sfx('place');
+    ask(t('cfg.resetConfirm'), t('dlg.reset'), function () {
+      for (var k in CFG_DEFAULTS) cfg[k] = CFG_DEFAULTS[k];
+      pending = hover = null; saveCfg();
+      if (S) { S.setEnabled(true); S.setVolume(0.8); S.setVibrate(true); }
+      setTheme(window.Themes.defaultId);
+      syncCfgUi(); render(); sfx('place');
+    });
   });
   window.addEventListener('resize', resize);
   if (window.ResizeObserver) new ResizeObserver(resize).observe(canvas);
