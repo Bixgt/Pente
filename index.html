@@ -474,6 +474,13 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 .seats .seat { padding: 9px 12px; border-radius: 10px; border: 1px solid var(--line, #3a3f4b); opacity: .6; font-weight: 600; }
 .seats .seat.on { opacity: 1; }
 .seats .seat.me { border-color: var(--accent, #e8b04a); }
+
+/* Menú principal: letras normales (sin negrita) */
+#menuOverlay .btn { font-weight: 400; }
+
+.seats .seat.free { background: transparent; color: inherit; text-align: left; cursor: pointer; border-style: dashed; font: inherit; font-weight: 600; opacity: .85; }
+.seats .seat.free:hover { border-color: var(--accent, #e8b04a); }
+.seats .hint { margin: 2px 2px 0; }
 </style>
 </head>
 <body>
@@ -566,7 +573,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v41</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v42</p></div>
     <div class="btns">
       <button class="btn primary" id="btnResume" hidden data-i18n="menu.resume"></button>
       <button class="btn primary" id="btnPlay" data-i18n="menu.play"></button>
@@ -1003,7 +1010,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 41;</script>
+<script>window.PENTE_VERSION = 42;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -3292,7 +3299,11 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     "four.empty": "esperando…",
     "four.mateTurn": "Le toca a tu compañero/a: {name}",
     "four.roomWaiting": "Sala de 4 de {name} ({n}/4)",
-    "four.badge": "2 contra 2"
+    "four.badge": "2 contra 2",
+    "four.emptyTap": "libre — tocá para sentarte acá",
+    "four.seatHint": "Tocá un asiento libre para cambiar de equipo. Los equipos son ⚫ (asientos 1 y 3) y ⚪ (2 y 4); mueve primero el equipo ⚫.",
+    "err.SEAT_TAKEN": "Ese asiento ya lo ocupó otra persona.",
+    "err.CANNOT_MOVE_SEAT": "Ya no se puede cambiar de equipo."
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -3310,7 +3321,11 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     "four.empty": "waiting…",
     "four.mateTurn": "Your teammate's turn: {name}",
     "four.roomWaiting": "{name}'s 4-player room ({n}/4)",
-    "four.badge": "2 vs 2"
+    "four.badge": "2 vs 2",
+    "four.emptyTap": "free — tap to sit here",
+    "four.seatHint": "Tap a free seat to switch teams. Teams are ⚫ (seats 1 and 3) and ⚪ (2 and 4); ⚫ moves first.",
+    "err.SEAT_TAKEN": "Someone else took that seat.",
+    "err.CANNOT_MOVE_SEAT": "You can no longer change teams."
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -5460,10 +5475,15 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     $('waitVis').textContent = t(online.isPublic ? 'online.waitPublic' : 'online.waitPrivate');
     $('waitSub').textContent = t(online.players === 4 ? 'four.waitSub' : 'online.waitSub');
     var box = $('waitSeats'); box.innerHTML = ''; box.hidden = online.players !== 4;
-    if (online.players === 4) for (var sw = 1; sw <= 4; sw++) {
-      var li = document.createElement('div'); li.className = 'seat' + (seatNames[sw] ? ' on' : '') + (sw === online.seat ? ' me' : '');
-      li.textContent = t('four.team', { n: teamOfSeat(sw) }) + ' · ' + (seatNames[sw] || t('four.empty')) + (sw === online.seat ? ' ' + t('online.you') : '');
-      box.appendChild(li);
+    if (online.players === 4) {
+      for (var sw = 1; sw <= 4; sw++) (function (sw) {
+        var free = !seatNames[sw], li = document.createElement(free ? 'button' : 'div');
+        li.className = 'seat' + (seatNames[sw] ? ' on' : ' free') + (sw === online.seat ? ' me' : '');
+        if (free) { li.type = 'button'; li.addEventListener('click', function () { if (online.net) online.net.send({ t: 'seat', seat: sw }); }); }
+        li.textContent = (teamOfSeat(sw) === 1 ? '⚫ ' : '⚪ ') + t('four.team', { n: teamOfSeat(sw) }) + ' · ' + (seatNames[sw] || t('four.emptyTap')) + (sw === online.seat ? ' ' + t('online.you') : '');
+        box.appendChild(li);
+      })(sw);
+      var hn = document.createElement('p'); hn.className = 'hint'; hn.textContent = t('four.seatHint'); box.appendChild(hn);
     }
     open('waitOverlay');
   }
@@ -6824,41 +6844,51 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     S.rounds.forEach(function (r) { if (r.phase === ph && r.duels.length && r.duels.every(function (d) { return d.status === 'done'; })) n++; });
     return n;
   }
+  /* Colores de la imagen: salen del estilo (tema) que se está usando, para que combine con lo que se ve en pantalla. */
+  function tnPalette() {
+    var cs = getComputedStyle(document.documentElement), v = function (n, d) { return (cs.getPropertyValue(n) || '').trim() || d; };
+    var rgb = function (h) { h = String(h).replace('#', ''); if (h.length === 3) h = h.replace(/./g, '$&$&'); var n = parseInt(h, 16); return isNaN(n) || h.length !== 6 ? [128, 128, 128] : [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+    var mix = function (a, b, k) { var x = rgb(a), y = rgb(b); return 'rgb(' + [0, 1, 2].map(function (i) { return Math.round(x[i] * (1 - k) + y[i] * k); }).join(',') + ')'; };
+    var P = { bg: v('--bg', '#14161b'), panel: v('--panel', '#1d2027'), panel2: v('--panel-2', '#262a33'), line: v('--line', '#343a46'), accent: v('--accent', '#e8b04a'), accentInk: v('--accent-ink', '#1a1405'), text: v('--text', '#f4f1ea'), muted: v('--muted', '#9aa0ad') };
+    P.tier = [mix(P.panel, P.accent, 0.30), mix(P.panel, P.text, 0.12), P.panel, P.panel2];   // de a 8 puestos: el color del estilo, luego tonos neutros del mismo estilo
+    P.wd = mix(P.panel, P.bg, 0.5);
+    return P;
+  }
   function tnDrawPng(S) {
     var rows = tnPngRows(S), SC = 2, RH = 44, HD = 44, COLS = [['#', 56], [t('tn.hName'), 330], ['G', 58], ['P', 58], ['+', 58], ['−', 58], [t('tn.hDiff'), 70]];
-    var W = COLS.reduce(function (a, c) { return a + c[1]; }, 0), H = HD * 3 + RH * rows.length + 14;
+    var W = COLS.reduce(function (a, c) { return a + c[1]; }, 0), H = HD * 3 + RH * rows.length + 14, C = tnPalette();
     var cv = document.createElement('canvas'); cv.width = W * SC; cv.height = H * SC;
     var g = cv.getContext('2d'); g.scale(SC, SC);
     var FONT = "'PenteSans', system-ui, sans-serif";
-    g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
+    g.fillStyle = C.bg; g.fillRect(0, 0, W, H);
     var x0 = COLS[0][1];
     g.textBaseline = 'middle'; g.textAlign = 'center';
-    g.fillStyle = '#000'; g.fillRect(x0, 0, W - x0, HD);
-    g.fillStyle = '#fff'; g.font = '700 21px ' + FONT; g.fillText(S.cfg.name.toUpperCase(), x0 + (W - x0) / 2, HD / 2 + 1, W - x0 - 20);
+    g.fillStyle = C.panel; g.fillRect(x0, 0, W - x0, HD);
+    g.fillStyle = C.accent; g.font = '700 21px ' + FONT; g.fillText(S.cfg.name.toUpperCase(), x0 + (W - x0) / 2, HD / 2 + 1, W - x0 - 20);
     var nr = tnRoundsDone(S), sub = S.status === 'finished' ? t('tn.png.final') : nr ? t('tn.png.afterRound', { n: nr }) : t('tn.png.positions');
-    g.fillStyle = '#FF0000'; g.fillRect(x0, HD, W - x0, HD);
-    g.fillStyle = '#fff'; g.font = '700 19px ' + FONT; g.fillText(sub, x0 + (W - x0) / 2, HD * 1.5 + 1);
+    g.fillStyle = C.accent; g.fillRect(x0, HD, W - x0, HD);
+    g.fillStyle = C.accentInk; g.font = '700 19px ' + FONT; g.fillText(sub, x0 + (W - x0) / 2, HD * 1.5 + 1);
     var y = HD * 2, x, i;
-    g.strokeStyle = '#000'; g.lineWidth = 1.5;
-    x = 0; g.fillStyle = '#fff'; g.fillRect(x0, y, W - x0, HD);
+    g.strokeStyle = C.line; g.lineWidth = 1.5;
+    x = 0; g.fillStyle = C.panel2; g.fillRect(x0, y, W - x0, HD);
     COLS.forEach(function (c, k) {
-      if (k > 0) { g.fillStyle = '#000'; g.font = '700 17px ' + FONT; g.fillText(c[0], x + c[1] / 2, y + HD / 2 + 1, c[1] - 8); g.strokeRect(x, y, c[1], HD); }
+      if (k > 0) { g.fillStyle = C.text; g.font = '700 17px ' + FONT; g.fillText(c[0], x + c[1] / 2, y + HD / 2 + 1, c[1] - 8); g.strokeRect(x, y, c[1], HD); }
       x += c[1];
     });
     rows.forEach(function (r, ri) {
       var yy = HD * 3 + ri * RH, wd = S.withdrawn.indexOf(r.id) >= 0;
-      g.fillStyle = '#000'; g.font = '400 17px ' + FONT; g.textAlign = 'center'; g.fillText(String(r.pos), COLS[0][1] / 2, yy + RH / 2 + 1);
+      g.fillStyle = C.text; g.font = '400 17px ' + FONT; g.textAlign = 'center'; g.fillText(String(r.pos), COLS[0][1] / 2, yy + RH / 2 + 1);
       var vals = [null, r.name + (wd ? ' (' + t('tn.retired') + ')' : ''), r.dw, r.dl, r.gw, r.gl, (r.diff > 0 ? '+' : '') + r.diff];
-      x = x0; var tier = TN_TIERS[Math.min(TN_TIERS.length - 1, Math.floor(ri / 8))];
+      x = x0; var tier = C.tier[Math.min(C.tier.length - 1, Math.floor(ri / 8))];
       for (i = 1; i < COLS.length; i++) {
-        g.fillStyle = wd ? '#E7E6E6' : tier; g.fillRect(x, yy, COLS[i][1], RH);
-        g.strokeStyle = '#000'; g.strokeRect(x, yy, COLS[i][1], RH);
-        g.fillStyle = wd ? '#7a7a7a' : '#000'; g.font = (i === 1 ? '700 ' : '400 ') + '17px ' + FONT; g.textAlign = i === 1 ? 'left' : 'center';
+        g.fillStyle = wd ? C.wd : tier; g.fillRect(x, yy, COLS[i][1], RH);
+        g.strokeStyle = C.line; g.strokeRect(x, yy, COLS[i][1], RH);
+        g.fillStyle = wd ? C.muted : C.text; g.font = (i === 1 ? '700 ' : '400 ') + '17px ' + FONT; g.textAlign = i === 1 ? 'left' : 'center';
         g.fillText(String(vals[i]), i === 1 ? x + 10 : x + COLS[i][1] / 2, yy + RH / 2 + 1, COLS[i][1] - 14);
         x += COLS[i][1];
       }
     });
-    g.textAlign = 'right'; g.fillStyle = '#888'; g.font = '400 11px ' + FONT; g.fillText('Pente', W - 6, H - 7);
+    g.textAlign = 'right'; g.fillStyle = C.muted; g.font = '400 11px ' + FONT; g.fillText('Pente', W - 6, H - 7);
     return cv;
   }
   function tnDownloadPng() {
