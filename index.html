@@ -367,6 +367,28 @@ input.locked { opacity: .75; cursor: not-allowed; }
 .tn-colin { flex: 1; display: flex; flex-direction: column; justify-content: space-around; }
 .tn-tw { overflow-x: auto; } .tn-tw table { width: 100%; border-collapse: collapse; font-size: 14px; } .tn-tw th, .tn-tw td { padding: 7px 6px; text-align: right; border-bottom: 1px solid var(--line); } .tn-tw th:nth-child(2), .tn-tw td:nth-child(2) { text-align: left; } .tn-tw th { color: var(--muted); font-weight: 600; font-size: 12px; }
 .tn-tw tr.champ td { color: var(--accent); font-weight: 700; } .tn-tw tr.out td { color: var(--muted); }
+.tn-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.tn-acts .tn-meta{margin-top:2px}
+.tn-acts{flex-direction:column;align-items:stretch}
+
+/* ---- Fixture de torneos: colores propios de cada temática ---- */
+html { --tn-card: var(--panel-2); --tn-line: var(--line); --tn-win: var(--accent); --tn-lose: var(--muted); --tn-pend: var(--accent); --tn-glow: none; --tn-zebra: rgba(255,255,255,.03); --tn-head: var(--accent); }
+.tn-duel { background: var(--tn-card); border: 1px solid var(--tn-line); box-shadow: var(--tn-glow); }
+.tn-duel:not(.done) { border-left: 3px solid var(--tn-pend); }
+.tn-p.w b { color: var(--tn-win); }
+.tn-p.l { color: var(--tn-lose); }
+.tn-champ, .tn-tw tr.champ td { color: var(--tn-win); }
+.tn-h { color: var(--tn-head); }
+.tn-tw tr:nth-child(even) td { background: var(--tn-zebra); }
+.tn-tw th { color: var(--tn-head); }
+html[data-theme="clasico"] { --tn-card: #20242c; --tn-line: #343a46; --tn-win: #e8b04a; --tn-lose: #7d8594; --tn-pend: #e8b04a; --tn-head: #e8b04a; }
+html[data-theme="tradicional"] { --tn-card: linear-gradient(180deg, #3d2c20, #2f2219); --tn-line: #6a4f3a; --tn-win: #f3cf88; --tn-lose: #9a8470; --tn-pend: #d9954a; --tn-head: #e0a458; --tn-zebra: rgba(224,164,88,.07); --tn-glow: inset 0 1px 0 rgba(255,225,170,.12), 0 1px 3px rgba(0,0,0,.4); }
+html[data-theme="glow"] { --tn-card: linear-gradient(180deg, #172058, #101745); --tn-line: #3a4cc0; --tn-win: #7cf0ff; --tn-lose: #8a93d8; --tn-pend: #ff4fb0; --tn-head: #7cf0ff; --tn-zebra: rgba(124,240,255,.05); --tn-glow: 0 0 10px rgba(80,110,255,.28); }
+html[data-theme="glow"] .tn-p.w b, html[data-theme="glow"] .tn-champ { text-shadow: 0 0 8px rgba(124,240,255,.7); }
+html[data-theme="glow"] .tn-duel:not(.done) { box-shadow: 0 0 12px rgba(255,79,176,.28); }
+html[data-theme="papel"] { --tn-card: #2a2b36; --tn-line: #6b70a8; --tn-win: #b9c2ff; --tn-lose: #8789a6; --tn-pend: #8d9bff; --tn-head: #b9c2ff; --tn-zebra: rgba(141,155,255,.06); }
+html[data-theme="papel"] .tn-duel { border-style: dashed; }
+html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-through; text-decoration-thickness: 1px; }
 </style>
 </head>
 <body>
@@ -440,6 +462,7 @@ input.locked { opacity: .75; cursor: not-allowed; }
 
   <div class="actions">
     <button class="btn" id="btnMenu" data-i18n="hud.menu"></button>
+    <button class="btn" id="btnPause" hidden data-i18n="pause.btn"></button>
     <button class="btn" id="btnRestart" data-i18n="hud.restart"></button>
     <button class="btn" id="btnClaim" hidden data-i18n="online.claim"></button>
     <button class="btn primary" id="btnResult" hidden data-i18n="end.result"></button>
@@ -506,6 +529,7 @@ input.locked { opacity: .75; cursor: not-allowed; }
       <button class="btn small" id="tnUndo" data-i18n="tn.undo"></button>
       <select id="tnWd"></select><button class="btn small" id="tnWdBtn" data-i18n="tn.withdraw"></button>
     </div>
+    <div class="tn-row"><button class="btn small primary" id="tnPng" data-i18n="tn.png"></button></div>
     <div class="tn-tabs" id="tnTabs"><button type="button" data-t="fx" aria-pressed="true" data-i18n="tn.fixture"></button><button type="button" data-t="st" aria-pressed="false" data-i18n="tn.table"></button></div>
     <div id="tnBody"></div>
     <p class="hint" data-i18n="tn.local"></p>
@@ -620,6 +644,7 @@ input.locked { opacity: .75; cursor: not-allowed; }
     </section>
 
     <section class="tabpanel" id="tab-game" role="tabpanel" hidden>
+      <label class="check"><input type="checkbox" data-cfg="botDelay"><span><span data-i18n="cfg.botDelay"></span><small data-i18n="cfg.botDelayHint"></small></span></label>
       <label class="check"><input type="checkbox" data-cfg="chat"><span><span data-i18n="cfg.chat"></span><small data-i18n="cfg.chatHint"></small></span></label>
       <label class="check"><input type="checkbox" data-cfg="zone"><span><span data-i18n="cfg.zone"></span><small data-i18n="cfg.zoneHint"></small></span></label>
       <div class="btns"><button type="button" class="btn" id="btnCfgReset" data-i18n="cfg.reset"></button></div>
@@ -711,6 +736,15 @@ input.locked { opacity: .75; cursor: not-allowed; }
   <div class="modal dlg" role="alertdialog" aria-modal="true" aria-labelledby="dlgMsg">
     <p id="dlgMsg"></p>
     <div class="dlg-btns"><button type="button" class="btn" id="dlgNo"></button><button type="button" class="btn primary" id="dlgYes"></button></div>
+  </div>
+</div>
+
+<!-- Pausa (partidas offline) -->
+<div class="overlay dialog" id="pauseOverlay">
+  <div class="modal dlg" role="alertdialog" aria-modal="true" aria-labelledby="pauseTitle">
+    <h3 id="pauseTitle" data-i18n="pause.title"></h3>
+    <p data-i18n="pause.text"></p>
+    <div class="dlg-btns"><button type="button" class="btn" id="pauseMenu" data-i18n="hud.menu"></button><button type="button" class="btn primary" id="pauseResume" data-i18n="pause.resume"></button></div>
   </div>
 </div>
 
@@ -2096,7 +2130,7 @@ input.locked { opacity: .75; cursor: not-allowed; }
       'cfg.chat': 'Activar el chat',
       'cfg.chatHint': 'Si lo apagás no ves ni mandás mensajes. Solo existe en partidas online.',
       'cfg.loupe': 'Lupa al arrastrar',
-      'cfg.loupeHint': 'Un cuadrado abajo a la derecha amplía la zona mientras arrastrás una ficha, para ver bien dónde cae. (Pensado para celula).',
+      'cfg.loupeHint': 'Un cuadrado abajo a la derecha amplía la zona mientras arrastrás una ficha, para ver bien dónde cae. (Pensado para celular).',
       'theme.papel': 'Papel',
       'err.CHAT_RATE': 'Más despacio: un mensaje por vez.',
       'menu.ai': 'Jugar contra la máquina',
@@ -2109,7 +2143,7 @@ input.locked { opacity: .75; cursor: not-allowed; }
       'ai.easy': 'Normal',
       'ai.medium': 'Difícil',
       'ai.hard': 'Muy difícil',
-      'ai.hint.beginner': 'Para aprender: se despista mucho y deja pasar jugadas obvias, hasta cuatro en línea.',
+      'ai.hint.beginner': 'Para aprender: se despista bastante y a veces deja pasar jugadas obvias, pero ya no regala las líneas.',
       'ai.hint.easy': 'Se distrae y se equivoca seguido, pero tapa lo obvio. Para entrar en calor.',
       'ai.hint.medium': 'Mira dos jugadas adelante: tapa lo obvio y no regala capturas.',
       'ai.hint.hard': 'Piensa hasta 4 jugadas adelante (hasta ~1 segundo). Un rival decente, no invencible.',
@@ -2414,7 +2448,7 @@ input.locked { opacity: .75; cursor: not-allowed; }
       'ai.easy': 'Normal',
       'ai.medium': 'Hard',
       'ai.hard': 'Very hard',
-      'ai.hint.beginner': 'For learning: it gets very distracted and lets obvious moves pass, even four in a row.',
+      'ai.hint.beginner': 'For learning: it gets distracted and sometimes lets obvious moves pass, but it won\'t hand you lines for free.',
       'ai.hint.easy': 'It gets distracted and often slips, but blocks the obvious. A warm-up.',
       'ai.hint.medium': 'Looks two moves ahead: blocks the obvious and doesn\'t give away captures.',
       'ai.hint.hard': 'Thinks up to 4 moves ahead (up to ~1 second). A decent rival, not an unbeatable one.',
@@ -2830,6 +2864,11 @@ input.locked { opacity: .75; cursor: not-allowed; }
 (function (root) {
   'use strict';
   Object.assign(root.I18n.STRINGS.es, {
+    "tn.result": "Tocá el resultado final (de arriba – de abajo):",
+    "tn.png": "Descargar tabla (PNG)",
+    "tn.png.positions": "Posiciones",
+    "tn.png.final": "Posiciones finales",
+    "tn.png.afterRound": "Ronda {n} · Posiciones",
     "tn.menu": "Torneos",
     "tn.title": "Torneos",
     "tn.sub": "Armá un torneo y cargá los resultados a medida que se juegan las partidas.",
@@ -2902,6 +2941,11 @@ input.locked { opacity: .75; cursor: not-allowed; }
 (function (root) {
   'use strict';
   Object.assign(root.I18n.STRINGS.en, {
+    "tn.result": "Tap the final score (top – bottom):",
+    "tn.png": "Download table (PNG)",
+    "tn.png.positions": "Standings",
+    "tn.png.final": "Final standings",
+    "tn.png.afterRound": "Round {n} · Standings",
     "tn.menu": "Tournaments",
     "tn.title": "Tournaments",
     "tn.sub": "Set up a tournament and enter the results as the games are played.",
@@ -2988,6 +3032,34 @@ input.locked { opacity: .75; cursor: not-allowed; }
     "mus.on": "Background music",
     "mus.hint": "Original elevator-style lounge jazz. It pauses by itself when you leave the tab.",
     "mus.volume": "Music volume"
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
+/* Textos de pausa y demora del bot — es */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.es, {
+    "pause.btn": "Pausa",
+    "pause.title": "Partida en pausa",
+    "pause.text": "El reloj está detenido. Cuando quieras, seguís desde donde estabas.",
+    "pause.resume": "Reanudar",
+    "cfg.botDelay": "La máquina piensa antes de jugar",
+    "cfg.botDelayHint": "Tarda más o menos según el nivel, así tenés tiempo de pensar. Apagado, juega al toque."
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
+/* Pause and bot delay strings — en */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.en, {
+    "pause.btn": "Pause",
+    "pause.title": "Game paused",
+    "pause.text": "The clock is stopped. Pick up whenever you're ready.",
+    "pause.resume": "Resume",
+    "cfg.botDelay": "Machine thinks before playing",
+    "cfg.botDelayHint": "It takes more or less time depending on the level, so you have time to think. Off: it plays instantly."
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -3232,7 +3304,7 @@ input.locked { opacity: .75; cursor: not-allowed; }
  * Se pausa sola cuando la pestaña queda oculta. */
 (function (root) {
   'use strict';
-  var BPM = 92, EIGHTH = 60 / BPM / 2, LOOK = 0.45, TICK = 120;
+  var BPM = 92, EIGHTH = 60 / BPM / 2;
   var enabled = true, volume = 0.3;
   try {
     enabled = localStorage.getItem('pente.music') !== '0';
@@ -3263,8 +3335,11 @@ input.locked { opacity: .75; cursor: not-allowed; }
     ['G7', 43, [[2, 71, 1], [3, 74, 1], [4, 74, 4]]]
   ];
 
-  var ctx = null, bus = null, verb = null, timer = null, playing = false, paused = false;
-  var step = 0, nextT = 0, noiseBuf = null;
+  /* Para que no trabe el celular: el loop se RENDERIZA UNA SOLA VEZ (OfflineAudioContext, en segundo plano) a un buffer,
+   * y después solo se reproduce ese buffer en loop. Reproducir un buffer casi no cuesta nada; sintetizar en vivo sí. */
+  var RATE = 22050, LOOP_S = BARS.length * 8 * EIGHTH, TAIL_S = 2.5;
+  var ctx = null, bus = null, src = null, loopBuf = null, rendering = false, wanted = false, playing = false, paused = false;
+  var oc = null, ob = null, verb = null, noiseBuf = null;      // contexto/nodos del render (solo existen mientras se renderiza)
 
   function hz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
   function targetGain() { return enabled && !paused ? 1.0 * volume : 0; }
@@ -3275,83 +3350,111 @@ input.locked { opacity: .75; cursor: not-allowed; }
     catch (e) { bus.gain.value = g; }
   }
 
-  function build() {
-    ctx = root.PenteSound && root.PenteSound.context && root.PenteSound.context();
-    if (!ctx) return false;
-    if (bus) return true;
-    bus = ctx.createGain(); bus.gain.value = 0; bus.connect(ctx.destination);
-    // reverb sencilla: ruido que decae
-    var n = Math.floor(ctx.sampleRate * 2.2), ir = ctx.createBuffer(2, n, ctx.sampleRate);
-    for (var ch = 0; ch < 2; ch++) { var d = ir.getChannelData(ch); for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.6); }
-    verb = ctx.createConvolver(); verb.buffer = ir;
-    var wet = ctx.createGain(); wet.gain.value = 0.38; verb.connect(wet); wet.connect(bus);
-    noiseBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.2), ctx.sampleRate);
-    var nd = noiseBuf.getChannelData(0); for (var j = 0; j < nd.length; j++) nd[j] = Math.random() * 2 - 1;
-    return true;
-  }
-
-  // Una nota: suma de senos con envolvente; "send" = cuánto va a la reverb
+  // Una nota: suma de senos con envolvente; "send" = cuánto va al eco
   function note(midi, t, dur, o) {
-    var f = hz(midi), g = ctx.createGain(), lp = ctx.createBiquadFilter();
+    var f = hz(midi), g = oc.createGain(), lp = oc.createBiquadFilter();
     lp.type = 'lowpass'; lp.frequency.value = o.cut || 3200;
     g.gain.setValueAtTime(0.0001, t);
     g.gain.exponentialRampToValueAtTime(o.vol, t + (o.atk || 0.008));
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    lp.connect(g); g.connect(bus);
-    var s = ctx.createGain(); s.gain.value = o.send || 0.3; g.connect(s); s.connect(verb);
+    lp.connect(g); g.connect(ob);
+    var s = oc.createGain(); s.gain.value = o.send || 0.3; g.connect(s); s.connect(verb);
     o.parts.forEach(function (p) {
-      var os = ctx.createOscillator(), pg = ctx.createGain();
+      var os = oc.createOscillator(), pg = oc.createGain();
       os.type = 'sine'; os.frequency.value = f * p[0];
       pg.gain.setValueAtTime(p[1], t);
-      if (p[2]) pg.gain.exponentialRampToValueAtTime(0.0001, t + p[2]);   // parcial que se apaga rápido (el "tine")
+      if (p[2]) pg.gain.exponentialRampToValueAtTime(0.0001, t + p[2]);
       os.connect(pg); pg.connect(lp); os.start(t); os.stop(t + dur + 0.05);
     });
   }
-  function rhodes(m, t, d, v) { note(m, t, d, { vol: v, cut: 2600, send: 0.35, atk: 0.012, parts: [[1, 1], [2, 0.28, d * 0.6], [7.1, 0.06, 0.12]] }); }
-  function vibes(m, t, d, v) { note(m, t, d, { vol: v, cut: 5200, send: 0.55, atk: 0.004, parts: [[1, 1], [4, 0.22, 0.35], [10, 0.05, 0.08]] }); }
+  function rhodes(m, t, d, v) { note(m, t, d, { vol: v, cut: 2600, send: 0.35, atk: 0.012, parts: [[1, 1], [2, 0.28, d * 0.6]] }); }
+  function vibes(m, t, d, v) { note(m, t, d, { vol: v, cut: 5200, send: 0.55, atk: 0.004, parts: [[1, 1], [4, 0.22, 0.35]] }); }
   function bass(m, t, d, v) { note(m, t, d, { vol: v, cut: 700, send: 0.05, atk: 0.015, parts: [[1, 1], [2, 0.25, 0.2]] }); }
   function hush(t, dur, freq, vol, hp) {
-    var s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    var s = oc.createBufferSource(), f = oc.createBiquadFilter(), g = oc.createGain();
     s.buffer = noiseBuf; f.type = hp ? 'highpass' : 'bandpass'; f.frequency.value = freq; f.Q.value = 0.8;
     g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    s.connect(f); f.connect(g); g.connect(bus); s.start(t); s.stop(t + dur + 0.02);
+    s.connect(f); f.connect(g); g.connect(ob); s.start(t); s.stop(t + dur + 0.02);
   }
-
   function schedule(bar, e, t) {                                  // e = corchea dentro del compás (0-7)
     var b = BARS[bar], ch = C[b[0]], i;
-    if (e === 0) for (i = 0; i < ch.length; i++) rhodes(ch[i], t + i * 0.012, EIGHTH * 5.5, 0.075);        // acorde en 1
-    if (e === 3) for (i = 0; i < ch.length; i++) rhodes(ch[i], t + i * 0.012, EIGHTH * 1.6, 0.05);         // contratiempo corto
+    if (e === 0) for (i = 0; i < ch.length; i++) rhodes(ch[i], t + i * 0.012, EIGHTH * 5.5, 0.075);
+    if (e === 3) for (i = 0; i < ch.length; i++) rhodes(ch[i], t + i * 0.012, EIGHTH * 1.6, 0.05);
     if (e === 0) bass(b[1], t, EIGHTH * 3.2, 0.2);
     if (e === 4) bass(b[1] + 7, t, EIGHTH * 3, 0.15);
     b[2].forEach(function (m) { if (m[0] === e) vibes(m[1], t, Math.min(1.8, EIGHTH * m[2] + 0.5), 0.085); });
-    hush(t, 0.07, 6500, e % 2 ? 0.02 : 0.035, true);              // escobillas: corcheas
-    if (e === 2 || e === 6) hush(t, 0.05, 1900, 0.06, false);     // clic de aro en 2 y 4
+    hush(t, 0.07, 6500, e % 2 ? 0.02 : 0.035, true);
+    if (e === 2 || e === 6) hush(t, 0.05, 1900, 0.06, false);
   }
 
-  function tick() {
-    if (!ctx || !playing) return;
-    while (nextT < ctx.currentTime + LOOK) {
-      var s = step % (BARS.length * 8);
-      schedule(Math.floor(s / 8), s % 8, nextT);
-      nextT += EIGHTH; step++;
-    }
+  // Renderiza el loop completo (mono). La cola de la reverb se suma al principio para que el corte sea invisible.
+  function render(done) {
+    var OAC = root.OfflineAudioContext || root.webkitOfflineAudioContext;
+    if (!OAC) { done(null); return; }
+    var len = Math.ceil((LOOP_S + TAIL_S) * RATE);
+    try { oc = new OAC(1, len, RATE); } catch (e) { done(null); return; }
+    ob = oc.createGain(); ob.gain.value = 1; ob.connect(oc.destination);
+    // "reverb" barata: dos ecos con realimentación y filtro (un ConvolverNode costaba demasiado)
+    verb = oc.createGain();
+    [[0.173, 0.5], [0.257, 0.45]].forEach(function (c) {
+      var dl = oc.createDelay(1), fb = oc.createGain(), lpf = oc.createBiquadFilter(), w = oc.createGain();
+      dl.delayTime.value = c[0]; fb.gain.value = c[1]; lpf.type = 'lowpass'; lpf.frequency.value = 2400; w.gain.value = 0.3;
+      verb.connect(dl); dl.connect(lpf); lpf.connect(fb); fb.connect(dl); lpf.connect(w); w.connect(ob);
+    });
+    noiseBuf = oc.createBuffer(1, Math.floor(RATE * 0.2), RATE);
+    var nd = noiseBuf.getChannelData(0); for (var j = 0; j < nd.length; j++) nd[j] = Math.random() * 2 - 1;
+    var finish = function (buf) {
+      oc = ob = verb = noiseBuf = null;
+      if (!buf) { done(null); return; }
+      var data = buf.getChannelData(0), L = Math.floor(LOOP_S * RATE), out = new Float32Array(L), k;
+      for (k = 0; k < L; k++) out[k] = data[k];
+      for (k = 0; k < len - L && k < L; k++) out[k] += data[L + k];       // la cola vuelve al principio
+      done(out);
+    };
+    // el grafo se arma de a poquito (8 corcheas por vuelta) para no frenar el juego en el celular
+    var st = 0;
+    (function pump() {
+      try {
+        for (var c = 0; c < 8 && st < BARS.length * 8; c++, st++) schedule(Math.floor(st / 8), st % 8, 0.05 + st * EIGHTH);
+        if (st < BARS.length * 8) { setTimeout(pump, 0); return; }
+        var pr = oc.startRendering();
+        if (pr && pr.then) pr.then(finish, function () { finish(null); }); else oc.oncomplete = function (e) { finish(e.renderedBuffer); };
+      } catch (e) { finish(null); }
+    })();
   }
+
+  function startSource() {
+    if (!ctx || !loopBuf || src) return;
+    var b = ctx.createBuffer(1, loopBuf.length, RATE); b.getChannelData(0).set(loopBuf);
+    src = ctx.createBufferSource(); src.buffer = b; src.loop = true; src.connect(bus); src.start();
+    playing = true;
+  }
+  function stopSource() { if (src) { try { src.stop(); } catch (e) {} try { src.disconnect(); } catch (e) {} src = null; } playing = false; }
+
   function begin() {
-    if (playing || !enabled || paused || !build()) return;
+    if (playing || !enabled || paused) return;
+    ctx = root.PenteSound && root.PenteSound.context && root.PenteSound.context();
+    if (!ctx) return;
     if (ctx.state === 'suspended') { try { ctx.resume(); } catch (e) {} }
-    playing = true; step = 0; nextT = ctx.currentTime + 0.15;
-    timer = setInterval(tick, TICK); tick();
-    fadeTo(targetGain(), 2.5);
+    if (!bus) { bus = ctx.createGain(); bus.gain.value = 0; bus.connect(ctx.destination); }
+    wanted = true;
+    if (loopBuf) { startSource(); fadeTo(targetGain(), 2.5); return; }
+    prerender();
   }
-  function halt() {
-    if (!playing) return;
-    playing = false; clearInterval(timer); timer = null;
+  // Se puede renderizar antes del primer toque (no pide permiso); así cuando toques ya está lista.
+  function prerender() {
+    if (loopBuf || rendering) return;
+    rendering = true;
+    render(function (buf) {
+      rendering = false; loopBuf = buf;
+      if (buf && wanted && enabled && !paused) { startSource(); fadeTo(targetGain(), 2.5); }
+    });
   }
   function kick() { if (enabled && !paused) { if (!playing) begin(); else fadeTo(targetGain(), 0.4); } }
   function setEnabled(v) {
     enabled = !!v; try { localStorage.setItem('pente.music', enabled ? '1' : '0'); } catch (e) {}
-    if (enabled) { var c = root.PenteSound && root.PenteSound.context && root.PenteSound.context(); if (c) { begin(); fadeTo(targetGain(), 1.2); } }
-    else { fadeTo(0, 0.8); setTimeout(function () { if (!enabled) halt(); }, 900); }
+    if (enabled) { begin(); fadeTo(targetGain(), 1.2); }
+    else { fadeTo(0, 0.8); setTimeout(function () { if (!enabled) stopSource(); }, 900); }
   }
   function setVolume(v) {
     volume = Math.max(0, Math.min(1, v)); try { localStorage.setItem('pente.musicVol', String(volume)); } catch (e) {}
@@ -3359,14 +3462,16 @@ input.locked { opacity: .75; cursor: not-allowed; }
   }
 
   if (typeof document !== 'undefined') document.addEventListener('visibilitychange', function () {
-    if (document.hidden) { paused = true; fadeTo(0, 0.3); setTimeout(function () { if (paused) halt(); }, 400); }
-    else { paused = false; if (enabled) { if (ctx && ctx.state === 'suspended') { try { ctx.resume(); } catch (e) {} } begin(); fadeTo(targetGain(), 1.2); } }
+    if (document.hidden) { paused = true; fadeTo(0, 0.3); setTimeout(function () { if (paused) stopSource(); }, 400); }
+    else { paused = false; if (enabled) { if (ctx && ctx.state === 'suspended') { try { ctx.resume(); } catch (e) {} } begin(); } }
   });
+
+  if (typeof setTimeout !== 'undefined') setTimeout(function () { if (enabled) prerender(); }, 2500);
 
   root.PenteMusic = {
     kick: kick, setEnabled: setEnabled, isEnabled: function () { return enabled; },
     setVolume: setVolume, getVolume: function () { return volume; },
-    isPlaying: function () { return playing; }, bars: BARS.length, bpm: BPM
+    isPlaying: function () { return playing; }, isRendering: function () { return rendering; }, peak: function () { if (!loopBuf) return -1; var m = 0; for (var i = 0; i < loopBuf.length; i++) { var a = Math.abs(loopBuf[i]); if (a > m) m = a; } return m; }, bars: BARS.length, bpm: BPM
   };
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -3398,7 +3503,7 @@ input.locked { opacity: .75; cursor: not-allowed; }
 
   // block4 / block3: probabilidad de tapar un cuatro (o una captura que gana) / un tres abierto cuando lo ve (solo niveles de 1 jugada)
   var LEVELS = {
-    beginner: { depth: 1, width: 8, timeMs: 0, noise: 1.4, slipTop: 8, slipChance: 0.7, seesWin: 0.35, block4: 0.2, block3: 0.1, ignoreObvious: true },
+    beginner: { depth: 1, width: 8, timeMs: 0, noise: 1.4, slipTop: 8, slipChance: 0.7, seesWin: 0.35, block4: 0.8, block3: 0.5, ignoreObvious: true },
     easy:   { depth: 1, width: 6,  timeMs: 0,   noise: 0.55, slipTop: 5, slipChance: 0.35, seesWin: 0.85, block4: 0.97, block3: 0.75 },
     medium: { depth: 2, width: 10, timeMs: 350, noise: 0.08, slipTop: 1, slipChance: 0,    seesWin: 1 },
     hard:   { depth: 4, width: 12, timeMs: 700, noise: 0,    slipTop: 1, slipChance: 0,    seesWin: 1 }
@@ -3584,7 +3689,7 @@ input.locked { opacity: .75; cursor: not-allowed; }
 
   /* Configuración del dispositivo (pantalla "Configuración"): se guarda en localStorage y se aplica al instante. */
   var coarse = matchMedia('(pointer: coarse)').matches, reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var CFG_DEFAULTS = { confirm: 'button', lift: 'mid', guides: true, coords: true, lastMove: true, anim: true, stoneSize: 'normal', zone: true, captureFx: 'shatter', chat: true, loupe: false, gem1: 'azul', gem2: 'verde' };
+  var CFG_DEFAULTS = { confirm: 'button', lift: 'mid', guides: true, coords: true, lastMove: true, anim: true, stoneSize: 'normal', zone: true, captureFx: 'shatter', chat: true, botDelay: true, loupe: false, gem1: 'azul', gem2: 'verde' };
   var CFG_ALLOWED = { confirm: ['button', 'double', 'none'], lift: ['low', 'mid', 'high'], stoneSize: ['small', 'normal', 'large'], captureFx: ['shatter', 'fade', 'none'], gem1: window.Themes.gems.map(function (g) { return g.id; }), gem2: window.Themes.gems.map(function (g) { return g.id; }) };
   function cleanCfg(raw) {
     var c = {}, k;
@@ -3694,7 +3799,7 @@ input.locked { opacity: .75; cursor: not-allowed; }
   function clockTick() {
     if (!clk || !state) return;
     if (tut.active) { renderClocks(); return; }           // en el tutorial el reloj es solo de muestra
-    var paused = !online.active && (document.body.classList.contains('in-screen') || $('dlgOverlay').classList.contains('open')) && !isOver();
+    var paused = !online.active && (document.body.classList.contains('in-screen') || $('dlgOverlay').classList.contains('open') || $('pauseOverlay').classList.contains('open')) && !isOver();
     if (paused && !clkPausedAt) clkPausedAt = performance.now();
     else if (!paused && clkPausedAt) { var d = performance.now() - clkPausedAt; clkPausedAt = 0; clk.since += d; clk.turnStart += d; }
     renderClocks();
@@ -3780,14 +3885,20 @@ input.locked { opacity: .75; cursor: not-allowed; }
     closeAll(); render(); setStatus(''); aiMaybeMove();
   }
   // Turno de la máquina: un respiro para que se vea que "piensa", y recién ahí calcula (en el dispositivo, sin red).
+  // Cuánto "piensa" la máquina antes de poner la ficha (ms, mínimo y máximo por nivel). Se puede apagar en Ajustes → Partida.
+  var BOT_THINK = { beginner: [800, 1600], easy: [1200, 2400], medium: [2000, 3500], hard: [3000, 5000] };
+  function botThinkMs() {
+    if (!cfg.botDelay) return 450;
+    var r = BOT_THINK[ai.level] || BOT_THINK.medium; return r[0] + Math.random() * (r[1] - r[0]);
+  }
   function aiMaybeMove() {
-    if (!ai.active || !state || isOver() || state.current !== ai.bot || ai.thinking || !window.PenteAI) return;
+    if (!ai.active || !state || isOver() || state.current !== ai.bot || ai.thinking || !window.PenteAI || paused()) return;
     ai.thinking = true; pending = hover = null; setStatus(''); render();
-    var tok = ai.token, st = state;
+    var tok = ai.token, st = state, target = botThinkMs();
     ai.timer = setTimeout(function () {
       if (tok !== ai.token || st !== state) return;
       var t0 = Date.now(), mv = window.PenteAI.chooseMove(state, { level: ai.level });
-      var wait = Math.max(0, 450 - (Date.now() - t0));
+      var wait = Math.max(0, target - (Date.now() - t0));
       ai.timer = setTimeout(function () {
         if (tok !== ai.token || st !== state) return;
         ai.thinking = false;
@@ -3795,6 +3906,23 @@ input.locked { opacity: .75; cursor: not-allowed; }
       }, wait);
     }, 80);
   }
+
+  /* ---------- Pausa (solo partidas offline: contra la máquina o de a dos en el mismo dispositivo) ---------- */
+  function paused() { return $('pauseOverlay').classList.contains('open'); }
+  function canPause() { return !!state && !online.active && !tut.active && !isOver() && !document.body.classList.contains('in-screen') && !$('dlgOverlay').classList.contains('open') && !$('endOverlay').classList.contains('open'); }
+  function pauseGame() {
+    if (!canPause() || paused()) return;
+    if (ai.active) { ai.token++; clearTimeout(ai.timer); ai.thinking = false; }       // la máquina deja de pensar hasta que vuelvas
+    drag = settle = null; pending = hover = null;
+    open('pauseOverlay'); render();
+  }
+  function resumeGame() { closeAll(); render(); aiMaybeMove(); }
+  $('btnPause').addEventListener('click', pauseGame);
+  $('pauseResume').addEventListener('click', resumeGame);
+  $('pauseMenu').addEventListener('click', function () { open('menuOverlay'); });
+  document.addEventListener('visibilitychange', function () { if (document.hidden) pauseGame(); });   // saliste de la pestaña / app: te espera
+  window.addEventListener('pagehide', pauseGame);
+  setInterval(function () { $('btnPause').hidden = !canPause(); }, 250);
 
   /* ---------- Entrada ---------- */
   // px de pantalla -> px del canvas
@@ -4868,7 +4996,7 @@ input.locked { opacity: .75; cursor: not-allowed; }
 
   /* ---------- Eventos ---------- */
   $('btnStart').addEventListener('click', function () { window.__localStart(); });
-  $('btnResume').addEventListener('click', closeAll);
+  $('btnResume').addEventListener('click', function () { closeAll(); aiMaybeMove(); });
   $('btnPlay').addEventListener('click', function () { open('playOverlay'); });
   $('btnPlayBack').addEventListener('click', function () { open('menuOverlay'); });
   $('btnMenu').addEventListener('click', function () { open('menuOverlay'); });
@@ -5683,6 +5811,21 @@ input.locked { opacity: .75; cursor: not-allowed; }
   });
 
   /* --- un torneo --- */
+  // Resultados posibles de un duelo (a – b), compatibles con lo ya cargado
+  function tnResults(S, d) {
+    var n = (S.cfg.bestOf + 1) / 2, out = [], k;
+    for (k = n - 1; k >= 0; k--) if (n >= d.score.a && k >= d.score.b) out.push([n, k]);
+    for (k = 0; k < n; k++) if (k >= d.score.a && n >= d.score.b) out.push([k, n]);
+    return out;
+  }
+  // Del resultado final a la lista de partidas ganadas (lo que pide el motor): el ganador cierra siempre al final
+  function tnGamesFor(d, sa, sb) {
+    var winA = sa > sb, w = winA ? d.a : d.b, l = winA ? d.b : d.a;
+    var wn = (winA ? sa : sb) - (winA ? d.score.a : d.score.b), ln = (winA ? sb : sa) - (winA ? d.score.b : d.score.a), seq = [];
+    while (wn > 1 || ln > 0) { if (wn > 1 && (ln === 0 || seq.length % 2 === 0)) { seq.push(w); wn--; } else { seq.push(l); ln--; } }
+    seq.push(w);
+    return d.games.concat(seq);
+  }
   function tnDuelEl(S, d) {
     var box = el('div', 'tn-duel' + (d.status === 'done' ? ' done' : '')); box.dataset.id = d.id;
     function side(id, sc, win) { var r = el('div', 'tn-p' + (d.status === 'done' ? (win ? ' w' : ' l') : '')); r.appendChild(el(win ? 'b' : 'span', '', id ? tnName(S, id) : t('tn.tbd'))); if (!id) r.firstChild.className = 'tn-tbd'; r.appendChild(el('span', '', id ? String(sc) : '')); return r; }
@@ -5693,8 +5836,14 @@ input.locked { opacity: .75; cursor: not-allowed; }
     else if (d.a && d.b) {
       box.appendChild(el('div', 'tn-meta', t('tn.opens', { n: d.games.length + 1, name: tnName(S, PT.opener(d, d.games.length)) }) + (S.cfg.bestOf > 1 ? ' · ' + t('tn.need', { n: need }) : '')));
       var acts = el('div', 'tn-acts');
-      [['a', d.a], ['b', d.b]].forEach(function (x) { var b = el('button', 'btn small', t('tn.win', { name: tnName(S, x[1]) })); b.type = 'button'; b.dataset.act = x[0]; acts.appendChild(b); });
-      if (S.cfg.bestOf > 1) [['wa', d.a], ['wb', d.b]].forEach(function (x) { var b = el('button', 'btn small ghost', t('tn.wo', { name: tnName(S, x[1]) })); b.type = 'button'; b.dataset.act = x[0]; acts.appendChild(b); });
+      // un toque con el resultado final (arriba – abajo): no hace falta marcar quién ganó cada partida
+      acts.appendChild(el('div', 'tn-meta', t('tn.result')));
+      var chips = el('div', 'tn-chips');
+      tnResults(S, d).forEach(function (r) { var b = el('button', 'btn small', r[0] + ' – ' + r[1]); b.type = 'button'; b.dataset.act = 'r'; b.dataset.sa = r[0]; b.dataset.sb = r[1]; chips.appendChild(b); });
+      acts.appendChild(chips);
+      var wo = el('div', 'tn-chips');
+      [['wa', d.a], ['wb', d.b]].forEach(function (x) { var b = el('button', 'btn small ghost', t('tn.wo', { name: tnName(S, x[1]) })); b.type = 'button'; b.dataset.act = x[0]; wo.appendChild(b); });
+      acts.appendChild(wo);
       box.appendChild(acts);
     }
     return box;
@@ -5751,10 +5900,69 @@ input.locked { opacity: .75; cursor: not-allowed; }
     var btn = e.target.closest('button[data-act]'); if (!btn) return;
     var id = btn.closest('.tn-duel').dataset.id, act = btn.dataset.act, S = tnGet(), d = null;
     S.rounds.forEach(function (r) { r.duels.forEach(function (x) { if (x.id === id) d = x; }); });
-    if (act === 'a' || act === 'b') return tnApply(function (st) { return PT.recordGames(st, id, d.games.concat([act === 'a' ? d.a : d.b])); });
+    if (act === 'r') { var games = tnGamesFor(d, +btn.dataset.sa, +btn.dataset.sb); return tnApply(function (st) { return PT.recordGames(st, id, games); }); }
     var w = act === 'wa' ? d.a : d.b;
     ask(t('tn.woConfirm', { name: tnName(S, w) }), t('tn.woYes'), function () { tnApply(function (st) { return PT.forfeit(st, id, w); }); });
   });
+  /* ---- Tabla de posiciones como imagen (PNG) para compartir ---- */
+  var TN_TIERS = ['#FFC000', '#BFBFBF', '#C55A11', '#7F7F7F'];      // de a 8 puestos: oro, plata, bronce…
+  function tnPngRows(S) { return S.cfg.format === 'elim' ? PT.ranking(S) : PT.standings(S, { phase: S.cfg.format === 'rr' ? 'rr' : 'swiss' }); }
+  function tnRoundsDone(S) {
+    var ph = S.cfg.format === 'rr' ? 'rr' : S.cfg.format === 'elim' ? 'elim' : 'swiss', n = 0;
+    S.rounds.forEach(function (r) { if (r.phase === ph && r.duels.length && r.duels.every(function (d) { return d.status === 'done'; })) n++; });
+    return n;
+  }
+  function tnDrawPng(S) {
+    var rows = tnPngRows(S), SC = 2, RH = 44, HD = 44, COLS = [['#', 56], [t('tn.hName'), 330], ['G', 58], ['P', 58], ['+', 58], ['−', 58], [t('tn.hDiff'), 70]];
+    var W = COLS.reduce(function (a, c) { return a + c[1]; }, 0), H = HD * 3 + RH * rows.length + 14;
+    var cv = document.createElement('canvas'); cv.width = W * SC; cv.height = H * SC;
+    var g = cv.getContext('2d'); g.scale(SC, SC);
+    var FONT = "'PenteSans', system-ui, sans-serif";
+    g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
+    var x0 = COLS[0][1];
+    g.textBaseline = 'middle'; g.textAlign = 'center';
+    g.fillStyle = '#000'; g.fillRect(x0, 0, W - x0, HD);
+    g.fillStyle = '#fff'; g.font = '700 21px ' + FONT; g.fillText(S.cfg.name.toUpperCase(), x0 + (W - x0) / 2, HD / 2 + 1, W - x0 - 20);
+    var nr = tnRoundsDone(S), sub = S.status === 'finished' ? t('tn.png.final') : nr ? t('tn.png.afterRound', { n: nr }) : t('tn.png.positions');
+    g.fillStyle = '#FF0000'; g.fillRect(x0, HD, W - x0, HD);
+    g.fillStyle = '#fff'; g.font = '700 19px ' + FONT; g.fillText(sub, x0 + (W - x0) / 2, HD * 1.5 + 1);
+    var y = HD * 2, x, i;
+    g.strokeStyle = '#000'; g.lineWidth = 1.5;
+    x = 0; g.fillStyle = '#fff'; g.fillRect(x0, y, W - x0, HD);
+    COLS.forEach(function (c, k) {
+      if (k > 0) { g.fillStyle = '#000'; g.font = '700 17px ' + FONT; g.fillText(c[0], x + c[1] / 2, y + HD / 2 + 1, c[1] - 8); g.strokeRect(x, y, c[1], HD); }
+      x += c[1];
+    });
+    rows.forEach(function (r, ri) {
+      var yy = HD * 3 + ri * RH, wd = S.withdrawn.indexOf(r.id) >= 0;
+      g.fillStyle = '#000'; g.font = '400 17px ' + FONT; g.textAlign = 'center'; g.fillText(String(r.pos), COLS[0][1] / 2, yy + RH / 2 + 1);
+      var vals = [null, r.name + (wd ? ' (' + t('tn.retired') + ')' : ''), r.dw, r.dl, r.gw, r.gl, (r.diff > 0 ? '+' : '') + r.diff];
+      x = x0; var tier = TN_TIERS[Math.min(TN_TIERS.length - 1, Math.floor(ri / 8))];
+      for (i = 1; i < COLS.length; i++) {
+        g.fillStyle = wd ? '#E7E6E6' : tier; g.fillRect(x, yy, COLS[i][1], RH);
+        g.strokeStyle = '#000'; g.strokeRect(x, yy, COLS[i][1], RH);
+        g.fillStyle = wd ? '#7a7a7a' : '#000'; g.font = (i === 1 ? '700 ' : '400 ') + '17px ' + FONT; g.textAlign = i === 1 ? 'left' : 'center';
+        g.fillText(String(vals[i]), i === 1 ? x + 10 : x + COLS[i][1] / 2, yy + RH / 2 + 1, COLS[i][1] - 14);
+        x += COLS[i][1];
+      }
+    });
+    g.textAlign = 'right'; g.fillStyle = '#888'; g.font = '400 11px ' + FONT; g.fillText('Pente', W - 6, H - 7);
+    return cv;
+  }
+  function tnDownloadPng() {
+    var S = tnGet(); if (!S) return;
+    var go = function () {
+      var cv = tnDrawPng(S), slug = S.cfg.name.toLowerCase().replace(/[^a-z0-9áéíóúñü]+/gi, '-').replace(/^-|-$/g, '') || 'torneo';
+      var save = function (blob) {
+        var url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = 'pente-' + slug + '-posiciones.png';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+      };
+      if (cv.toBlob) cv.toBlob(function (b) { if (b) save(b); }, 'image/png'); else { var a = document.createElement('a'); a.href = cv.toDataURL('image/png'); a.download = 'pente-' + slug + '-posiciones.png'; a.click(); }
+    };
+    if (document.fonts && document.fonts.load) Promise.all([document.fonts.load("400 17px PenteSans"), document.fonts.load("700 17px PenteSans")]).then(go, go); else go();
+  }
+  window.__tnPng = function (n) { var S = tnGet(); return S ? tnDrawPng(S).toDataURL('image/png') : null; };
+  $('tnPng').addEventListener('click', tnDownloadPng);
   $('tnUndo').addEventListener('click', function () { tnApply(function (st) { return PT.undo(st); }); });
   $('tnWdBtn').addEventListener('click', function () {
     var id = $('tnWd').value, S = tnGet(); if (!id || !S) return;
