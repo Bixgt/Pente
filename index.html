@@ -581,7 +581,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v45</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v46</p></div>
     <div class="btns">
       <button class="btn primary" id="btnResume" hidden data-i18n="menu.resume"></button>
       <button class="btn primary" id="btnPlay" data-i18n="menu.play"></button>
@@ -1026,7 +1026,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 45;</script>
+<script>window.PENTE_VERSION = 46;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -3378,6 +3378,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     "tn.bo": "Mejor de {n}",
     "tn.min": "Mínimo de duelos por jugador",
     "tn.cut": "Pasan a la eliminatoria final",
+    "tn.sample": "Jugador {n}",
     "tn.players": "Jugadores (uno por línea; el orden es la siembra)",
     "tn.shuffle": "Mezclar al azar",
     "tn.count": "{n} jugadores",
@@ -3455,6 +3456,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     "tn.bo": "Best of {n}",
     "tn.min": "Minimum matches per player",
     "tn.cut": "Players advancing to the final bracket",
+    "tn.sample": "Player {n}",
     "tn.players": "Players (one per line; the order is the seeding)",
     "tn.shuffle": "Shuffle",
     "tn.count": "{n} players",
@@ -6968,7 +6970,6 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   $('tnCreate').addEventListener('click', function () { tnOpenNew(); });
 
   /* --- nuevo --- */
-  var TN_SAMPLE = ['Tobi', 'Ro', 'Cami', 'Juan', 'Lu', 'Mati', 'Sofi', 'Nico', 'Vale', 'Fede', 'Ana', 'Beto', 'Dani', 'Eli', 'Gus', 'Hugo'];
   function tnPlayers() { return $('tnPlayers').value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean); }
   function tnCfg() { return { name: $('tnName').value, format: $('tnFormat').value, bestOf: +$('tnBest').value, minDuels: +$('tnMin').value, cut: +$('tnCut').value }; }
   function tnSetCfg(c) { $('tnFormat').value = c.format; $('tnBest').value = c.bestOf; $('tnMin').value = c.minDuels; $('tnCut').value = c.cut; tnRenderCheck(); }
@@ -6980,8 +6981,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   }
   function tnOpenNew() {
     tnBuildSelects(); $('tnName').value = ''; $('tnName').placeholder = t('tn.name'); $('tnFormat').value = 'swiss_cut'; $('tnBest').value = '3'; $('tnMin').value = '2'; $('tnCut').value = '4';
-    var me = profile.name && !/^Invitado/.test(profile.name) ? profile.name : '';
-    var base = TN_SAMPLE.slice(0, 8); if (me) base[0] = me;
+    var base = []; for (var i = 1; i <= 8; i++) base.push(t('tn.sample', { n: i }));
     $('tnPlayers').value = base.join('\n'); tnRenderCheck(); open('tnNewOverlay');
   }
   function tnRenderCheck() {
