@@ -436,6 +436,37 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 .pw-eye[aria-pressed="true"] .eye-off { display: block; }
 
 .brand .ver { font-size: 11px; opacity: .45; margin: 4px 0 0; letter-spacing: .08em; }
+
+/* Menú: cuadrados arriba (opciones e idioma a la izquierda, perfil a la derecha) */
+.menu-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.menu-top-l { display: flex; gap: 10px; }
+.sq { position: relative; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; background: var(--panel); border: 2px solid var(--line); border-radius: 14px; color: var(--text); cursor: pointer; padding: 0; }
+.sq:hover, .sq:focus-visible { border-color: var(--accent); }
+.sq:active { transform: translateY(1px); }
+.sq-av { font-size: 30px; line-height: 1; }
+.sq-tag { position: absolute; right: 4px; bottom: 3px; font-size: 10px; font-weight: 800; letter-spacing: .04em; color: var(--accent); line-height: 1; }
+.btn .badge { display: inline-block; min-width: 22px; height: 22px; margin-left: 8px; padding: 0 6px; border-radius: 11px; background: var(--accent); color: var(--accent-ink); font-size: 13px; line-height: 22px; text-align: center; vertical-align: middle; }
+.btn .badge[hidden] { display: none; }
+#frNeedBtns[hidden] { display: none; }
+
+/* Gráficos de estadísticas */
+:root { --st-w: #5dd39e; --st-l: #ef6b6b; --st-d: #9aa1ad; }
+.charts { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
+.charts[hidden] { display: none; }
+.ch-card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+.ch-card h4 { margin: 0 0 10px; font-size: 14px; color: var(--muted); font-weight: 700; letter-spacing: .02em; }
+.ch-stack { display: flex; height: 22px; border-radius: 11px; overflow: hidden; background: var(--bg); gap: 2px; }
+.ch-stack .seg { min-width: 6px; }
+.ch-stack .seg.w, .dot.w { background: var(--st-w); } .ch-stack .seg.l, .dot.l { background: var(--st-l); } .ch-stack .seg.d, .dot.d { background: var(--st-d); }
+.ch-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font-size: 13px; }
+.ch-legend .lg { display: inline-flex; align-items: center; gap: 6px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.ch-row { display: grid; grid-template-columns: 9.5em 1fr auto; gap: 8px; align-items: center; margin: 7px 0; font-size: 13px; }
+.ch-lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ch-track { height: 12px; border-radius: 6px; background: var(--bg); overflow: hidden; }
+.ch-fill { display: block; height: 100%; border-radius: 6px; background: var(--st-w); }
+.ch-fill.alt { background: var(--accent); }
+.ch-val { font-variant-numeric: tabular-nums; color: var(--muted); text-align: right; min-width: 4.5em; }
 </style>
 </head>
 <body>
@@ -521,16 +552,21 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 <!-- Menú principal (pantalla propia: el juego no se ve detrás) -->
 <div class="overlay screen" id="menuOverlay">
   <div class="screen-body">
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v36</p></div>
+    <div class="menu-top">
+      <div class="menu-top-l">
+        <button type="button" class="sq" id="btnSettings" data-i18n-aria="menu.settings" data-i18n-title="menu.settings"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+        <button type="button" class="sq" id="btnLang" data-i18n-aria="menu.language"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg><span class="sq-tag" id="langTag"></span></button>
+      </div>
+      <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
+    </div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v37</p></div>
     <div class="btns">
       <button class="btn primary" id="btnResume" hidden data-i18n="menu.resume"></button>
       <button class="btn primary" id="btnPlay" data-i18n="menu.play"></button>
       <button class="btn" id="btnTourn" data-i18n="tn.menu"></button>
-      <button class="btn" id="btnProfile"></button>
-      <button class="btn" id="btnSettings" data-i18n="menu.settings"></button>
+      <button class="btn" id="btnFriends"><span data-i18n="fr.btn"></span><b class="badge" id="frBadge" hidden></b></button>
       <button class="btn" id="btnRules" data-i18n="menu.rules"></button>
       <button class="btn" id="btnInstall" hidden data-i18n="inst.btn"></button>
-      <button class="btn" id="btnLang"></button>
     </div>
   </div>
 </div>
@@ -812,6 +848,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     <h2 data-i18n="fr.title"></h2>
     <p class="sub" data-i18n="fr.sub"></p>
     <p class="hint" id="frNeed" hidden></p>
+    <div class="btns" id="frNeedBtns" hidden><button class="btn primary" id="btnFrGoProfile" data-i18n="fr.goProfile"></button></div>
     <div id="frMain" hidden>
       <form class="field" id="frForm" autocomplete="off">
         <label class="lbl" for="frSearch" data-i18n="fr.search"></label>
@@ -833,7 +870,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 <div class="overlay screen" id="pviewOverlay">
   <div class="screen-body">
     <div class="pv-head"><span class="pv-av" id="pvAv"></span><div><h2 id="pvName"></h2><p class="sub" id="pvRel"></p></div></div>
-    <div class="field" id="pvStatsBox"><span class="lbl" data-i18n="prof.stats"></span><div class="prof-stats" id="pvStats"></div><p class="hint" id="pvNote"></p></div>
+    <div class="field" id="pvStatsBox"><span class="lbl" data-i18n="prof.stats"></span><div class="prof-stats" id="pvStats"></div><div class="charts" id="pvCharts"></div><p class="hint" id="pvNote"></p></div>
     <p class="hint" id="pvMsg" role="status" aria-live="polite"></p>
     <div class="btns" id="pvActions"></div>
     <div class="btns"><button class="btn primary" id="btnPviewBack" data-i18n="menu.back"></button></div>
@@ -877,7 +914,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       <p class="hint" id="claimMsg"></p></div>
     <p class="hint" id="nameHint" hidden></p>
     <div class="field"><span class="lbl" data-i18n="prof.avatar"></span><div class="avatar-grid" id="avatarGrid"></div></div>
-    <div class="field"><span class="lbl" data-i18n="prof.stats"></span><div class="prof-stats" id="profStats"></div><p class="hint" id="profNote"></p></div>
+    <div class="field"><span class="lbl" data-i18n="prof.stats"></span><div class="prof-stats" id="profStats"></div><div class="charts" id="profCharts"></div><p class="hint" id="profNote"></p></div>
     <div class="field acct" id="acctBox" hidden>
       <span class="lbl" data-i18n="auth.title"></span>
       <div id="acctOut">
@@ -925,7 +962,6 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       <p class="hint" data-i18n="auth.privacy"></p>
     </div>
     <div class="btns">
-      <button class="btn" id="btnFriends" data-i18n="fr.btn"></button>
       <button class="btn primary" id="btnProfileBack" data-i18n="menu.back"></button>
       <button class="btn" id="btnProfReset" data-i18n="prof.reset"></button>
     </div>
@@ -956,7 +992,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 36;</script>
+<script>window.PENTE_VERSION = 37;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -3157,6 +3193,32 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     'pw.logging': 'Signing in…'
   });
 })(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script>
+/* Gráficos de estadísticas y menú — es */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.es, {
+    'fr.goProfile': 'Ir a mi perfil',
+    'ch.empty': 'Cuando juegues algunas partidas, acá vas a ver tus gráficos.',
+    'ch.results': 'Resultados',
+    'ch.winrate': 'Victorias por modo',
+    'ch.played': 'Partidas jugadas'
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
+/* Gráficos de estadísticas y menú — en */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.en, {
+    'fr.goProfile': 'Go to my profile',
+    'ch.empty': 'Play a few games and your charts will show up here.',
+    'ch.results': 'Results',
+    'ch.winrate': 'Wins by mode',
+    'ch.played': 'Games played'
+  });
+})(typeof self !== 'undefined' ? self : this);
 </script>
 <script>
 /* Textos de torneos — es (los mensajes del motor de reglas siguen en español) */
@@ -5510,7 +5572,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = t(el.getAttribute('data-i18n')); });
     document.querySelectorAll('[data-i18n-title]').forEach(function (el) { el.title = t(el.getAttribute('data-i18n-title')); });
     document.querySelectorAll('[data-i18n-aria]').forEach(function (el) { el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria'))); });
-    $('btnLang').textContent = t('menu.language') + ' · ' + t('lang.name');
+    $('langTag').textContent = String(window.I18n.getLang() || '').slice(0, 2).toUpperCase(); $('btnLang').title = t('menu.language') + ' · ' + t('lang.name');
     renderProfileBtn(); if (Auth !== undefined) renderAcct();
     if (PT) { tnBuildSelects(); if ($('tnViewOverlay').classList.contains('open')) tnRenderView(); if ($('tnOverlay').classList.contains('open')) tnRenderList(); if ($('tnNewOverlay').classList.contains('open')) tnRenderCheck(); }
     document.documentElement.lang = window.I18n.getLang();
@@ -5862,7 +5924,10 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   }, true);
 
   /* ---------- Perfil ---------- */
-  function renderProfileBtn() { $('btnProfile').textContent = PP.emojiOf(profile.avatar) + ' ' + (profile.name ? t('menu.profile') + ' · ' + profile.name : t('menu.profile')); }
+  function renderProfileBtn() {
+    var lbl = profile.name ? t('menu.profile') + ' · ' + profile.name : t('menu.profile');
+    $('avEmoji').textContent = PP.emojiOf(profile.avatar); $('btnProfile').setAttribute('aria-label', lbl); $('btnProfile').title = lbl;
+  }
   function applyProfileName() {                               // el nombre del perfil rellena los campos de nombre (se pueden cambiar partida por partida)
     ['name1', 'onName', 'rName'].forEach(function (id) { if ($(id)) $(id).value = profile.name; });
     var lock = !!(profile.nameSet && typeof Auth !== 'undefined' && Auth && Auth.user);       // con nombre definitivo, en las partidas online no se puede usar otro
@@ -5878,6 +5943,44 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       [s.p, s.w, s.l, s.d].forEach(function (v, i) { cell('n' + (v ? '' : ' z'), loc && i > 0 ? '–' : String(v)); });
     });
   }
+  /* Gráficos de estadísticas (propias y de otras personas). Solo cuentan partidas con resultado: contra la máquina y online. */
+  function fillCharts(box, stats) {
+    box.innerHTML = '';
+    function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
+    var modes = PP.MODES.filter(function (m) { return m !== 'local'; }), W = 0, L = 0, D = 0, played = 0;
+    modes.forEach(function (m) { var x = stats[m] || {}; W += x.w || 0; L += x.l || 0; D += x.d || 0; });
+    PP.MODES.forEach(function (m) { played += (stats[m] && stats[m].p) || 0; });
+    if (!played) { box.appendChild(el('p', 'hint', t('ch.empty'))); return; }
+    var T = W + L + D;
+    if (T) {                                                    // 1) resultados en total
+      var c1 = el('div', 'ch-card'); c1.appendChild(el('h4', '', t('ch.results')));
+      var bar = el('div', 'ch-stack'); bar.setAttribute('role', 'img');
+      bar.setAttribute('aria-label', t('prof.won') + ' ' + W + ', ' + t('prof.lost') + ' ' + L + ', ' + t('prof.drawn') + ' ' + D);
+      [['w', W], ['l', L], ['d', D]].forEach(function (k) { if (k[1]) { var sg = el('span', 'seg ' + k[0]); sg.style.flexGrow = String(k[1]); bar.appendChild(sg); } });
+      c1.appendChild(bar);
+      var lg = el('div', 'ch-legend');
+      [['w', W, 'prof.won'], ['l', L, 'prof.lost'], ['d', D, 'prof.drawn']].forEach(function (k) { var i = el('span', 'lg'); i.appendChild(el('i', 'dot ' + k[0])); i.appendChild(document.createTextNode(t(k[2]) + ' ' + k[1] + ' (' + Math.round(100 * k[1] / T) + '%)')); lg.appendChild(i); });
+      c1.appendChild(lg); box.appendChild(c1);
+      var c2 = el('div', 'ch-card'); c2.appendChild(el('h4', '', t('ch.winrate')));          // 2) % de victorias por modo
+      modes.forEach(function (m) {
+        var x = stats[m] || {}, n = (x.w || 0) + (x.l || 0) + (x.d || 0); if (!n) return;
+        var pct = Math.round(100 * (x.w || 0) / n), row = el('div', 'ch-row');
+        row.appendChild(el('span', 'ch-lbl', t('prof.mode.' + m)));
+        var tr = el('span', 'ch-track'), fl = el('span', 'ch-fill'); fl.style.width = Math.max(pct, 2) + '%'; tr.appendChild(fl); row.appendChild(tr);
+        row.appendChild(el('span', 'ch-val', pct + '% · ' + (x.w || 0) + '/' + n)); c2.appendChild(row);
+      });
+      box.appendChild(c2);
+    }
+    var c3 = el('div', 'ch-card'); c3.appendChild(el('h4', '', t('ch.played')));          // 3) partidas por modo (incluye Local)
+    var mx = 0; PP.MODES.forEach(function (m) { mx = Math.max(mx, (stats[m] && stats[m].p) || 0); });
+    PP.MODES.forEach(function (m) {
+      var n = (stats[m] && stats[m].p) || 0; if (!n) return;
+      var row = el('div', 'ch-row'); row.appendChild(el('span', 'ch-lbl', t('prof.mode.' + m)));
+      var tr = el('span', 'ch-track'), fl = el('span', 'ch-fill alt'); fl.style.width = Math.max(100 * n / mx, 3) + '%'; tr.appendChild(fl); row.appendChild(tr);
+      row.appendChild(el('span', 'ch-val', String(n))); c3.appendChild(row);
+    });
+    box.appendChild(c3);
+  }
   function renderProfile() {
     var g = $('avatarGrid'); g.innerHTML = '';
     PP.AVATARS.forEach(function (a) {
@@ -5890,7 +5993,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     $('nameClaim').hidden = !(logged && !profile.nameSet);
     $('nameHint').textContent = logged ? (profile.nameSet ? t('name.locked') : t('name.pick')) : '';
     $('nameHint').hidden = !logged;
-    fillStats($('profStats'), ownStats());
+    fillStats($('profStats'), ownStats()); fillCharts($('profCharts'), PP.cleanStats(ownStats()));
     var tot = PP.totals(profile);
     $('profNote').textContent = (tot.p ? t('prof.localNote') : t('prof.noGames')) + ' ' + t('prof.onlineNote');
   }
@@ -5925,6 +6028,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   }
   function frRender() {
     var ok = socialOk(); $('frNeed').hidden = ok; $('frMain').hidden = !ok;
+    $('frNeedBtns').hidden = ok;
     if (!ok) { $('frNeed').textContent = t(Auth && Auth.user ? 'fr.needName' : 'fr.needLogin'); return; }
     var o = social.ov || { list: [], stats_public: true }, L = o.list || [];
     var inc = L.filter(function (x) { return x.status === 'pending' && x.dir === 'in'; }), out = L.filter(function (x) { return x.status === 'pending' && x.dir === 'out'; }), fr = L.filter(function (x) { return x.status === 'accepted'; });
@@ -5960,7 +6064,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     var v = social.view; if (!v) return;
     $('pvAv').textContent = PP.emojiOf(v.avatar); $('pvName').textContent = v.name; $('pvRel').textContent = t('pv.' + (v.relation || 'none'));
     var st = PP.cleanStats(v.stats), has = Object.keys(st).length > 0;
-    $('pvStats').hidden = !!v.hidden; if (v.hidden) $('pvStats').innerHTML = ''; else fillStats($('pvStats'), st);
+    $('pvStats').hidden = !!v.hidden; $('pvCharts').hidden = !!v.hidden; if (v.hidden) { $('pvStats').innerHTML = ''; $('pvCharts').innerHTML = ''; } else { fillStats($('pvStats'), st); fillCharts($('pvCharts'), st); }
     $('pvNote').textContent = v.hidden ? t('pv.hidden') : has ? t('pv.note') : t('pv.noGames');
     var box = $('pvActions'); box.innerHTML = '';
     function btn(label, cls, fn) { var b = el('button', 'btn' + (cls ? ' ' + cls : ''), label); b.type = 'button'; b.addEventListener('click', fn); box.appendChild(b); }
@@ -5971,7 +6075,21 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     else if (v.relation === 'friend') btn(t('fr.remove'), 'ghost', function () { ask(t('fr.removeConfirm', { name: v.name }), t('fr.remove'), function () { run(Auth.friendRemove(v.id).then(function () { return ''; })); }); });
   }
   $('btnFriends').addEventListener('click', function () { frMsg(''); frLoad(); open('friendsOverlay'); });
-  $('btnFriendsBack').addEventListener('click', function () { renderProfile(); renderAcct(); open('profileOverlay'); });
+  $('btnFriendsBack').addEventListener('click', function () { open('menuOverlay'); frBadgeRefresh(); });
+  $('btnFrGoProfile').addEventListener('click', function () { renderProfile(); renderAcct(); open('profileOverlay'); });
+  /* globito con las solicitudes de amistad que te llegaron (se refresca al volver al menú, máx. 1 vez por minuto) */
+  var frBadgeAt = 0;
+  function frBadgeSet(n) { var b = $('frBadge'); b.hidden = !n; b.textContent = n ? String(n) : ''; }
+  function frBadgeRefresh(force) {
+    if (!socialOk()) { frBadgeSet(0); return; }
+    if (!force && Date.now() - frBadgeAt < 60000) return;
+    frBadgeAt = Date.now();
+    Auth.friendsOverview().then(function (o) {
+      social.ov = o && typeof o === 'object' ? o : social.ov;
+      frBadgeSet(((o && o.list) || []).filter(function (x) { return x.status === 'pending' && x.dir === 'in'; }).length);
+    }, function () {});
+  }
+  new MutationObserver(function () { if ($('menuOverlay').classList.contains('open')) frBadgeRefresh(); }).observe($('menuOverlay'), { attributes: true, attributeFilter: ['class'] });
   $('frForm').addEventListener('submit', function (e) {
     e.preventDefault(); var n = $('frSearch').value.trim();
     if (!n) { frMsg(t('fr.writeName'), true); return; }
