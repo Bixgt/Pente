@@ -482,6 +482,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       <button class="btn" id="btnProfile"></button>
       <button class="btn" id="btnSettings" data-i18n="menu.settings"></button>
       <button class="btn" id="btnRules" data-i18n="menu.rules"></button>
+      <button class="btn" id="btnInstall" hidden data-i18n="inst.btn"></button>
       <button class="btn" id="btnLang"></button>
     </div>
   </div>
@@ -736,6 +737,15 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   <div class="modal dlg" role="alertdialog" aria-modal="true" aria-labelledby="dlgMsg">
     <p id="dlgMsg"></p>
     <div class="dlg-btns"><button type="button" class="btn" id="dlgNo"></button><button type="button" class="btn primary" id="dlgYes"></button></div>
+  </div>
+</div>
+
+<!-- Instalar la app -->
+<div class="overlay dialog" id="installOverlay">
+  <div class="modal dlg" role="alertdialog" aria-modal="true" aria-labelledby="instTitle">
+    <h3 id="instTitle" data-i18n="inst.title"></h3>
+    <p id="instText"></p>
+    <div class="dlg-btns"><button type="button" class="btn primary" id="instClose" data-i18n="inst.close"></button></div>
   </div>
 </div>
 
@@ -3064,6 +3074,34 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 })(typeof self !== 'undefined' ? self : this);
 </script>
 <script>
+/* Textos de instalación — es */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.es, {
+    "inst.btn": "Instalar la app",
+    "inst.title": "Instalar Pente",
+    "inst.close": "Entendido",
+    "inst.ios": "En iPhone tiene que ser desde Safari: tocá el botón Compartir (el cuadrado con la flecha hacia arriba) y elegí \"Agregar a inicio\".",
+    "inst.android": "En Android, abrí el menú del navegador (los tres puntitos ⋮) y elegí \"Instalar app\" o \"Agregar a la pantalla principal\".",
+    "inst.desktop": "En la PC, con Chrome o Edge, buscá el ícono de instalar al final de la barra de direcciones, o abrí el menú ⋮ y elegí \"Instalar Pente\"."
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
+/* Install strings — en */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.en, {
+    "inst.btn": "Install the app",
+    "inst.title": "Install Pente",
+    "inst.close": "Got it",
+    "inst.ios": "On iPhone it has to be from Safari: tap the Share button (the square with the up arrow) and choose \"Add to Home Screen\".",
+    "inst.android": "On Android, open the browser menu (the three dots ⋮) and choose \"Install app\" or \"Add to Home screen\".",
+    "inst.desktop": "On a computer, with Chrome or Edge, look for the install icon at the end of the address bar, or open the ⋮ menu and choose \"Install Pente\"."
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
 /* Temas del tablero. Cada tema es solo DATOS: para sumar uno nuevo, agregar un objeto a "list"
  * (y su nombre en i18n como 'theme.<id>'). El dibujo y el menú lo toman solos. */
 (function (root) {
@@ -3906,6 +3944,30 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       }, wait);
     }, 80);
   }
+
+  /* ---------- Instalar la app (PWA) ---------- */
+  var installEvt = null;
+  function isStandalone() { try { return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true; } catch (e) { return false; } }
+  function installPlatform() {
+    var ua = navigator.userAgent || '';
+    if (/iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) return 'ios';
+    if (/Android/.test(ua)) return 'android';
+    return 'desktop';
+  }
+  function updateInstallBtn() { $('btnInstall').hidden = isStandalone(); }
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); installEvt = e; updateInstallBtn(); });
+  window.addEventListener('appinstalled', function () { installEvt = null; updateInstallBtn(); });
+  $('btnInstall').addEventListener('click', function () {
+    if (installEvt) {                                         // Android / PC con Chrome o Edge: instala directo
+      var ev = installEvt; installEvt = null;
+      try { ev.prompt(); if (ev.userChoice) ev.userChoice.then(function () { updateInstallBtn(); }); } catch (e) {}
+      return;
+    }
+    $('instText').textContent = t('inst.' + installPlatform());   // iPhone y demás: instrucciones a mano
+    open('installOverlay');
+  });
+  $('instClose').addEventListener('click', function () { open('menuOverlay'); });
+  updateInstallBtn();
 
   /* ---------- Pausa (solo partidas offline: contra la máquina o de a dos en el mismo dispositivo) ---------- */
   function paused() { return $('pauseOverlay').classList.contains('open'); }
