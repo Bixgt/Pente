@@ -581,7 +581,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v44</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v45</p></div>
     <div class="btns">
       <button class="btn primary" id="btnResume" hidden data-i18n="menu.resume"></button>
       <button class="btn primary" id="btnPlay" data-i18n="menu.play"></button>
@@ -1026,7 +1026,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 44;</script>
+<script>window.PENTE_VERSION = 45;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -4064,36 +4064,138 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     ['Am', 45, [[0, 81, 4], [4, 76, 4]]],
     ['E7', 40, [[0, 80, 2], [2, 76, 2], [4, 80, 2], [6, 83, 2]]]
   ];
-  function thump(t, vol) {                                      // golpe grave: seno que baja de 110 a 46 Hz
+  function thump(t, vol, hk) {                                      // golpe grave: seno que baja de 110 a 46 Hz
     var o = oc.createOscillator(), g = oc.createGain(), s = oc.createGain();
     o.type = 'sine'; o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(46, t + 0.14);
     g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.34);
     var o2 = oc.createOscillator(), g2 = oc.createGain();                                      // armónico agudo: en el parlante del celular el grave puro casi no se oye
     o2.type = 'triangle'; o2.frequency.setValueAtTime(230, t); o2.frequency.exponentialRampToValueAtTime(110, t + 0.1);
-    g2.gain.setValueAtTime(vol * 0.55, t); g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+    g2.gain.setValueAtTime(vol * (hk == null ? 0.35 : hk), t); g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
     o2.connect(g2); g2.connect(ob); o2.start(t); o2.stop(t + 0.2);
     o.connect(g); g.connect(ob); s.gain.value = 0.25; g.connect(s); s.connect(verb); o.start(t); o.stop(t + 0.38);
   }
-  function bassB(m, t, d, v) { note(m, t, d, { vol: v, cut: 1100, send: 0.05, atk: 0.01, parts: [[1, 1], [2, 0.7, 0.35], [3, 0.4, 0.2]] }); }
-  function pluck(m, t, d, v) { note(m, t, d, { vol: v, cut: 1500, send: 0.3, atk: 0.006, parts: [[1, 1], [2, 0.5, 0.25], [3, 0.12, 0.12]] }); }
-  function scheduleBattle(bar, e, t) {
+  function bassB(m, t, d, v) { note(m, t, d, { vol: v, cut: 800, send: 0.05, atk: 0.02, parts: [[1, 1], [2, 0.6, 0.35], [3, 0.25, 0.2]] }); }
+  function pluck(m, t, d, v) { note(m, t, d, { vol: v, cut: 850, send: 0.42, atk: 0.012, parts: [[1, 1], [2, 0.35, 0.3], [3, 0.06, 0.1]] }); }
+  function scheduleGlow(bar, e, t) {
     var b = BARS[bar], ch = C[b[0]], i, root = b[1], last = bar % 8 === 7;
-    if (e === 0) for (i = 0; i < ch.length; i++) rhodes(ch[i], t + i * 0.012, EIGHTH * 7.5, 0.04);        // colchón bajito
-    if (e === 0) { bassB(root, t, EIGHTH * 1.7, 0.2); thump(t, 0.45); }
+    if (e === 0) for (i = 0; i < ch.length; i++) rhodes(ch[i] - 12, t + i * 0.012, EIGHTH * 7.8, 0.06);    // colchón grave
+    if (e === 0) { bassB(root, t, EIGHTH * 2.2, 0.2); thump(t, 0.14); }
     if (e === 2) bassB(root, t, EIGHTH * 1.2, 0.12);
     if (e === 3) bassB(root + 12, t, EIGHTH * 0.9, 0.08);
-    if (e === 4) { bassB(root, t, EIGHTH * 1.7, 0.17); thump(t, 0.3); }
+    if (e === 4) bassB(root, t, EIGHTH * 2, 0.15);
     if (e === 6) bassB(root + 7, t, EIGHTH * 1.2, 0.11);
-    if (e === 7 && last) thump(t + 0.02, 0.18);                                                       // pequeño empujón antes de repetir
-    b[2].forEach(function (m) { if (m[0] === e) pluck(m[1], t, Math.min(1.4, EIGHTH * m[2] + 0.4), 0.08); });
-    hush(t, 0.05, 7000, e % 2 ? 0.018 : 0.028, true);                                                 // hi-hat suave en cada corchea
-    if (e === 2 || e === 6) hush(t, 0.09, 1700, 0.075, false);                                        // escobilla en 2 y 4
-    if (last && e >= 4) hush(t, 0.07, 2200, 0.03 + (e - 4) * 0.02, false);                            // redoble que sube al cerrar cada 8 compases
+    if (e === 7 && last) thump(t + 0.02, 0.1);                                                       // pequeño empujón antes de repetir
+    b[2].forEach(function (m) { if (m[0] === e) pluck(m[1] - 12, t, Math.min(1.8, EIGHTH * m[2] + 0.6), 0.085); });
+    hush(t, 0.05, 5200, e % 2 ? 0.008 : 0.014, true);                                                 // hi-hat apenas insinuado
+    if (e === 2 || e === 6) hush(t, 0.12, 1100, 0.05, false);                                         // escobilla grave en 2 y 4
+    if (last && e >= 4) hush(t, 0.08, 1400, 0.02 + (e - 4) * 0.012, false);                            // redoble que sube al cerrar cada 8 compases
+  }
+
+  /* ---------- Un tema de partida por estilo del tablero ----------
+   * clásico: la versión más tensa (104 BPM, con golpe) · glow (neón): la versión oscura y suave (94 BPM)
+   * tradicional: "madera y vidrio", pentatónica japonesa, koto + clac de fichas sobre la madera (92 BPM)
+   * papel: "lápiz y cuaderno", marimba y pizzicato en re dórico, tictac de lápiz y raspado de papel (100 BPM) */
+  function bassC(m, t, d, v) { note(m, t, d, { vol: v, cut: 1100, send: 0.05, atk: 0.01, parts: [[1, 1], [2, 0.7, 0.35], [3, 0.4, 0.2]] }); }
+  function pluckC(m, t, d, v) { note(m, t, d, { vol: v, cut: 1500, send: 0.3, atk: 0.006, parts: [[1, 1], [2, 0.5, 0.25], [3, 0.12, 0.12]] }); }
+  function scheduleClasico(bar, e, t) {
+    var b = BARS[bar], ch = C[b[0]], i, root = b[1], last = bar % 8 === 7;
+    if (e === 0) for (i = 0; i < ch.length; i++) rhodes(ch[i], t + i * 0.012, EIGHTH * 7.5, 0.04);
+    if (e === 0) { bassC(root, t, EIGHTH * 1.7, 0.2); thump(t, 0.45, 0.55); }
+    if (e === 2) bassC(root, t, EIGHTH * 1.2, 0.12);
+    if (e === 3) bassC(root + 12, t, EIGHTH * 0.9, 0.08);
+    if (e === 4) { bassC(root, t, EIGHTH * 1.7, 0.17); thump(t, 0.3, 0.55); }
+    if (e === 6) bassC(root + 7, t, EIGHTH * 1.2, 0.11);
+    if (e === 7 && last) thump(t + 0.02, 0.18, 0.55);
+    b[2].forEach(function (m) { if (m[0] === e) pluckC(m[1], t, Math.min(1.4, EIGHTH * m[2] + 0.4), 0.08); });
+    hush(t, 0.05, 7000, e % 2 ? 0.018 : 0.028, true);
+    if (e === 2 || e === 6) hush(t, 0.09, 1700, 0.075, false);
+    if (last && e >= 4) hush(t, 0.07, 2200, 0.03 + (e - 4) * 0.02, false);
+  }
+
+  // --- TRADICIONAL ---
+  C.Af5 = [57, 64, 69]; C.Ff5 = [53, 60, 65]; C.Ef5 = [52, 59, 64]; C.Cf5 = [48, 55, 60]; C.Df5 = [50, 57, 62];
+  var BARS_TRAD = [
+    ['Af5', 45, [[0, 76, 2], [3, 72, 1], [4, 69, 3]]],
+    ['Af5', 45, [[1, 71, 1], [2, 72, 2], [5, 76, 3]]],
+    ['Ff5', 41, [[0, 77, 3], [4, 76, 2], [6, 72, 2]]],
+    ['Ef5', 40, [[0, 76, 2], [3, 71, 1], [4, 69, 4]]],
+    ['Af5', 45, [[0, 81, 2], [2, 77, 2], [4, 76, 4]]],
+    ['Cf5', 48, [[0, 72, 2], [2, 76, 2], [4, 77, 2], [6, 76, 2]]],
+    ['Ff5', 41, [[0, 77, 2], [2, 81, 2], [4, 84, 2], [6, 81, 2]]],
+    ['Ef5', 40, [[0, 80, 2], [2, 76, 2], [4, 71, 4]]],
+    ['Af5', 45, [[0, 69, 4], [4, 76, 4]]],
+    ['Af5', 45, [[1, 72, 1], [2, 76, 2], [4, 81, 3]]],
+    ['Df5', 50, [[0, 74, 3], [3, 77, 1], [4, 81, 4]]],
+    ['Ef5', 40, [[0, 76, 2], [2, 80, 2], [4, 83, 3]]],
+    ['Ff5', 41, [[0, 77, 4], [4, 72, 4]]],
+    ['Ef5', 40, [[0, 76, 2], [2, 71, 2], [4, 68, 4]]],
+    ['Af5', 45, [[0, 69, 3], [4, 72, 2], [6, 76, 2]]],
+    ['Af5', 45, [[0, 81, 4], [4, 76, 2], [6, 69, 2]]]
+  ];
+  function koto(m, t, d, v) { note(m, t, d, { vol: v, cut: 3200, send: 0.45, atk: 0.003, parts: [[1, 1], [2, 0.55, 0.18], [3, 0.28, 0.09], [4, 0.14, 0.05]] }); }
+  function bell(m, t, d, v) { note(m, t, d, { vol: v, cut: 6000, send: 0.75, atk: 0.003, parts: [[1, 1], [2.76, 0.3, 0.5], [5.4, 0.12, 0.2]] }); }
+  function clack(t, v) {                                          // una ficha apoyada sobre la madera
+    var s2 = oc.createBufferSource(), f = oc.createBiquadFilter(), g = oc.createGain(), o = oc.createOscillator(), og = oc.createGain();
+    s2.buffer = noiseBuf; f.type = 'bandpass'; f.frequency.value = 1050; f.Q.value = 3.5;
+    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+    s2.connect(f); f.connect(g); g.connect(ob); s2.start(t); s2.stop(t + 0.07);
+    o.type = 'sine'; o.frequency.setValueAtTime(560, t); o.frequency.exponentialRampToValueAtTime(330, t + 0.06);
+    og.gain.setValueAtTime(v * 0.9, t); og.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+    o.connect(og); og.connect(ob); o.start(t); o.stop(t + 0.1);
+  }
+  function scheduleTrad(bar, e, t) {
+    var b = BARS[bar], ch = C[b[0]], i, root = b[1];
+    if (e === 0 && bar % 2 === 0) for (i = 0; i < ch.length; i++) rhodes(ch[i] - 12, t + i * 0.02, EIGHTH * 15.6, 0.055);   // bordón de quintas, se renueva cada 2 compases
+    if (e === 0) bassB(root, t, EIGHTH * 7.6, 0.15);
+    b[2].forEach(function (m) { if (m[0] === e) koto(m[1], t, Math.min(2.4, EIGHTH * m[2] + 0.5), 0.1); });
+    if (e === 0) clack(t, 0.1);
+    if (e === 5 && bar % 2 === 1) clack(t, 0.065);
+    if (e === 6 && bar % 4 === 3) bell(93, t, 2.6, 0.05);                                       // un "ting" de vidrio cada 4 compases
+    if (e === 4 && bar % 8 === 7) hush(t, 0.5, 900, 0.03, false);                                // un soplo antes de repetir
+  }
+
+  // --- PAPEL ---
+  C.Bb = [53, 58, 62]; C.Gm = [55, 58, 62];
+  var BARS_PAPEL = [
+    ['Dm', 50, [[0, 74, 1], [1, 77, 1], [2, 81, 2], [4, 79, 1], [5, 77, 1], [6, 74, 2]]],
+    ['Dm', 50, [[0, 72, 2], [2, 74, 2], [4, 69, 4]]],
+    ['G', 43, [[0, 71, 1], [1, 74, 1], [2, 79, 2], [4, 77, 2], [6, 74, 2]]],
+    ['G', 43, [[0, 76, 2], [2, 74, 2], [4, 71, 2], [6, 67, 2]]],
+    ['Dm', 50, [[0, 69, 1], [1, 72, 1], [2, 74, 2], [4, 77, 2], [6, 81, 2]]],
+    ['Bb', 46, [[0, 82, 2], [2, 79, 2], [4, 77, 2], [6, 74, 2]]],
+    ['A7', 45, [[0, 73, 2], [2, 76, 1], [3, 79, 1], [4, 81, 4]]],
+    ['A7', 45, [[0, 79, 2], [2, 76, 2], [4, 73, 2], [6, 76, 2]]],
+    ['Dm', 50, [[0, 74, 2], [2, 77, 2], [4, 81, 2], [6, 86, 2]]],
+    ['Gm', 43, [[0, 79, 2], [2, 82, 2], [4, 79, 2], [6, 74, 2]]],
+    ['Dm', 50, [[0, 77, 3], [3, 74, 1], [4, 69, 4]]],
+    ['Cc', 48, [[0, 76, 2], [2, 72, 2], [4, 79, 2], [6, 76, 2]]],
+    ['Dm', 50, [[0, 74, 1], [1, 77, 1], [2, 81, 2], [4, 86, 2], [6, 84, 2]]],
+    ['Bb', 46, [[0, 82, 2], [2, 77, 2], [4, 74, 2], [6, 70, 2]]],
+    ['A7', 45, [[0, 73, 2], [2, 76, 2], [4, 79, 2], [6, 76, 2]]],
+    ['A7', 45, [[0, 81, 2], [2, 79, 1], [3, 76, 1], [4, 73, 4]]]
+  ];
+  function marimba(m, t, d, v) { note(m, t, d, { vol: v, cut: 4200, send: 0.3, atk: 0.003, parts: [[1, 1], [4, 0.32, 0.07], [9.2, 0.08, 0.025]] }); }
+  function pizz(m, t, d, v) { note(m, t, d, { vol: v, cut: 1300, send: 0.1, atk: 0.004, parts: [[1, 1], [2, 0.5, 0.1], [3, 0.2, 0.05]] }); }
+  function schedulePapel(bar, e, t) {
+    var b = BARS[bar], ch = C[b[0]], i, root = b[1], end = bar % 4 === 3;
+    if (e === 0) pizz(root, t, EIGHTH * 1.1, 0.2);
+    if (e === 2) pizz(root + 7, t, EIGHTH * 0.9, 0.12);
+    if (e === 4) pizz(root, t, EIGHTH * 1.1, 0.16);
+    if (e === 6) pizz(root + 7, t, EIGHTH * 0.9, 0.12);
+    if (e === 3 || e === 7) for (i = 0; i < ch.length; i++) marimba(ch[i] + 12, t + i * 0.01, 0.3, 0.03);        // acordes cortitos a contratiempo
+    b[2].forEach(function (m) { if (m[0] === e) marimba(m[1], t, Math.min(0.9, EIGHTH * m[2] * 0.8 + 0.2), 0.085); });
+    if (e === 2 || e === 6) hush(t, 0.035, 2600, 0.05, false);                                                       // tictac de lápiz
+    if (e === 0 && bar % 8 === 7) hush(t, 0.35, 3500, 0.03, false);                                                  // pasar la hoja
+    if (end && e >= 4) hush(t, 0.12, 5200, 0.012 + (e - 4) * 0.01, true);                                            // raspado de lápiz que sube
   }
   var TRACKS = {
     lounge: { bpm: 92, bars: BARS_LOUNGE, sched: scheduleLounge, file: 'audio/loop-16k.wav' },
-    battle: { bpm: 104, bars: BARS_BATTLE, sched: scheduleBattle, file: 'audio/battle-16k.wav' }
+    'battle-clasico': { bpm: 104, bars: BARS_BATTLE, sched: scheduleClasico, file: 'audio/battle-clasico-16k.wav' },
+    'battle-glow': { bpm: 94, bars: BARS_BATTLE, sched: scheduleGlow, file: 'audio/battle-glow-16k.wav' },
+    'battle-tradicional': { bpm: 92, bars: BARS_TRAD, sched: scheduleTrad, file: 'audio/battle-tradicional-16k.wav' },
+    'battle-papel': { bpm: 100, bars: BARS_PAPEL, sched: schedulePapel, file: 'audio/battle-papel-16k.wav' }
   };
+
   var schedule = scheduleLounge;
   function useTrack(name) {
     var T = TRACKS[name] || TRACKS.lounge;
@@ -4153,7 +4255,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   function swap() {
     if (swapping || !playing) return;
     swapping = true; fadeTo(0, 1.0);
-    setTimeout(function () { swapping = false; stopSource(); if (enabled && !paused && bufs[want]) { startSource(); fadeTo(targetGain(), 1.6); } }, 1100);
+    setTimeout(function () { swapping = false; if (cur === want && src) { if (enabled && !paused) fadeTo(targetGain(), 1.0); return; } stopSource(); if (enabled && !paused && bufs[want]) { startSource(); fadeTo(targetGain(), 1.6); } }, 1100);
   }
 
   function begin() {
@@ -5329,7 +5431,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     try { localStorage.setItem('pente.theme', id); } catch (e) {}
     document.querySelectorAll('.theme-opt').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.id === id ? 'true' : 'false'); });
     $('gemField').hidden = id !== 'tradicional'; buildGemPickers();
-    render();
+    render(); musicScene();
   }
   function buildThemePicker() {
     var box = $('themePicker'); box.innerHTML = '';
@@ -5383,8 +5485,12 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   // Música: tema de "partida" mientras hay una partida en curso a la vista; el de calma en el menú, al terminar y en el tutorial
   function musicScene() {
     var m = window.PenteMusic; if (!m || !m.setTrack) return;
-    m.setTrack(state && !isOver() && !tut.active && !document.body.classList.contains('in-screen') ? 'battle' : 'lounge');
+    clearTimeout(musicT);                                       // se decide recién cuando se asienta la pantalla (abrir una sección pasa por un estado intermedio)
+    musicT = setTimeout(function () {
+      m.setTrack(state && !isOver() && !tut.active && !document.body.classList.contains('in-screen') ? 'battle-' + themeId : 'lounge');
+    }, 120);
   }
+  var musicT = 0;
   function closeAll() { stopRooms(); document.querySelectorAll('.overlay').forEach(function (o) { o.classList.remove('open'); }); document.body.classList.remove('in-screen'); musicScene(); }
   function open(id) {
     closeAll();
