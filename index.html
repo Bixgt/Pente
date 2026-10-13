@@ -587,6 +587,8 @@ input.locked { opacity: .75; cursor: not-allowed; }
     <section class="tabpanel" id="tab-sound" role="tabpanel">
       <label class="check"><input type="checkbox" id="optSound"><span><span data-i18n="cfg.sound"></span><small data-i18n="cfg.soundHint"></small></span></label>
       <div class="field"><label class="lbl" for="cfgVolume"><span data-i18n="cfg.volume"></span> <b id="cfgVolumeVal"></b></label><input type="range" id="cfgVolume" min="0" max="100" step="5"></div>
+      <label class="check"><input type="checkbox" id="optMusic"><span><span data-i18n="mus.on"></span><small data-i18n="mus.hint"></small></span></label>
+      <div class="field"><label class="lbl" for="cfgMusicVol"><span data-i18n="mus.volume"></span> <b id="cfgMusicVolVal"></b></label><input type="range" id="cfgMusicVol" min="0" max="100" step="5"></div>
       <label class="check"><input type="checkbox" id="optVibrate"><span><span data-i18n="cfg.vibrate"></span><small data-i18n="cfg.vibrateHint"></small></span></label>
     </section>
 
@@ -2968,6 +2970,28 @@ input.locked { opacity: .75; cursor: not-allowed; }
 })(typeof self !== 'undefined' ? self : this);
 </script>
 <script>
+/* Textos de la música de fondo — es */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.es, {
+    "mus.on": "Música de fondo",
+    "mus.hint": "Jazz de ascensor, original de Pente. Se calla sola si salís de la pestaña.",
+    "mus.volume": "Volumen de la música"
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
+/* Background music strings — en */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.en, {
+    "mus.on": "Background music",
+    "mus.hint": "Original elevator-style lounge jazz. It pauses by itself when you leave the tab.",
+    "mus.volume": "Music volume"
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
 /* Temas del tablero. Cada tema es solo DATOS: para sumar uno nuevo, agregar un objeto a "list"
  * (y su nombre en i18n como 'theme.<id>'). El dibujo y el menú lo toman solos. */
 (function (root) {
@@ -3196,7 +3220,154 @@ input.locked { opacity: .75; cursor: not-allowed; }
   function setVibrate(v) { vibrate = !!v; try { localStorage.setItem('pente.vibrate', vibrate ? '1' : '0'); } catch (e) {} }
   function setEnabled(v) { enabled = !!v; try { localStorage.setItem('pente.sound', enabled ? '1' : '0'); } catch (e) {} }
 
-  root.PenteSound = { unlock: unlock, play: play, buzz: buzz, setEnabled: setEnabled, isEnabled: function () { return enabled; }, setVolume: setVolume, getVolume: function () { return volume; }, setVibrate: setVibrate, vibrateOn: function () { return vibrate; }, stats: stats, state: function () { return ctx ? ctx.state : 'sin-contexto'; } };
+  root.PenteSound = { context: ensure, unlock: unlock, play: play, buzz: buzz, setEnabled: setEnabled, isEnabled: function () { return enabled; }, setVolume: setVolume, getVolume: function () { return volume; }, setVibrate: setVibrate, vibrateOn: function () { return vibrate; }, stats: stats, state: function () { return ctx ? ctx.state : 'sin-contexto'; } };
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
+/* Música de fondo de Pente: tema original estilo "ascensor / lounge", sintetizado con WebAudio (no hay archivos de audio).
+ * 16 compases en loop (~42 s): Rhodes tranquilo, bajo, vibráfono, escobillas y un clic de aro en 2 y 4.
+ *   PenteMusic.kick()            -> llamarlo desde un gesto del usuario: si está activada, arranca
+ *   PenteMusic.setEnabled(bool) / isEnabled()   (se guarda en el dispositivo, clave pente.music)
+ *   PenteMusic.setVolume(0..1) / getVolume()     (clave pente.musicVol; independiente del volumen de los efectos)
+ * Se pausa sola cuando la pestaña queda oculta. */
+(function (root) {
+  'use strict';
+  var BPM = 92, EIGHTH = 60 / BPM / 2, LOOK = 0.45, TICK = 120;
+  var enabled = true, volume = 0.3;
+  try {
+    enabled = localStorage.getItem('pente.music') !== '0';
+    var v = parseFloat(localStorage.getItem('pente.musicVol')); if (v >= 0 && v <= 1) volume = v;
+  } catch (e) {}
+
+  // Acordes: voicing del Rhodes, raíz del bajo (MIDI) y melodía [posición en corcheas 0-7, nota, duración en corcheas]
+  var C = {
+    Cmaj7: [52, 55, 59, 62], Am7: [55, 60, 64, 67], Dm7: [53, 57, 60, 64], G7: [53, 59, 62, 65],
+    Em7: [55, 59, 62, 66], A7: [55, 61, 64], Fmaj7: [52, 57, 60, 64], Fm6: [56, 60, 62, 65]
+  };
+  var BARS = [
+    ['Cmaj7', 48, [[0, 76, 3], [3, 79, 1], [4, 83, 3]]],
+    ['Am7', 45, [[0, 81, 2], [2, 79, 2], [4, 76, 3]]],
+    ['Dm7', 50, [[1, 77, 1], [2, 74, 2], [4, 72, 2], [6, 69, 2]]],
+    ['G7', 43, [[0, 71, 3], [3, 74, 1], [4, 77, 4]]],
+    ['Em7', 40, [[0, 79, 2], [2, 76, 2], [4, 74, 2], [6, 71, 2]]],
+    ['A7', 45, [[0, 73, 3], [3, 76, 1], [4, 79, 3]]],
+    ['Dm7', 50, [[0, 77, 2], [2, 74, 2], [4, 69, 3]]],
+    ['G7', 43, [[1, 71, 1], [2, 74, 2], [4, 71, 2], [6, 74, 2]]],
+    ['Fmaj7', 41, [[0, 77, 3], [3, 81, 1], [4, 84, 3]]],
+    ['Fm6', 41, [[0, 80, 2], [2, 77, 2], [4, 74, 4]]],
+    ['Cmaj7', 48, [[0, 76, 3], [4, 72, 2], [6, 76, 2]]],
+    ['Am7', 45, [[0, 72, 2], [2, 76, 2], [4, 81, 4]]],
+    ['Dm7', 50, [[0, 77, 3], [3, 74, 1], [4, 69, 4]]],
+    ['G7', 43, [[0, 71, 2], [2, 74, 2], [4, 77, 2], [6, 74, 2]]],
+    ['Cmaj7', 48, [[0, 72, 4], [4, 76, 3]]],
+    ['G7', 43, [[2, 71, 1], [3, 74, 1], [4, 74, 4]]]
+  ];
+
+  var ctx = null, bus = null, verb = null, timer = null, playing = false, paused = false;
+  var step = 0, nextT = 0, noiseBuf = null;
+
+  function hz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+  function targetGain() { return enabled && !paused ? 1.0 * volume : 0; }
+  function fadeTo(g, secs) {
+    if (!bus || !ctx) return;
+    var t = ctx.currentTime;
+    try { bus.gain.cancelScheduledValues(t); bus.gain.setValueAtTime(bus.gain.value, t); bus.gain.linearRampToValueAtTime(g, t + secs); }
+    catch (e) { bus.gain.value = g; }
+  }
+
+  function build() {
+    ctx = root.PenteSound && root.PenteSound.context && root.PenteSound.context();
+    if (!ctx) return false;
+    if (bus) return true;
+    bus = ctx.createGain(); bus.gain.value = 0; bus.connect(ctx.destination);
+    // reverb sencilla: ruido que decae
+    var n = Math.floor(ctx.sampleRate * 2.2), ir = ctx.createBuffer(2, n, ctx.sampleRate);
+    for (var ch = 0; ch < 2; ch++) { var d = ir.getChannelData(ch); for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.6); }
+    verb = ctx.createConvolver(); verb.buffer = ir;
+    var wet = ctx.createGain(); wet.gain.value = 0.38; verb.connect(wet); wet.connect(bus);
+    noiseBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.2), ctx.sampleRate);
+    var nd = noiseBuf.getChannelData(0); for (var j = 0; j < nd.length; j++) nd[j] = Math.random() * 2 - 1;
+    return true;
+  }
+
+  // Una nota: suma de senos con envolvente; "send" = cuánto va a la reverb
+  function note(midi, t, dur, o) {
+    var f = hz(midi), g = ctx.createGain(), lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = o.cut || 3200;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(o.vol, t + (o.atk || 0.008));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    lp.connect(g); g.connect(bus);
+    var s = ctx.createGain(); s.gain.value = o.send || 0.3; g.connect(s); s.connect(verb);
+    o.parts.forEach(function (p) {
+      var os = ctx.createOscillator(), pg = ctx.createGain();
+      os.type = 'sine'; os.frequency.value = f * p[0];
+      pg.gain.setValueAtTime(p[1], t);
+      if (p[2]) pg.gain.exponentialRampToValueAtTime(0.0001, t + p[2]);   // parcial que se apaga rápido (el "tine")
+      os.connect(pg); pg.connect(lp); os.start(t); os.stop(t + dur + 0.05);
+    });
+  }
+  function rhodes(m, t, d, v) { note(m, t, d, { vol: v, cut: 2600, send: 0.35, atk: 0.012, parts: [[1, 1], [2, 0.28, d * 0.6], [7.1, 0.06, 0.12]] }); }
+  function vibes(m, t, d, v) { note(m, t, d, { vol: v, cut: 5200, send: 0.55, atk: 0.004, parts: [[1, 1], [4, 0.22, 0.35], [10, 0.05, 0.08]] }); }
+  function bass(m, t, d, v) { note(m, t, d, { vol: v, cut: 700, send: 0.05, atk: 0.015, parts: [[1, 1], [2, 0.25, 0.2]] }); }
+  function hush(t, dur, freq, vol, hp) {
+    var s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    s.buffer = noiseBuf; f.type = hp ? 'highpass' : 'bandpass'; f.frequency.value = freq; f.Q.value = 0.8;
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(f); f.connect(g); g.connect(bus); s.start(t); s.stop(t + dur + 0.02);
+  }
+
+  function schedule(bar, e, t) {                                  // e = corchea dentro del compás (0-7)
+    var b = BARS[bar], ch = C[b[0]], i;
+    if (e === 0) for (i = 0; i < ch.length; i++) rhodes(ch[i], t + i * 0.012, EIGHTH * 5.5, 0.075);        // acorde en 1
+    if (e === 3) for (i = 0; i < ch.length; i++) rhodes(ch[i], t + i * 0.012, EIGHTH * 1.6, 0.05);         // contratiempo corto
+    if (e === 0) bass(b[1], t, EIGHTH * 3.2, 0.2);
+    if (e === 4) bass(b[1] + 7, t, EIGHTH * 3, 0.15);
+    b[2].forEach(function (m) { if (m[0] === e) vibes(m[1], t, Math.min(1.8, EIGHTH * m[2] + 0.5), 0.085); });
+    hush(t, 0.07, 6500, e % 2 ? 0.02 : 0.035, true);              // escobillas: corcheas
+    if (e === 2 || e === 6) hush(t, 0.05, 1900, 0.06, false);     // clic de aro en 2 y 4
+  }
+
+  function tick() {
+    if (!ctx || !playing) return;
+    while (nextT < ctx.currentTime + LOOK) {
+      var s = step % (BARS.length * 8);
+      schedule(Math.floor(s / 8), s % 8, nextT);
+      nextT += EIGHTH; step++;
+    }
+  }
+  function begin() {
+    if (playing || !enabled || paused || !build()) return;
+    if (ctx.state === 'suspended') { try { ctx.resume(); } catch (e) {} }
+    playing = true; step = 0; nextT = ctx.currentTime + 0.15;
+    timer = setInterval(tick, TICK); tick();
+    fadeTo(targetGain(), 2.5);
+  }
+  function halt() {
+    if (!playing) return;
+    playing = false; clearInterval(timer); timer = null;
+  }
+  function kick() { if (enabled && !paused) { if (!playing) begin(); else fadeTo(targetGain(), 0.4); } }
+  function setEnabled(v) {
+    enabled = !!v; try { localStorage.setItem('pente.music', enabled ? '1' : '0'); } catch (e) {}
+    if (enabled) { var c = root.PenteSound && root.PenteSound.context && root.PenteSound.context(); if (c) { begin(); fadeTo(targetGain(), 1.2); } }
+    else { fadeTo(0, 0.8); setTimeout(function () { if (!enabled) halt(); }, 900); }
+  }
+  function setVolume(v) {
+    volume = Math.max(0, Math.min(1, v)); try { localStorage.setItem('pente.musicVol', String(volume)); } catch (e) {}
+    fadeTo(targetGain(), 0.15);
+  }
+
+  if (typeof document !== 'undefined') document.addEventListener('visibilitychange', function () {
+    if (document.hidden) { paused = true; fadeTo(0, 0.3); setTimeout(function () { if (paused) halt(); }, 400); }
+    else { paused = false; if (enabled) { if (ctx && ctx.state === 'suspended') { try { ctx.resume(); } catch (e) {} } begin(); fadeTo(targetGain(), 1.2); } }
+  });
+
+  root.PenteMusic = {
+    kick: kick, setEnabled: setEnabled, isEnabled: function () { return enabled; },
+    setVolume: setVolume, getVolume: function () { return volume; },
+    isPlaying: function () { return playing; }, bars: BARS.length, bpm: BPM
+  };
 })(typeof self !== 'undefined' ? self : this);
 </script>
 <script>
@@ -5012,7 +5183,7 @@ input.locked { opacity: .75; cursor: not-allowed; }
   $('btnLocalBack').addEventListener('click', function () { open('playOverlay'); });
   $('btnConfirm').addEventListener('click', function () { if (pending && !isOver()) tryMove(pending.x, pending.y); });
   // Sonido: los navegadores solo dejan activarlo después de un toque o clic del usuario
-  ['pointerdown', 'touchend', 'click', 'keydown'].forEach(function (ev) { document.addEventListener(ev, function () { if (window.PenteSound) window.PenteSound.unlock(); }, true); });
+  ['pointerdown', 'touchend', 'click', 'keydown'].forEach(function (ev) { document.addEventListener(ev, function () { if (window.PenteSound) window.PenteSound.unlock(); if (window.PenteMusic) window.PenteMusic.kick(); }, true); });
   /* ---------- Cartel de confirmación (reemplaza al confirm() del navegador, que se ve ajeno y frena el juego) ---------- */
   var dlgYes = null, dlgFocus = null;
   function ask(msg, yesLabel, onYes) {
@@ -5386,6 +5557,10 @@ input.locked { opacity: .75; cursor: not-allowed; }
     var vol = S ? Math.round(S.getVolume() * 100) : 0;
     $('cfgVolume').value = vol; $('cfgVolumeVal').textContent = vol + '%';
     $('cfgVolume').disabled = !(S && S.isEnabled());
+    var M = window.PenteMusic, mv = M ? Math.round(M.getVolume() * 100) : 0;
+    $('optMusic').checked = M ? M.isEnabled() : false;
+    $('cfgMusicVol').value = mv; $('cfgMusicVolVal').textContent = mv + '%';
+    $('cfgMusicVol').disabled = !(M && M.isEnabled());
   }
   function cfgChanged(key) {
     if (key === 'chat' && !cfg.chat) chatReset();
@@ -5399,6 +5574,8 @@ input.locked { opacity: .75; cursor: not-allowed; }
     i.addEventListener('change', function () { var k = i.getAttribute('data-cfg'); cfg[k] = i.checked; cfgChanged(k); });
   });
   $('optSound').addEventListener('change', function () { if (!S) return; S.setEnabled($('optSound').checked); syncCfgUi(); sfx('place'); });
+  $('optMusic').addEventListener('change', function () { if (!window.PenteMusic) return; window.PenteMusic.setEnabled($('optMusic').checked); syncCfgUi(); });
+  $('cfgMusicVol').addEventListener('input', function () { if (!window.PenteMusic) return; window.PenteMusic.setVolume($('cfgMusicVol').value / 100); $('cfgMusicVolVal').textContent = $('cfgMusicVol').value + '%'; });
   $('optVibrate').addEventListener('change', function () { if (!S) return; S.setVibrate($('optVibrate').checked); syncCfgUi(); buzz(30); });
   $('cfgVolume').addEventListener('input', function () { if (!S) return; S.setVolume($('cfgVolume').value / 100); $('cfgVolumeVal').textContent = $('cfgVolume').value + '%'; });
   $('cfgVolume').addEventListener('change', function () { sfx('place'); });       // al soltar el deslizador suena una muestra
@@ -5418,6 +5595,7 @@ input.locked { opacity: .75; cursor: not-allowed; }
       for (var k in CFG_DEFAULTS) cfg[k] = CFG_DEFAULTS[k];
       pending = hover = null; saveCfg();
       if (S) { S.setEnabled(true); S.setVolume(0.8); S.setVibrate(true); }
+      if (window.PenteMusic) { window.PenteMusic.setEnabled(true); window.PenteMusic.setVolume(0.3); }
       setTheme(window.Themes.defaultId); markPrefs();
       syncCfgUi(); render(); sfx('place');
     });
