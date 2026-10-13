@@ -559,7 +559,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v39</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v40</p></div>
     <div class="btns">
       <button class="btn primary" id="btnResume" hidden data-i18n="menu.resume"></button>
       <button class="btn primary" id="btnPlay" data-i18n="menu.play"></button>
@@ -992,7 +992,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 39;</script>
+<script>window.PENTE_VERSION = 40;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -1105,6 +1105,9 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
  *  - Victoria: 5 o más en línea (H, V, diagonales) o 5 pares capturados.
  *  - Orden de resolución: se colocan la ficha, se resuelven capturas, se evalúa victoria.
  *  - Empate: tablero lleno sin ganador.
+ *  - Modo 4 jugadores (opts.players = 4): 2 contra 2. Asientos 1,2,3,4 juegan en ese orden; 1 y 3 son el equipo 1, 2 y 4 el equipo 2.
+ *    Las fichas, capturas y victorias son POR EQUIPO (las fichas del equipo nunca se capturan entre sí). `current` sigue siendo el
+ *    equipo (1|2), así todo lo que ya existe para 2 jugadores sigue valiendo; `seatToMove(s)` dice qué asiento (1-4) le toca.
  *  - Regla de torneo (opcional, activada por defecto): la 1ª ficha del J1 va al centro y la
  *    2ª ficha del J1 debe estar a distancia >= 3 del centro (Chebyshev: fuera del cuadrado 5x5).
  */
@@ -1134,6 +1137,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     opts = opts || {};
     var size = opts.size || 19;
     return {
+      players: opts.players === 4 ? 4 : 2,
       size: size,
       board: new Array(size * size).fill(EMPTY),
       current: P1,
@@ -1159,7 +1163,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 
   function clone(s) {
     return {
-      size: s.size, board: s.board.slice(), current: s.current,
+      players: s.players, size: s.size, board: s.board.slice(), current: s.current,
       captures: { 1: s.captures[1], 2: s.captures[2] },
       moves: s.moves.slice(), lastMove: s.lastMove, status: s.status,
       winner: s.winner, winReasons: s.winReasons.slice(), winLine: s.winLine,
@@ -1238,7 +1242,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     n.board[y * n.size + x] = me;
     for (var i = 0; i < captured.length; i++) n.board[captured[i].y * n.size + captured[i].x] = EMPTY;
     n.captures[me] += captured.length / 2;
-    n.moves.push({ x: x, y: y, player: me, captured: captured });
+    n.moves.push({ x: x, y: y, player: me, seat: seatToMove(s), captured: captured });
     n.lastMove = { x: x, y: y, player: me };
 
     var reasons = [], line = null, winner = 0;
@@ -1265,6 +1269,18 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       n.current = opponent(me);
     }
     return { ok: true, state: n, captured: captured, won: n.status === 'won', draw: n.status === 'draw' };
+  }
+
+  /** Asiento (1..players) al que le toca jugar. En 2 jugadores coincide con el equipo. */
+  function seatToMove(s) { return (s.moves.length % (s.players || 2)) + 1; }
+  /** Equipo (1|2) de un asiento: 1 y 3 -> equipo 1; 2 y 4 -> equipo 2. */
+  function teamOfSeat(seat) { return seat % 2 === 1 ? P1 : P2; }
+  /** Asientos de un equipo (en 2 jugadores, el propio asiento). */
+  function seatsOfTeam(s, team) { return (s.players || 2) === 4 ? (team === P1 ? [1, 3] : [2, 4]) : [team]; }
+  /** Como playMove pero identificando al jugador por ASIENTO (1..players): valida que le toque a ese asiento y no solo a su equipo. */
+  function playMoveSeat(s, x, y, seat) {
+    if (s.status === 'playing' && seat !== seatToMove(s)) return { ok: false, error: ERR.NOT_YOUR_TURN };
+    return playMove(s, x, y, teamOfSeat(seat));
   }
 
   function isBoardFull(s) { for (var i = 0; i < s.board.length; i++) if (s.board[i] === EMPTY) return false; return true; }
@@ -1294,7 +1310,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 
   return {
     EMPTY: EMPTY, P1: P1, P2: P2, ERR: ERR,
-    createGame: createGame, validateMove: validateMove, playMove: playMove,
+    createGame: createGame, validateMove: validateMove, playMove: playMove, playMoveSeat: playMoveSeat,
+    seatToMove: seatToMove, teamOfSeat: teamOfSeat, seatsOfTeam: seatsOfTeam,
     findCaptures: findCaptures, findLine: findLine, legalMoves: legalMoves,
     opponent: opponent, get: get, inBounds: inBounds, center: center,
     winsNeededForBestOf: winsNeededForBestOf,
@@ -3885,7 +3902,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 
   /* Para que no trabe el celular: el loop se RENDERIZA UNA SOLA VEZ (OfflineAudioContext, en segundo plano) a un buffer,
    * y después solo se reproduce ese buffer en loop. Reproducir un buffer casi no cuesta nada; sintetizar en vivo sí. */
-  var RATE = 16000, CACHE_V = 'loop-v2-' + RATE + '-' + BARS.length, LOOP_S = BARS.length * 8 * EIGHTH, TAIL_S = 2.5;
+  var RATE = 16000, LOOP_S = BARS.length * 8 * EIGHTH, TAIL_S = 2.5;
   var ctx = null, bus = null, src = null, loopBuf = null, rendering = false, wanted = false, playing = false, paused = false;
   var oc = null, ob = null, verb = null, noiseBuf = null;      // contexto/nodos del render (solo existen mientras se renderiza)
 
@@ -3989,34 +4006,36 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     if (loopBuf) { startSource(); fadeTo(targetGain(), 2.5); return; }
     prerender();
   }
-  // Se puede renderizar antes del primer toque (no pide permiso); así cuando toques ya está lista.
-  // El loop ya renderizado se guarda en el dispositivo (IndexedDB): desde la segunda vez arranca al instante.
-  function cacheOpen(cb) {
-    try {
-      var rq = root.indexedDB.open('pente-music', 1);
-      rq.onupgradeneeded = function () { rq.result.createObjectStore('loop'); };
-      rq.onsuccess = function () { cb(rq.result); }; rq.onerror = function () { cb(null); };
-    } catch (e) { cb(null); }
-  }
-  function cacheGet(cb) {
-    cacheOpen(function (db) {
-      if (!db) return cb(null);
-      try { var g = db.transaction('loop').objectStore('loop').get(CACHE_V); g.onsuccess = function () { var v = g.result; cb(v && v.length === Math.floor(LOOP_S * RATE) ? v : null); }; g.onerror = function () { cb(null); }; }
-      catch (e) { cb(null); }
-    });
-  }
-  function cachePut(arr) { cacheOpen(function (db) { if (!db) return; try { db.transaction('loop', 'readwrite').objectStore('loop').put(arr, CACHE_V); } catch (e) {} }); }
   function ready(buf) {
     rendering = false; loopBuf = buf;
     if (buf && wanted && enabled && !paused) { startSource(); fadeTo(targetGain(), 2.5); }
   }
+  // El loop ya viene ARMADO como archivo (audio/loop-16k.wav, mono, 16 kHz, 16 bits): el celular solo lo descarga y lo lee.
+  // Sintetizarlo en el dispositivo (OfflineAudioContext) trababa el iPhone, por eso ya no se hace en uso normal.
+  var LOOP_URL = 'audio/loop-16k.wav';
+  function parseWav(ab) {
+    var dv = new DataView(ab), pos = 12, n = dv.byteLength;
+    if (n < 44 || dv.getUint32(0, false) !== 0x52494646) return null;                  // "RIFF"
+    while (pos + 8 <= n) {
+      var id = dv.getUint32(pos, false), size = dv.getUint32(pos + 4, true);
+      if (id === 0x64617461) {                                                         // "data"
+        var cnt = Math.min(size, n - pos - 8) >> 1, out = new Float32Array(cnt);
+        for (var i = 0; i < cnt; i++) out[i] = dv.getInt16(pos + 8 + i * 2, true) / 32768;
+        return out;
+      }
+      pos += 8 + size + (size & 1);
+    }
+    return null;
+  }
   function prerender() {
-    if (loopBuf || rendering || failed || root.PENTE_NOMUSIC) return;
+    if (loopBuf || rendering || failed || root.PENTE_NOMUSIC || typeof fetch !== 'function') return;
     rendering = true;
-    cacheGet(function (cached) {
-      if (cached) { ready(cached); return; }
-      render(function (buf) { if (buf) cachePut(buf); else failed = true; ready(buf); });
-    });
+    var fail = function () { failed = true; ready(null); };
+    try {
+      fetch(LOOP_URL).then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.arrayBuffer(); })
+        .then(function (ab) { var d = parseWav(ab); if (!d || d.length < RATE * 5) throw new Error('wav'); ready(d); })
+        .catch(fail);
+    } catch (e) { fail(); }
   }
 
   function kick() { if (enabled && !paused && !failed) { if (!playing) begin(); else fadeTo(targetGain(), 0.4); } }
@@ -4035,16 +4054,17 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     else { paused = false; if (enabled) { if (ctx && ctx.state === 'suspended') { try { ctx.resume(); } catch (e) {} } begin(); } }
   });
 
-  // Ya no se renderiza al abrir: en iPhone competía con el arranque. Se espera al primer toque y se deja respirar 2 s.
+  // Ya no se sintetiza en el celular: solo se descarga el archivo ya armado, después del primer toque.
   // (Si el loop ya está guardado en el dispositivo, igual arranca al instante.)
   var armed = false;
   function arm() {
     if (armed) return; armed = true;
-    setTimeout(function () { if (enabled && !paused) prerender(); }, 2000);
+    setTimeout(function () { if (enabled && !paused) prerender(); }, 500);
   }
   if (typeof document !== 'undefined') ['pointerdown', 'touchend', 'click', 'keydown'].forEach(function (ev) { document.addEventListener(ev, arm, { capture: true, passive: true, once: true }); });
 
   root.PenteMusic = {
+    _render: render,            // solo para tools/make_music.py (genera el archivo de audio); no se usa en el juego
     kick: kick, setEnabled: setEnabled, isEnabled: function () { return enabled; },
     setVolume: setVolume, getVolume: function () { return volume; },
     isPlaying: function () { return playing; }, isRendering: function () { return rendering; }, peak: function () { if (!loopBuf) return -1; var m = 0; for (var i = 0; i < loopBuf.length; i++) { var a = Math.abs(loopBuf[i]); if (a > m) m = a; } return m; }, bars: BARS.length, bpm: BPM
