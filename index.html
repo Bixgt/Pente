@@ -76,7 +76,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .modal p.sub { margin: 0 0 16px; color: var(--muted); }
 .field { margin: 12px 0; }
 .field label.lbl { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
-.field input[type=text] { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font: inherit; }
+.field input[type=text], .field input[type=email] { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font: inherit; }
 .check { display: flex; gap: 10px; align-items: flex-start; margin: 14px 0; }
 .check input { width: 22px; height: 22px; margin-top: 2px; flex: none; accent-color: var(--accent); }
 .check small { display: block; color: var(--muted); margin-top: 2px; }
@@ -307,6 +307,15 @@ html[data-theme="papel"] .modal.dlg p { font-size: 1.15em; }
 .gem-opt { width: 40px; height: 40px; border-radius: 50%; border: 3px solid var(--line); padding: 0; position: relative; box-shadow: inset 0 -3px 5px rgba(0,0,0,.35); }
 .gem-opt::after { content: ''; position: absolute; left: 22%; top: 16%; width: 34%; height: 20%; border-radius: 50%; background: rgba(255,255,255,.8); transform: rotate(-35deg); }
 .gem-opt[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent), inset 0 -3px 5px rgba(0,0,0,.35); }
+
+/* ---------- Cuenta ---------- */
+.acct { border-top: 1px solid var(--line); padding-top: 14px; }
+.acct input { margin-top: 8px; }
+.acct .btns { margin-top: 10px; flex-wrap: wrap; }
+.acct .who { margin: 4px 0 0; font-weight: 700; word-break: break-all; }
+.auth-msg { min-height: 1.4em; }
+.auth-msg.bad { color: var(--danger); font-weight: 600; }
+.auth-msg.good { color: var(--accent); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -586,6 +595,34 @@ html[data-theme="papel"] .modal.dlg p { font-size: 1.15em; }
     <div class="field"><label class="lbl" for="profName" data-i18n="prof.name"></label><input type="text" id="profName" maxlength="20" autocomplete="off" data-i18n-ph="prof.namePh"></div>
     <div class="field"><span class="lbl" data-i18n="prof.avatar"></span><div class="avatar-grid" id="avatarGrid"></div></div>
     <div class="field"><span class="lbl" data-i18n="prof.stats"></span><div class="prof-stats" id="profStats"></div><p class="hint" id="profNote"></p></div>
+    <div class="field acct" id="acctBox" hidden>
+      <span class="lbl" data-i18n="auth.title"></span>
+      <div id="acctOut">
+        <p class="hint" data-i18n="auth.intro"></p>
+        <input type="email" id="authEmail" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" data-i18n-ph="auth.emailPh" aria-label="Email">
+        <div class="btns"><button class="btn primary" id="btnSendCode" data-i18n="auth.send"></button></div>
+      </div>
+      <div id="acctCode" hidden>
+        <p class="hint" id="authSent"></p>
+        <input type="text" id="authCode" class="code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="7" data-i18n-ph="auth.codePh" aria-label="Code">
+        <div class="btns">
+          <button class="btn primary" id="btnVerify" data-i18n="auth.verify"></button>
+          <button class="btn" id="btnResend" data-i18n="auth.resend"></button>
+          <button class="btn" id="btnChangeEmail" data-i18n="auth.changeEmail"></button>
+        </div>
+      </div>
+      <div id="acctIn" hidden>
+        <p class="who" id="authWho"></p>
+        <p class="hint" id="authSync"></p>
+        <div class="btns">
+          <button class="btn" id="btnSyncNow" data-i18n="auth.syncNow"></button>
+          <button class="btn" id="btnSignOut" data-i18n="auth.signOut"></button>
+          <button class="btn" id="btnDelAcct" data-i18n="auth.delete"></button>
+        </div>
+      </div>
+      <p class="hint auth-msg" id="authMsg" role="status" aria-live="polite"></p>
+      <p class="hint" data-i18n="auth.privacy"></p>
+    </div>
     <div class="btns">
       <button class="btn primary" id="btnProfileBack" data-i18n="menu.back"></button>
       <button class="btn" id="btnProfReset" data-i18n="prof.reset"></button>
@@ -951,21 +988,34 @@ html[data-theme="papel"] .modal.dlg p { font-size: 1.15em; }
   function emojiOf(id) { for (var i = 0; i < AVATARS.length; i++) if (AVATARS[i][0] === id) return AVATARS[i][1]; return AVATARS[0][1]; }
   function cleanName(s) { return String(s == null ? '' : s).replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, NAME_MAX); }
   function num(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? Math.min(v, CAP) : 0; }
-  function empty() { return { v: 1, name: '', avatar: 'a1', stats: {} }; }
+  function empty() { return { v: 1, name: '', avatar: 'a1', stats: {}, uid: '', email: '', base: {}, nameAt: 0, prefsAt: 0 }; }
 
-  function normalize(raw) {                     // acepta cualquier cosa (localStorage viejo, roto o editado a mano) y devuelve un perfil válido
-    var p = empty();
-    if (!raw || typeof raw !== 'object') return p;
-    p.name = cleanName(raw.name);
-    p.avatar = AVATARS.some(function (a) { return a[0] === raw.avatar; }) ? raw.avatar : 'a1';
-    var st = raw.stats && typeof raw.stats === 'object' ? raw.stats : {};
+  function cleanStats(st) {
+    var out = {};
+    st = st && typeof st === 'object' ? st : {};
     MODES.forEach(function (m) {
       var s = st[m]; if (!s || typeof s !== 'object') return;
       var r = { p: num(s.p), w: num(s.w), l: num(s.l), d: num(s.d) };
       if (m === 'local') { r.w = r.l = r.d = 0; }
       else r.p = Math.max(r.p, r.w + r.l + r.d);
-      if (r.p) p.stats[m] = r;
+      if (r.p) out[m] = r;
     });
+    return out;
+  }
+  function validAvatar(a) { return AVATARS.some(function (x) { return x[0] === a; }) ? a : 'a1'; }
+  function ts(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 && v < 4102444800000 ? v : 0; }
+  function cleanUid(u) { u = String(u == null ? '' : u); return /^[0-9a-fA-F-]{36}$/.test(u) ? u.toLowerCase() : ''; }
+  function cleanEmail(e) { e = String(e == null ? '' : e).trim().slice(0, 120); return /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(e) ? e : ''; }
+
+  function normalize(raw) {                     // acepta cualquier cosa (localStorage viejo, roto o editado a mano) y devuelve un perfil válido
+    var p = empty();
+    if (!raw || typeof raw !== 'object') return p;
+    p.name = cleanName(raw.name);
+    p.avatar = validAvatar(raw.avatar);
+    p.stats = cleanStats(raw.stats);
+    p.uid = cleanUid(raw.uid); p.email = p.uid ? cleanEmail(raw.email) : '';
+    p.base = p.uid ? cleanStats(raw.base) : {};
+    p.nameAt = ts(raw.nameAt); p.prefsAt = ts(raw.prefsAt);
     return p;
   }
 
@@ -986,7 +1036,176 @@ html[data-theme="papel"] .modal.dlg p { font-size: 1.15em; }
     return t;
   }
 
-  return { AVATARS: AVATARS, MODES: MODES, NAME_MAX: NAME_MAX, emojiOf: emojiOf, cleanName: cleanName, empty: empty, normalize: normalize, record: record, totals: totals };
+  /* ----- Sincronización con la cuenta -----
+   * Los contadores se suman entre dispositivos: lo nuevo del remoto + lo que ESTE dispositivo jugó desde la última sincronización
+   * (stats - base). Así dos celulares que juegan por separado no se pisan. Nombre/avatar y preferencias: gana lo último que se tocó. */
+  function mergeStats(local, base, remote) {
+    var out = {};
+    MODES.forEach(function (m) {
+      var l = local[m] || {}, b = base[m] || {}, r = remote[m] || {}, o = {};
+      ['p', 'w', 'l', 'd'].forEach(function (k) { o[k] = num((r[k] || 0) + Math.max(0, (l[k] || 0) - (b[k] || 0))); });
+      if (m === 'local') o.w = o.l = o.d = 0; else o.p = Math.max(o.p, o.w + o.l + o.d);
+      if (o.p) out[m] = o;
+    });
+    return out;
+  }
+  function cleanPrefs(pr) {
+    pr = pr && typeof pr === 'object' ? pr : {};
+    var o = {};
+    if (typeof pr.theme === 'string' && /^[a-z]{1,20}$/.test(pr.theme)) o.theme = pr.theme;
+    if (typeof pr.lang === 'string' && /^[a-z]{2,5}$/.test(pr.lang)) o.lang = pr.lang;
+    if (pr.cfg && typeof pr.cfg === 'object' && !Array.isArray(pr.cfg)) o.cfg = pr.cfg;
+    return o;
+  }
+  /* local: perfil del dispositivo · remote: fila de la nube (o null si no hay) · uid: id de la cuenta · localPrefs: {theme, lang, cfg} actuales.
+   * Devuelve { profile (nuevo local), prefs (para aplicar acá o null), push (¿hay que subir?), body (lo que se sube) }. */
+  function merge(local, remote, uid, localPrefs) {
+    var L = normalize(local);
+    if (L.uid && L.uid !== uid) L = empty();              // otra cuenta en este dispositivo: los datos de la anterior no se mezclan
+    var rp = remote && typeof remote.prefs === 'object' && remote.prefs ? remote.prefs : {};
+    var R = { name: cleanName(remote && remote.name), avatar: validAvatar(remote && remote.avatar), stats: cleanStats(remote && remote.stats), at: ts(rp.at), nameAt: ts(rp.nameAt), prefs: cleanPrefs(rp) };
+    var stats = mergeStats(L.stats, L.uid === uid ? L.base : {}, R.stats);
+    var useLocalName = L.nameAt > R.nameAt || (R.nameAt === 0 && !!L.name);
+    var name = useLocalName ? L.name : (R.name || L.name), avatar = useLocalName ? L.avatar : R.avatar, nameAt = useLocalName ? L.nameAt : R.nameAt;
+    var useLocalPrefs = L.prefsAt > R.at, prefs = useLocalPrefs ? cleanPrefs(localPrefs) : R.prefs, prefsAt = useLocalPrefs ? L.prefsAt : R.at;
+    var body = { name: name || 'Jugador', avatar: avatar, stats: stats, prefs: {} };
+    Object.keys(prefs).forEach(function (k) { body.prefs[k] = prefs[k]; });
+    body.prefs.at = prefsAt; body.prefs.nameAt = nameAt;
+    var remoteBody = { name: R.name, avatar: R.avatar, stats: R.stats, prefs: Object.assign({}, R.prefs, { at: R.at, nameAt: R.nameAt }) };
+    var push = !remote || JSON.stringify(body) !== JSON.stringify(remoteBody);
+    var prof = { v: 1, name: name, avatar: avatar, stats: stats, uid: uid, email: L.email, base: JSON.parse(JSON.stringify(stats)), nameAt: nameAt, prefsAt: prefsAt };
+    return { profile: normalize(prof), prefs: (!useLocalPrefs && R.at > 0) ? R.prefs : null, push: push, body: body };
+  }
+
+  return { merge: merge, mergeStats: mergeStats, AVATARS: AVATARS, MODES: MODES, NAME_MAX: NAME_MAX, emojiOf: emojiOf, cleanName: cleanName, empty: empty, normalize: normalize, record: record, totals: totals };
+});
+</script>
+<script>
+/*
+ * CUENTA — ingreso por email con código de 6 dígitos (sin contraseñas) + lectura/escritura del perfil en Supabase.
+ * Habla directo con la API de Supabase por fetch (GoTrue + PostgREST): sin librerías. Sin DOM: se prueba en Node con un fetch falso.
+ * Seguridad: la clave pública (publishable) puede estar en el código; lo que protege los datos son las reglas RLS de supabase/schema.sql.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.PenteAuth = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+  var KEY = 'pente.auth';
+
+  function AuthError(code, status, msg) { var e = new Error(msg || code); e.code = code; e.status = status || 0; return e; }
+
+  function create(opts) {
+    opts = opts || {};
+    var url = String(opts.url || '').replace(/\/+$/, ''), apikey = opts.key || '';
+    var doFetch = opts.fetch || (typeof fetch === 'function' ? fetch.bind(typeof self !== 'undefined' ? self : globalThis) : null);
+    var store = opts.storage || null, now = opts.now || function () { return Math.floor(Date.now() / 1000); };
+    var session = null, refreshing = null;
+
+    function load() {
+      try {
+        var s = JSON.parse(store.getItem(KEY) || 'null');
+        if (s && typeof s.access_token === 'string' && typeof s.refresh_token === 'string' && s.user && typeof s.user.id === 'string') session = s;
+      } catch (e) { session = null; }
+    }
+    function save() { try { if (session) store.setItem(KEY, JSON.stringify(session)); else store.removeItem(KEY); } catch (e) {} }
+    function setSession(d) {
+      var u = d.user || {};
+      session = { access_token: d.access_token, refresh_token: d.refresh_token, expires_at: d.expires_at || (now() + (d.expires_in || 3600)), user: { id: u.id || (session && session.user.id), email: u.email || (session && session.user.email) || '' } };
+      save();
+    }
+    function clear() { session = null; save(); }
+    if (store) load();
+
+    function enabled() { return !!(url && apikey && doFetch); }
+
+    /* Pedido crudo. Devuelve el JSON (o null). Errores con .code: network | rate | invalid | auth | server */
+    function raw(method, path, body, token, extra) {
+      if (!enabled()) return Promise.reject(AuthError('off'));
+      var h = { apikey: apikey, Authorization: 'Bearer ' + (token || apikey), 'Content-Type': 'application/json' };
+      if (extra) Object.keys(extra).forEach(function (k) { h[k] = extra[k]; });
+      return doFetch(url + path, { method: method, headers: h, body: body === undefined ? undefined : JSON.stringify(body) }).then(function (r) {
+        return r.text().then(function (txt) {
+          var j = null; try { j = txt ? JSON.parse(txt) : null; } catch (e) {}
+          if (r.ok) return j;
+          var msg = String((j && (j.msg || j.message || j.error_description || j.error)) || ''), c = String((j && (j.error_code || j.code)) || '');
+          var code = r.status === 429 || /rate limit|too many|only request this after/i.test(msg) || c === 'over_email_send_rate_limit' ? 'rate'
+            : !/jwt/i.test(msg) && (/otp_expired|otp_disabled/.test(c) || /token.*(expired|invalid)|invalid.*(token|otp|code)/i.test(msg)) ? 'invalid'
+            : r.status === 401 || r.status === 403 ? 'auth'
+            : r.status >= 500 ? 'server'
+            : /expired|invalid|otp/i.test(msg + c) ? 'invalid'
+            : /email/i.test(msg + c) ? 'email' : 'bad';
+          throw AuthError(code, r.status, msg);
+        });
+      }, function () { throw AuthError('network'); });
+    }
+
+    function refresh() {
+      if (!session) return Promise.reject(AuthError('auth', 401));
+      if (refreshing) return refreshing;
+      refreshing = raw('POST', '/auth/v1/token?grant_type=refresh_token', { refresh_token: session.refresh_token }).then(function (d) {
+        refreshing = null; setSession(d); return session;
+      }, function (e) {
+        refreshing = null;
+        if (e.code === 'auth' || e.code === 'invalid' || e.code === 'bad') clear();      // el refresh ya no sirve: hay que volver a entrar
+        throw e;
+      });
+      return refreshing;
+    }
+    function token() {
+      if (!session) return Promise.reject(AuthError('auth', 401));
+      if (session.expires_at - now() > 60) return Promise.resolve(session.access_token);
+      return refresh().then(function (s) { return s.access_token; });
+    }
+    /* Pedido con sesión; si el token venció a mitad de camino, renueva una vez y repite. */
+    function authed(method, path, body, extra) {
+      return token().then(function (tk) {
+        return raw(method, path, body, tk, extra).catch(function (e) {
+          if (e.code !== 'auth' || !session) throw e;
+          return refresh().then(function (s) { return raw(method, path, body, s.access_token, extra); });
+        });
+      });
+    }
+
+    function cleanEmail(e) { e = String(e || '').trim().toLowerCase(); return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e) && e.length <= 254 ? e : ''; }
+    function cleanCode(c) { c = String(c || '').replace(/\D/g, ''); return c.length === 6 ? c : ''; }
+
+    return {
+      enabled: enabled, cleanEmail: cleanEmail, cleanCode: cleanCode,
+      get user() { return session ? session.user : null; },
+      sendCode: function (email) {
+        var em = cleanEmail(email); if (!em) return Promise.reject(AuthError('email'));
+        return raw('POST', '/auth/v1/otp', { email: em, create_user: true }).then(function () { return em; });
+      },
+      verify: function (email, code) {
+        var em = cleanEmail(email), cd = cleanCode(code);
+        if (!em) return Promise.reject(AuthError('email'));
+        if (!cd) return Promise.reject(AuthError('invalid'));
+        function go(type) { return raw('POST', '/auth/v1/verify', { type: type, email: em, token: cd }); }
+        return go('email').catch(function (e) { if (e.code === 'invalid' || e.code === 'bad') return go('signup'); throw e; }).then(function (d) {
+          if (!d || !d.access_token || !d.refresh_token) throw AuthError('server');
+          setSession(d); return session.user;
+        });
+      },
+      getProfile: function () {
+        return authed('GET', '/rest/v1/profiles?select=name,avatar,prefs,stats&id=eq.' + encodeURIComponent(session.user.id), undefined, { Accept: 'application/json' }).then(function (rows) { return rows && rows[0] ? rows[0] : null; });
+      },
+      saveProfile: function (body) {
+        var row = { id: session.user.id, name: body.name, avatar: body.avatar, prefs: body.prefs, stats: body.stats };
+        return authed('POST', '/rest/v1/profiles?on_conflict=id', row, { Prefer: 'resolution=merge-duplicates,return=minimal' }).then(function () { return true; });
+      },
+      signOut: function () {
+        var tk = session && session.access_token;
+        clear();
+        if (!tk) return Promise.resolve();
+        return raw('POST', '/auth/v1/logout?scope=local', {}, tk).catch(function () {});     // si no hay red igual queda cerrada acá
+      },
+      deleteAccount: function () {
+        return authed('POST', '/rest/v1/rpc/delete_my_account', {}).then(function () { clear(); return true; });
+      }
+    };
+  }
+  return { create: create };
 });
 </script>
 <script>
@@ -1789,7 +2008,7 @@ html[data-theme="papel"] .modal.dlg p { font-size: 1.15em; }
   Object.assign(root.I18n.STRINGS.es, {
     'menu.profile': 'Perfil',
     'prof.title': 'Tu perfil',
-    'prof.sub': 'Por ahora se guarda en este dispositivo.',
+    'prof.sub': 'Tu nombre, tu avatar y tus partidas.',
     'prof.name': 'Tu nombre',
     'prof.namePh': 'Cómo te llaman',
     'prof.avatar': 'Avatar',
@@ -1819,7 +2038,7 @@ html[data-theme="papel"] .modal.dlg p { font-size: 1.15em; }
   Object.assign(root.I18n.STRINGS.en, {
     'menu.profile': 'Profile',
     'prof.title': 'Your profile',
-    'prof.sub': 'For now it is saved on this device.',
+    'prof.sub': 'Your name, your avatar and your games.',
     'prof.name': 'Your name',
     'prof.namePh': 'What people call you',
     'prof.avatar': 'Avatar',
@@ -1839,6 +2058,90 @@ html[data-theme="papel"] .modal.dlg p { font-size: 1.15em; }
     'prof.mode.online': 'Online',
     'prof.reset': 'Delete my data',
     'prof.resetConfirm': 'Delete name, avatar and stats from this device? This can\'t be undone.'
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
+/* Textos de la cuenta — español */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.es, {
+    'auth.title': 'Cuenta',
+    'auth.intro': 'Entrá con tu email y tu perfil queda guardado en la nube: lo ves igual en el celu, la compu y la tablet. Sin contraseñas: te mandamos un código.',
+    'auth.emailPh': 'tu@email.com',
+    'auth.send': 'Mandame el código',
+    'auth.sending': 'Enviando…',
+    'auth.sent': 'Te mandamos un código de 6 dígitos a {email}. Puede tardar un minuto; mirá también en spam.',
+    'auth.codePh': '000000',
+    'auth.verify': 'Entrar',
+    'auth.verifying': 'Verificando…',
+    'auth.resend': 'Reenviar',
+    'auth.resendIn': 'Reenviar ({s})',
+    'auth.changeEmail': 'Cambiar email',
+    'auth.who': 'Sesión iniciada: {email}',
+    'auth.syncNow': 'Sincronizar',
+    'auth.signOut': 'Cerrar sesión',
+    'auth.signOutConfirm': 'Se cierra la sesión y se borran de este aparato tu nombre, avatar y estadísticas. Quedan guardados en tu cuenta.',
+    'auth.delete': 'Borrar mi cuenta',
+    'auth.deleteConfirm': '¿Borrar tu cuenta y todo lo que guardamos (email, nombre, avatar, estadísticas, preferencias)? No se puede deshacer.',
+    'auth.sync.run': 'Sincronizando…',
+    'auth.sync.ok': 'Sincronizado a las {time}.',
+    'auth.sync.idle': 'Todavía no se sincronizó.',
+    'auth.sync.err': 'No se pudo sincronizar. Se reintenta solo.',
+    'auth.sync.offline': 'Sin conexión: se sincroniza cuando vuelva internet.',
+    'auth.welcome': '¡Listo! Ya estás adentro.',
+    'auth.loggedOut': 'Sesión cerrada.',
+    'auth.deleted': 'Cuenta borrada.',
+    'auth.err.email': 'Ese email no parece válido.',
+    'auth.err.invalid': 'Código incorrecto o vencido. Revisalo o pedí uno nuevo.',
+    'auth.err.rate': 'Pediste muchos códigos seguidos. Esperá unos minutos y probá de nuevo.',
+    'auth.err.network': 'No hay conexión. Probá de nuevo con internet.',
+    'auth.err.expired': 'Se venció tu sesión. Entrá de nuevo con tu email.',
+    'auth.err.generic': 'Algo falló. Probá de nuevo en un rato.',
+    'auth.err.signOut': 'No pude guardar tus últimos cambios en la nube. Probá de nuevo con internet para no perderlos.',
+    'auth.privacy': 'Guardamos solo tu email, nombre, avatar, estadísticas y preferencias. Las estadísticas las informa tu navegador; por eso por ahora no hay ranking.'
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
+/* Account texts — English */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.en, {
+    'auth.title': 'Account',
+    'auth.intro': 'Sign in with your email and your profile is saved in the cloud: same on your phone, computer and tablet. No passwords: we send you a code.',
+    'auth.emailPh': 'you@email.com',
+    'auth.send': 'Send me the code',
+    'auth.sending': 'Sending…',
+    'auth.sent': 'We sent a 6-digit code to {email}. It can take a minute; check spam too.',
+    'auth.codePh': '000000',
+    'auth.verify': 'Sign in',
+    'auth.verifying': 'Checking…',
+    'auth.resend': 'Resend',
+    'auth.resendIn': 'Resend ({s})',
+    'auth.changeEmail': 'Change email',
+    'auth.who': 'Signed in: {email}',
+    'auth.syncNow': 'Sync',
+    'auth.signOut': 'Sign out',
+    'auth.signOutConfirm': 'This signs you out and removes your name, avatar and stats from this device. They stay saved in your account.',
+    'auth.delete': 'Delete my account',
+    'auth.deleteConfirm': 'Delete your account and everything we store (email, name, avatar, stats, preferences)? This can\'t be undone.',
+    'auth.sync.run': 'Syncing…',
+    'auth.sync.ok': 'Synced at {time}.',
+    'auth.sync.idle': 'Not synced yet.',
+    'auth.sync.err': 'Couldn\'t sync. It retries by itself.',
+    'auth.sync.offline': 'Offline: it syncs when the internet is back.',
+    'auth.welcome': 'Done! You\'re in.',
+    'auth.loggedOut': 'Signed out.',
+    'auth.deleted': 'Account deleted.',
+    'auth.err.email': 'That email doesn\'t look valid.',
+    'auth.err.invalid': 'Wrong or expired code. Check it or ask for a new one.',
+    'auth.err.rate': 'You asked for too many codes in a row. Wait a few minutes and try again.',
+    'auth.err.network': 'No connection. Try again when you\'re online.',
+    'auth.err.expired': 'Your session expired. Sign in again with your email.',
+    'auth.err.generic': 'Something failed. Try again in a while.',
+    'auth.err.signOut': 'I couldn\'t save your latest changes to the cloud. Try again online so you don\'t lose them.',
+    'auth.privacy': 'We only store your email, name, avatar, stats and preferences. Stats are reported by your browser, so there is no ranking for now.'
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -2290,20 +2593,23 @@ html[data-theme="papel"] .modal.dlg p { font-size: 1.15em; }
   var coarse = matchMedia('(pointer: coarse)').matches, reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var CFG_DEFAULTS = { confirm: 'button', lift: 'mid', guides: true, coords: true, lastMove: true, anim: true, stoneSize: 'normal', zone: true, captureFx: 'shatter', chat: true, loupe: false, gem1: 'azul', gem2: 'verde' };
   var CFG_ALLOWED = { confirm: ['button', 'double', 'none'], lift: ['low', 'mid', 'high'], stoneSize: ['small', 'normal', 'large'], captureFx: ['shatter', 'fade', 'none'], gem1: window.Themes.gems.map(function (g) { return g.id; }), gem2: window.Themes.gems.map(function (g) { return g.id; }) };
-  function loadCfg() {
-    var c = {}, k, raw = null;
+  function cleanCfg(raw) {
+    var c = {}, k;
     for (k in CFG_DEFAULTS) c[k] = CFG_DEFAULTS[k];
-    try {
-      raw = JSON.parse(localStorage.getItem('pente.cfg') || 'null');
-      if (!raw) { var old = localStorage.getItem('pente.confirm'); if (old === '1') c.confirm = 'button'; else if (old === '0') c.confirm = 'none'; }   // versión anterior
-    } catch (e) { raw = null; }
     if (raw && typeof raw === 'object') for (k in CFG_DEFAULTS) {
       if (CFG_ALLOWED[k]) { if (CFG_ALLOWED[k].indexOf(raw[k]) >= 0) c[k] = raw[k]; }
       else if (typeof raw[k] === 'boolean') c[k] = raw[k];
     }
     return c;
   }
-  function saveCfg() { try { localStorage.setItem('pente.cfg', JSON.stringify(cfg)); } catch (e) {} }
+  function loadCfg() {
+    var raw = null;
+    try { raw = JSON.parse(localStorage.getItem('pente.cfg') || 'null'); } catch (e) { raw = null; }
+    var c = cleanCfg(raw);
+    if (!raw) { try { var old = localStorage.getItem('pente.confirm'); if (old === '1') c.confirm = 'button'; else if (old === '0') c.confirm = 'none'; } catch (e) {} }   // versión anterior
+    return c;
+  }
+  function saveCfg() { try { localStorage.setItem('pente.cfg', JSON.stringify(cfg)); } catch (e) {} markPrefs(); }
   var cfg = loadCfg();
   /* Perfil del jugador (src/profile.js): nombre, avatar y estadísticas. Por ahora vive en este dispositivo. */
   var PP = window.PenteProfile, profile = PP.empty(), recorded = false;
@@ -3033,7 +3339,7 @@ html[data-theme="papel"] .modal.dlg p { font-size: 1.15em; }
       });
       var lb = document.createElement('span'); lb.textContent = t('theme.' + th.id);
       b.appendChild(sw); b.appendChild(lb);
-      b.addEventListener('click', function () { setTheme(th.id); });
+      b.addEventListener('click', function () { setTheme(th.id); markPrefs(); });
       box.appendChild(b);
     });
     setTheme(themeId);
@@ -3101,7 +3407,7 @@ html[data-theme="papel"] .modal.dlg p { font-size: 1.15em; }
     var w = online.active ? (online.over ? online.over.winner : state.winner) : localOver ? localOver.winner : state.winner;
     var mode = online.active ? 'online' : ai.active ? 'ai_' + ai.level : 'local', me = online.active ? online.me : ai.active ? ai.human : 0;
     profile = PP.record(profile, mode, !me ? 'played' : !w ? 'draw' : w === me ? 'win' : 'loss');
-    saveProfile();
+    saveProfile(); scheduleSync(1500);
   }
   function showEnd() {
     if (!state || !isOver()) return;
@@ -3464,7 +3770,7 @@ html[data-theme="papel"] .modal.dlg p { font-size: 1.15em; }
     window.I18n.available().forEach(function (code) {
       var b = document.createElement('button'); b.type = 'button'; b.className = 'btn lang-opt'; b.dataset.code = code;
       b.textContent = window.I18n.STRINGS[code]['lang.name'] || code; b.setAttribute('aria-pressed', String(code === window.I18n.getLang()));
-      b.addEventListener('click', function () { setLanguage(code); });
+      b.addEventListener('click', function () { setLanguage(code); markPrefs(); });
       box.appendChild(b);
     });
   }
@@ -3485,7 +3791,7 @@ html[data-theme="papel"] .modal.dlg p { font-size: 1.15em; }
     document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = t(el.getAttribute('data-i18n')); });
     document.querySelectorAll('[data-i18n-aria]').forEach(function (el) { el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria'))); });
     $('btnLang').textContent = '🌐 ' + t('menu.language') + ' · ' + t('lang.name');
-    renderProfileBtn();
+    renderProfileBtn(); if (Auth !== undefined) renderAcct();
     document.documentElement.lang = window.I18n.getLang();
     document.querySelectorAll('[data-i18n-ph]').forEach(function (el) { el.placeholder = t(el.getAttribute('data-i18n-ph')); });
     canvas.setAttribute('aria-label', t('a11y.board'));
@@ -3813,7 +4119,7 @@ html[data-theme="papel"] .modal.dlg p { font-size: 1.15em; }
     var g = $('avatarGrid'); g.innerHTML = '';
     PP.AVATARS.forEach(function (a) {
       var b = document.createElement('button'); b.type = 'button'; b.className = 'avatar-opt'; b.textContent = a[1]; b.setAttribute('aria-pressed', String(a[0] === profile.avatar)); b.dataset.id = a[0];
-      b.addEventListener('click', function () { profile.avatar = a[0]; saveProfile(); renderProfile(); renderProfileBtn(); });
+      b.addEventListener('click', function () { profile.avatar = a[0]; profile.nameAt = Date.now(); saveProfile(); renderProfile(); renderProfileBtn(); scheduleSync(1500); });
       g.appendChild(b);
     });
     $('profName').value = profile.name;
@@ -3828,10 +4134,10 @@ html[data-theme="papel"] .modal.dlg p { font-size: 1.15em; }
     var tot = PP.totals(profile);
     $('profNote').textContent = tot.p ? t('prof.localNote') : t('prof.noGames');
   }
-  $('btnProfile').addEventListener('click', function () { renderProfile(); open('profileOverlay'); });
+  $('btnProfile').addEventListener('click', function () { renderProfile(); renderAcct(); open('profileOverlay'); });
   $('btnProfileBack').addEventListener('click', function () { open('menuOverlay'); });
   $('profName').addEventListener('input', function () {
-    profile.name = PP.cleanName($('profName').value); saveProfile(); renderProfileBtn(); applyProfileName();
+    profile.name = PP.cleanName($('profName').value); profile.nameAt = Date.now(); saveProfile(); renderProfileBtn(); applyProfileName(); scheduleSync(2500);
     try { localStorage.setItem('pente.name', profile.name); } catch (e) {}
   });
   $('btnProfReset').addEventListener('click', function () {
@@ -3842,6 +4148,147 @@ html[data-theme="papel"] .modal.dlg p { font-size: 1.15em; }
   });
   if (profile.name) applyProfileName();
   renderProfileBtn();
+
+  /* ---------- Cuenta (email + código) y sincronización con Supabase ----------
+   * Todo el perfil sigue funcionando sin cuenta. Con cuenta, cada cambio se sube (con un respiro de 1-2 s) y al volver a la página se baja lo nuevo.
+   * Las reglas de mezcla están en PenteProfile.merge (con tests): los contadores se suman entre aparatos, nombre y preferencias gana lo último tocado. */
+  var SB = window.PENTE_SUPABASE || {};
+  var Auth = window.PenteAuth && SB.url && SB.key ? window.PenteAuth.create({ url: SB.url, key: SB.key, storage: window.localStorage }) : null;
+  var acct = { step: 'out', email: '', cd: 0, cdTimer: 0, busy: false }, sync = { busy: false, dirty: false, timer: 0, state: 'idle', at: 0, err: '', promise: null };
+  var applyingRemote = false;
+  function curPrefs() { return { theme: themeId, lang: window.I18n.getLang(), cfg: cfg }; }
+  function markPrefs() { if (applyingRemote) return; profile.prefsAt = Date.now(); saveProfile(); scheduleSync(2000); }
+  function applyRemotePrefs(p) {
+    applyingRemote = true;
+    try {
+      if (p.theme && window.Themes.byId[p.theme] && p.theme !== themeId) setTheme(p.theme);
+      if (p.lang && window.I18n.STRINGS[p.lang] && p.lang !== window.I18n.getLang()) setLanguage(p.lang);
+      if (p.cfg) {
+        var c = cleanCfg(p.cfg); for (var k in c) cfg[k] = c[k];
+        pending = hover = null; saveCfg(); applyThemeCss(); buildGemPickers(); syncCfgUi(); render(); updateSide();
+      }
+    } finally { applyingRemote = false; }
+  }
+  function scheduleSync(ms) {
+    if (!Auth || !Auth.user) return;
+    clearTimeout(sync.timer); sync.timer = setTimeout(syncProfile, ms == null ? 2000 : ms);
+  }
+  function syncProfile() {
+    if (!Auth || !Auth.user) return Promise.resolve(false);
+    clearTimeout(sync.timer);
+    if (sync.busy) { sync.dirty = true; return sync.promise; }
+    sync.busy = true; sync.state = 'run'; renderAcct();
+    var uid = Auth.user.id, snap = null;
+    sync.promise = Auth.getProfile().then(function (remote) {
+      if (!Auth.user || Auth.user.id !== uid) throw new Error('gone');
+      if (!profile.prefsAt && !(remote && remote.prefs && remote.prefs.at)) { profile.prefsAt = Date.now(); saveProfile(); }     // cuenta nueva: se suben las preferencias de este aparato
+      snap = JSON.parse(JSON.stringify(profile));
+      var m = PP.merge(snap, remote, uid, curPrefs());
+      return m.push ? Auth.saveProfile(m.body).then(function () { return m; }) : m;
+    }).then(function (m) {
+      var cur = profile, np = m.profile, oldName = cur.name;
+      np.stats = PP.mergeStats(cur.stats, snap.stats, np.stats);               // lo que se jugó mientras se sincronizaba no se pierde
+      if (JSON.stringify(np.stats) !== JSON.stringify(np.base)) sync.dirty = true;
+      if (cur.nameAt !== snap.nameAt) { np.name = cur.name; np.avatar = cur.avatar; np.nameAt = cur.nameAt; sync.dirty = true; }
+      if (cur.prefsAt !== snap.prefsAt) { np.prefsAt = cur.prefsAt; sync.dirty = true; }
+      np.email = Auth.user.email;
+      profile = PP.normalize(np); saveProfile();
+      if (m.prefs && cur.prefsAt === snap.prefsAt) applyRemotePrefs(m.prefs);
+      if (profile.name !== oldName) { applyProfileName(); try { localStorage.setItem('pente.name', profile.name); } catch (e) {} }
+      renderProfileBtn();
+      if ($('profileOverlay').classList.contains('open') && document.activeElement !== $('profName')) renderProfile();
+      sync.state = 'ok'; sync.at = Date.now(); sync.err = '';
+      return true;
+    }).catch(function (e) {
+      if (e && e.message === 'gone') { sync.state = 'idle'; return false; }
+      sync.state = 'err'; sync.err = (e && e.code) || 'generic';
+      if (sync.err !== 'network') sync.dirty = false;                          // no reintentar en bucle un error que no es de conexión
+      return false;
+    }).then(function (ok) {
+      sync.busy = false; renderAcct();
+      if (sync.dirty && Auth.user) { sync.dirty = false; scheduleSync(ok ? 500 : 15000); }
+      return ok;
+    });
+    return sync.promise;
+  }
+  function authErr(e) {
+    var c = e && e.code; return t(c === 'email' ? 'auth.err.email' : c === 'invalid' ? 'auth.err.invalid' : c === 'rate' ? 'auth.err.rate' : c === 'network' ? 'auth.err.network' : c === 'auth' ? 'auth.err.expired' : 'auth.err.generic');
+  }
+  function authMsg(txt, kind) { var m = $('authMsg'); m.textContent = txt || ''; m.className = 'hint auth-msg' + (kind ? ' ' + kind : ''); }
+  function renderAcct() {
+    var box = $('acctBox'); if (!box) return;
+    box.hidden = !Auth;
+    $('btnProfReset').hidden = !!(Auth && Auth.user);                          // con cuenta, "Borrar mis datos" se reemplaza por "Cerrar sesión" / "Borrar mi cuenta"
+    if (!Auth) return;
+    var logged = !!Auth.user, step = logged ? 'in' : acct.step;
+    $('acctOut').hidden = step !== 'out'; $('acctCode').hidden = step !== 'code'; $('acctIn').hidden = step !== 'in';
+    if (logged) {
+      $('authWho').textContent = t('auth.who', { email: Auth.user.email });
+      var tm = sync.at ? new Date(sync.at).toLocaleTimeString(window.I18n.getLang(), { hour: '2-digit', minute: '2-digit' }) : '';
+      $('authSync').textContent = sync.state === 'run' ? t('auth.sync.run') : sync.state === 'ok' ? t('auth.sync.ok', { time: tm })
+        : sync.state === 'err' ? t(sync.err === 'network' ? 'auth.sync.offline' : 'auth.sync.err') : t('auth.sync.idle');
+      $('btnSyncNow').disabled = sync.busy;
+    }
+    if (step === 'code') {
+      $('authSent').textContent = t('auth.sent', { email: acct.email });
+      $('btnResend').disabled = acct.cd > 0 || acct.busy; $('btnResend').textContent = acct.cd > 0 ? t('auth.resendIn', { s: acct.cd }) : t('auth.resend');
+      $('btnVerify').disabled = acct.busy;
+    }
+    $('btnSendCode').disabled = acct.busy;
+  }
+  function startCooldown(n) {
+    clearInterval(acct.cdTimer); acct.cd = n;
+    acct.cdTimer = setInterval(function () { acct.cd--; if (acct.cd <= 0) clearInterval(acct.cdTimer); renderAcct(); }, 1000);
+  }
+  function sendCode(isResend) {
+    if (!Auth || acct.busy) return;
+    var em = isResend ? acct.email : Auth.cleanEmail($('authEmail').value);
+    if (!em) { authMsg(t('auth.err.email'), 'bad'); $('authEmail').focus(); return; }
+    acct.busy = true; authMsg(t('auth.sending')); renderAcct();
+    Auth.sendCode(em).then(function () {
+      acct.email = em; acct.step = 'code'; acct.busy = false; authMsg(''); startCooldown(60); renderAcct(); $('authCode').value = ''; $('authCode').focus();
+    }, function (e) { acct.busy = false; authMsg(authErr(e), 'bad'); renderAcct(); });
+  }
+  function verifyCode() {
+    if (!Auth || acct.busy) return;
+    var cd = Auth.cleanCode($('authCode').value);
+    if (!cd) { authMsg(t('auth.err.invalid'), 'bad'); $('authCode').focus(); return; }
+    acct.busy = true; authMsg(t('auth.verifying')); renderAcct();
+    Auth.verify(acct.email, cd).then(function () {
+      acct.busy = false; acct.step = 'out'; clearInterval(acct.cdTimer); $('authCode').value = ''; $('authEmail').value = '';
+      authMsg(t('auth.welcome'), 'good'); renderAcct(); return syncProfile();
+    }, function (e) { acct.busy = false; authMsg(authErr(e), 'bad'); renderAcct(); });
+  }
+  function wipeLocalProfile() {                                               // al salir, el aparato queda limpio (la persona sigue teniendo todo en su cuenta)
+    profile = PP.empty(); saveProfile(); try { localStorage.removeItem('pente.name'); } catch (e) {}
+    sync.state = 'idle'; sync.at = 0; applyProfileName(); renderProfile(); renderProfileBtn(); renderAcct(); updateHud();
+  }
+  $('btnSendCode').addEventListener('click', function () { sendCode(false); });
+  $('btnResend').addEventListener('click', function () { sendCode(true); });
+  $('btnVerify').addEventListener('click', verifyCode);
+  $('btnChangeEmail').addEventListener('click', function () { acct.step = 'out'; clearInterval(acct.cdTimer); authMsg(''); renderAcct(); $('authEmail').focus(); });
+  $('authEmail').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); sendCode(false); } });
+  $('authCode').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); verifyCode(); } });
+  $('authCode').addEventListener('input', function () { if (Auth && Auth.cleanCode($('authCode').value)) verifyCode(); });      // al completar los 6 dígitos entra solo
+  $('btnSyncNow').addEventListener('click', function () { authMsg(''); syncProfile(); });
+  $('btnSignOut').addEventListener('click', function () {
+    ask(t('auth.signOutConfirm'), t('auth.signOut'), function () {
+      authMsg(t('auth.sync.run'));
+      syncProfile().then(function (ok) {
+        if (!ok && sync.err === 'network') { authMsg(t('auth.err.signOut'), 'bad'); return; }          // no se pierde nada sin subir
+        return Auth.signOut().then(function () { wipeLocalProfile(); authMsg(t('auth.loggedOut'), 'good'); });
+      });
+    });
+  });
+  $('btnDelAcct').addEventListener('click', function () {
+    ask(t('auth.deleteConfirm'), t('dlg.delete'), function () {
+      authMsg(''); Auth.deleteAccount().then(function () { wipeLocalProfile(); authMsg(t('auth.deleted'), 'good'); }, function (e) { authMsg(authErr(e), 'bad'); renderAcct(); });
+    });
+  });
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') scheduleSync(600); else if (Auth && Auth.user && !sync.busy) syncProfile(); });
+  window.addEventListener('online', function () { scheduleSync(500); });
+  renderAcct();
+  if (Auth && Auth.user) scheduleSync(400);
 
   /* ---------- Tutorial interactivo ----------
    * Corre sobre el tablero real, pero con su propia partida de mentira: cada lección arma una posición (TutorialData.build),
@@ -4011,7 +4458,7 @@ html[data-theme="papel"] .modal.dlg p { font-size: 1.15em; }
       for (var k in CFG_DEFAULTS) cfg[k] = CFG_DEFAULTS[k];
       pending = hover = null; saveCfg();
       if (S) { S.setEnabled(true); S.setVolume(0.8); S.setVibrate(true); }
-      setTheme(window.Themes.defaultId);
+      setTheme(window.Themes.defaultId); markPrefs();
       syncCfgUi(); render(); sfx('place');
     });
   });
@@ -4020,7 +4467,7 @@ html[data-theme="papel"] .modal.dlg p { font-size: 1.15em; }
   canvas.addEventListener('focus', render); canvas.addEventListener('blur', render);
 
   applyI18n(); buildThemePicker(); syncSizePicker(); syncOpts(); syncVis(); resize(); open('menuOverlay'); initOnline(); updateSide();
-  window.__pente = { get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, startAI: startAI, get ai() { return ai; }, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; }, get tut() { return tut; }, get profile() { return profile; } };  // utilidad para pruebas manuales
+  window.__pente = { get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, startAI: startAI, get ai() { return ai; }, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; }, get tut() { return tut; }, get profile() { return profile; }, get auth() { return Auth; }, get sync() { return sync; }, syncProfile: syncProfile };  // utilidad para pruebas manuales
 })();
 </script>
 <script>
