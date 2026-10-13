@@ -434,6 +434,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 .pw-eye .eye-off { display: none; }
 .pw-eye[aria-pressed="true"] .eye-on { display: none; }
 .pw-eye[aria-pressed="true"] .eye-off { display: block; }
+
+.brand .ver { font-size: 11px; opacity: .45; margin: 4px 0 0; letter-spacing: .08em; }
 </style>
 </head>
 <body>
@@ -519,7 +521,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 <!-- Menú principal (pantalla propia: el juego no se ve detrás) -->
 <div class="overlay screen" id="menuOverlay">
   <div class="screen-body">
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v36</p></div>
     <div class="btns">
       <button class="btn primary" id="btnResume" hidden data-i18n="menu.resume"></button>
       <button class="btn primary" id="btnPlay" data-i18n="menu.play"></button>
@@ -954,6 +956,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   </div>
 </div>
 
+<script>window.PENTE_VERSION = 36;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -973,6 +976,9 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     };
   }
   window.__penteStorageBlocked = false;
+  var errs = []; window.__penteErrors = errs;
+  window.addEventListener('error', function (e) { if (errs.length < 5) errs.push(String(e.message || 'error').slice(0, 120) + (e.filename ? ' @' + String(e.filename).split('/').pop() + ':' + (e.lineno || 0) : '')); });
+  window.addEventListener('unhandledrejection', function (e) { if (errs.length < 5) errs.push('promesa: ' + String(e.reason && (e.reason.message || e.reason)).slice(0, 100)); });
   ['localStorage', 'sessionStorage'].forEach(function (name) {
     var ok = true;
     try { var s = window[name]; s.setItem('pente.__t', '1'); s.removeItem('pente.__t'); } catch (e) { ok = false; }
@@ -1012,7 +1018,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       : (es ? 'El juego no pudo arrancar en este navegador. Abrilo en Safari o Chrome (en WhatsApp/Instagram: menú ··· → "Abrir en el navegador").' : 'The game could not start in this browser. Open it in Safari or Chrome (in WhatsApp/Instagram: ··· menu → "Open in browser").');
     var b = document.createElement('div'); b.id = 'penteSafeBanner'; b.setAttribute('role', 'alert');
     b.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;background:#3a2a10;color:#ffe9b8;border:2px solid #e8b04a;border-radius:12px;padding:12px 14px;font:600 15px/1.35 system-ui,sans-serif;box-shadow:0 4px 20px rgba(0,0,0,.5)';
-    b.textContent = msg;
+    b.textContent = msg + (errs.length ? ' [' + errs.join(' | ') + ']' : '') + ' · v' + (window.PENTE_VERSION || '?');
     b.addEventListener('click', function () { b.remove(); });
     document.body.appendChild(b);
   }
