@@ -393,6 +393,23 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 .size-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .size-col .seg-opt { width: 100%; flex: none; }
 .size-sub { text-align: center; color: var(--muted); font-size: 12px; line-height: 1.2; }
+
+/* Botón Confirmar: fijo; apagado (en el tono de cada temática) cuando no hay jugada para confirmar */
+.btn:disabled, .btn.primary:disabled { background: var(--panel-2); color: var(--muted); border-color: var(--line); opacity: .55; cursor: default; filter: none; }
+
+/* Secciones plegables (Opciones de partida, Unirse a sala, Crear sala) */
+.acc { display: block; width: 100%; border: 1px solid var(--line); border-radius: 12px; background: var(--panel-2); margin: 10px 0; text-align: left; }
+.acc-head { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 50px; padding: 12px 14px; font-weight: 700; background: transparent; border: 0; border-radius: 12px; color: inherit; text-align: left; }
+.acc-sum { margin-left: auto; color: var(--muted); font-size: 12px; font-weight: 500; text-align: right; }
+.acc-chev { flex: none; width: 9px; height: 9px; margin: 0 4px 3px auto; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); transition: transform .15s; opacity: .8; }
+.acc-sum + .acc-chev { margin-left: 8px; }
+.acc-head[aria-expanded="true"] .acc-chev { transform: rotate(-135deg); margin-bottom: -3px; }
+.acc-body { padding: 2px 14px 14px; }
+.acc-body[hidden] { display: none; }
+.acc-inner { background: var(--bg); }
+.acc-link { padding: 0; cursor: pointer; color: inherit; font: inherit; }
+.acc-link .acc-chev { transform: rotate(-45deg); margin-bottom: 0; }
+.acc-link:hover { filter: brightness(1.12); }
 </style>
 </head>
 <body>
@@ -550,8 +567,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   <div class="screen-body">
     <h2 data-i18n="menu.play"></h2>
     <div class="btns">
-      <button class="btn primary" id="btnOnline" data-i18n="menu.online"></button>
       <button class="btn primary" id="btnLocal" data-i18n="menu.local"></button>
+      <button class="btn primary" id="btnOnline" data-i18n="menu.online"></button>
       <button class="btn" id="btnTutorial" data-i18n="menu.tutorial"></button>
       <button class="btn" id="btnPlayBack" data-i18n="menu.back"></button>
     </div>
@@ -567,6 +584,9 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       <div class="seg" id="localMode" role="group"><button type="button" class="seg-opt" data-val="person" data-i18n="local.modePerson"></button><button type="button" class="seg-opt" data-val="ai" data-i18n="local.modeAI"></button></div></div>
     <div class="field"><label class="lbl" for="name1" data-i18n="menu.p1"></label><input type="text" id="name1" maxlength="18" autocomplete="off"></div>
     <div class="field" data-mode="person"><label class="lbl" for="name2" data-i18n="menu.p2"></label><input type="text" id="name2" maxlength="18" autocomplete="off"></div>
+    <section class="acc" id="accLocal">
+      <button type="button" class="acc-head" aria-expanded="false" aria-controls="accLocalBody"><span data-i18n="acc.opts"></span><span class="acc-sum" id="accLocalSum"></span><span class="acc-chev" aria-hidden="true"></span></button>
+      <div class="acc-body" id="accLocalBody" hidden>
     <div class="field" data-mode="ai"><span class="lbl" data-i18n="ai.level"></span>
       <div class="seg seg4" id="aiLevel" role="group"><button type="button" class="seg-opt" data-val="beginner" data-i18n="ai.beginner"></button><button type="button" class="seg-opt" data-val="easy" data-i18n="ai.easy"></button><button type="button" class="seg-opt" data-val="medium" data-i18n="ai.medium"></button><button type="button" class="seg-opt" data-val="hard" data-i18n="ai.hard"></button></div>
       <p class="hint" id="aiLevelHint"></p></div>
@@ -576,6 +596,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     <label class="check"><input type="checkbox" data-opt="tournamentRule" checked><span><span data-i18n="menu.tournamentRule"></span><small data-i18n="menu.tournamentRuleHint"></small></span></label>
     <label class="check"><input type="checkbox" data-opt="exactFive"><span><span data-i18n="menu.exactFive"></span><small data-i18n="menu.exactFiveHint"></small></span></label>
     <label class="check"><input type="checkbox" data-opt="timer" checked><span><span data-i18n="menu.timer"></span><small data-i18n="menu.timerHint"></small></span></label>
+      </div>
+    </section>
     <div class="btns">
       <button class="btn primary" id="btnStart" data-i18n="menu.start"></button>
       <button class="btn" id="btnLocalBack" data-i18n="menu.back"></button>
@@ -666,24 +688,38 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     <h2 data-i18n="online.title"></h2>
     <p class="sub" data-i18n="online.sub"></p>
     <div class="field"><label class="lbl" for="onName" data-i18n="online.yourName"></label><input type="text" id="onName" maxlength="18" autocomplete="off"></div>
+    <button type="button" class="acc acc-link" id="btnOpenRooms"><span class="acc-head"><span data-i18n="online.rooms"></span><span class="acc-chev" aria-hidden="true"></span></span></button>
+    <section class="acc" data-grp="online" id="accJoin">
+      <button type="button" class="acc-head" aria-expanded="false" aria-controls="accJoinBody"><span data-i18n="acc.join"></span><span class="acc-chev" aria-hidden="true"></span></button>
+      <div class="acc-body" id="accJoinBody" hidden>
+        <div class="field"><label class="lbl" for="onCode" data-i18n="online.code"></label><input type="text" id="onCode" class="code-input" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false"></div>
+        <div class="btns">
+          <button class="btn primary" id="btnJoinRoom" data-i18n="online.join"></button>
+          <button class="btn" id="btnSpectateOffer" hidden data-i18n="online.spectateOffer"></button>
+        </div>
+      </div>
+    </section>
+    <section class="acc" data-grp="online" id="accCreate">
+      <button type="button" class="acc-head" aria-expanded="false" aria-controls="accCreateBody"><span data-i18n="acc.create"></span><span class="acc-chev" aria-hidden="true"></span></button>
+      <div class="acc-body" id="accCreateBody" hidden>
     <div class="field"><span class="lbl" data-i18n="online.visibility"></span>
       <div class="seg" id="visPicker" role="group"><button type="button" class="seg-opt" data-vis="private" data-i18n="online.private"></button><button type="button" class="seg-opt" data-vis="public" data-i18n="online.public"></button></div>
       <p class="hint" id="visHint"></p></div>
+        <section class="acc acc-inner" id="accOnline">
+          <button type="button" class="acc-head" aria-expanded="false" aria-controls="accOnlineBody"><span data-i18n="acc.opts"></span><span class="acc-sum" id="accOnSum"></span><span class="acc-chev" aria-hidden="true"></span></button>
+          <div class="acc-body" id="accOnlineBody" hidden>
     <div class="field"><span class="lbl" data-i18n="menu.size"></span><div class="seg sizePicker" role="group"><div class="size-col"><button type="button" class="seg-opt" data-size="13" data-i18n="menu.size13"></button><small class="size-sub" data-i18n="size.sub13"></small></div><div class="size-col"><button type="button" class="seg-opt" data-size="19" data-i18n="menu.size19"></button><small class="size-sub" data-i18n="size.sub19"></small></div></div></div>
     <label class="check"><input type="checkbox" data-opt="tournamentRule" checked><span><span data-i18n="menu.tournamentRule"></span><small data-i18n="menu.tournamentRuleHint"></small></span></label>
     <label class="check"><input type="checkbox" data-opt="exactFive"><span><span data-i18n="menu.exactFive"></span><small data-i18n="menu.exactFiveHint"></small></span></label>
     <label class="check"><input type="checkbox" data-opt="timer" checked><span><span data-i18n="menu.timer"></span><small data-i18n="menu.timerHint"></small></span></label>
-    <div class="btns"><button class="btn primary" id="btnCreateRoom" data-i18n="online.create"></button></div>
-    <p class="hint" data-i18n="online.createHint"></p>
-    <div class="or" data-i18n="online.or"></div>
-    <div class="field"><label class="lbl" for="onCode" data-i18n="online.code"></label><input type="text" id="onCode" class="code-input" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false"></div>
-    <div class="btns">
-      <button class="btn primary" id="btnJoinRoom" data-i18n="online.join"></button>
-      <button class="btn" id="btnSpectateOffer" hidden data-i18n="online.spectateOffer"></button>
-      <button class="btn" id="btnOpenRooms" data-i18n="online.rooms"></button>
-      <button class="btn" id="btnOnlineBack" data-i18n="menu.back"></button>
-    </div>
+          </div>
+        </section>
+        <div class="btns"><button class="btn primary" id="btnCreateRoom" data-i18n="online.create"></button></div>
+        <p class="hint" data-i18n="online.createHint"></p>
+      </div>
+    </section>
     <p class="online-msg" id="onlineMsg" role="status" aria-live="polite"></p>
+    <div class="btns"><button class="btn" id="btnOnlineBack" data-i18n="menu.back"></button></div>
   </div>
 </div>
 
@@ -3110,6 +3146,28 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 })(typeof self !== 'undefined' ? self : this);
 </script>
 <script>
+/* Textos de secciones plegables — es */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.es, {
+    "acc.opts": "Opciones de partida",
+    "acc.join": "Unirse a sala",
+    "acc.create": "Crear sala"
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
+/* Collapsible section strings — en */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.en, {
+    "acc.opts": "Game options",
+    "acc.join": "Join a room",
+    "acc.create": "Create a room"
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
 /* Temas del tablero. Cada tema es solo DATOS: para sumar uno nuevo, agregar un objeto a "list"
  * (y su nombre en i18n como 'theme.<id>'). El dibujo y el menú lo toman solos. */
 (function (root) {
@@ -3974,6 +4032,25 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     }, 80);
   }
 
+  /* ---------- Secciones plegables ---------- */
+  function accSet(acc, openIt) {
+    var head = acc.querySelector(':scope > .acc-head'), body = acc.querySelector(':scope > .acc-body'); if (!head || !body) return;
+    head.setAttribute('aria-expanded', String(openIt)); body.hidden = !openIt;
+    if (openIt && acc.dataset.grp) document.querySelectorAll('.acc[data-grp="' + acc.dataset.grp + '"]').forEach(function (o) { if (o !== acc) accSet(o, false); });
+  }
+  function accSummaries() {
+    var parts = [settings.size + '×' + settings.size];
+    var local = parts.slice(); if (localMode === 'ai') local.push(t('ai.' + aiPref.level)); if (settings.timer) local.push(t('menu.timer'));
+    var on = parts.slice(); if (settings.timer) on.push(t('menu.timer'));
+    $('accLocalSum').textContent = local.join(' · '); $('accOnSum').textContent = on.join(' · ');
+  }
+  document.addEventListener('click', function (e) {
+    var h = e.target.closest ? e.target.closest('.acc-head') : null;
+    if (h && h.tagName === 'BUTTON' && h.parentNode.classList.contains('acc')) { var a = h.parentNode; accSet(a, h.getAttribute('aria-expanded') !== 'true'); }
+    if (e.target.closest && e.target.closest('#localOverlay, #onlineOverlay')) setTimeout(accSummaries, 0);
+  });
+  function accOpenJoin() { accSet($('accJoin'), true); }
+
   /* ---------- Instalar la app (PWA) ---------- */
   var installEvt = null;
   function isStandalone() { try { return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true; } catch (e) { return false; } }
@@ -4611,7 +4688,10 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     var sb = $('specBar'); sb.hidden = !online.spectator;
     if (online.spectator) sb.textContent = t('spec.badge', { code: online.code, n: online.specN });
     if (!isOver() && !$('status').dataset.toast) $('status').textContent = turnText();
-    $('btnConfirm').hidden = !(pending && cfg.confirm === 'button' && canPlayNow() && !(drag && drag.lifted));
+    // El botón Confirmar queda fijo mientras dura la partida (así el tablero no salta); gris cuando no se puede usar
+    var cbtn = $('btnConfirm'), usable = !!(pending && canPlayNow() && !(drag && drag.lifted));
+    cbtn.hidden = !(cfg.confirm === 'button' && (tut.active ? usable : !isOver() && !online.spectator));
+    cbtn.disabled = !usable;
   }
   function setStatus(msg, isToast) {
     if (tut.active) { tutToast(msg, isToast); return; }          // en el tutorial los avisos van a la tarjeta
@@ -4870,7 +4950,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     if (code) { try { history.replaceState(null, '', location.href.replace(/([?&])sala=[^&#]*&?/, '$1').replace(/[?&]$/, '')); } catch (e) {} }
     code = code ? String(code).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5) : '';
     if (url && ses && ses.url === url && (!code || ses.code === code)) { online.code = ses.code; online.token = ses.token; ensureNet(url); }   // volver a la sala donde estaba
-    else if (code) { $('onCode').value = code; onlineMsg(url ? '' : t('online.noServer')); open('onlineOverlay'); }
+    else if (code) { $('onCode').value = code; onlineMsg(url ? '' : t('online.noServer')); open('onlineOverlay'); accOpenJoin(); }
   }
 
 
@@ -5105,7 +5185,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   $('btnEndMenu').addEventListener('click', function () { if (online.active) leaveOnline(false); open('menuOverlay'); });
   $('btnClaim').addEventListener('click', function () { if (online.net) online.net.send({ t: 'claimWin' }); });
   $('btnOnline').addEventListener('click', function () {
-    function showOnlineMenu() { $('btnSpectateOffer').hidden = true; onlineMsg(serverUrl() ? '' : t('online.noServer')); open('onlineOverlay'); }
+    function showOnlineMenu() { accSummaries(); $('btnSpectateOffer').hidden = true; onlineMsg(serverUrl() ? '' : t('online.noServer')); open('onlineOverlay'); }
     function go() {
       aiStop();
       if (online.net) {
@@ -5398,7 +5478,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   $('btnRoomsBack').addEventListener('click', function () { if (online.net && !online.active) leaveOnline(false); open('onlineOverlay'); });
   $('rName').addEventListener('input', function () { $('onName').value = $('rName').value; });
   $('btnSpectateOffer').addEventListener('click', function () { $('btnSpectateOffer').hidden = true; startOnline({ t: 'spectate', code: online.lastCode }); });
-  $('btnLocal').addEventListener('click', function () { syncLocalMode(); open('localOverlay'); });
+  $('btnLocal').addEventListener('click', function () { syncLocalMode(); accSummaries(); open('localOverlay'); });
   $('btnLocalBack').addEventListener('click', function () { open('playOverlay'); });
   $('btnConfirm').addEventListener('click', function () { if (pending && !isOver()) tryMove(pending.x, pending.y); });
   // Sonido: los navegadores solo dejan activarlo después de un toque o clic del usuario
