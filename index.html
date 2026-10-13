@@ -1955,7 +1955,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
         });
       },
       getProfile: function () {
-        return authed('GET', '/rest/v1/profiles?select=name,name_set,avatar,prefs,stats&id=eq.' + encodeURIComponent(session.user.id), undefined, { Accept: 'application/json' }).then(function (rows) { return rows && rows[0] ? rows[0] : null; });
+        return authed('GET', '/rest/v1/profiles?select=name,name_set,avatar,prefs,stats,online_stats&id=eq.' + encodeURIComponent(session.user.id), undefined, { Accept: 'application/json' }).then(function (rows) { return rows && rows[0] ? rows[0] : null; });
       },
       saveProfile: function (body) {
         var row = { id: session.user.id, avatar: body.avatar, prefs: body.prefs, stats: body.stats };
@@ -1968,6 +1968,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
         return authed('POST', '/rest/v1/rpc/claim_name', { p: String(name == null ? '' : name) }).then(function (r) { return typeof r === 'string' ? r : ''; });
       },
       /* Amigos y perfiles de otras personas (supabase/friends.sql). Todo pasa por funciones del servidor. */
+      accessToken: function () { return session ? token().catch(function () { return ''; }) : Promise.resolve(''); },     // para que el servidor de salas verifique quién sos
       friendsOverview: function () { return authed('POST', '/rest/v1/rpc/friends_overview', {}); },
       friendRequest: function (name) { return authed('POST', '/rest/v1/rpc/friend_request', { p: String(name == null ? '' : name) }).then(function (r) { return typeof r === 'string' ? r : ''; }); },
       friendRespond: function (id, accept) { return authed('POST', '/rest/v1/rpc/friend_respond', { p: String(id || ''), accept: !!accept }).then(function (r) { return typeof r === 'string' ? r : ''; }); },
@@ -2803,6 +2804,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     'prof.drawn': 'Empates',
     'prof.hP': 'Jug.', 'prof.hW': 'Gan.', 'prof.hL': 'Perd.', 'prof.hD': 'Emp.',
     'prof.noGames': 'Todavía no jugaste ninguna partida completa.',
+    'prof.onlineNote': 'En "Online" cuentan las partidas entre dos cuentas (con sesión iniciada) de al menos 10 jugadas: las registra el servidor, no el navegador.',
     'prof.localNote': 'En "Local" solo se cuentan las jugadas: son dos personas en el mismo aparato.',
     'prof.mode.ai_beginner': 'Máquina · Fácil',
     'prof.mode.ai_easy': 'Máquina · Normal',
@@ -2833,6 +2835,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     'prof.drawn': 'Draws',
     'prof.hP': 'Pl.', 'prof.hW': 'Won', 'prof.hL': 'Lost', 'prof.hD': 'Draw',
     'prof.noGames': 'You haven\'t finished any game yet.',
+    'prof.onlineNote': 'In "Online" only games between two signed-in accounts with at least 10 moves count: the server records them, not the browser.',
     'prof.localNote': 'In "Local" only games played are counted: it is two people on the same device.',
     'prof.mode.ai_beginner': 'Machine · Easy',
     'prof.mode.ai_easy': 'Machine · Normal',
@@ -4901,6 +4904,10 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     recorded = true;
     var w = online.active ? (online.over ? online.over.winner : state.winner) : localOver ? localOver.winner : state.winner;
     var mode = online.active ? 'online' : ai.active ? 'ai_' + ai.level : 'local', me = online.active ? online.me : ai.active ? ai.human : 0;
+    if (mode === 'online') {                                  // las online las registra el servidor (solo entre dos cuentas); acá solo se refresca lo verificado
+      if (Auth && Auth.user && !online.spectator) setTimeout(function () { syncProfile(); }, 2500);
+      return;
+    }
     profile = PP.record(profile, mode, !me ? 'played' : !w ? 'draw' : w === me ? 'win' : 'loss');
     saveProfile(); scheduleSync(1500);
   }
@@ -4977,8 +4984,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     intent.name = myName();
     online.intent = intent; online.token = ''; online.code = '';
     onlineMsg(t('online.connecting'));
-    if (!online.net) ensureNet(url);
-    else if (online.net.isOpen()) online.net.send(intent);
+    var go = function () { if (online.intent !== intent) return; if (!online.net) ensureNet(url); else if (online.net.isOpen()) online.net.send(intent); };
+    if (Auth && Auth.user && intent.t !== 'spectate') Auth.accessToken().then(function (tk) { if (tk) intent.jwt = tk; go(); }); else go();
   }
 
   function leaveOnline(resign) {
@@ -5698,9 +5705,9 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     $('nameClaim').hidden = !(logged && !profile.nameSet);
     $('nameHint').textContent = logged ? (profile.nameSet ? t('name.locked') : t('name.pick')) : '';
     $('nameHint').hidden = !logged;
-    fillStats($('profStats'), profile.stats);
+    fillStats($('profStats'), ownStats());
     var tot = PP.totals(profile);
-    $('profNote').textContent = tot.p ? t('prof.localNote') : t('prof.noGames');
+    $('profNote').textContent = (tot.p ? t('prof.localNote') : t('prof.noGames')) + ' ' + t('prof.onlineNote');
   }
   $('btnProfile').addEventListener('click', function () { renderProfile(); renderAcct(); open('profileOverlay'); });
   $('btnProfileBack').addEventListener('click', function () { open('menuOverlay'); });
@@ -5826,6 +5833,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     if (!Auth || !Auth.user) return;
     clearTimeout(sync.timer); sync.timer = setTimeout(syncProfile, ms == null ? 2000 : ms);
   }
+  var verifiedOnline = null;     // estadísticas online verificadas por el servidor (online.sql)
+  function ownStats() { var st = Object.assign({}, profile.stats); delete st.online; if (Auth && Auth.user && verifiedOnline) st.online = verifiedOnline; return st; }
   function syncProfile() {
     if (!Auth || !Auth.user) return Promise.resolve(false);
     clearTimeout(sync.timer);
@@ -5836,6 +5845,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       if (!Auth.user || Auth.user.id !== uid) throw new Error('gone');
       if (!profile.prefsAt && !(remote && remote.prefs && remote.prefs.at)) { profile.prefsAt = Date.now(); saveProfile(); }     // cuenta nueva: se suben las preferencias de este aparato
       snap = JSON.parse(JSON.stringify(profile));
+      verifiedOnline = PP.cleanStats({ online: remote && remote.online_stats }).online || null;
       var m = PP.merge(snap, remote, uid, curPrefs());
       return m.push ? Auth.saveProfile(m.body).then(function () { return m; }) : m;
     }).then(function (m) {
