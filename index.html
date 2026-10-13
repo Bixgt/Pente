@@ -559,7 +559,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v37</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v38</p></div>
     <div class="btns">
       <button class="btn primary" id="btnResume" hidden data-i18n="menu.resume"></button>
       <button class="btn primary" id="btnPlay" data-i18n="menu.play"></button>
@@ -992,7 +992,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 37;</script>
+<script>window.PENTE_VERSION = 38;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -1000,6 +1000,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
  * Debe cargarse primero. */
 (function () {
   'use strict';
+  /* ?safe=1 -> modo seguro: sin sonido ni música ni service worker, y un cartelito que muestra qué recibe cada toque (para diagnosticar) */
+  window.PENTE_SAFE = /[?&]safe=1(&|$)/.test(location.search);
   function memStore() {
     var d = {};
     return {
@@ -1046,6 +1048,28 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       banner('dead');
     }, 1500);
   });
+  if (window.PENTE_SAFE) {
+    var probe = function () {
+      var el = document.createElement('div'); el.id = 'penteProbe';
+      el.style.cssText = 'position:fixed;left:6px;right:6px;top:6px;z-index:99998;background:rgba(0,0,0,.82);color:#9ff;border:1px solid #4aa;border-radius:8px;padding:6px 8px;font:12px/1.3 ui-monospace,monospace;pointer-events:none';
+      document.body.appendChild(el);
+      var n = { pointerdown: 0, touchstart: 0, touchend: 0, click: 0 }, last = '-', maxLag = 0, t0 = performance.now();
+      var show = function () { el.textContent = 'SAFE v' + (window.PENTE_VERSION || '?') + ' | pd ' + n.pointerdown + ' ts ' + n.touchstart + ' te ' + n.touchend + ' clk ' + n.click + ' | lag max ' + Math.round(maxLag) + 'ms | js ' + (window.__pente ? 'ok' : 'NO') + ' | err ' + errs.length + ' | tap: ' + last; };
+      Object.keys(n).forEach(function (ev) {
+        document.addEventListener(ev, function (e) {
+          n[ev]++;
+          var t = e.target; var pt = e.changedTouches && e.changedTouches[0] || e;
+          var top = (pt && pt.clientX != null && document.elementFromPoint) ? document.elementFromPoint(pt.clientX, pt.clientY) : null;
+          var d = function (x) { return x ? x.tagName.toLowerCase() + (x.id ? '#' + x.id : '') + (x.className && typeof x.className === 'string' ? '.' + x.className.split(' ')[0] : '') : '?'; };
+          last = ev + ' ' + d(t) + (top && top !== t ? ' (arriba: ' + d(top) + ')' : ''); show();
+        }, true);
+      });
+      var prev = performance.now();
+      setInterval(function () { var now = performance.now(); var lag = now - prev - 200; if (lag > maxLag) maxLag = lag; prev = now; show(); }, 200);
+      show();
+    };
+    if (document.body) probe(); else document.addEventListener('DOMContentLoaded', probe);
+  }
   function banner(kind) {
     if (document.getElementById('penteSafeBanner')) return;
     var es = /^es/i.test(navigator.language || 'es');
@@ -3754,7 +3778,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   function ensure() {
     if (ctx) return ctx;
     var AC = root.AudioContext || root.webkitAudioContext;
-    if (!AC) return null;
+    if (!AC || root.PENTE_SAFE) return null;
     try {
       ctx = new AC();
       master = ctx.createGain(); master.connect(ctx.destination); applyVolume();
@@ -3822,9 +3846,10 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 (function (root) {
   'use strict';
   var BPM = 92, EIGHTH = 60 / BPM / 2;
-  var enabled = true, volume = 0.3;
+  var enabled = true, volume = 0.3, failed = false;
   try {
     enabled = localStorage.getItem('pente.music') !== '0';
+    if (root.PENTE_SAFE) enabled = false;
     var v = parseFloat(localStorage.getItem('pente.musicVol')); if (v >= 0 && v <= 1) volume = v;
   } catch (e) {}
 
@@ -3980,15 +4005,15 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     if (buf && wanted && enabled && !paused) { startSource(); fadeTo(targetGain(), 2.5); }
   }
   function prerender() {
-    if (loopBuf || rendering) return;
+    if (loopBuf || rendering || failed || root.PENTE_SAFE) return;
     rendering = true;
     cacheGet(function (cached) {
       if (cached) { ready(cached); return; }
-      render(function (buf) { if (buf) cachePut(buf); ready(buf); });
+      render(function (buf) { if (buf) cachePut(buf); else failed = true; ready(buf); });
     });
   }
 
-  function kick() { if (enabled && !paused) { if (!playing) begin(); else fadeTo(targetGain(), 0.4); } }
+  function kick() { if (enabled && !paused && !failed) { if (!playing) begin(); else fadeTo(targetGain(), 0.4); } }
   function setEnabled(v) {
     enabled = !!v; try { localStorage.setItem('pente.music', enabled ? '1' : '0'); } catch (e) {}
     if (enabled) { begin(); fadeTo(targetGain(), 1.2); }
@@ -4004,7 +4029,14 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     else { paused = false; if (enabled) { if (ctx && ctx.state === 'suspended') { try { ctx.resume(); } catch (e) {} } begin(); } }
   });
 
-  if (typeof setTimeout !== 'undefined') setTimeout(function () { if (enabled) prerender(); }, 400);
+  // Ya no se renderiza al abrir: en iPhone competía con el arranque. Se espera al primer toque y se deja respirar 2 s.
+  // (Si el loop ya está guardado en el dispositivo, igual arranca al instante.)
+  var armed = false;
+  function arm() {
+    if (armed) return; armed = true;
+    setTimeout(function () { if (enabled && !paused) prerender(); }, 2000);
+  }
+  if (typeof document !== 'undefined') ['pointerdown', 'touchend', 'click', 'keydown'].forEach(function (ev) { document.addEventListener(ev, arm, { capture: true, passive: true, once: true }); });
 
   root.PenteMusic = {
     kick: kick, setEnabled: setEnabled, isEnabled: function () { return enabled; },
@@ -6756,7 +6788,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 /* Registro del service worker. Solo funciona servido por http(s); abriendo el archivo directo se ignora. */
 (function () {
   'use strict';
-  if (!('serviceWorker' in navigator) || !navigator.serviceWorker || location.protocol.indexOf('http') !== 0) return;
+  if (!('serviceWorker' in navigator) || !navigator.serviceWorker || location.protocol.indexOf('http') !== 0 || window.PENTE_SAFE) return;
   window.addEventListener('load', function () {
     navigator.serviceWorker.register('sw.js').catch(function () { /* sin SW el juego funciona igual */ });
   });
