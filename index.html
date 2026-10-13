@@ -481,6 +481,14 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 .seats .seat.free { background: transparent; color: inherit; text-align: left; cursor: pointer; border-style: dashed; font: inherit; font-weight: 600; opacity: .85; }
 .seats .seat.free:hover { border-color: var(--accent, #e8b04a); }
 .seats .hint { margin: 2px 2px 0; }
+
+/* 2 contra 2 sin conexión: lista de asientos */
+.l4rows { display: grid; gap: 8px; margin: 8px 0 12px; }
+.l4row { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; }
+.l4tag { font-size: 13px; color: var(--muted); white-space: nowrap; min-width: 78px; }
+.l4row input { min-width: 0; }
+.l4kind { min-height: 44px; padding: 8px 12px; white-space: nowrap; }
+.l4kind:disabled { opacity: .55; }
 </style>
 </head>
 <body>
@@ -573,7 +581,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v42</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v43</p></div>
     <div class="btns">
       <button class="btn primary" id="btnResume" hidden data-i18n="menu.resume"></button>
       <button class="btn primary" id="btnPlay" data-i18n="menu.play"></button>
@@ -656,10 +664,18 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   <div class="screen-body">
     <h2 data-i18n="local.title"></h2>
     <p class="sub" data-i18n="local.sub"></p>
-    <div class="field"><span class="lbl" data-i18n="local.mode"></span>
+    <div class="field"><span class="lbl" data-i18n="four.pick"></span>
+      <div class="seg" id="localPlayers" role="group"><button type="button" class="seg-opt" data-pl="2" data-i18n="four.p2"></button><button type="button" class="seg-opt" data-pl="4" data-i18n="four.p4"></button></div></div>
+    <div id="loc4" hidden>
+      <p class="hint" data-i18n="four.localHint"></p>
+      <div class="l4rows" id="l4rows"></div>
+      <div class="field" id="l4LevelBox"><span class="lbl" data-i18n="ai.level"></span>
+        <div class="seg seg4" id="l4Level" role="group"><button type="button" class="seg-opt" data-val="beginner" data-i18n="ai.beginner"></button><button type="button" class="seg-opt" data-val="easy" data-i18n="ai.easy"></button><button type="button" class="seg-opt" data-val="medium" data-i18n="ai.medium"></button><button type="button" class="seg-opt" data-val="hard" data-i18n="ai.hard"></button></div></div>
+    </div>
+    <div class="field l2only"><span class="lbl" data-i18n="local.mode"></span>
       <div class="seg" id="localMode" role="group"><button type="button" class="seg-opt" data-val="person" data-i18n="local.modePerson"></button><button type="button" class="seg-opt" data-val="ai" data-i18n="local.modeAI"></button></div></div>
-    <div class="field"><label class="lbl" for="name1" data-i18n="menu.p1"></label><input type="text" id="name1" maxlength="18" autocomplete="off"></div>
-    <div class="field" data-mode="person"><label class="lbl" for="name2" data-i18n="menu.p2"></label><input type="text" id="name2" maxlength="18" autocomplete="off"></div>
+    <div class="field l2only"><label class="lbl" for="name1" data-i18n="menu.p1"></label><input type="text" id="name1" maxlength="18" autocomplete="off"></div>
+    <div class="field l2only" data-mode="person"><label class="lbl" for="name2" data-i18n="menu.p2"></label><input type="text" id="name2" maxlength="18" autocomplete="off"></div>
     <section class="acc" id="accLocal">
       <button type="button" class="acc-head" aria-expanded="false" aria-controls="accLocalBody"><span data-i18n="acc.opts"></span><span class="acc-sum" id="accLocalSum"></span><span class="acc-chev" aria-hidden="true"></span></button>
       <div class="acc-body" id="accLocalBody" hidden>
@@ -1010,7 +1026,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 42;</script>
+<script>window.PENTE_VERSION = 43;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -3303,7 +3319,12 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     "four.emptyTap": "libre — tocá para sentarte acá",
     "four.seatHint": "Tocá un asiento libre para cambiar de equipo. Los equipos son ⚫ (asientos 1 y 3) y ⚪ (2 y 4); mueve primero el equipo ⚫.",
     "err.SEAT_TAKEN": "Ese asiento ya lo ocupó otra persona.",
-    "err.CANNOT_MOVE_SEAT": "Ya no se puede cambiar de equipo."
+    "err.CANNOT_MOVE_SEAT": "Ya no se puede cambiar de equipo.",
+    "four.localHint": "Cuatro asientos en este mismo dispositivo. Cada uno es una persona o una máquina. ⚫ (1 y 3) contra ⚪ (2 y 4); mueve primero el asiento 1.",
+    "four.seatDefault": "Jugador {n}",
+    "four.bot": "Máquina {n}",
+    "four.person": "Persona",
+    "four.machine": "Máquina"
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -3325,7 +3346,12 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     "four.emptyTap": "free — tap to sit here",
     "four.seatHint": "Tap a free seat to switch teams. Teams are ⚫ (seats 1 and 3) and ⚪ (2 and 4); ⚫ moves first.",
     "err.SEAT_TAKEN": "Someone else took that seat.",
-    "err.CANNOT_MOVE_SEAT": "You can no longer change teams."
+    "err.CANNOT_MOVE_SEAT": "You can no longer change teams.",
+    "four.localHint": "Four seats on this one device. Each is a person or a machine. ⚫ (1 and 3) vs ⚪ (2 and 4); seat 1 moves first.",
+    "four.seatDefault": "Player {n}",
+    "four.bot": "Machine {n}",
+    "four.person": "Person",
+    "four.machine": "Machine"
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -4385,7 +4411,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   function sfx(name) { if (window.PenteSound) window.PenteSound.play(name); }
   function buzz(ms) { if (window.PenteSound) window.PenteSound.buzz(ms); }
   var LEVELS_OK = ['beginner', 'easy', 'medium', 'hard'];
-  var ai = { active: false, level: 'medium', human: 1, bot: 2, timer: 0, token: 0, thinking: false };   // rival offline
+  var ai = { active: false, level: 'medium', human: 1, bot: 2, timer: 0, token: 0, thinking: false, four: false, botSeats: {} };   // rival offline
   var replayBusy = false; // true mientras se dibuja un cuadro del video (render no toca la pantalla real)
   var fx = [];            // fichas capturadas que se están desvaneciendo / rompiendo
   var rooms = { open: false, timer: 0 };
@@ -4400,8 +4426,12 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
    * `online.seat` es el asiento. names[1] / names[2] son los nombres de EQUIPO (en 4 jugadores: "Ana + Carla"); seatNames[s] los de cada asiento. */
   var seatNames = {};
   function teamOfSeat(s) { return s % 2 === 1 ? 1 : 2; }
-  function nSeats() { return online.players === 4 ? 4 : 2; }
-  function seatsOf(team) { return online.players === 4 ? (team === 1 ? [1, 3] : [2, 4]) : [team]; }
+  function playersNow() { return (state && state.players === 4) || (!state && online.players === 4) ? 4 : 2; }
+  function nSeats() { return playersNow(); }
+  function seatsOf(team) { return playersNow() === 4 ? (team === 1 ? [1, 3] : [2, 4]) : [team]; }
+  // Rival offline: ¿el asiento lo juega la máquina? (en 2 jugadores el asiento coincide con el equipo; en 2vs2 offline hay un mapa de asientos)
+  function isBotSeat(seat) { return ai.active && (ai.four ? !!ai.botSeats[seat] : teamOfSeat(seat) === ai.bot); }
+  function botNow() { return !!state && isBotSeat(P.seatToMove(state)); }
   function onlineFull() { for (var s = 1; s <= nSeats(); s++) if (!seatNames[s]) return false; return true; }
   function turnSeat() { return state ? P.seatToMove(state) : 0; }
   function teamName(team) { return seatsOf(team).map(function (s) { return seatNames[s] || ''; }).filter(Boolean).join(' + '); }
@@ -4413,11 +4443,11 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   var tut = { active: false, i: 0, solved: false, awaiting: false, marks: [], token: 0, fb: '', fbRaw: '', fbKind: '', timers: [] };   // tutorial interactivo (ver sección al final)
   var localOver = null;   // fin por tiempo en partidas locales / contra la máquina: { winner, reason:'timeout' }
   function isOver() { return !state || state.status !== 'playing' || !!localOver || (online.active && !!online.over); }
-  function canPlayNow() { return !!state && !isOver() && (!tut.active || tut.awaiting) && (!online.active || turnSeat() === online.seat) && (!ai.active || state.current === ai.human); }
+  function canPlayNow() { return !!state && !isOver() && (!tut.active || tut.awaiting) && (!online.active || turnSeat() === online.seat) && (!ai.active || !botNow()); }
   function turnText() {
     if (tut.active) return '';
-    if (ai.active && state.current === ai.bot) return t('ai.thinking', { name: names[ai.bot] });
-    if (!online.active) return t('hud.turn', { name: names[state.current] });
+    if (botNow()) return t('ai.thinking', { name: ai.four ? seatNames[P.seatToMove(state)] : names[ai.bot] });
+    if (!online.active) return t('hud.turn', { name: state.players === 4 ? seatNames[P.seatToMove(state)] : names[state.current] });
     if (online.conn !== 'open') return t('online.reconnecting');
     if (!onlineFull()) return '';                   // todavía no entraron todos
     if (online.spectator) return t('online.theirTurn', { name: seatNames[turnSeat()] });
@@ -4442,16 +4472,16 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     var n = performance.now(), cur = c.current;
     clk = { on: true, total: c.total, turnMs: c.turnMs, rem: { 1: c.rem[1], 2: c.rem[2] }, current: cur || (state ? state.current : 1), since: n, turnStart: n - (c.turnMs - c.turnLeft), frozen: !cur };
   }
-  function botTurn() { return ai.active && state && state.current === ai.bot; }
+  function botTurn() { return ai.active && botNow(); }
   function clockLive() {                                   // { 1: ms totales, 2: ms totales, turn: ms de la jugada } a este instante
     if (!clk) return null;
     var n = clkPausedAt || performance.now(), out = { 1: clk.rem[1], 2: clk.rem[2], turn: clk.turnMs, cur: clk.current };
-    if (!clk.frozen && !(ai.active && clk.current === ai.bot)) { out[clk.current] = Math.max(0, clk.rem[clk.current] - (n - clk.since)); out.turn = Math.max(0, clk.turnMs - (n - clk.turnStart)); }
+    if (!clk.frozen && !botTurn()) { out[clk.current] = Math.max(0, clk.rem[clk.current] - (n - clk.since)); out.turn = Math.max(0, clk.turnMs - (n - clk.turnStart)); }
     return out;
   }
   function clockSwitch() {                                 // se hizo una jugada local: se descuenta lo gastado y pasa el turno
     if (!clk || clk.frozen) return;
-    var n = performance.now(); if (!(ai.active && clk.current === ai.bot)) clk.rem[clk.current] = Math.max(0, clk.rem[clk.current] - (n - clk.since));
+    var n = performance.now(), lm = state.moves[state.moves.length - 1]; if (!(ai.active && lm && isBotSeat(lm.seat || lm.player))) clk.rem[clk.current] = Math.max(0, clk.rem[clk.current] - (n - clk.since));
     clk.current = state.current; clk.since = clk.turnStart = n;
     clockLog[state.moves.length - 1] = { 1: clk.rem[1], 2: clk.rem[2] };
   }
@@ -4462,7 +4492,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     [1, 2].forEach(function (p) {
       var el = $('clock' + p); if (!el) return;
       el.hidden = !l; if (!l) return;
-      var active = !clk.frozen && !isOver() && state.current === p && !(ai.active && p === ai.bot);
+      var active = !clk.frozen && !isOver() && state.current === p && !botTurn();
       el.querySelector('.ctot').textContent = fmtClock(l[p]);
       el.querySelector('.cturn').textContent = active ? fmtClock(l.turn) : '';
       el.classList.toggle('low', active && (l.turn <= 10000 || l[p] <= 30000));
@@ -4490,7 +4520,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   setInterval(clockTick, 200);
 
   /* ---------- Partida ---------- */
-  function aiStop() { ai.active = false; ai.token++; clearTimeout(ai.timer); ai.thinking = false; }
+  function aiStop() { ai.active = false; ai.four = false; ai.botSeats = {}; ai.token++; clearTimeout(ai.timer); ai.thinking = false; }
   function startGame() {
     tutStop(); aiStop(); videoDiscard(); endSeen = recorded = false;
     if (online.net) leaveOnline(false);
@@ -4513,13 +4543,13 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   function moveFeedback(captured, ended, winner) {
     if (captured.length) { sfx('place'); setTimeout(function () { sfx('capture'); }, 70); buzz([10, 40, 18]); }
     else { sfx('place'); buzz(8); }
-    if (ended) setTimeout(function () { sfx(online.active && !online.spectator ? (winner === online.me ? 'win' : 'lose') : (ai.active && winner === ai.bot ? 'lose' : 'win')); }, 380);
+    if (ended) setTimeout(function () { sfx(online.active && !online.spectator ? (winner === online.me ? 'win' : 'lose') : (ai.active && winner && winner !== ai.human ? 'lose' : 'win')); }, 380);
   }
 
   function tryMove(x, y, fromAI) {
     if (tut.active) { tutHandleMove(x, y); return; }
     if (!state || isOver()) return;
-    if (ai.active && !fromAI && state.current !== ai.human) return;       // no se juega por la máquina
+    if (ai.active && !fromAI && botNow()) return;       // no se juega por la máquina
     settle = null;
     if (online.active) {
       // En online el servidor es el árbitro: acá solo se comprueba rápido y se envía; el tablero cambia cuando el servidor lo confirma.
@@ -4557,6 +4587,24 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     hover = pending = drag = settle = null; fx.length = 0; clockFresh(); kbd = { x: centerIdx(), y: centerIdx() };
     closeAll(); render(); setStatus(''); aiMaybeMove();
   }
+  /* 2 contra 2 sin conexión: 4 asientos en el mismo dispositivo; cada uno es una persona o una máquina (el asiento 1 siempre es persona). */
+  var loc4 = { bots: { 2: true, 3: true, 4: true } };
+  function startLocal4() {
+    tutStop(); aiStop(); videoDiscard(); endSeen = recorded = false;
+    if (online.net) leaveOnline(false);
+    var any = false; seatNames = {};
+    for (var q = 1; q <= 4; q++) {
+      var bot = q > 1 && !!loc4.bots[q]; any = any || bot;
+      var inp = $('l4n' + q); seatNames[q] = bot ? t('four.bot', { n: q }) : (inp && inp.value || '').trim() || t('four.seatDefault', { n: q });
+    }
+    try { var n1 = ($('l4n1').value || '').trim(); if (n1) localStorage.setItem('pente.name', n1); } catch (e) {}
+    ai.active = any; ai.four = true; ai.botSeats = {}; for (var z = 2; z <= 4; z++) if (loc4.bots[z]) ai.botSeats[z] = true;
+    ai.level = aiPref.level; ai.human = 1; ai.bot = 2;
+    names[1] = seatNames[1] + ' + ' + seatNames[3]; names[2] = seatNames[2] + ' + ' + seatNames[4];
+    state = P.createGame({ size: settings.size, tournamentRule: settings.tournamentRule, exactFive: settings.exactFive, players: 4 });
+    hover = pending = drag = settle = null; fx.length = 0; clockFresh(); kbd = { x: centerIdx(), y: centerIdx() };
+    closeAll(); render(); setStatus(''); aiMaybeMove();
+  }
   // Turno de la máquina: un respiro para que se vea que "piensa", y recién ahí calcula (en el dispositivo, sin red).
   // Cuánto "piensa" la máquina antes de poner la ficha (ms, mínimo y máximo por nivel; los más fuertes juegan más rápido). Se puede apagar en Ajustes → Partida.
   var BOT_THINK = { beginner: [1000, 2000], easy: [900, 1800], medium: [600, 1200], hard: [250, 600] };
@@ -4565,7 +4613,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     var r = BOT_THINK[ai.level] || BOT_THINK.medium; return r[0] + Math.random() * (r[1] - r[0]);
   }
   function aiMaybeMove() {
-    if (!ai.active || !state || isOver() || state.current !== ai.bot || ai.thinking || !window.PenteAI || paused()) return;
+    if (!ai.active || !state || isOver() || !botNow() || ai.thinking || !window.PenteAI || paused()) return;
     ai.thinking = true; pending = hover = null; setStatus(''); render();
     var tok = ai.token, st = state, target = botThinkMs();
     ai.timer = setTimeout(function () {
@@ -4686,7 +4734,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   canvas.addEventListener('pointerdown', function (e) {
     if (!state || isOver() || drag) return;
     if (e.pointerType === 'mouse' && e.button !== 0) return;
-    if (ai.active && state.current !== ai.human) return;
+    if (ai.active && botNow()) return;
     if (tut.active && !tut.awaiting) return;
     e.preventDefault();
     var p = toCanvas(e), c = snap(p.x, p.y, false); if (!c) return;
@@ -5281,7 +5329,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   function updateResultBtn() { $('btnResult').hidden = !(state && isOver() && endSeen && !$('endOverlay').classList.contains('open') && !document.body.classList.contains('in-screen')); }
   // Suma la partida terminada a las estadísticas (una sola vez por partida; el tutorial y mirar online no cuentan)
   function recordResult() {
-    if (recorded || tut.active || !state || !isOver() || online.spectator) return;
+    if (recorded || tut.active || !state || !isOver() || online.spectator || (state.players === 4 && !online.active)) return;   // el 2vs2 sin conexión no suma estadísticas (todavía)
     recorded = true;
     var w = online.active ? (online.over ? online.over.winner : state.winner) : localOver ? localOver.winner : state.winner;
     var mode = online.active ? 'online' : ai.active ? 'ai_' + ai.level : 'local', me = online.active ? online.me : ai.active ? ai.human : 0;
@@ -5312,7 +5360,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   function rematch() {
     videoDiscard(); endSeen = recorded = false;
     if (ai.active) { ai.token++; clearTimeout(ai.timer); ai.thinking = false; }
-    state = P.createGame({ size: state ? state.size : settings.size, tournamentRule: settings.tournamentRule, exactFive: settings.exactFive });
+    state = P.createGame({ size: state ? state.size : settings.size, tournamentRule: settings.tournamentRule, exactFive: settings.exactFive, players: state && state.players === 4 ? 4 : 2 });
     hover = pending = drag = settle = null; fx.length = 0; kbd = { x: centerIdx(), y: centerIdx() }; clockFresh(); closeAll(); setStatus(''); render();
     if (ai.active) aiMaybeMove();
   }
@@ -5805,13 +5853,42 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   document.querySelectorAll('#aiSide .seg-opt').forEach(function (b) { b.addEventListener('click', function () { aiPref.side = b.dataset.val; saveAiPref(); syncAiUi(); }); });
   // "Jugar local": un solo botón de inicio; según el modo arranca con otra persona o contra la máquina
   var localMode = 'person'; try { if (localStorage.getItem('pente.localMode') === 'ai') localMode = 'ai'; } catch (e) {}
+  var localPlayers = 2; try { if (localStorage.getItem('pente.localPlayers') === '4') localPlayers = 4; } catch (e) {}
   function syncLocalMode() {
     document.querySelectorAll('#localMode .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.val === localMode)); });
     document.querySelectorAll('#localOverlay [data-mode]').forEach(function (el) { el.hidden = el.dataset.mode !== localMode; });
     syncAiUi();
+    // 2 contra 2: se esconden los campos de 2 jugadores y aparece la lista de 4 asientos
+    var four = localPlayers === 4;
+    document.querySelectorAll('#localPlayers .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(Number(b.dataset.pl) === localPlayers)); });
+    document.querySelectorAll('#localOverlay .l2only').forEach(function (el) { el.hidden = four; });
+    if (four) document.querySelectorAll('#localOverlay [data-mode]').forEach(function (el) { el.hidden = true; });
+    $('loc4').hidden = !four;
+    if (four) buildLoc4();
   }
+  function buildLoc4() {
+    var box = $('l4rows'), keep = {}; for (var k = 1; k <= 4; k++) if ($('l4n' + k)) keep[k] = $('l4n' + k).value;
+    box.innerHTML = '';
+    for (var q = 1; q <= 4; q++) (function (q) {
+      var row = document.createElement('div'); row.className = 'l4row';
+      var tag = document.createElement('span'); tag.className = 'l4tag'; tag.textContent = (q % 2 === 1 ? '⚫' : '⚪') + ' ' + t('four.team', { n: q % 2 === 1 ? 1 : 2 });
+      var inp = document.createElement('input'); inp.type = 'text'; inp.id = 'l4n' + q; inp.maxLength = 18; inp.autocomplete = 'off';
+      var bot = q > 1 && !!loc4.bots[q];
+      inp.placeholder = bot ? t('four.bot', { n: q }) : t('four.seatDefault', { n: q }); inp.disabled = bot;
+      if (!bot) inp.value = keep[q] != null ? keep[q] : (q === 1 ? (function () { try { return localStorage.getItem('pente.name') || ''; } catch (e) { return ''; } })() : '');
+      var kind = document.createElement('button'); kind.type = 'button'; kind.className = 'btn l4kind'; kind.disabled = q === 1;
+      kind.textContent = bot ? '🤖 ' + t('four.machine') : '🧑 ' + t('four.person'); kind.setAttribute('aria-pressed', String(bot));
+      kind.addEventListener('click', function () { loc4.bots[q] = !loc4.bots[q]; buildLoc4(); });
+      row.appendChild(tag); row.appendChild(inp); row.appendChild(kind); box.appendChild(row);
+    })(q);
+    var anyBot = !!(loc4.bots[2] || loc4.bots[3] || loc4.bots[4]);
+    $('l4LevelBox').hidden = !anyBot;
+    document.querySelectorAll('#l4Level .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.val === aiPref.level)); });
+  }
+  document.querySelectorAll('#localPlayers .seg-opt').forEach(function (b) { b.addEventListener('click', function () { localPlayers = Number(b.dataset.pl) === 4 ? 4 : 2; try { localStorage.setItem('pente.localPlayers', String(localPlayers)); } catch (e) {} syncLocalMode(); }); });
+  document.querySelectorAll('#l4Level .seg-opt').forEach(function (b) { b.addEventListener('click', function () { aiPref.level = b.dataset.val; saveAiPref(); buildLoc4(); }); });
   document.querySelectorAll('#localMode .seg-opt').forEach(function (b) { b.addEventListener('click', function () { localMode = b.dataset.val; try { localStorage.setItem('pente.localMode', localMode); } catch (e) {} syncLocalMode(); }); });
-  window.__localStart = function () { if (localMode === 'ai') { var n = ($('name1').value || '').trim(); try { if (n) localStorage.setItem('pente.name', n); } catch (e) {} startAI(aiPref.level, aiPref.side); } else startGame(); };
+  window.__localStart = function () { if (localPlayers === 4) { startLocal4(); return; } if (localMode === 'ai') { var n = ($('name1').value || '').trim(); try { if (n) localStorage.setItem('pente.name', n); } catch (e) {} startAI(aiPref.level, aiPref.side); } else startGame(); };
 
 
   /* ---------- Video de la partida ----------
