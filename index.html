@@ -426,6 +426,14 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 #loginPwBox input, #loginMailBox input, #pwForm input { margin-bottom: 8px; }
 .pw-set { margin: 12px 0; padding-top: 10px; border-top: 1px solid var(--line); }
 .pw-set[hidden], #pwForm[hidden], #loginPwBox[hidden], #loginMailBox[hidden] { display: none; }
+
+.pw-wrap { position: relative; }
+.pw-wrap input { padding-right: 52px; margin-bottom: 8px; }
+.pw-eye { position: absolute; right: 4px; top: 0; height: 46px; width: 46px; display: flex; align-items: center; justify-content: center; background: none; border: 0; color: var(--muted); cursor: pointer; border-radius: 10px; }
+.pw-eye:hover, .pw-eye:focus-visible { color: var(--text); }
+.pw-eye .eye-off { display: none; }
+.pw-eye[aria-pressed="true"] .eye-on { display: none; }
+.pw-eye[aria-pressed="true"] .eye-off { display: block; }
 </style>
 </head>
 <body>
@@ -875,7 +883,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
         <form id="loginPwBox" autocomplete="on">
           <p class="hint" data-i18n="pw.intro"></p>
           <input type="text" id="loginName" autocomplete="username" autocapitalize="off" spellcheck="false" data-i18n-ph="pw.namePh" aria-label="Name">
-          <input type="password" id="loginPw" autocomplete="current-password" data-i18n-ph="pw.pwPh" aria-label="Password">
+          <div class="pw-wrap"><input type="password" id="loginPw" autocomplete="current-password" data-i18n-ph="pw.pwPh" aria-label="Password"><button type="button" class="pw-eye" aria-pressed="false" data-i18n-aria="pw.show"><svg class="eye-on" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="eye-off" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.9 17.9A10.9 10.9 0 0 1 12 19C5 19 1 12 1 12a19.8 19.8 0 0 1 5.1-5.9M9.9 4.2A10.4 10.4 0 0 1 12 4c7 0 11 8 11 8a19.7 19.7 0 0 1-3.2 4.2M14.1 14.1a3 3 0 1 1-4.2-4.2"/><path d="M1 1l22 22"/></svg></button></div>
           <div class="btns"><button type="submit" class="btn primary" id="btnLogin" data-i18n="pw.login"></button></div>
           <p class="hint" data-i18n="pw.forgot"></p>
         </form>
@@ -901,7 +909,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
           <span class="lbl" data-i18n="pw.setTitle"></span>
           <p class="hint" id="pwHint"></p>
           <form id="pwForm" autocomplete="on">
-            <input type="password" id="newPw" autocomplete="new-password" data-i18n-ph="pw.newPh" aria-label="New password">
+            <div class="pw-wrap"><input type="password" id="newPw" autocomplete="new-password" data-i18n-ph="pw.newPh" aria-label="New password"><button type="button" class="pw-eye" aria-pressed="false" data-i18n-aria="pw.show"><svg class="eye-on" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="eye-off" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.9 17.9A10.9 10.9 0 0 1 12 19C5 19 1 12 1 12a19.8 19.8 0 0 1 5.1-5.9M9.9 4.2A10.4 10.4 0 0 1 12 4c7 0 11 8 11 8a19.7 19.7 0 0 1-3.2 4.2M14.1 14.1a3 3 0 1 1-4.2-4.2"/><path d="M1 1l22 22"/></svg></button></div>
             <div class="btns"><button type="submit" class="btn" id="btnSetPw" data-i18n="pw.save"></button></div>
           </form>
         </div>
@@ -2062,7 +2070,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
           return r.text().then(function (txt) {
             var j = null; try { j = txt ? JSON.parse(txt) : null; } catch (e) {}
             if (r.ok && j && j.access_token && j.refresh_token) { setSession(j); return session.user; }
-            throw AuthError(r.status === 401 ? 'badcreds' : r.status === 429 ? 'rate' : r.status === 503 ? 'off' : 'server', r.status);
+            throw AuthError(r.status === 401 ? 'badcreds' : r.status === 429 ? 'rate' : r.status === 503 ? 'off' : 'server', r.status, j && j.why ? String(j.why).slice(0, 60) : '');
           });
         }, function () { throw AuthError('network'); });
       },
@@ -3087,6 +3095,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 (function (root) {
   'use strict';
   Object.assign(root.I18n.STRINGS.es, {
+    'pw.show': 'Mostrar contraseña',
+    'pw.hide': 'Ocultar contraseña',
     'pw.modePw': 'Nombre y contraseña',
     'pw.modeMail': 'Email (código)',
     'pw.intro': 'Entrá con el nombre de tu cuenta y tu contraseña. Sin mails.',
@@ -3116,6 +3126,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 (function (root) {
   'use strict';
   Object.assign(root.I18n.STRINGS.en, {
+    'pw.show': 'Show password',
+    'pw.hide': 'Hide password',
     'pw.modePw': 'Name & password',
     'pw.modeMail': 'Email (code)',
     'pw.intro': 'Sign in with your account name and password. No emails.',
@@ -5497,6 +5509,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     if (PT) { tnBuildSelects(); if ($('tnViewOverlay').classList.contains('open')) tnRenderView(); if ($('tnOverlay').classList.contains('open')) tnRenderList(); if ($('tnNewOverlay').classList.contains('open')) tnRenderCheck(); }
     document.documentElement.lang = window.I18n.getLang();
     document.querySelectorAll('[data-i18n-ph]').forEach(function (el) { el.placeholder = t(el.getAttribute('data-i18n-ph')); });
+    document.querySelectorAll('.pw-eye').forEach(function (b) { var on = b.getAttribute('aria-pressed') === 'true'; b.setAttribute('aria-label', t(on ? 'pw.hide' : 'pw.show')); });
     canvas.setAttribute('aria-label', t('a11y.board'));
     var ol = $('rulesList'); ol.innerHTML = '';
     for (var i = 1; t('rules.' + i) !== 'rules.' + i; i++) { var li = document.createElement('li'); li.textContent = t('rules.' + i); ol.appendChild(li); }   // muestra todas las reglas que existan (podés sumar o borrar rules.N)
@@ -6121,10 +6134,18 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     }, function (e) { acct.busy = false; authMsg(authErr(e), 'bad'); renderAcct(); });
   }
   /* ---- Entrar con nombre + contraseña ---- */
+  document.querySelectorAll('.pw-eye').forEach(function (b) {          // ojito: mostrar / ocultar lo que se escribe
+    b.addEventListener('click', function () {
+      var inp = b.parentNode.querySelector('input'), on = inp.type === 'password';
+      inp.type = on ? 'text' : 'password'; b.setAttribute('aria-pressed', String(on)); b.setAttribute('aria-label', t(on ? 'pw.hide' : 'pw.show')); inp.focus();
+    });
+    b.addEventListener('mousedown', function (e) { e.preventDefault(); });   // no le saca el foco al campo
+  });
   function storeGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function storeSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function resetEyes() { document.querySelectorAll('.pw-eye').forEach(function (b) { var i = b.parentNode.querySelector('input'); i.type = 'password'; b.setAttribute('aria-pressed', 'false'); b.setAttribute('aria-label', t('pw.show')); }); }
   function afterLogin(msgKey) {
-    acct.busy = false; acct.step = 'out'; clearInterval(acct.cdTimer); $('authCode').value = ''; $('authEmail').value = ''; $('loginPw').value = ''; $('loginName').value = '';
+    acct.busy = false; acct.step = 'out'; clearInterval(acct.cdTimer); $('authCode').value = ''; $('authEmail').value = ''; $('loginPw').value = ''; $('loginName').value = ''; resetEyes();
     authMsg(t(msgKey || 'auth.welcome'), 'good'); renderAcct(); return syncProfile();
   }
   $('loginMode').addEventListener('click', function (e) {
@@ -6136,7 +6157,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     if (!nm || !pw) { authMsg(t('pw.err.empty'), 'bad'); return; }
     acct.busy = true; authMsg(t('pw.logging')); renderAcct();
     Auth.loginWithName(serverUrl(), nm, pw).then(function () { storeSet('pente.loginMode', 'pw'); return afterLogin(); },
-      function (er) { acct.busy = false; $('loginPw').value = ''; authMsg(er && er.code === 'rate' ? t('pw.err.rate') : authErr(er), 'bad'); renderAcct(); });
+      function (er) { acct.busy = false; $('loginPw').value = ''; authMsg((er && er.code === 'rate' ? t('pw.err.rate') : authErr(er)) + (er && (er.code === 'off' || er.code === 'server') && er.message && er.message !== 'off' && er.message !== 'server' ? ' [' + er.message + ']' : ''), 'bad'); renderAcct(); });
   });
   $('pwForm').addEventListener('submit', function (e) {
     e.preventDefault(); if (!Auth || !Auth.user || acct.busy) return;
