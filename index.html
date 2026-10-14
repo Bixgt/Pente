@@ -489,6 +489,18 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 .l4row input { min-width: 0; }
 .l4kind { min-height: 44px; padding: 8px 12px; white-space: nowrap; }
 .l4kind:disabled { opacity: .55; }
+
+/* modos de juego y bots online */
+.modes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.modes .seg-opt { flex: none; min-height: 44px; }
+.modes .seg-opt:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.check[hidden] { display: none; }
+.modebar { background: var(--panel-2); color: var(--text); }
+.seatrow { display: flex; gap: 8px; align-items: stretch; }
+.seatrow .seat { flex: 1; }
+.seat-bot { flex: none; border: 1px solid var(--line, #3a3f4b); background: transparent; color: inherit; border-radius: 10px; padding: 0 12px; font: inherit; font-weight: 600; cursor: pointer; }
+.seat-bot:hover { border-color: var(--accent, #e8b04a); }
+.clock.blitz .cturn { display: none; }
 </style>
 </head>
 <body>
@@ -507,6 +519,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   </div>
 
   <div class="specbar" id="specBar" hidden></div>
+  <div class="specbar modebar" id="modeBar" hidden></div>
 
   <div class="status" id="status" role="status" aria-live="polite"></div>
 
@@ -581,7 +594,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v46</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v47</p></div>
     <div class="btns">
       <button class="btn primary" id="btnResume" hidden data-i18n="menu.resume"></button>
       <button class="btn primary" id="btnPlay" data-i18n="menu.play"></button>
@@ -672,6 +685,9 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       <div class="field" id="l4LevelBox"><span class="lbl" data-i18n="ai.level"></span>
         <div class="seg seg4" id="l4Level" role="group"><button type="button" class="seg-opt" data-val="beginner" data-i18n="ai.beginner"></button><button type="button" class="seg-opt" data-val="easy" data-i18n="ai.easy"></button><button type="button" class="seg-opt" data-val="medium" data-i18n="ai.medium"></button><button type="button" class="seg-opt" data-val="hard" data-i18n="ai.hard"></button></div></div>
     </div>
+    <div class="field"><span class="lbl" data-i18n="mode.pick"></span>
+      <div class="modes modePicker" role="group"><button type="button" class="seg-opt" data-gm="classic" data-i18n="mode.classic"></button><button type="button" class="seg-opt" data-gm="pairs3" data-i18n="mode.pairs3"></button><button type="button" class="seg-opt" data-gm="triples" data-i18n="mode.triples"></button><button type="button" class="seg-opt" data-gm="gomoku" data-i18n="mode.gomoku"></button><button type="button" class="seg-opt" data-gm="blitz" data-i18n="mode.blitz"></button></div>
+      <p class="hint modeHint"></p></div>
     <div class="field l2only"><span class="lbl" data-i18n="local.mode"></span>
       <div class="seg" id="localMode" role="group"><button type="button" class="seg-opt" data-val="person" data-i18n="local.modePerson"></button><button type="button" class="seg-opt" data-val="ai" data-i18n="local.modeAI"></button></div></div>
     <div class="field l2only"><label class="lbl" for="name1" data-i18n="menu.p1"></label><input type="text" id="name1" maxlength="18" autocomplete="off"></div>
@@ -797,6 +813,9 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     <div class="field"><span class="lbl" data-i18n="four.pick"></span>
       <div class="seg" id="plPicker" role="group"><button type="button" class="seg-opt" data-pl="2" data-i18n="four.p2"></button><button type="button" class="seg-opt" data-pl="4" data-i18n="four.p4"></button></div>
       <p class="hint" id="plHint"></p></div>
+    <div class="field"><span class="lbl" data-i18n="mode.pick"></span>
+      <div class="modes modePicker" role="group"><button type="button" class="seg-opt" data-gm="classic" data-i18n="mode.classic"></button><button type="button" class="seg-opt" data-gm="pairs3" data-i18n="mode.pairs3"></button><button type="button" class="seg-opt" data-gm="triples" data-i18n="mode.triples"></button><button type="button" class="seg-opt" data-gm="gomoku" data-i18n="mode.gomoku"></button><button type="button" class="seg-opt" data-gm="blitz" data-i18n="mode.blitz"></button></div>
+      <p class="hint modeHint"></p></div>
     <div class="field"><span class="lbl" data-i18n="online.visibility"></span>
       <div class="seg" id="visPicker" role="group"><button type="button" class="seg-opt" data-vis="private" data-i18n="online.private"></button><button type="button" class="seg-opt" data-vis="public" data-i18n="online.public"></button></div>
       <p class="hint" id="visHint"></p></div>
@@ -847,6 +866,9 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     <h2 data-i18n="online.waitTitle"></h2>
     <p class="sub" id="waitSub" data-i18n="online.waitSub"></p>
     <div class="seats" id="waitSeats" hidden></div>
+    <div class="field" id="botBox" hidden><span class="lbl" data-i18n="bot.level"></span>
+      <div class="seg seg4" id="botLevel" role="group"><button type="button" class="seg-opt" data-val="beginner" data-i18n="ai.beginner"></button><button type="button" class="seg-opt" data-val="easy" data-i18n="ai.easy"></button><button type="button" class="seg-opt" data-val="medium" data-i18n="ai.medium"></button><button type="button" class="seg-opt" data-val="hard" data-i18n="ai.hard"></button></div>
+      <div class="btns"><button type="button" class="btn small" id="btnBotFill" data-i18n="bot.fill"></button></div></div>
     <div class="roomcode" id="roomCode" data-i18n-aria="a11y.roomCode"></div>
     <p class="hint" id="waitVis"></p>
     <div class="btns">
@@ -1026,7 +1048,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 46;</script>
+<script>window.PENTE_VERSION = 47;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -1142,6 +1164,9 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
  *  - Modo 4 jugadores (opts.players = 4): 2 contra 2. Asientos 1,2,3,4 juegan en ese orden; 1 y 3 son el equipo 1, 2 y 4 el equipo 2.
  *    Las fichas, capturas y victorias son POR EQUIPO (las fichas del equipo nunca se capturan entre sí). `current` sigue siendo el
  *    equipo (1|2), así todo lo que ya existe para 2 jugadores sigue valiendo; `seatToMove(s)` dice qué asiento (1-4) le toca.
+ *  - Variantes (opts.variant): 'classic' (por defecto; solo pares), 'pairs3' (se capturan pares Y tríos; par = 1 punto, trío = 2; gana con 5 puntos),
+ *    'triples' (solo tríos: P O O O P; cada trío = 1 punto; gana con 3), 'gomoku' (sin capturas, sin regla de torneo; gana con 5 o más en línea).
+ *    `captures[p]` cuenta PUNTOS de captura; `options.capturesToWin` es el objetivo. Blitz no es una regla del tablero: es solo cómo corre el reloj (lo maneja quien juega).
  *  - Regla de torneo (opcional, activada por defecto): la 1ª ficha del J1 va al centro y la
  *    2ª ficha del J1 debe estar a distancia >= 3 del centro (Chebyshev: fuera del cuadrado 5x5).
  */
@@ -1167,9 +1192,20 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 
   function opponent(p) { return p === P1 ? P2 : P1; }
 
+  var VARIANTS = ['classic', 'pairs3', 'triples', 'gomoku'];
+  // qué largos de grupo se capturan, cuántos puntos vale cada uno y cuántos puntos hacen falta para ganar
+  var VARIANT_RULES = {
+    classic: { sizes: [2], pts: { 2: 1 }, toWin: 5 },
+    pairs3:  { sizes: [2, 3], pts: { 2: 1, 3: 2 }, toWin: 5 },
+    triples: { sizes: [3], pts: { 3: 1 }, toWin: 3 },
+    gomoku:  { sizes: [], pts: {}, toWin: 999 }
+  };
+  function rulesOf(s) { var v = s && s.options && s.options.variant; return VARIANT_RULES[v] || VARIANT_RULES.classic; }
+
   function createGame(opts) {
     opts = opts || {};
     var size = opts.size || 19;
+    var variant = VARIANTS.indexOf(opts.variant) >= 0 ? opts.variant : 'classic', vr = VARIANT_RULES[variant];
     return {
       players: opts.players === 4 ? 4 : 2,
       size: size,
@@ -1183,10 +1219,11 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       winReasons: [],                     // 'line' | 'captures'
       winLine: null,                      // [{x,y}...] si ganó por línea
       options: {
-        tournamentRule: opts.tournamentRule !== false,
-        capturesToWin: opts.capturesToWin || 5,
+        variant: variant,
+        tournamentRule: variant === 'gomoku' ? false : opts.tournamentRule !== false,
+        capturesToWin: opts.capturesToWin || vr.toWin,
         lineToWin: opts.lineToWin || 5,
-        exactFive: !!opts.exactFive            // true: solo cuenta una línea de EXACTAMENTE lineToWin
+        exactFive: variant === 'gomoku' ? false : !!opts.exactFive            // true: solo cuenta una línea de EXACTAMENTE lineToWin
       }
     };
   }
@@ -1201,7 +1238,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       captures: { 1: s.captures[1], 2: s.captures[2] },
       moves: s.moves.slice(), lastMove: s.lastMove, status: s.status,
       winner: s.winner, winReasons: s.winReasons.slice(), winLine: s.winLine,
-      options: { tournamentRule: s.options.tournamentRule, capturesToWin: s.options.capturesToWin, lineToWin: s.options.lineToWin, exactFive: s.options.exactFive }
+      options: { variant: s.options.variant, tournamentRule: s.options.tournamentRule, capturesToWin: s.options.capturesToWin, lineToWin: s.options.lineToWin, exactFive: s.options.exactFive }
     };
   }
 
@@ -1220,20 +1257,25 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     return null;
   }
 
-  /** Pares que captura "player" al colocar en (x,y). Se evalúa ANTES de poner la ficha en el tablero lógico
-   *  (la ficha nueva es la P de un extremo). Devuelve lista de {x,y}. */
-  function findCaptures(s, x, y, player) {
-    var opp = opponent(player), out = [];
+  /** Grupos que captura "player" al colocar en (x,y). Se evalúa ANTES de poner la ficha en el tablero lógico
+   *  (la ficha nueva es la P de un extremo). Devuelve {cells:[{x,y}...], points} según la variante. */
+  function captureInfo(s, x, y, player) {
+    var vr = rulesOf(s), opp = opponent(player), cells = [], points = 0;
     for (var i = 0; i < DIRS8.length; i++) {
       var dx = DIRS8[i][0], dy = DIRS8[i][1];
-      var x1 = x + dx, y1 = y + dy, x2 = x + 2*dx, y2 = y + 2*dy, x3 = x + 3*dx, y3 = y + 3*dy;
-      if (!inBounds(s, x3, y3)) continue;
-      if (get(s, x1, y1) === opp && get(s, x2, y2) === opp && get(s, x3, y3) === player) {
-        out.push({ x: x1, y: y1 }, { x: x2, y: y2 });
+      for (var k = 0; k < vr.sizes.length; k++) {
+        var n = vr.sizes[k], ex = x + (n + 1) * dx, ey = y + (n + 1) * dy;
+        if (!inBounds(s, ex, ey) || get(s, ex, ey) !== player) continue;
+        var ok = true;
+        for (var j = 1; j <= n; j++) if (get(s, x + j * dx, y + j * dy) !== opp) { ok = false; break; }
+        if (!ok) continue;
+        for (j = 1; j <= n; j++) cells.push({ x: x + j * dx, y: y + j * dy });
+        points += vr.pts[n];
       }
     }
-    return out;
+    return { cells: cells, points: points };
   }
+  function findCaptures(s, x, y, player) { return captureInfo(s, x, y, player).cells; }
 
   /** Línea de >= lineToWin fichas de "player" que pasa por (x,y). Devuelve array de celdas o null. */
   function findLine(s, x, y, player) {
@@ -1272,10 +1314,10 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     if (err) return { ok: false, error: err };
 
     var n = clone(s), me = s.current;
-    var captured = findCaptures(s, x, y, me);   // sobre el tablero previo: la ficha nueva es el extremo
+    var info = captureInfo(s, x, y, me), captured = info.cells;   // sobre el tablero previo: la ficha nueva es el extremo
     n.board[y * n.size + x] = me;
     for (var i = 0; i < captured.length; i++) n.board[captured[i].y * n.size + captured[i].x] = EMPTY;
-    n.captures[me] += captured.length / 2;
+    n.captures[me] += info.points;
     n.moves.push({ x: x, y: y, player: me, seat: seatToMove(s), captured: captured });
     n.lastMove = { x: x, y: y, player: me };
 
@@ -1346,7 +1388,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     EMPTY: EMPTY, P1: P1, P2: P2, ERR: ERR,
     createGame: createGame, validateMove: validateMove, playMove: playMove, playMoveSeat: playMoveSeat,
     seatToMove: seatToMove, teamOfSeat: teamOfSeat, seatsOfTeam: seatsOfTeam,
-    findCaptures: findCaptures, findLine: findLine, legalMoves: legalMoves,
+    findCaptures: findCaptures, captureInfo: captureInfo, VARIANTS: VARIANTS, VARIANT_RULES: VARIANT_RULES, findLine: findLine, legalMoves: legalMoves,
     opponent: opponent, get: get, inBounds: inBounds, center: center,
     winsNeededForBestOf: winsNeededForBestOf,
     COLS: COLS, coordName: coordName, parseCoord: parseCoord
@@ -3356,6 +3398,66 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 })(typeof self !== 'undefined' ? self : this);
 </script>
 <script>
+/* Modos de juego y bots online — es */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.es, {
+    "mode.pick": "Modo de juego",
+    "mode.classic": "Clásico",
+    "mode.pairs3": "Pares y tríos",
+    "mode.triples": "Solo tríos",
+    "mode.gomoku": "Gomoku",
+    "mode.blitz": "Blitz ⚡",
+    "mode.hint.classic": "El Pente de siempre: capturás pares; ganás con 5 en línea o 5 pares.",
+    "mode.hint.pairs3": "Se capturan pares (1 punto) y tríos (2 puntos). Ganás con 5 puntos o 5 en línea.",
+    "mode.hint.triples": "Solo se capturan tríos (X O O O X). Ganás con 3 tríos capturados o 5 en línea. Los pares no se tocan.",
+    "mode.hint.gomoku": "Sin capturas ni regla de torneo: gana quien arma 5 o más en línea.",
+    "mode.hint.blitz": "Pente clásico con 3 minutos por jugador en total y sin tiempo por jugada. Si se te acaba el reloj, perdés.",
+    "mode.blitzClock": "Blitz: tiempo total que le queda a cada uno (no hay tiempo por jugada)",
+    "toast.capturedTrio": "{name} capturó un trío",
+    "toast.capturedStones": "{name} capturó {n} fichas",
+    "bot.level": "Nivel de los bots",
+    "bot.fill": "🤖 Completar con bots",
+    "bot.add": "🤖 Bot",
+    "bot.addTitle": "Sumar un bot en este asiento",
+    "bot.remove": "Sacar",
+    "bot.seat": "🤖 Bot {n} · {lvl}",
+    "bot.hint": "Si falta gente, sumá bots: juegan desde el servidor y siempre aceptan la revancha.",
+    "err.CANNOT_ADD_BOT": "Ahora no se pueden sumar ni sacar bots."
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
+/* Modos de juego y bots online — en */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.en, {
+    "mode.pick": "Game mode",
+    "mode.classic": "Classic",
+    "mode.pairs3": "Pairs & triples",
+    "mode.triples": "Triples only",
+    "mode.gomoku": "Gomoku",
+    "mode.blitz": "Blitz ⚡",
+    "mode.hint.classic": "Regular Pente: capture pairs; win with 5 in a row or 5 pairs.",
+    "mode.hint.pairs3": "Pairs (1 point) and triples (2 points) can be captured. Win with 5 points or 5 in a row.",
+    "mode.hint.triples": "Only triples are captured (X O O O X). Win with 3 captured triples or 5 in a row. Pairs are safe.",
+    "mode.hint.gomoku": "No captures and no tournament rule: whoever makes 5 or more in a row wins.",
+    "mode.hint.blitz": "Classic Pente with 3 minutes per player in total and no per-move time. If your clock runs out, you lose.",
+    "mode.blitzClock": "Blitz: total time each player has left (no per-move time)",
+    "toast.capturedTrio": "{name} captured a triple",
+    "toast.capturedStones": "{name} captured {n} stones",
+    "bot.level": "Bot level",
+    "bot.fill": "🤖 Fill with bots",
+    "bot.add": "🤖 Bot",
+    "bot.addTitle": "Add a bot in this seat",
+    "bot.remove": "Remove",
+    "bot.seat": "🤖 Bot {n} · {lvl}",
+    "bot.hint": "Short on people? Add bots: they play from the server and always accept a rematch.",
+    "err.CANNOT_ADD_BOT": "Bots can't be added or removed right now."
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
 /* Textos de torneos — es (los mensajes del motor de reglas siguen en español) */
 (function (root) {
   'use strict';
@@ -4402,17 +4504,17 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
         total += lineScore(L, open) * (side ? 0.92 : 1);
       }
     }
-    var caps = P.findCaptures(s, x, y, p).length / 2;
-    if (caps) total += 1900 * caps + (s.captures[p] + caps >= s.options.capturesToWin ? 90000 : s.captures[p] >= 3 ? 1500 : 0);
-    var theirs = P.findCaptures({ size: s.size, board: s.board }, x, y, q).length / 2;           // si ÉL jugara acá, ¿capturaría? tapar vale
-    if (theirs) total += 1100 * theirs + (s.captures[q] + theirs >= s.options.capturesToWin ? 80000 : 0);
+    var tw = s.options.capturesToWin, caps = P.captureInfo(s, x, y, p).points;
+    if (caps) total += 1900 * caps + (s.captures[p] + caps >= tw ? 90000 : s.captures[p] >= tw - 2 ? 1500 : 0);
+    var theirs = P.captureInfo({ size: s.size, board: s.board, options: s.options }, x, y, q).points;           // si ÉL jugara acá, ¿capturaría? tapar vale
+    if (theirs) total += 1100 * theirs + (s.captures[q] + theirs >= tw ? 80000 : 0);
     var c = (s.size - 1) / 2; total -= (Math.abs(x - c) + Math.abs(y - c)) * 0.3;                 // desempate: el centro vale un poquito
     return total;
   }
 
   /* Evaluación estática del tablero desde el punto de vista de "p": líneas abiertas, pares capturados y pares vulnerables. */
   function evaluate(s, p) {
-    var n = s.size, b = s.board, score = 0, a, x, y, v;
+    var n = s.size, b = s.board, score = 0, a, x, y, v, vr = P.VARIANT_RULES[s.options.variant] || P.VARIANT_RULES.classic, vuln = vr.sizes.length ? vr.sizes[0] : -1;
     for (a = 0; a < 4; a++) {
       var dx = AXES[a][0], dy = AXES[a][1];
       for (y = 0; y < n; y++) for (x = 0; x < n; x++) {
@@ -4423,13 +4525,14 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
         while (cx >= 0 && cy >= 0 && cx < n && cy < n && b[cy * n + cx] === v) { L++; cx += dx; cy += dy; }
         var after = (cx >= 0 && cy >= 0 && cx < n && cy < n) ? b[cy * n + cx] : -1, before = (px >= 0 && py >= 0 && px < n && py < n) ? b[py * n + px] : -1;
         var open = (after === 0 ? 1 : 0) + (before === 0 ? 1 : 0), sc = lineScore(L, open);
-        if (L === 2 && ((after === 0 && before > 0 && before !== v) || (before === 0 && after > 0 && after !== v))) sc -= 650;   // par con un rival de un lado y hueco del otro: lo pueden capturar
+        if (L === vuln && ((after === 0 && before > 0 && before !== v) || (before === 0 && after > 0 && after !== v))) sc -= 650;   // par con un rival de un lado y hueco del otro: lo pueden capturar
         score += (v === p) ? sc : -sc * 1.05;
       }
     }
     var q = P.opponent(p), cd = s.captures[p] - s.captures[q];
+    var tw = s.options.capturesToWin;
     score += cd * 1000;
-    if (s.captures[p] >= 4) score += 3500; if (s.captures[q] >= 4) score -= 3800;
+    if (s.captures[p] >= tw - 1) score += 3500; if (s.captures[q] >= tw - 1) score -= 3800;
     return score;
   }
 
@@ -4553,7 +4656,15 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 
   var canvas = $('board'), ctx = canvas.getContext('2d');
   var state = null, names = { 1: '', 2: '' };
-  var settings = { tournamentRule: true, exactFive: true, size: 13, timer: true };      // opciones de la partida (menú principal)
+  var settings = { tournamentRule: true, exactFive: true, size: 13, timer: true, mode: 'classic' };      // opciones de la partida (menú principal)
+  var MODES = ['classic', 'pairs3', 'triples', 'gomoku', 'blitz'];     // modo de juego = variante de reglas (+ blitz, que es solo otro reloj)
+  try { var mv0 = localStorage.getItem('pente.mode'); if (MODES.indexOf(mv0) >= 0) settings.mode = mv0; } catch (e) {}
+  var gameMode = 'classic';                                              // modo de la partida en curso (no cambia si se toca el menú a mitad de partida)
+  function modeVariant(m) { return m === 'blitz' ? 'classic' : m; }
+  function coreOpts(extra) {
+    var m = gameMode, o = { size: settings.size, tournamentRule: settings.tournamentRule, exactFive: settings.exactFive, variant: modeVariant(m) };
+    return Object.assign(o, extra || {});
+  }
   try { var sv = parseInt(localStorage.getItem('pente.size'), 10); if (sv === 13 || sv === 19) settings.size = sv; } catch (e) {}
 
   /* Configuración del dispositivo (pantalla "Configuración"): se guarda en localStorage y se aplica al instante. */
@@ -4600,7 +4711,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   var replayBusy = false; // true mientras se dibuja un cuadro del video (render no toca la pantalla real)
   var fx = [];            // fichas capturadas que se están desvaneciendo / rompiendo
   var rooms = { open: false, timer: 0 };
-  var online = {
+  var online = { bots: {}, mode: 'classic',
     spectator: false, specN: 0, lastCode: '', isPublic: false, cid: '',
     active: false, net: null, url: '', conn: 'closed', code: '', token: '', me: 0, intent: null, rejoining: false,
     over: null, connected: { 1: true, 2: true, 3: true, 4: true }, rematch: { 1: false, 2: false, 3: false, 4: false }, seat: 0, players: 2,
@@ -4646,22 +4757,23 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   /* ---------- Reloj ----------
    * clk = { on, total, turnMs, rem:{1,2}, current, since, turnStart, frozen }.  rem = tiempo total restante al instante "since".
    * Online lo fija el servidor (clockFromServer); local y contra la máquina lo lleva este navegador (se pausa con un menú abierto). */
-  var TOTAL_MS = 600000, TURN_MS = 60000, clk = null, clkPausedAt = 0, clockLog = [];   // clockLog[i] = tiempo total de cada uno tras la jugada i (para el video)
+  var TOTAL_MS = 600000, TURN_MS = 60000, BLITZ_MS = 180000, clk = null, clkPausedAt = 0, clockLog = [];   // clockLog[i] = tiempo total de cada uno tras la jugada i (para el video)
   function clockFresh() {
     clkPausedAt = 0; localOver = null; clockLog = [];
-    if (!settings.timer) { clk = null; return; }
-    var n = performance.now(); clk = { on: true, total: TOTAL_MS, turnMs: TURN_MS, rem: { 1: TOTAL_MS, 2: TOTAL_MS }, current: 1, since: n, turnStart: n, frozen: false };
+    var bl = gameMode === 'blitz' && !tut.active, tot = bl ? BLITZ_MS : TOTAL_MS;
+    if (!settings.timer && !bl) { clk = null; return; }
+    var n = performance.now(); clk = { on: true, total: tot, turnMs: bl ? 0 : TURN_MS, blitz: bl, rem: { 1: tot, 2: tot }, current: 1, since: n, turnStart: n, frozen: false };
   }
   function clockFromServer(c) {
     if (!c || !c.on) { clk = null; return; }
     var n = performance.now(), cur = c.current;
-    clk = { on: true, total: c.total, turnMs: c.turnMs, rem: { 1: c.rem[1], 2: c.rem[2] }, current: cur || (state ? state.current : 1), since: n, turnStart: n - (c.turnMs - c.turnLeft), frozen: !cur };
+    clk = { on: true, total: c.total, turnMs: c.turnMs, blitz: !!c.blitz, rem: { 1: c.rem[1], 2: c.rem[2] }, current: cur || (state ? state.current : 1), since: n, turnStart: n - (c.turnMs - c.turnLeft), frozen: !cur };
   }
   function botTurn() { return ai.active && botNow(); }
   function clockLive() {                                   // { 1: ms totales, 2: ms totales, turn: ms de la jugada } a este instante
     if (!clk) return null;
     var n = clkPausedAt || performance.now(), out = { 1: clk.rem[1], 2: clk.rem[2], turn: clk.turnMs, cur: clk.current };
-    if (!clk.frozen && !botTurn()) { out[clk.current] = Math.max(0, clk.rem[clk.current] - (n - clk.since)); out.turn = Math.max(0, clk.turnMs - (n - clk.turnStart)); }
+    if (!clk.frozen && !botTurn()) { out[clk.current] = Math.max(0, clk.rem[clk.current] - (n - clk.since)); out.turn = clk.turnMs ? Math.max(0, clk.turnMs - (n - clk.turnStart)) : Infinity; }
     return out;
   }
   function clockSwitch() {                                 // se hizo una jugada local: se descuenta lo gastado y pasa el turno
@@ -4679,9 +4791,10 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       el.hidden = !l; if (!l) return;
       var active = !clk.frozen && !isOver() && state.current === p && !botTurn();
       el.querySelector('.ctot').textContent = fmtClock(l[p]);
-      el.querySelector('.cturn').textContent = active ? fmtClock(l.turn) : '';
+      el.querySelector('.cturn').textContent = active && clk.turnMs ? fmtClock(l.turn) : '';
       el.classList.toggle('low', active && (l.turn <= 10000 || l[p] <= 30000));
-      el.title = t('clock.title');
+      el.classList.toggle('blitz', !!clk.blitz);
+      el.title = t(clk.blitz ? 'mode.blitzClock' : 'clock.title');
     });
   }
   function clockTick() {
@@ -4693,7 +4806,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     renderClocks();
     if (online.active || paused || isOver() || clk.frozen || botTurn()) return;
     var l = clockLive();
-    if (l[clk.current] <= 0 || l.turn <= 0) timeoutEnd(clk.current);   // en online decide el servidor
+    if (l[clk.current] <= 0 || (clk.turnMs && l.turn <= 0)) timeoutEnd(clk.current);   // en online decide el servidor
   }
   function timeoutEnd(loser) {
     if (isOver()) return;
@@ -4711,7 +4824,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     if (online.net) leaveOnline(false);
     names[1] = ($('name1').value || '').trim() || t('player.1');
     names[2] = ($('name2').value || '').trim() || t('player.2');
-        state = P.createGame({ size: settings.size, tournamentRule: settings.tournamentRule, exactFive: settings.exactFive });
+    gameMode = settings.mode; state = P.createGame(coreOpts());
     hover = pending = drag = settle = null; fx.length = 0; clockFresh();
     kbd = { x: centerIdx(), y: centerIdx() };
     closeAll(); render(); setStatus('');
@@ -4719,8 +4832,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 
   function announceCaptures(mover, captured) {
     if (captured.length) {
-      var n = captured.length / 2;
-      setStatus(n === 1 ? t('toast.captured', { name: names[mover] }) : t('toast.capturedMany', { name: names[mover], n: n }), true);
+      var c = captured.length;
+      setStatus(c === 2 ? t('toast.captured', { name: names[mover] }) : c === 3 ? t('toast.capturedTrio', { name: names[mover] }) : t('toast.capturedStones', { name: names[mover], n: c }), true);
     } else setStatus('');
   }
 
@@ -4768,7 +4881,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     var human = side === 'second' ? 2 : side === 'random' ? (Math.random() < 0.5 ? 1 : 2) : 1;
     ai.active = true; ai.level = level; ai.human = human; ai.bot = human === 1 ? 2 : 1;
     names[human] = ($('name1').value || '').trim() || t('ai.you'); names[ai.bot] = t('ai.name.' + level);
-    state = P.createGame({ size: settings.size, tournamentRule: settings.tournamentRule, exactFive: settings.exactFive });
+    gameMode = settings.mode; state = P.createGame(coreOpts());
     hover = pending = drag = settle = null; fx.length = 0; clockFresh(); kbd = { x: centerIdx(), y: centerIdx() };
     closeAll(); render(); setStatus(''); aiMaybeMove();
   }
@@ -4786,7 +4899,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     ai.active = any; ai.four = true; ai.botSeats = {}; for (var z = 2; z <= 4; z++) if (loc4.bots[z]) ai.botSeats[z] = true;
     ai.level = aiPref.level; ai.human = 1; ai.bot = 2;
     names[1] = seatNames[1] + ' + ' + seatNames[3]; names[2] = seatNames[2] + ' + ' + seatNames[4];
-    state = P.createGame({ size: settings.size, tournamentRule: settings.tournamentRule, exactFive: settings.exactFive, players: 4 });
+    gameMode = settings.mode; state = P.createGame(coreOpts({ players: 4 }));
     hover = pending = drag = settle = null; fx.length = 0; clockFresh(); kbd = { x: centerIdx(), y: centerIdx() };
     closeAll(); render(); setStatus(''); aiMaybeMove();
   }
@@ -5454,7 +5567,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   }
 
   /* ---------- HUD ---------- */
-  function pips(n) { var s = ''; for (var i = 0; i < 5; i++) s += '<span class="pip' + (i < n ? ' on' : '') + '"></span>'; return s; }
+  function pips(n, tot) { var s = ''; tot = tot || 5; for (var i = 0; i < tot; i++) s += '<span class="pip' + (i < n ? ' on' : '') + '"></span>'; return s; }
   function updateHud() {
     if (!state) return;
     [1, 2].forEach(function (p) {
@@ -5463,9 +5576,12 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       el.classList.toggle('offline', online.active && seatsOf(p).some(function (x) { return !online.connected[x]; }));
       var mine = !tut.active && ((ai.active && p === ai.human) || (online.active && !online.spectator && p === online.me));
       $('pname' + p).textContent = (mine ? PP.emojiOf(profile.avatar) + ' ' : '') + (names[p] || '…') + (online.active && online.me === p && online.players !== 4 ? ' ' + t('online.you') : '');
-      $('caps' + p).innerHTML = pips(state.captures[p]) + '<span>' + state.captures[p] + '/5</span>';
+      var tw = state.options.capturesToWin;
+      $('caps' + p).innerHTML = tw > 20 ? '' : pips(state.captures[p], tw) + '<span>' + state.captures[p] + '/' + tw + '</span>';   // gomoku: sin capturas
     });
     updateSide(); renderClocks(); updateVideoButtons(); updateResultBtn(); musicScene();
+    var am = tut.active ? 'classic' : (online.active || online.spectator) ? online.mode : gameMode, mb = $('modeBar');
+    mb.hidden = am === 'classic'; if (am !== 'classic') mb.textContent = t('mode.' + am) + ' · ' + t('mode.hint.' + am);
     var sb = $('specBar'); sb.hidden = !online.spectator;
     if (online.spectator) sb.textContent = t('spec.badge', { code: online.code, n: online.specN });
     if (!isOver() && !$('status').dataset.toast) $('status').textContent = turnText();
@@ -5555,7 +5671,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   function rematch() {
     videoDiscard(); endSeen = recorded = false;
     if (ai.active) { ai.token++; clearTimeout(ai.timer); ai.thinking = false; }
-    state = P.createGame({ size: state ? state.size : settings.size, tournamentRule: settings.tournamentRule, exactFive: settings.exactFive, players: state && state.players === 4 ? 4 : 2 });
+    state = P.createGame(coreOpts({ size: state ? state.size : settings.size, players: state && state.players === 4 ? 4 : 2 }));   // la revancha conserva el modo de la partida
     hover = pending = drag = settle = null; fx.length = 0; kbd = { x: centerIdx(), y: centerIdx() }; clockFresh(); closeAll(); setStatus(''); render();
     if (ai.active) aiMaybeMove();
   }
@@ -5622,7 +5738,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     online.net = null; online.active = false; online.conn = 'closed'; online.code = ''; online.token = ''; online.me = 0;
     online.spectator = false; online.specN = 0; online.cid = ''; chatReset(); stopRooms(); fx.length = 0; $('btnSpectateOffer').hidden = true;
     online.intent = null; online.rejoining = false; online.over = null; online.awaiting = false; online.rivalLeftAt = 0;
-    online.connected = { 1: true, 2: true, 3: true, 4: true }; online.rematch = { 1: false, 2: false, 3: false, 4: false }; online.seat = 0; online.players = 2; seatNames = {};
+    online.connected = { 1: true, 2: true, 3: true, 4: true }; online.rematch = { 1: false, 2: false, 3: false, 4: false }; online.seat = 0; online.players = 2; online.bots = {}; online.mode = 'classic'; seatNames = {};
     clearSession(); updateOnlineButtons(); updateRematchUi();
     if (wasActive) { videoDiscard(); state = null; clk = null; hover = pending = null; setStatus(''); render(); }
     updateHud();
@@ -5671,7 +5787,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       g = r.state;
     }
     state = g; online.seat = m.you; online.me = m.you ? teamOfSeat(m.you) : 0; online.over = m.over || null; online.connected = m.connected;
-    online.players = (m.opts && m.opts.players === 4) ? 4 : 2;
+    online.players = (m.opts && m.opts.players === 4) ? 4 : 2; online.bots = m.bots || {};
+    online.mode = m.opts && m.opts.blitz ? 'blitz' : (m.opts && m.opts.variant) || 'classic';
     online.rematch = m.rematch || { 1: false, 2: false }; online.awaiting = false;
     seatNames = {}; for (var si = 1; si <= nSeats(); si++) seatNames[si] = (m.names && m.names[si]) || '';
     names[1] = teamName(1) || t('player.1'); names[2] = teamName(2);
@@ -5712,22 +5829,38 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   }
   function clearClaim() { clearTimeout(online.claimTimer); $('btnClaim').hidden = true; }
 
+  var botPick = 'medium';
+  try { var bp0 = localStorage.getItem('pente.botLevel'); if (['beginner', 'easy', 'medium', 'hard'].indexOf(bp0) >= 0) botPick = bp0; } catch (e) {}
   function showWait() {
     $('roomCode').textContent = online.code; $('waitMsg').textContent = '';
     $('btnShare').hidden = !navigator.share;
     $('waitVis').textContent = t(online.isPublic ? 'online.waitPublic' : 'online.waitPrivate');
     $('waitSub').textContent = t(online.players === 4 ? 'four.waitSub' : 'online.waitSub');
     var box = $('waitSeats'); box.innerHTML = ''; box.hidden = online.players !== 4;
+    $('botBox').hidden = online.players !== 4;
     if (online.players === 4) {
+      var freeSeats = [];
       for (var sw = 1; sw <= 4; sw++) (function (sw) {
-        var free = !seatNames[sw], li = document.createElement(free ? 'button' : 'div');
+        var bot = online.bots[sw], free = !seatNames[sw], row = document.createElement('div'); row.className = 'seatrow';
+        if (free) freeSeats.push(sw);
+        var li = document.createElement(free ? 'button' : 'div');
         li.className = 'seat' + (seatNames[sw] ? ' on' : ' free') + (sw === online.seat ? ' me' : '');
         if (free) { li.type = 'button'; li.addEventListener('click', function () { if (online.net) online.net.send({ t: 'seat', seat: sw }); }); }
-        li.textContent = (teamOfSeat(sw) === 1 ? '⚫ ' : '⚪ ') + t('four.team', { n: teamOfSeat(sw) }) + ' · ' + (seatNames[sw] || t('four.emptyTap')) + (sw === online.seat ? ' ' + t('online.you') : '');
-        box.appendChild(li);
+        li.textContent = (teamOfSeat(sw) === 1 ? '⚫ ' : '⚪ ') + t('four.team', { n: teamOfSeat(sw) }) + ' · ' + (bot ? t('bot.seat', { n: sw, lvl: t('ai.' + bot) }) : seatNames[sw] || t('four.emptyTap')) + (sw === online.seat ? ' ' + t('online.you') : '');
+        row.appendChild(li);
+        if (free || bot) {
+          var bb = document.createElement('button'); bb.type = 'button'; bb.className = 'seat-bot';
+          bb.textContent = bot ? t('bot.remove') : t('bot.add'); bb.title = bot ? t('bot.remove') : t('bot.addTitle');
+          bb.addEventListener('click', function () { if (online.net) online.net.send(bot ? { t: 'botoff', seat: sw } : { t: 'bot', seat: sw, level: botPick }); });
+          row.appendChild(bb);
+        }
+        box.appendChild(row);
       })(sw);
-      var hn = document.createElement('p'); hn.className = 'hint'; hn.textContent = t('four.seatHint'); box.appendChild(hn);
+      var hn = document.createElement('p'); hn.className = 'hint'; hn.textContent = t('four.seatHint') + ' ' + t('bot.hint'); box.appendChild(hn);
+      $('btnBotFill').hidden = !freeSeats.length; $('btnBotFill').onclick = function () { if (online.net) freeSeats.forEach(function (x) { online.net.send({ t: 'bot', seat: x, level: botPick }); }); };
+      document.querySelectorAll('#botLevel .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.val === botPick)); });
     }
+    $('waitVis').textContent = t(online.isPublic ? 'online.waitPublic' : 'online.waitPrivate') + (online.mode !== 'classic' ? ' · ' + t('mode.' + online.mode) : '');
     open('waitOverlay');
   }
 
@@ -5802,7 +5935,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   function movesText() {
     if (!state) return '';
     var o = state.options, rules = [];
-    if (o.tournamentRule) rules.push(t('moves.ruleTournament')); if (o.exactFive) rules.push(t('moves.ruleExact'));
+    if (o.variant && o.variant !== 'classic') rules.push(t('mode.' + o.variant)); if (o.tournamentRule) rules.push(t('moves.ruleTournament')); if (o.exactFive) rules.push(t('moves.ruleExact'));
     var d = new Date(), pad = function (n) { return (n < 10 ? '0' : '') + n; };
     var lines = [t('moves.txtHeader', { size: state.size }), names[1] + ' (1) vs ' + (names[2] || '…') + ' (2)',
       t('moves.txtRules', { rules: rules.length ? rules.join(', ') : t('moves.ruleFree') }),
@@ -5968,6 +6101,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     if (PT) { tnBuildSelects(); if ($('tnViewOverlay').classList.contains('open')) tnRenderView(); if ($('tnOverlay').classList.contains('open')) tnRenderList(); if ($('tnNewOverlay').classList.contains('open')) tnRenderCheck(); }
     document.documentElement.lang = window.I18n.getLang();
     document.querySelectorAll('[data-i18n-ph]').forEach(function (el) { el.placeholder = t(el.getAttribute('data-i18n-ph')); });
+    if (typeof syncMode === 'function') syncMode();
     document.querySelectorAll('.pw-eye').forEach(function (b) { var on = b.getAttribute('aria-pressed') === 'true'; b.setAttribute('aria-label', t(on ? 'pw.hide' : 'pw.show')); });
     canvas.setAttribute('aria-label', t('a11y.board'));
     var ol = $('rulesList'); ol.innerHTML = '';
@@ -6008,7 +6142,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   $('btnOnlineBack').addEventListener('click', function () { if (online.net && !online.active) leaveOnline(false); open('playOverlay'); });
   $('btnCreateRoom').addEventListener('click', function () {
     online.isPublic = vis === 'public';
-    startOnline({ t: 'create', opts: { tournamentRule: settings.tournamentRule, exactFive: settings.exactFive, size: settings.size, timer: settings.timer, players: plPick, public: online.isPublic } });
+    startOnline({ t: 'create', opts: { variant: modeVariant(settings.mode), blitz: settings.mode === 'blitz', tournamentRule: settings.tournamentRule, exactFive: settings.exactFive, size: settings.size, timer: settings.timer, players: plPick, public: online.isPublic } });
   });
   function joinFromInput() {
     var code = ($('onCode').value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -6238,6 +6372,23 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   document.querySelectorAll('input[data-opt]').forEach(function (i) {
     i.addEventListener('change', function () { settings[i.getAttribute('data-opt')] = i.checked; syncOpts(); });
   });
+  /* Modo de juego (variante de reglas): el mismo selector en la pantalla local y en la de crear sala online */
+  function syncMode() {
+    var m = settings.mode;
+    document.querySelectorAll('.modePicker .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.gm === m)); });
+    document.querySelectorAll('.modeHint').forEach(function (h) { h.textContent = t('mode.hint.' + m); });
+    var hide = { tournamentRule: m === 'gomoku', exactFive: m === 'gomoku', timer: m === 'blitz' };     // no aplican en ese modo
+    document.querySelectorAll('input[data-opt]').forEach(function (i) { var lb = i.closest('label'); if (lb) lb.hidden = !!hide[i.getAttribute('data-opt')]; });
+  }
+  document.querySelectorAll('.modePicker .seg-opt').forEach(function (b) {
+    b.addEventListener('click', function () {
+      settings.mode = b.dataset.gm; try { localStorage.setItem('pente.mode', settings.mode); } catch (e) {}
+      syncMode();
+    });
+  });
+  document.querySelectorAll('#botLevel .seg-opt').forEach(function (b) {
+    b.addEventListener('click', function () { botPick = b.dataset.val; try { localStorage.setItem('pente.botLevel', botPick); } catch (e) {} document.querySelectorAll('#botLevel .seg-opt').forEach(function (x) { x.setAttribute('aria-pressed', String(x.dataset.val === botPick)); }); });
+  });
   var plPick = 2;
   try { if (localStorage.getItem('pente.players') === '4') plPick = 4; } catch (e) {}
   function syncPl() {
@@ -6311,7 +6462,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       else who.textContent = r.status === 'waiting' ? t('rooms.waiting', { name: r.names[0] || '…' }) : t('rooms.vs', { a: r.names[0] || '…', b: r.names[1] || '…' });
       var meta = document.createElement('div'); meta.className = 'meta';
       var st = r.status === 'waiting' ? t('rooms.statusWaiting') : t(r.status === 'over' ? 'rooms.statusOver' : 'rooms.statusPlaying', { n: r.moves });
-      meta.textContent = (r.players === 4 ? t('four.badge') + ' · ' : '') + r.size + '×' + r.size + ' · ' + st + (r.spectators ? ' · ' + t('rooms.watching', { n: r.spectators }) : '');
+      meta.textContent = (r.players === 4 ? t('four.badge') + ' · ' : '') + (r.blitz ? t('mode.blitz') + ' · ' : r.variant && r.variant !== 'classic' ? t('mode.' + r.variant) + ' · ' : '') + r.size + '×' + r.size + ' · ' + st + (r.spectators ? ' · ' + t('rooms.watching', { n: r.spectators }) : '');
       info.appendChild(who); info.appendChild(meta);
       var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'btn' + (r.status === 'waiting' ? ' primary' : '');
       btn.textContent = t(r.status === 'waiting' ? 'rooms.play' : 'rooms.watch');
@@ -7188,7 +7339,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   });
   tnLoad();
 
-  applyI18n(); buildThemePicker(); syncSizePicker(); syncOpts(); syncVis(); resize(); open('menuOverlay'); initOnline(); updateSide();
+  applyI18n(); buildThemePicker(); syncSizePicker(); syncOpts(); syncMode(); syncVis(); resize(); open('menuOverlay'); initOnline(); updateSide();
   window.__pente = { get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, startAI: startAI, get ai() { return ai; }, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; }, get tut() { return tut; }, get profile() { return profile; }, get auth() { return Auth; }, get sync() { return sync; }, setChatW: setChatW, syncProfile: syncProfile, get tn() { return tn; } };  // utilidad para pruebas manuales
 })();
 </script>
