@@ -49,6 +49,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .stone-ico { width: 22px; height: 22px; border-radius: 50%; flex: none; box-shadow: inset 0 -2px 3px rgba(0,0,0,.35), 0 1px 2px rgba(0,0,0,.5); }
 .stone-ico.s1 { background: radial-gradient(circle at 35% 30%, var(--s1a), var(--s1b) 75%); }
 .stone-ico.s2 { background: radial-gradient(circle at 35% 30%, var(--s2a), var(--s2b) 75%); }
+.stone-ico.s3 { background: radial-gradient(circle at 35% 30%, var(--s3a), var(--s3b) 75%); }
+.stone-ico.s4 { background: radial-gradient(circle at 35% 30%, var(--s4a), var(--s4b) 75%); }
 .player .name { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .player .caps { margin-top: 8px; display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); flex-wrap: wrap; }
 .pip { width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid var(--muted); }
@@ -173,6 +175,8 @@ body.in-screen .app { visibility: hidden; }
 .movelist .mv::before { content: ''; width: 11px; height: 11px; border-radius: 50%; flex: none; }
 .movelist .mv[data-p="1"]::before { background: radial-gradient(circle at 35% 30%, var(--s1a), var(--s1b)); }
 .movelist .mv[data-p="2"]::before { background: radial-gradient(circle at 35% 30%, var(--s2a), var(--s2b)); box-shadow: 0 0 0 1px rgba(0,0,0,.25); }
+.movelist .mv[data-p="3"]::before { background: radial-gradient(circle at 35% 30%, var(--s3a), var(--s3b)); }
+.movelist .mv[data-p="4"]::before { background: radial-gradient(circle at 35% 30%, var(--s4a), var(--s4b)); }
 .movelist .cap { color: var(--accent); font-size: 12px; font-weight: 700; }
 .movelist .empty { display: block; color: var(--muted); }
 .badge { display: inline-block; min-width: 18px; padding: 0 5px; margin-left: 6px; border-radius: 9px; background: var(--danger); color: #fff; font-size: 12px; line-height: 18px; text-align: center; }
@@ -501,6 +505,15 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 .seat-bot { flex: none; border: 1px solid var(--line, #3a3f4b); background: transparent; color: inherit; border-radius: 10px; padding: 0 12px; font: inherit; font-weight: 600; cursor: pointer; }
 .seat-bot:hover { border-color: var(--accent, #e8b04a); }
 .clock.blitz .cturn { display: none; }
+
+/* todos contra todos: cuatro paneles y jugadores eliminados */
+.hud.ffa { grid-template-columns: 1fr 1fr; gap: 6px; }
+.hud.ffa .player { padding: 6px 10px; }
+.hud.ffa .player .caps { margin-top: 4px; }
+.player.out { opacity: .4; }
+.player.out .name { text-decoration: line-through; }
+#localPlayers, #plPicker { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+#localPlayers .seg-opt, #plPicker .seg-opt { min-height: 52px; line-height: 1.15; }
 </style>
 </head>
 <body>
@@ -515,6 +528,16 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       <div class="row"><span class="stone-ico s2"></span><span class="name" id="pname2"></span></div>
       <div class="clock" id="clock2" hidden><span class="cturn"></span><span class="ctot"></span></div>
       <div class="caps" id="caps2" data-i18n-aria="a11y.captures"></div>
+    </div>
+    <div class="player" id="player3" hidden>
+      <div class="row"><span class="stone-ico s3"></span><span class="name" id="pname3"></span></div>
+      <div class="clock" id="clock3" hidden><span class="cturn"></span><span class="ctot"></span></div>
+      <div class="caps" id="caps3" data-i18n-aria="a11y.captures"></div>
+    </div>
+    <div class="player" id="player4" hidden>
+      <div class="row"><span class="stone-ico s4"></span><span class="name" id="pname4"></span></div>
+      <div class="clock" id="clock4" hidden><span class="cturn"></span><span class="ctot"></span></div>
+      <div class="caps" id="caps4" data-i18n-aria="a11y.captures"></div>
     </div>
   </div>
 
@@ -594,7 +617,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v47</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v48</p></div>
     <div class="btns">
       <button class="btn primary" id="btnResume" hidden data-i18n="menu.resume"></button>
       <button class="btn primary" id="btnPlay" data-i18n="menu.play"></button>
@@ -678,7 +701,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     <h2 data-i18n="local.title"></h2>
     <p class="sub" data-i18n="local.sub"></p>
     <div class="field"><span class="lbl" data-i18n="four.pick"></span>
-      <div class="seg" id="localPlayers" role="group"><button type="button" class="seg-opt" data-pl="2" data-i18n="four.p2"></button><button type="button" class="seg-opt" data-pl="4" data-i18n="four.p4"></button></div></div>
+      <div class="seg" id="localPlayers" role="group"><button type="button" class="seg-opt" data-pl="2" data-i18n="four.p2"></button><button type="button" class="seg-opt" data-pl="4" data-i18n="four.p4"></button><button type="button" class="seg-opt" data-pl="5" data-i18n="four.p5"></button></div></div>
     <div id="loc4" hidden>
       <p class="hint" data-i18n="four.localHint"></p>
       <div class="l4rows" id="l4rows"></div>
@@ -811,7 +834,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       <button type="button" class="acc-head" aria-expanded="false" aria-controls="accCreateBody"><span data-i18n="acc.create"></span><span class="acc-chev" aria-hidden="true"></span></button>
       <div class="acc-body" id="accCreateBody" hidden>
     <div class="field"><span class="lbl" data-i18n="four.pick"></span>
-      <div class="seg" id="plPicker" role="group"><button type="button" class="seg-opt" data-pl="2" data-i18n="four.p2"></button><button type="button" class="seg-opt" data-pl="4" data-i18n="four.p4"></button></div>
+      <div class="seg" id="plPicker" role="group"><button type="button" class="seg-opt" data-pl="2" data-i18n="four.p2"></button><button type="button" class="seg-opt" data-pl="4" data-i18n="four.p4"></button><button type="button" class="seg-opt" data-pl="5" data-i18n="four.p5"></button></div>
       <p class="hint" id="plHint"></p></div>
     <div class="field"><span class="lbl" data-i18n="mode.pick"></span>
       <div class="modes modePicker" role="group"><button type="button" class="seg-opt" data-gm="classic" data-i18n="mode.classic"></button><button type="button" class="seg-opt" data-gm="pairs3" data-i18n="mode.pairs3"></button><button type="button" class="seg-opt" data-gm="triples" data-i18n="mode.triples"></button><button type="button" class="seg-opt" data-gm="gomoku" data-i18n="mode.gomoku"></button><button type="button" class="seg-opt" data-gm="blitz" data-i18n="mode.blitz"></button></div>
@@ -1048,7 +1071,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 47;</script>
+<script>window.PENTE_VERSION = 48;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -1167,6 +1190,9 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
  *  - Variantes (opts.variant): 'classic' (por defecto; solo pares), 'pairs3' (se capturan pares Y tríos; par = 1 punto, trío = 2; gana con 5 puntos),
  *    'triples' (solo tríos: P O O O P; cada trío = 1 punto; gana con 3), 'gomoku' (sin capturas, sin regla de torneo; gana con 5 o más en línea).
  *    `captures[p]` cuenta PUNTOS de captura; `options.capturesToWin` es el objetivo. Blitz no es una regla del tablero: es solo cómo corre el reloj (lo maneja quien juega).
+ *  - Todos contra todos (opts.players = 4 y opts.ffa = true): 4 colores (1..4), cada asiento es su propio "equipo": `current` es el asiento al que le toca (1,2,3,4 y vuelta),
+ *    las capturas se llevan por asiento, un par/trío se captura si son del MISMO color rival y sus dos extremos son tuyos. Sin regla de torneo. Quien abandona o se queda sin tiempo
+ *    queda ELIMINADO (`eliminate`): sus fichas quedan en el tablero y se saltea su turno; si queda uno solo, gana (winReasons ['last']).
  *  - Regla de torneo (opcional, activada por defecto): la 1ª ficha del J1 va al centro y la
  *    2ª ficha del J1 debe estar a distancia >= 3 del centro (Chebyshev: fuera del cuadrado 5x5).
  */
@@ -1205,13 +1231,16 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   function createGame(opts) {
     opts = opts || {};
     var size = opts.size || 19;
+    var ffa = opts.players === 4 && opts.ffa === true;
     var variant = VARIANTS.indexOf(opts.variant) >= 0 ? opts.variant : 'classic', vr = VARIANT_RULES[variant];
     return {
       players: opts.players === 4 ? 4 : 2,
+      ffa: ffa,                           // todos contra todos (4 colores)
+      out: {},                            // asientos eliminados (solo ffa)
       size: size,
       board: new Array(size * size).fill(EMPTY),
       current: P1,
-      captures: { 1: 0, 2: 0 },          // pares capturados por cada jugador
+      captures: ffa ? { 1: 0, 2: 0, 3: 0, 4: 0 } : { 1: 0, 2: 0 },          // puntos de captura de cada jugador
       moves: [],                          // {x,y,player,captured:[{x,y}]}
       lastMove: null,
       status: 'playing',                  // 'playing' | 'won' | 'draw'
@@ -1220,7 +1249,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       winLine: null,                      // [{x,y}...] si ganó por línea
       options: {
         variant: variant,
-        tournamentRule: variant === 'gomoku' ? false : opts.tournamentRule !== false,
+        tournamentRule: (variant === 'gomoku' || ffa) ? false : opts.tournamentRule !== false,
         capturesToWin: opts.capturesToWin || vr.toWin,
         lineToWin: opts.lineToWin || 5,
         exactFive: variant === 'gomoku' ? false : !!opts.exactFive            // true: solo cuenta una línea de EXACTAMENTE lineToWin
@@ -1234,8 +1263,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 
   function clone(s) {
     return {
-      players: s.players, size: s.size, board: s.board.slice(), current: s.current,
-      captures: { 1: s.captures[1], 2: s.captures[2] },
+      players: s.players, ffa: !!s.ffa, out: Object.assign({}, s.out), size: s.size, board: s.board.slice(), current: s.current,
+      captures: Object.assign({}, s.captures),
       moves: s.moves.slice(), lastMove: s.lastMove, status: s.status,
       winner: s.winner, winReasons: s.winReasons.slice(), winLine: s.winLine,
       options: { variant: s.options.variant, tournamentRule: s.options.tournamentRule, capturesToWin: s.options.capturesToWin, lineToWin: s.options.lineToWin, exactFive: s.options.exactFive }
@@ -1260,16 +1289,18 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   /** Grupos que captura "player" al colocar en (x,y). Se evalúa ANTES de poner la ficha en el tablero lógico
    *  (la ficha nueva es la P de un extremo). Devuelve {cells:[{x,y}...], points} según la variante. */
   function captureInfo(s, x, y, player) {
-    var vr = rulesOf(s), opp = opponent(player), cells = [], points = 0;
+    var vr = rulesOf(s), cells = [], points = 0;
     for (var i = 0; i < DIRS8.length; i++) {
-      var dx = DIRS8[i][0], dy = DIRS8[i][1];
+      var dx = DIRS8[i][0], dy = DIRS8[i][1], o = null;
       for (var k = 0; k < vr.sizes.length; k++) {
         var n = vr.sizes[k], ex = x + (n + 1) * dx, ey = y + (n + 1) * dy;
         if (!inBounds(s, ex, ey) || get(s, ex, ey) !== player) continue;
+        o = get(s, x + dx, y + dy);
+        if (!o || o === player) continue;                           // el grupo es de UN solo color rival (en ffa hay tres posibles)
         var ok = true;
-        for (var j = 1; j <= n; j++) if (get(s, x + j * dx, y + j * dy) !== opp) { ok = false; break; }
+        for (var j = 2; j <= n; j++) if (get(s, x + j * dx, y + j * dy) !== o) { ok = false; break; }
         if (!ok) continue;
-        for (j = 1; j <= n; j++) cells.push({ x: x + j * dx, y: y + j * dy });
+        for (j = 1; j <= n; j++) cells.push({ x: x + j * dx, y: y + j * dy, p: o });
         points += vr.pts[n];
       }
     }
@@ -1329,8 +1360,11 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       line = findExactLine(n, me);
       if (line) reasons.push('line');
       if (!reasons.length) {
-        var oppLine = findExactLine(n, opponent(me));
-        if (oppLine) { winner = opponent(me); reasons.push('line'); line = oppLine; }
+        for (var q = 1; q <= (n.ffa ? 4 : 2) && !winner; q++) {
+          if (q === me || (n.ffa && n.out[q])) continue;
+          var oppLine = findExactLine(n, q);
+          if (oppLine) { winner = q; reasons.push('line'); line = oppLine; }
+        }
       }
     } else {
       line = findLine(n, x, y, me);
@@ -1342,21 +1376,31 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     } else if (isBoardFull(n)) {
       n.status = 'draw';   // tablero lleno sin ganador
     } else {
-      n.current = opponent(me);
+      n.current = n.ffa ? nextActive(n, me) : opponent(me);
     }
     return { ok: true, state: n, captured: captured, won: n.status === 'won', draw: n.status === 'draw' };
   }
 
-  /** Asiento (1..players) al que le toca jugar. En 2 jugadores coincide con el equipo. */
-  function seatToMove(s) { return (s.moves.length % (s.players || 2)) + 1; }
+  function nextActive(s, from) { for (var i = 1; i <= 4; i++) { var q = ((from - 1 + i) % 4) + 1; if (!s.out[q]) return q; } return from; }
+  /** Asiento (1..players) al que le toca jugar. En 2 jugadores coincide con el equipo; en todos contra todos es `current`. */
+  function seatToMove(s) { return s.ffa ? s.current : (s.moves.length % (s.players || 2)) + 1; }
+  /** Todos contra todos: saca a un asiento (abandono / tiempo). Si queda uno solo, gana. */
+  function eliminate(s, seat) {
+    if (!s.ffa || s.status !== 'playing' || seat < 1 || seat > 4 || s.out[seat]) return { ok: false, error: ERR.GAME_OVER };
+    var n = clone(s); n.out[seat] = true;
+    var left = [1, 2, 3, 4].filter(function (q) { return !n.out[q]; });
+    if (left.length === 1) { n.status = 'won'; n.winner = left[0]; n.winReasons = ['last']; n.winLine = null; }
+    else if (n.current === seat) n.current = nextActive(n, seat);
+    return { ok: true, state: n };
+  }
   /** Equipo (1|2) de un asiento: 1 y 3 -> equipo 1; 2 y 4 -> equipo 2. */
-  function teamOfSeat(seat) { return seat % 2 === 1 ? P1 : P2; }
+  function teamOfSeat(seat, s) { return s && s.ffa ? seat : seat % 2 === 1 ? P1 : P2; }
   /** Asientos de un equipo (en 2 jugadores, el propio asiento). */
-  function seatsOfTeam(s, team) { return (s.players || 2) === 4 ? (team === P1 ? [1, 3] : [2, 4]) : [team]; }
+  function seatsOfTeam(s, team) { return s.ffa ? [team] : (s.players || 2) === 4 ? (team === P1 ? [1, 3] : [2, 4]) : [team]; }
   /** Como playMove pero identificando al jugador por ASIENTO (1..players): valida que le toque a ese asiento y no solo a su equipo. */
   function playMoveSeat(s, x, y, seat) {
     if (s.status === 'playing' && seat !== seatToMove(s)) return { ok: false, error: ERR.NOT_YOUR_TURN };
-    return playMove(s, x, y, teamOfSeat(seat));
+    return playMove(s, x, y, teamOfSeat(seat, s));
   }
 
   function isBoardFull(s) { for (var i = 0; i < s.board.length; i++) if (s.board[i] === EMPTY) return false; return true; }
@@ -1387,7 +1431,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   return {
     EMPTY: EMPTY, P1: P1, P2: P2, ERR: ERR,
     createGame: createGame, validateMove: validateMove, playMove: playMove, playMoveSeat: playMoveSeat,
-    seatToMove: seatToMove, teamOfSeat: teamOfSeat, seatsOfTeam: seatsOfTeam,
+    seatToMove: seatToMove, eliminate: eliminate, nextActive: nextActive, teamOfSeat: teamOfSeat, seatsOfTeam: seatsOfTeam,
     findCaptures: findCaptures, captureInfo: captureInfo, VARIANTS: VARIANTS, VARIANT_RULES: VARIANT_RULES, findLine: findLine, legalMoves: legalMoves,
     opponent: opponent, get: get, inBounds: inBounds, center: center,
     winsNeededForBestOf: winsNeededForBestOf,
@@ -3402,6 +3446,17 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 (function (root) {
   'use strict';
   Object.assign(root.I18n.STRINGS.es, {
+    "four.p4": "4 · 2 contra 2",
+    "four.p5": "4 · todos contra todos",
+    "four.player": "Jugador {n}",
+    "four.ffa": "Todos contra todos",
+    "four.hint5": "Cada uno juega por su cuenta con su propio color, en orden 1-2-3-4. Se capturan pares de UN mismo color rival; se gana con 5 en línea o 5 pares. Quien abandona o se queda sin tiempo queda afuera (sus fichas quedan y se saltea su turno); si queda uno solo, gana.",
+    "four.hintFfaShort": "Gana quien haga 5 en línea o 5 pares. Quien se va queda afuera.",
+    "four.out": "{name} quedó afuera",
+    "four.outYou": "Quedaste afuera. Podés seguir mirando la partida.",
+    "four.seatHintFfa": "Cada uno tiene su color; el asiento define el orden de juego (1, 2, 3, 4). Tocá un asiento libre para cambiarte.",
+    "four.claimFfa": "Sacar a los ausentes",
+    "end.winLast": "{name} ganó: fue el único que quedó en pie",
     "mode.pick": "Modo de juego",
     "mode.classic": "Clásico",
     "mode.pairs3": "Pares y tríos",
@@ -3432,6 +3487,17 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 (function (root) {
   'use strict';
   Object.assign(root.I18n.STRINGS.en, {
+    "four.p4": "4 · 2 vs 2",
+    "four.p5": "4 · free-for-all",
+    "four.player": "Player {n}",
+    "four.ffa": "Free-for-all",
+    "four.hint5": "Everyone plays on their own with their own color, in order 1-2-3-4. Pairs of ONE rival color are captured; win with 5 in a row or 5 pairs. Whoever resigns or runs out of time is out (their stones stay and their turn is skipped); if only one is left, they win.",
+    "four.hintFfaShort": "Win with 5 in a row or 5 pairs. Anyone who leaves is out.",
+    "four.out": "{name} is out",
+    "four.outYou": "You're out. You can keep watching the game.",
+    "four.seatHintFfa": "Everyone has their own color; the seat sets the playing order (1, 2, 3, 4). Tap a free seat to move.",
+    "four.claimFfa": "Remove absent players",
+    "end.winLast": "{name} wins: the last one standing",
     "mode.pick": "Game mode",
     "mode.classic": "Classic",
     "mode.pairs3": "Pairs & triples",
@@ -3844,21 +3910,21 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   var list = [
     {
       id: 'clasico',
-      css: { '--bg': '#14161b', '--panel': '#1d2027', '--panel-2': '#262a33', '--line': '#343a46', '--accent-ink': '#1a1405', '--accent': '#e8b04a', '--s1a': '#5a5a5a', '--s1b': '#070707', '--s2a': '#ffffff', '--s2b': '#c9c2b2',
+      css: { '--bg': '#14161b', '--panel': '#1d2027', '--panel-2': '#262a33', '--line': '#343a46', '--accent-ink': '#1a1405', '--accent': '#e8b04a', '--s1a': '#5a5a5a', '--s1b': '#070707', '--s2a': '#ffffff', '--s2b': '#c9c2b2', '--s3a': '#ff9a8a', '--s3b': '#a5200f', '--s4a': '#a8c8ff', '--s4b': '#1747b0',
              '--board-shadow': '0 10px 30px rgba(0,0,0,.45)' },
       board: { bg: ['#d9a85b', '#c4903f'], line: 'rgba(40,25,5,.85)', lineGlow: null, star: 'rgba(40,25,5,.9)', label: 'rgba(40,25,5,.72)', labelHi: '#7a1f0a' },
-      stones: { 1: { a: '#5a5a5a', b: '#070707', glow: null }, 2: { a: '#ffffff', b: '#c9c2b2', glow: null } },
-      last: { ring: '#e5604f', dot: { 1: '#f4f1ea', 2: '#111111' } },
+      stones: { 1: { a: '#5a5a5a', b: '#070707', glow: null }, 2: { a: '#ffffff', b: '#c9c2b2', glow: null }, 3: { a: '#ff9a8a', b: '#a5200f', glow: null }, 4: { a: '#a8c8ff', b: '#1747b0', glow: null } },
+      last: { ring: '#e5604f', dot: { 1: '#f4f1ea', 2: '#111111', 3: '#ffffff', 4: '#ffffff' } },
       zone: { fill: 'rgba(0,0,0,.22)', stroke: 'rgba(0,0,0,.55)' },
       win: '#d6381f', winStyle: 'ring', pendingRing: '#2b6fe8', kbd: '#79b8ff'
     },
     {
       id: 'glow',
-      css: { '--bg': '#070a18', '--panel': '#0f1538', '--panel-2': '#19225a', '--line': '#3a4cc0', '--accent-ink': '#02121a', '--accent': '#7cf0ff', '--s1a': '#ffd0ec', '--s1b': '#e0147a', '--s2a': '#eaffff', '--s2b': '#17bfe0',
+      css: { '--bg': '#070a18', '--panel': '#0f1538', '--panel-2': '#19225a', '--line': '#3a4cc0', '--accent-ink': '#02121a', '--accent': '#7cf0ff', '--s1a': '#ffd0ec', '--s1b': '#e0147a', '--s2a': '#eaffff', '--s2b': '#17bfe0', '--s3a': '#e6ffd0', '--s3b': '#35c03a', '--s4a': '#fff2c0', '--s4b': '#f0a000',
              '--board-shadow': '0 0 42px rgba(70,120,255,.38)' },
       board: { bg: ['#060a18', '#131a3a'], line: 'rgba(110,150,255,.55)', lineGlow: 'rgba(80,130,255,.9)', star: 'rgba(170,200,255,.95)', label: 'rgba(150,185,255,.78)', labelHi: '#ffffff' },
-      stones: { 1: { a: '#ffd0ec', b: '#e0147a', glow: '#ff2d95' }, 2: { a: '#eaffff', b: '#17bfe0', glow: '#27e8ff' } },
-      last: { ring: '#ffffff', dot: { 1: '#ffffff', 2: '#062030' } },
+      stones: { 1: { a: '#ffd0ec', b: '#e0147a', glow: '#ff2d95' }, 2: { a: '#eaffff', b: '#17bfe0', glow: '#27e8ff' }, 3: { a: '#e6ffd0', b: '#35c03a', glow: '#5dff5d' }, 4: { a: '#fff2c0', b: '#f0a000', glow: '#ffc233' } },
+      last: { ring: '#ffffff', dot: { 1: '#ffffff', 2: '#062030', 3: '#062030', 4: '#062030' } },
       zone: { fill: 'rgba(255,255,255,.07)', stroke: 'rgba(160,190,255,.55)' },
       win: '#ffffff', winStyle: 'neon', pendingRing: '#ffe066', kbd: '#ffffff'
     }
@@ -3868,29 +3934,32 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
              '--board-shadow': '0 12px 34px rgba(0,0,0,.6)' },
       // wood: true -> la madera se genera por código (veta, vetas claras y oscuras, viñeta). stones: se completan con gemStone() según los colores elegidos.
       board: { wood: true, bg: ['#a8733f', '#8a5b30'], line: 'rgba(32,15,4,.82)', lineGlow: null, star: 'rgba(32,15,4,.9)', label: 'rgba(245,220,175,.78)', labelHi: '#ffffff' },
-      stones: { 1: gemStone('azul'), 2: gemStone('verde') },
-      last: { ring: '#fff0b8', dot: { 1: '#ffffff', 2: '#ffffff' } },
+      stones: { 1: gemStone('azul'), 2: gemStone('verde'), 3: gemStone('rojo'), 4: gemStone('ambar') },
+      last: { ring: '#fff0b8', dot: { 1: '#ffffff', 2: '#ffffff', 3: '#ffffff', 4: '#ffffff' } },
       zone: { fill: 'rgba(20,8,0,.30)', stroke: 'rgba(255,232,185,.6)' },
       win: '#fff0b8', winStyle: 'gem', pendingRing: '#ffe08a', kbd: '#ffffff'
     }
     ,{
       id: 'papel',
-      css: { '--bg': '#1a1b23', '--panel': '#24252f', '--panel-2': '#30323f', '--line': '#6b70a8', '--accent-ink': '#0b0f33', '--accent': '#8d9bff', '--s1a': '#8a8a8e', '--s1b': '#2b2b2e', '--s2a': '#7d8aff', '--s2b': '#1f2fc4',
+      css: { '--bg': '#1a1b23', '--panel': '#24252f', '--panel-2': '#30323f', '--line': '#6b70a8', '--accent-ink': '#0b0f33', '--accent': '#8d9bff', '--s1a': '#8a8a8e', '--s1b': '#2b2b2e', '--s2a': '#7d8aff', '--s2b': '#1f2fc4', '--s3a': '#ff8f86', '--s3b': '#b81d14', '--s4a': '#6fd68b', '--s4b': '#126b2c',
              '--board-shadow': '0 10px 30px rgba(0,0,0,.45)' },
       // paper: true -> el fondo es una hoja blanca arrugada generada por código (sin imágenes)
       board: { paper: true, bg: ['#fdfcf9', '#efece4'], line: 'rgba(18,18,20,.9)', lineGlow: null, star: 'rgba(18,18,20,.92)', label: 'rgba(30,30,34,.6)', labelHi: '#c0261d' },
       // scribble: las fichas son garabatos que cierran un círculo ('pencil' = grafito, 'pen' = lapicera)
-      stones: { 1: { a: '#8a8a8e', b: '#2b2b2e', glow: null, scribble: 'pencil' }, 2: { a: '#7d8aff', b: '#1f2fc4', glow: null, scribble: 'pen' } },
-      last: { ring: '#d1342b', dot: { 1: '#ffffff', 2: '#ffffff' } },
+      stones: { 1: { a: '#8a8a8e', b: '#2b2b2e', glow: null, scribble: 'pencil' }, 2: { a: '#7d8aff', b: '#1f2fc4', glow: null, scribble: 'pen' }, 3: { a: '#ff8f86', b: '#b81d14', glow: null, scribble: 'pen' }, 4: { a: '#6fd68b', b: '#126b2c', glow: null, scribble: 'pencil' } },
+      last: { ring: '#d1342b', dot: { 1: '#ffffff', 2: '#ffffff', 3: '#ffffff', 4: '#ffffff' } },
       zone: { fill: 'rgba(0,0,0,.07)', stroke: 'rgba(0,0,0,.45)' },
       win: '#c0261d', winStyle: 'pen', pendingRing: '#e8791f', kbd: '#c0261d'
     }
   ];
+  var OTHER_GEMS = ['rojo', 'ambar', 'violeta', 'turquesa', 'rosa'];
+  // todos contra todos: las piedras 3 y 4 del tablero Tradicional son las primeras de esta lista que no usen los dos jugadores 1 y 2
+  function extraGems(g1, g2) { return OTHER_GEMS.filter(function (g) { return g !== g1 && g !== g2; }).slice(0, 2); }
   var ORDER = ['clasico', 'tradicional', 'glow', 'papel'];       // orden en el selector
   list.sort(function (x, y) { return ORDER.indexOf(x.id) - ORDER.indexOf(y.id); });
   var byId = {};
   list.forEach(function (th) { byId[th.id] = th; });
-  root.Themes = { list: list, byId: byId, defaultId: 'clasico', gems: gems, gemStone: gemStone };
+  root.Themes = { list: list, byId: byId, defaultId: 'clasico', gems: gems, gemStone: gemStone, extraGems: extraGems };
 })(typeof self !== 'undefined' ? self : this);
 </script>
 <script src="config.js"></script>
@@ -4490,23 +4559,32 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     return open === 2 ? 6 : 1;
   }
 
+  // Rivales de "p": uno en 2 jugadores (o por equipos), todos los que siguen en juego en "todos contra todos"
+  function rivalsOf(s, p) {
+    if (!s.ffa) return [P.opponent(p)];
+    var out = []; for (var q = 1; q <= 4; q++) if (q !== p && !s.out[q]) out.push(q);
+    return out;
+  }
   function cellAt(s, x, y) { return (x < 0 || y < 0 || x >= s.size || y >= s.size) ? -1 : s.board[y * s.size + x]; }   // -1 = fuera
 
   /* Nota rápida de poner "p" en (x,y): líneas que arma + líneas del rival que tapa + capturas. Barata: se usa para ordenar jugadas. */
   function quick(s, x, y, p) {
-    var q = P.opponent(p), total = 0, a, d, L, open, cx, cy, v;
+    var rv = rivalsOf(s, p), total = 0, a, d, L, open, cx, cy, v, ri;
     for (a = 0; a < 4; a++) {
-      var dx = AXES[a][0], dy = AXES[a][1];
-      for (var side = 0; side < 2; side++) {                 // side 0: yo armo; side 1: tapo al rival (como si él pusiera acá)
-        var who = side ? q : p; L = 1; open = 0;
+      var dx = AXES[a][0], dy = AXES[a][1], blockBest = 0;
+      for (var side = 0; side < 1 + rv.length; side++) {     // side 0: yo armo; después, tapo a cada rival (como si él pusiera acá); se toma el rival más peligroso
+        var who = side ? rv[side - 1] : p; L = 1; open = 0;
         for (d = 1; d < 5; d++) { cx = x + dx * d; cy = y + dy * d; v = cellAt(s, cx, cy); if (v === who) L++; else { if (v === 0) open++; break; } }
         for (d = 1; d < 5; d++) { cx = x - dx * d; cy = y - dy * d; v = cellAt(s, cx, cy); if (v === who) L++; else { if (v === 0) open++; break; } }
-        total += lineScore(L, open) * (side ? 0.92 : 1);
+        var ls = lineScore(L, open);
+        if (side) blockBest = Math.max(blockBest, ls * 0.92); else total += ls;
       }
+      total += blockBest;
     }
     var tw = s.options.capturesToWin, caps = P.captureInfo(s, x, y, p).points;
     if (caps) total += 1900 * caps + (s.captures[p] + caps >= tw ? 90000 : s.captures[p] >= tw - 2 ? 1500 : 0);
-    var theirs = P.captureInfo({ size: s.size, board: s.board, options: s.options }, x, y, q).points;           // si ÉL jugara acá, ¿capturaría? tapar vale
+    var q = rv[0], theirs = 0;
+    for (ri = 0; ri < rv.length; ri++) { var tp = P.captureInfo({ size: s.size, board: s.board, options: s.options }, x, y, rv[ri]).points; if (tp > theirs) { theirs = tp; q = rv[ri]; } }      // si ÉL jugara acá, ¿capturaría? tapar vale
     if (theirs) total += 1100 * theirs + (s.captures[q] + theirs >= tw ? 80000 : 0);
     var c = (s.size - 1) / 2; total -= (Math.abs(x - c) + Math.abs(y - c)) * 0.3;                 // desempate: el centro vale un poquito
     return total;
@@ -4526,10 +4604,10 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
         var after = (cx >= 0 && cy >= 0 && cx < n && cy < n) ? b[cy * n + cx] : -1, before = (px >= 0 && py >= 0 && px < n && py < n) ? b[py * n + px] : -1;
         var open = (after === 0 ? 1 : 0) + (before === 0 ? 1 : 0), sc = lineScore(L, open);
         if (L === vuln && ((after === 0 && before > 0 && before !== v) || (before === 0 && after > 0 && after !== v))) sc -= 650;   // par con un rival de un lado y hueco del otro: lo pueden capturar
-        score += (v === p) ? sc : -sc * 1.05;
+        score += (v === p) ? sc : -sc * (s.ffa ? 0.55 : 1.05);
       }
     }
-    var q = P.opponent(p), cd = s.captures[p] - s.captures[q];
+    var rvs = rivalsOf(s, p), q = rvs[0], cd = s.captures[p], qmax = 0; rvs.forEach(function (r) { cd -= s.captures[r] / rvs.length; if (s.captures[r] > qmax) { qmax = s.captures[r]; q = r; } });
     var tw = s.options.capturesToWin;
     score += cd * 1000;
     if (s.captures[p] >= tw - 1) score += 3500; if (s.captures[q] >= tw - 1) score -= 3800;
@@ -4579,6 +4657,16 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       for (var i = 0; i < top.length; i++) { var r0 = P.playMove(state, top[i].x, top[i].y); if (r0.ok && r0.won && r0.state.winner === me) return { x: top[i].x, y: top[i].y }; }
     }
 
+    // 2b) todos contra todos: no hay búsqueda a varias jugadas (con tres rivales no sirve el alfa-beta): se elige entre las mejores por nota rápida + cómo queda el tablero
+    if (state.ffa && lv.depth > 1) {
+      var base = evaluate(state, me), top2 = cands.slice(0, lv.width + 2), bestF = null, bestS = -Infinity;
+      top2.forEach(function (c) {
+        var rr = P.playMove(state, c.x, c.y); if (!rr.ok) return;
+        var sc = rr.won ? 1e9 : c.q0 * 0.6 + (evaluate(rr.state, me) - base) * 0.4;
+        if (sc > bestS) { bestS = sc; bestF = c; }
+      });
+      if (bestF) return { x: bestF.x, y: bestF.y };
+    }
     // 2) fácil: elige entre las mejores por nota rápida (a veces se equivoca)
     if (lv.depth === 1) {
       // lo obvio no se le escapa: tapar un 4 (o ganar por capturas) casi siempre, y tapar/armar un 3 abierto la mayoría de las veces
@@ -4655,7 +4743,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   var $ = function (id) { return document.getElementById(id); };
 
   var canvas = $('board'), ctx = canvas.getContext('2d');
-  var state = null, names = { 1: '', 2: '' };
+  var state = null, names = { 1: '', 2: '', 3: '', 4: '' };
   var settings = { tournamentRule: true, exactFive: true, size: 13, timer: true, mode: 'classic' };      // opciones de la partida (menú principal)
   var MODES = ['classic', 'pairs3', 'triples', 'gomoku', 'blitz'];     // modo de juego = variante de reglas (+ blitz, que es solo otro reloj)
   try { var mv0 = localStorage.getItem('pente.mode'); if (MODES.indexOf(mv0) >= 0) settings.mode = mv0; } catch (e) {}
@@ -4711,7 +4799,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   var replayBusy = false; // true mientras se dibuja un cuadro del video (render no toca la pantalla real)
   var fx = [];            // fichas capturadas que se están desvaneciendo / rompiendo
   var rooms = { open: false, timer: 0 };
-  var online = { bots: {}, mode: 'classic',
+  var online = { bots: {}, mode: 'classic', ffa: false,
     spectator: false, specN: 0, lastCode: '', isPublic: false, cid: '',
     active: false, net: null, url: '', conn: 'closed', code: '', token: '', me: 0, intent: null, rejoining: false,
     over: null, connected: { 1: true, 2: true, 3: true, 4: true }, rematch: { 1: false, 2: false, 3: false, 4: false }, seat: 0, players: 2,
@@ -4721,17 +4809,19 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   /* Modo 4 jugadores (2 contra 2): asientos 1-4; 1 y 3 son el equipo 1, 2 y 4 el equipo 2. `online.me` sigue siendo el EQUIPO (1|2),
    * `online.seat` es el asiento. names[1] / names[2] son los nombres de EQUIPO (en 4 jugadores: "Ana + Carla"); seatNames[s] los de cada asiento. */
   var seatNames = {};
-  function teamOfSeat(s) { return s % 2 === 1 ? 1 : 2; }
+  function ffaNow() { return state ? !!state.ffa : !!online.ffa; }      // todos contra todos: 4 colores, cada asiento es su propio equipo
+  function teamOfSeat(s) { return ffaNow() ? s : s % 2 === 1 ? 1 : 2; }
+  function seatKeys() { return ffaNow() ? [1, 2, 3, 4] : [1, 2]; }
   function playersNow() { return (state && state.players === 4) || (!state && online.players === 4) ? 4 : 2; }
   function nSeats() { return playersNow(); }
-  function seatsOf(team) { return playersNow() === 4 ? (team === 1 ? [1, 3] : [2, 4]) : [team]; }
+  function seatsOf(team) { return ffaNow() ? [team] : playersNow() === 4 ? (team === 1 ? [1, 3] : [2, 4]) : [team]; }
   // Rival offline: ¿el asiento lo juega la máquina? (en 2 jugadores el asiento coincide con el equipo; en 2vs2 offline hay un mapa de asientos)
   function isBotSeat(seat) { return ai.active && (ai.four ? !!ai.botSeats[seat] : teamOfSeat(seat) === ai.bot); }
   function botNow() { return !!state && isBotSeat(P.seatToMove(state)); }
   function onlineFull() { for (var s = 1; s <= nSeats(); s++) if (!seatNames[s]) return false; return true; }
   function turnSeat() { return state ? P.seatToMove(state) : 0; }
   function teamName(team) { return seatsOf(team).map(function (s) { return seatNames[s] || ''; }).filter(Boolean).join(' + '); }
-  function rivalSeats() { return seatsOf(online.me === 1 ? 2 : 1); }
+  function rivalSeats() { return ffaNow() ? [1, 2, 3, 4].filter(function (x) { return x !== online.seat && !(state && state.out && state.out[x]); }) : seatsOf(online.me === 1 ? 2 : 1); }
   function offlineRivals() { return rivalSeats().filter(function (x) { return !online.connected[x]; }); }
   function rematchOther() { for (var x = 1; x <= nSeats(); x++) if (x !== online.seat && online.rematch[x]) return x; return 0; }
 
@@ -4762,17 +4852,18 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     clkPausedAt = 0; localOver = null; clockLog = [];
     var bl = gameMode === 'blitz' && !tut.active, tot = bl ? BLITZ_MS : TOTAL_MS;
     if (!settings.timer && !bl) { clk = null; return; }
-    var n = performance.now(); clk = { on: true, total: tot, turnMs: bl ? 0 : TURN_MS, blitz: bl, rem: { 1: tot, 2: tot }, current: 1, since: n, turnStart: n, frozen: false };
+    var n = performance.now(), rm = {}; seatKeys().forEach(function (k) { rm[k] = tot; });
+    clk = { on: true, total: tot, turnMs: bl ? 0 : TURN_MS, blitz: bl, rem: rm, current: 1, since: n, turnStart: n, frozen: false };
   }
   function clockFromServer(c) {
     if (!c || !c.on) { clk = null; return; }
     var n = performance.now(), cur = c.current;
-    clk = { on: true, total: c.total, turnMs: c.turnMs, blitz: !!c.blitz, rem: { 1: c.rem[1], 2: c.rem[2] }, current: cur || (state ? state.current : 1), since: n, turnStart: n - (c.turnMs - c.turnLeft), frozen: !cur };
+    clk = { on: true, total: c.total, turnMs: c.turnMs, blitz: !!c.blitz, rem: Object.assign({}, c.rem), current: cur || (state ? state.current : 1), since: n, turnStart: n - (c.turnMs - c.turnLeft), frozen: !cur };
   }
   function botTurn() { return ai.active && botNow(); }
   function clockLive() {                                   // { 1: ms totales, 2: ms totales, turn: ms de la jugada } a este instante
     if (!clk) return null;
-    var n = clkPausedAt || performance.now(), out = { 1: clk.rem[1], 2: clk.rem[2], turn: clk.turnMs, cur: clk.current };
+    var n = clkPausedAt || performance.now(), out = Object.assign({}, clk.rem, { turn: clk.turnMs, cur: clk.current });
     if (!clk.frozen && !botTurn()) { out[clk.current] = Math.max(0, clk.rem[clk.current] - (n - clk.since)); out.turn = clk.turnMs ? Math.max(0, clk.turnMs - (n - clk.turnStart)) : Infinity; }
     return out;
   }
@@ -4780,15 +4871,15 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     if (!clk || clk.frozen) return;
     var n = performance.now(), lm = state.moves[state.moves.length - 1]; if (!(ai.active && lm && isBotSeat(lm.seat || lm.player))) clk.rem[clk.current] = Math.max(0, clk.rem[clk.current] - (n - clk.since));
     clk.current = state.current; clk.since = clk.turnStart = n;
-    clockLog[state.moves.length - 1] = { 1: clk.rem[1], 2: clk.rem[2] };
+    clockLog[state.moves.length - 1] = Object.assign({}, clk.rem);
   }
-  function clockFreeze() { if (!clk || clk.frozen) return; var l = clockLive(); clk.rem[1] = l[1]; clk.rem[2] = l[2]; clk.frozen = true; }
+  function clockFreeze() { if (!clk || clk.frozen) return; var l = clockLive(); Object.keys(clk.rem).forEach(function (k) { clk.rem[k] = l[k]; }); clk.frozen = true; }
   function fmtClock(ms) { var s = Math.ceil(ms / 1000), m = Math.floor(s / 60); s = s % 60; return m + ':' + (s < 10 ? '0' : '') + s; }
   function renderClocks() {
     var l = (state && clk) ? clockLive() : null;
-    [1, 2].forEach(function (p) {
+    [1, 2, 3, 4].forEach(function (p) {
       var el = $('clock' + p); if (!el) return;
-      el.hidden = !l; if (!l) return;
+      el.hidden = !l || clk.rem[p] === undefined; if (el.hidden) return;
       var active = !clk.frozen && !isOver() && state.current === p && !botTurn();
       el.querySelector('.ctot').textContent = fmtClock(l[p]);
       el.querySelector('.cturn').textContent = active && clk.turnMs ? fmtClock(l.turn) : '';
@@ -4810,6 +4901,13 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   }
   function timeoutEnd(loser) {
     if (isOver()) return;
+    if (state.ffa) {                                       // todos contra todos: se queda afuera quien agota el tiempo y sigue la partida
+      var er = P.eliminate(state, loser); if (!er.ok) return;
+      state = er.state; clk.rem[loser] = 0; drag = settle = null; pending = hover = null;
+      if (state.status !== 'playing') { clockFreeze(); setStatus(''); render(); sfx('win'); setTimeout(showEnd, 450); return; }
+      clk.current = state.current; clk.since = clk.turnStart = performance.now();
+      setStatus(t('four.out', { name: names[loser] }), true); render(); aiMaybeMove(); return;
+    }
     clockFreeze(); drag = settle = null; pending = hover = null;
     localOver = { winner: loser === 1 ? 2 : 1, reason: 'timeout' };
     if (ai.active) { ai.token++; clearTimeout(ai.timer); ai.thinking = false; }
@@ -4896,10 +4994,11 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       var inp = $('l4n' + q); seatNames[q] = bot ? t('four.bot', { n: q }) : (inp && inp.value || '').trim() || t('four.seatDefault', { n: q });
     }
     try { var n1 = ($('l4n1').value || '').trim(); if (n1) localStorage.setItem('pente.name', n1); } catch (e) {}
+    var ffaLocal = localPlayers === 5;
     ai.active = any; ai.four = true; ai.botSeats = {}; for (var z = 2; z <= 4; z++) if (loc4.bots[z]) ai.botSeats[z] = true;
     ai.level = aiPref.level; ai.human = 1; ai.bot = 2;
-    names[1] = seatNames[1] + ' + ' + seatNames[3]; names[2] = seatNames[2] + ' + ' + seatNames[4];
-    gameMode = settings.mode; state = P.createGame(coreOpts({ players: 4 }));
+    if (ffaLocal) { for (var nn = 1; nn <= 4; nn++) names[nn] = seatNames[nn]; } else { names[1] = seatNames[1] + ' + ' + seatNames[3]; names[2] = seatNames[2] + ' + ' + seatNames[4]; }
+    gameMode = settings.mode; state = P.createGame(coreOpts({ players: 4, ffa: ffaLocal }));
     hover = pending = drag = settle = null; fx.length = 0; clockFresh(); kbd = { x: centerIdx(), y: centerIdx() };
     closeAll(); render(); setStatus(''); aiMaybeMove();
   }
@@ -5458,7 +5557,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     captured.forEach(function (c, i) {
       var sh = [];
       if (mode === 'shatter') for (var k = 0; k < SHARDS; k++) sh.push({ v: 0.55 + Math.random() * 0.9, rot: (Math.random() - 0.5) * 7, up: 0.2 + Math.random() * 0.6 });
-      (arr || fx).push({ x: c.x, y: c.y, p: owner, seed: seedOf(c.x, c.y, owner), t0: t0 + i * 40, dur: mode === 'shatter' ? 720 : 480, mode: mode, shards: sh, jit: Math.random() * Math.PI });
+      (arr || fx).push({ x: c.x, y: c.y, p: c.p || owner, seed: seedOf(c.x, c.y, c.p || owner), t0: t0 + i * 40, dur: mode === 'shatter' ? 720 : 480, mode: mode, shards: sh, jit: Math.random() * Math.PI });
     });
   }
   function drawFx(now) {
@@ -5534,6 +5633,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   function applyGems() {                                      // las piedras del tablero Tradicional toman los colores elegidos en Configuración
     var th = window.Themes.byId.tradicional; if (!th) return;
     [1, 2].forEach(function (p) { var st = window.Themes.gemStone(cfg['gem' + p]); th.stones[p] = st; th.css['--s' + p + 'a'] = st.a; th.css['--s' + p + 'b'] = st.b; });
+    var ex = window.Themes.extraGems(cfg.gem1, cfg.gem2);                     // fichas 3 y 4 (todos contra todos): otras dos piedras distintas de las elegidas
+    [3, 4].forEach(function (p, i) { var st = window.Themes.gemStone(ex[i]); th.stones[p] = st; th.css['--s' + p + 'a'] = st.a; th.css['--s' + p + 'b'] = st.b; });
   }
   function applyThemeCss() {
     applyGems();
@@ -5570,8 +5671,11 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   function pips(n, tot) { var s = ''; tot = tot || 5; for (var i = 0; i < tot; i++) s += '<span class="pip' + (i < n ? ' on' : '') + '"></span>'; return s; }
   function updateHud() {
     if (!state) return;
-    [1, 2].forEach(function (p) {
+    document.querySelector('.hud').classList.toggle('ffa', !!state.ffa);
+    [1, 2, 3, 4].forEach(function (p) {
       var el = $('player' + p);
+      el.hidden = p > 2 && !state.ffa; if (el.hidden) return;
+      el.classList.toggle('out', !!(state.out && state.out[p]));
       el.classList.toggle('active', !isOver() && state.current === p);
       el.classList.toggle('offline', online.active && seatsOf(p).some(function (x) { return !online.connected[x]; }));
       var mine = !tut.active && ((ai.active && p === ai.human) || (online.active && !online.spectator && p === online.me));
@@ -5580,8 +5684,9 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       $('caps' + p).innerHTML = tw > 20 ? '' : pips(state.captures[p], tw) + '<span>' + state.captures[p] + '/' + tw + '</span>';   // gomoku: sin capturas
     });
     updateSide(); renderClocks(); updateVideoButtons(); updateResultBtn(); musicScene();
-    var am = tut.active ? 'classic' : (online.active || online.spectator) ? online.mode : gameMode, mb = $('modeBar');
-    mb.hidden = am === 'classic'; if (am !== 'classic') mb.textContent = t('mode.' + am) + ' · ' + t('mode.hint.' + am);
+    var am = tut.active ? 'classic' : (online.active || online.spectator) ? online.mode : gameMode, mb = $('modeBar'), ff = !tut.active && !!state.ffa;
+    mb.hidden = am === 'classic' && !ff;
+    if (!mb.hidden) mb.textContent = (ff ? t('four.ffa') + (am !== 'classic' ? ' · ' + t('mode.' + am) : '') + ' · ' + t('four.hintFfaShort') : t('mode.' + am) + ' · ' + t('mode.hint.' + am));
     var sb = $('specBar'); sb.hidden = !online.spectator;
     if (online.spectator) sb.textContent = t('spec.badge', { code: online.code, n: online.specN });
     if (!isOver() && !$('status').dataset.toast) $('status').textContent = turnText();
@@ -5622,7 +5727,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   function resultText() {
     if (!state || !isOver()) return '';
     var tx, ov = online.active ? online.over : localOver;
-    if (ov && ov.reason === 'timeout') { var lw = ov.winner === 1 ? 2 : 1; tx = online.spectator ? t('spec.over', { name: names[ov.winner] }) : t('end.winTime', { name: names[ov.winner], loser: names[lw] }); }
+    if ((online.active && online.over && online.over.reason === 'last') || (state.ffa && state.winReasons[0] === 'last')) tx = t('end.winLast', { name: names[online.active && online.over ? online.over.winner : state.winner] });
+    else if (ov && ov.reason === 'timeout') { var lw = ov.winner === 1 ? 2 : 1; tx = online.spectator ? t('spec.over', { name: names[ov.winner] }) : t('end.winTime', { name: names[ov.winner], loser: names[lw] }); }
     else if (online.spectator && online.over && (online.over.reason === 'resign' || online.over.reason === 'forfeit')) tx = t('spec.over', { name: names[online.over.winner] });
     else if (online.active && online.over && (online.over.reason === 'resign' || online.over.reason === 'forfeit')) {
       var w = online.over.winner, l = w === 1 ? 2 : 1;
@@ -5671,7 +5777,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   function rematch() {
     videoDiscard(); endSeen = recorded = false;
     if (ai.active) { ai.token++; clearTimeout(ai.timer); ai.thinking = false; }
-    state = P.createGame(coreOpts({ size: state ? state.size : settings.size, players: state && state.players === 4 ? 4 : 2 }));   // la revancha conserva el modo de la partida
+    state = P.createGame(coreOpts({ size: state ? state.size : settings.size, players: state && state.players === 4 ? 4 : 2, ffa: !!(state && state.ffa) }));   // la revancha conserva el modo de la partida
     hover = pending = drag = settle = null; fx.length = 0; kbd = { x: centerIdx(), y: centerIdx() }; clockFresh(); closeAll(); setStatus(''); render();
     if (ai.active) aiMaybeMove();
   }
@@ -5738,7 +5844,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     online.net = null; online.active = false; online.conn = 'closed'; online.code = ''; online.token = ''; online.me = 0;
     online.spectator = false; online.specN = 0; online.cid = ''; chatReset(); stopRooms(); fx.length = 0; $('btnSpectateOffer').hidden = true;
     online.intent = null; online.rejoining = false; online.over = null; online.awaiting = false; online.rivalLeftAt = 0;
-    online.connected = { 1: true, 2: true, 3: true, 4: true }; online.rematch = { 1: false, 2: false, 3: false, 4: false }; online.seat = 0; online.players = 2; online.bots = {}; online.mode = 'classic'; seatNames = {};
+    online.connected = { 1: true, 2: true, 3: true, 4: true }; online.rematch = { 1: false, 2: false, 3: false, 4: false }; online.seat = 0; online.players = 2; online.bots = {}; online.mode = 'classic'; online.ffa = false; seatNames = {};
     clearSession(); updateOnlineButtons(); updateRematchUi();
     if (wasActive) { videoDiscard(); state = null; clk = null; hover = pending = null; setStatus(''); render(); }
     updateHud();
@@ -5762,11 +5868,12 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       case 'chatlog': chat.msgs = []; chat.people = {}; (m.msgs || []).forEach(function (x) { chatAdd(x, true); }); renderChat(); break;
       case 'sync': applySync(m); break;
       case 'move': applyRemoteMove(m); break;
+      case 'out': applyOut(m); break;
       case 'presence': online.connected = m.connected; trackRival(0); updateHud(); break;
       case 'over':
         online.over = { winner: m.winner, reason: m.reason }; online.awaiting = false; clearClaim(); drag = settle = null;
         if (m.clock) clockFromServer(m.clock); else clockFreeze();
-        if (m.reason === 'resign' || m.reason === 'forfeit' || m.reason === 'timeout') sfx(online.spectator || m.winner === online.me ? 'win' : 'lose');   // si terminó por jugada, el sonido ya sonó
+        if (m.reason === 'resign' || m.reason === 'forfeit' || m.reason === 'timeout' || m.reason === 'last') sfx(online.spectator || m.winner === online.me ? 'win' : 'lose');   // si terminó por jugada, el sonido ya sonó
         render(); setTimeout(showEnd, 450); break;
       case 'rematch': online.rematch = m.votes; updateRematchUi();
         if (isOver() && !online.spectator && !$('endOverlay').classList.contains('open') && !document.body.classList.contains('in-screen')) { var rv = rematchOther(); if (rv && !m.votes[online.seat]) setStatus(t('online.rematchRival', { name: seatNames[rv] }), true); }
@@ -5780,18 +5887,22 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     localOver = null; clockFromServer(m.clock); if (!m.over) { endSeen = false; recorded = false; }
     if (!m.moves.length) clockLog = []; else clockLog.length = Math.min(clockLog.length, m.moves.length);
     if (!m.moves.length || (state && m.moves.length < state.moves.length)) videoDiscard();
-    var g = P.createGame(m.opts);
+    var g = P.createGame(m.opts), outs = m.outs || [], oi = 0;
+    function applyOuts(upTo) { while (oi < outs.length && outs[oi][0] <= upTo) { var er = P.eliminate(g, outs[oi][1]); if (er.ok) g = er.state; oi++; } }
     for (var i = 0; i < m.moves.length; i++) {
+      applyOuts(i);
       var r = P.playMove(g, m.moves[i][0], m.moves[i][1]);
       if (!r.ok) break;
       g = r.state;
     }
+    applyOuts(Infinity);
     state = g; online.seat = m.you; online.me = m.you ? teamOfSeat(m.you) : 0; online.over = m.over || null; online.connected = m.connected;
-    online.players = (m.opts && m.opts.players === 4) ? 4 : 2; online.bots = m.bots || {};
+    online.players = (m.opts && m.opts.players === 4) ? 4 : 2; online.bots = m.bots || {}; online.ffa = !!(m.opts && m.opts.ffa);
     online.mode = m.opts && m.opts.blitz ? 'blitz' : (m.opts && m.opts.variant) || 'classic';
     online.rematch = m.rematch || { 1: false, 2: false }; online.awaiting = false;
     seatNames = {}; for (var si = 1; si <= nSeats(); si++) seatNames[si] = (m.names && m.names[si]) || '';
     names[1] = teamName(1) || t('player.1'); names[2] = teamName(2);
+    if (online.ffa) { names[3] = teamName(3); names[4] = teamName(4); }
     hover = pending = drag = settle = null; fx.length = 0; kbd = { x: centerIdx(), y: centerIdx() };
     trackRival(m.disconnectedFor ? Math.max.apply(null, rivalSeats().map(function (x) { return m.disconnectedFor[x] || 0; })) : 0);
     setStatus(''); render();
@@ -5803,6 +5914,16 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     }
   }
 
+  // Todos contra todos: el servidor avisa que un asiento quedó afuera (abandono, tiempo o ausencia larga)
+  function applyOut(m) {
+    if (!state || !state.ffa) return;
+    var r = P.eliminate(state, m.seat);
+    if (!r.ok) { if (online.net) online.net.send({ t: 'resync' }); return; }
+    state = r.state; pending = hover = drag = settle = null; online.awaiting = false;
+    if (m.clock) clockFromServer(m.clock);
+    setStatus(t(m.seat === online.seat ? 'four.outYou' : 'four.out', { name: seatNames[m.seat] }), true);
+    updateHud(); render();
+  }
   function applyRemoteMove(m) {
     if (!state) return;
     online.awaiting = false;
@@ -5810,7 +5931,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     var mover = state.current, r = P.playMove(state, m.x, m.y);
     if (!r.ok) { online.net.send({ t: 'resync' }); return; }
     state = r.state; pending = hover = drag = settle = null;
-    if (m.clock) { clockFromServer(m.clock); if (m.clock.on) clockLog[m.n - 1] = { 1: m.clock.rem[1], 2: m.clock.rem[2] }; }
+    if (m.clock) { clockFromServer(m.clock); if (m.clock.on) clockLog[m.n - 1] = Object.assign({}, m.clock.rem); }
     spawnFx(r.captured, mover === 1 ? 2 : 1);
     announceCaptures(mover, r.captured);
     moveFeedback(r.captured, state.status !== 'playing', state.winner);
@@ -5824,7 +5945,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     if (!online.rivalLeftAt) online.rivalLeftAt = Date.now() - (alreadyOfflineMs || 0);
     clearTimeout(online.claimTimer);
     var left = 60000 - (Date.now() - online.rivalLeftAt);
-    var show = function () { $('btnClaim').hidden = isOver(); };
+    var show = function () { $('btnClaim').textContent = t(ffaNow() ? 'four.claimFfa' : 'online.claim'); $('btnClaim').hidden = isOver(); };
     if (left <= 0) show(); else online.claimTimer = setTimeout(show, left);
   }
   function clearClaim() { clearTimeout(online.claimTimer); $('btnClaim').hidden = true; }
@@ -5846,7 +5967,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
         var li = document.createElement(free ? 'button' : 'div');
         li.className = 'seat' + (seatNames[sw] ? ' on' : ' free') + (sw === online.seat ? ' me' : '');
         if (free) { li.type = 'button'; li.addEventListener('click', function () { if (online.net) online.net.send({ t: 'seat', seat: sw }); }); }
-        li.textContent = (teamOfSeat(sw) === 1 ? '⚫ ' : '⚪ ') + t('four.team', { n: teamOfSeat(sw) }) + ' · ' + (bot ? t('bot.seat', { n: sw, lvl: t('ai.' + bot) }) : seatNames[sw] || t('four.emptyTap')) + (sw === online.seat ? ' ' + t('online.you') : '');
+        li.textContent = (online.ffa ? '' : teamOfSeat(sw) === 1 ? '⚫ ' : '⚪ ') + (online.ffa ? t('four.player', { n: sw }) : t('four.team', { n: teamOfSeat(sw) })) + ' · ' + (bot ? t('bot.seat', { n: sw, lvl: t('ai.' + bot) }) : seatNames[sw] || t('four.emptyTap')) + (sw === online.seat ? ' ' + t('online.you') : '');
         row.appendChild(li);
         if (free || bot) {
           var bb = document.createElement('button'); bb.type = 'button'; bb.className = 'seat-bot';
@@ -5856,7 +5977,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
         }
         box.appendChild(row);
       })(sw);
-      var hn = document.createElement('p'); hn.className = 'hint'; hn.textContent = t('four.seatHint') + ' ' + t('bot.hint'); box.appendChild(hn);
+      var hn = document.createElement('p'); hn.className = 'hint'; hn.textContent = t(online.ffa ? 'four.seatHintFfa' : 'four.seatHint') + ' ' + t('bot.hint'); box.appendChild(hn);
       $('btnBotFill').hidden = !freeSeats.length; $('btnBotFill').onclick = function () { if (online.net) freeSeats.forEach(function (x) { online.net.send({ t: 'bot', seat: x, level: botPick }); }); };
       document.querySelectorAll('#botLevel .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.val === botPick)); });
     }
@@ -6142,7 +6263,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   $('btnOnlineBack').addEventListener('click', function () { if (online.net && !online.active) leaveOnline(false); open('playOverlay'); });
   $('btnCreateRoom').addEventListener('click', function () {
     online.isPublic = vis === 'public';
-    startOnline({ t: 'create', opts: { variant: modeVariant(settings.mode), blitz: settings.mode === 'blitz', tournamentRule: settings.tournamentRule, exactFive: settings.exactFive, size: settings.size, timer: settings.timer, players: plPick, public: online.isPublic } });
+    startOnline({ t: 'create', opts: { variant: modeVariant(settings.mode), blitz: settings.mode === 'blitz', tournamentRule: settings.tournamentRule, exactFive: settings.exactFive, size: settings.size, timer: settings.timer, players: plPick >= 4 ? 4 : 2, ffa: plPick === 5, public: online.isPublic } });
   });
   function joinFromInput() {
     var code = ($('onCode').value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -6182,13 +6303,13 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   document.querySelectorAll('#aiSide .seg-opt').forEach(function (b) { b.addEventListener('click', function () { aiPref.side = b.dataset.val; saveAiPref(); syncAiUi(); }); });
   // "Jugar local": un solo botón de inicio; según el modo arranca con otra persona o contra la máquina
   var localMode = 'person'; try { if (localStorage.getItem('pente.localMode') === 'ai') localMode = 'ai'; } catch (e) {}
-  var localPlayers = 2; try { if (localStorage.getItem('pente.localPlayers') === '4') localPlayers = 4; } catch (e) {}
+  var localPlayers = 2; try { var lp0 = localStorage.getItem('pente.localPlayers'); if (lp0 === '4' || lp0 === '5') localPlayers = Number(lp0); } catch (e) {}      // 2 | 4 (2 contra 2) | 5 (4 todos contra todos)
   function syncLocalMode() {
     document.querySelectorAll('#localMode .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.val === localMode)); });
     document.querySelectorAll('#localOverlay [data-mode]').forEach(function (el) { el.hidden = el.dataset.mode !== localMode; });
     syncAiUi();
     // 2 contra 2: se esconden los campos de 2 jugadores y aparece la lista de 4 asientos
-    var four = localPlayers === 4;
+    var four = localPlayers >= 4;
     document.querySelectorAll('#localPlayers .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(Number(b.dataset.pl) === localPlayers)); });
     document.querySelectorAll('#localOverlay .l2only').forEach(function (el) { el.hidden = four; });
     if (four) document.querySelectorAll('#localOverlay [data-mode]').forEach(function (el) { el.hidden = true; });
@@ -6200,7 +6321,9 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     box.innerHTML = '';
     for (var q = 1; q <= 4; q++) (function (q) {
       var row = document.createElement('div'); row.className = 'l4row';
-      var tag = document.createElement('span'); tag.className = 'l4tag'; tag.textContent = (q % 2 === 1 ? '⚫' : '⚪') + ' ' + t('four.team', { n: q % 2 === 1 ? 1 : 2 });
+      var tag = document.createElement('span'); tag.className = 'l4tag';
+      if (localPlayers === 5) { var dot = document.createElement('i'); dot.className = 'stone-ico s' + q; tag.appendChild(dot); tag.appendChild(document.createTextNode(' ' + t('four.player', { n: q }))); }
+      else tag.textContent = (q % 2 === 1 ? '⚫' : '⚪') + ' ' + t('four.team', { n: q % 2 === 1 ? 1 : 2 });
       var inp = document.createElement('input'); inp.type = 'text'; inp.id = 'l4n' + q; inp.maxLength = 18; inp.autocomplete = 'off';
       var bot = q > 1 && !!loc4.bots[q];
       inp.placeholder = bot ? t('four.bot', { n: q }) : t('four.seatDefault', { n: q }); inp.disabled = bot;
@@ -6214,10 +6337,10 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     $('l4LevelBox').hidden = !anyBot;
     document.querySelectorAll('#l4Level .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.val === aiPref.level)); });
   }
-  document.querySelectorAll('#localPlayers .seg-opt').forEach(function (b) { b.addEventListener('click', function () { localPlayers = Number(b.dataset.pl) === 4 ? 4 : 2; try { localStorage.setItem('pente.localPlayers', String(localPlayers)); } catch (e) {} syncLocalMode(); }); });
+  document.querySelectorAll('#localPlayers .seg-opt').forEach(function (b) { b.addEventListener('click', function () { localPlayers = [2, 4, 5].indexOf(Number(b.dataset.pl)) >= 0 ? Number(b.dataset.pl) : 2; try { localStorage.setItem('pente.localPlayers', String(localPlayers)); } catch (e) {} syncLocalMode(); }); });
   document.querySelectorAll('#l4Level .seg-opt').forEach(function (b) { b.addEventListener('click', function () { aiPref.level = b.dataset.val; saveAiPref(); buildLoc4(); }); });
   document.querySelectorAll('#localMode .seg-opt').forEach(function (b) { b.addEventListener('click', function () { localMode = b.dataset.val; try { localStorage.setItem('pente.localMode', localMode); } catch (e) {} syncLocalMode(); }); });
-  window.__localStart = function () { if (localPlayers === 4) { startLocal4(); return; } if (localMode === 'ai') { var n = ($('name1').value || '').trim(); try { if (n) localStorage.setItem('pente.name', n); } catch (e) {} startAI(aiPref.level, aiPref.side); } else startGame(); };
+  window.__localStart = function () { if (localPlayers >= 4) { startLocal4(); return; } if (localMode === 'ai') { var n = ($('name1').value || '').trim(); try { if (n) localStorage.setItem('pente.name', n); } catch (e) {} startAI(aiPref.level, aiPref.side); } else startGame(); };
 
 
   /* ---------- Video de la partida ----------
@@ -6349,7 +6472,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     $('btnVideoBack').textContent = work ? t('video.cancel') : t('video.back');
     updateVideoButtons();
   }
-  function updateVideoButtons() { var has = !!state && isOver() && state.moves.length > 0; $('btnEndVideo').hidden = !has; $('btnVideoMoves').hidden = !has; }
+  function updateVideoButtons() { var has = !!state && isOver() && state.moves.length > 0 && !state.ffa;   /* el video todavía no sabe dibujar 4 jugadores */ $('btnEndVideo').hidden = !has; $('btnVideoMoves').hidden = !has; }
   function videoFileName() { var d = new Date(), pad = function (n) { return (n < 10 ? '0' : '') + n; }; return 'pente-' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + pad(d.getHours()) + pad(d.getMinutes()) + '.' + video.ext; }
   function openVideo() { open('videoOverlay'); updateVideoUi(); if (!video.blob && !video.running) videoStart(); }
   $('btnEndBoard').addEventListener('click', function () { closeAll(); setStatus(resultText()); updateResultBtn(); });
@@ -6390,13 +6513,13 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     b.addEventListener('click', function () { botPick = b.dataset.val; try { localStorage.setItem('pente.botLevel', botPick); } catch (e) {} document.querySelectorAll('#botLevel .seg-opt').forEach(function (x) { x.setAttribute('aria-pressed', String(x.dataset.val === botPick)); }); });
   });
   var plPick = 2;
-  try { if (localStorage.getItem('pente.players') === '4') plPick = 4; } catch (e) {}
+  try { var pp0 = localStorage.getItem('pente.players'); if (pp0 === '4' || pp0 === '5') plPick = Number(pp0); } catch (e) {}      // 2 | 4 (2 contra 2) | 5 (4 todos contra todos)
   function syncPl() {
     document.querySelectorAll('#plPicker .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(Number(b.dataset.pl) === plPick)); });
-    $('plHint').textContent = plPick === 4 ? t('four.hint4') : '';
+    $('plHint').textContent = plPick === 4 ? t('four.hint4') : plPick === 5 ? t('four.hint5') : '';
   }
   document.querySelectorAll('#plPicker .seg-opt').forEach(function (b) {
-    b.addEventListener('click', function () { plPick = Number(b.dataset.pl) === 4 ? 4 : 2; try { localStorage.setItem('pente.players', String(plPick)); } catch (e) {} syncPl(); });
+    b.addEventListener('click', function () { plPick = [2, 4, 5].indexOf(Number(b.dataset.pl)) >= 0 ? Number(b.dataset.pl) : 2; try { localStorage.setItem('pente.players', String(plPick)); } catch (e) {} syncPl(); });
   });
   var vis = 'private';
   try { if (localStorage.getItem('pente.vis') === 'public') vis = 'public'; } catch (e) {}
