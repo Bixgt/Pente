@@ -617,7 +617,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v48</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v49</p></div>
     <div class="btns">
       <button class="btn primary" id="btnResume" hidden data-i18n="menu.resume"></button>
       <button class="btn primary" id="btnPlay" data-i18n="menu.play"></button>
@@ -1071,7 +1071,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 48;</script>
+<script>window.PENTE_VERSION = 49;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -4853,22 +4853,23 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     var bl = gameMode === 'blitz' && !tut.active, tot = bl ? BLITZ_MS : TOTAL_MS;
     if (!settings.timer && !bl) { clk = null; return; }
     var n = performance.now(), rm = {}; seatKeys().forEach(function (k) { rm[k] = tot; });
-    clk = { on: true, total: tot, turnMs: bl ? 0 : TURN_MS, blitz: bl, rem: rm, current: 1, since: n, turnStart: n, frozen: false };
+    clk = { on: true, total: tot, turnMs: bl ? 0 : TURN_MS, blitz: bl, rem: rm, current: 1, since: n, turnStart: n, frozen: false, wait: !tut.active };   // wait: el reloj arranca con la primera ficha
   }
   function clockFromServer(c) {
     if (!c || !c.on) { clk = null; return; }
     var n = performance.now(), cur = c.current;
-    clk = { on: true, total: c.total, turnMs: c.turnMs, blitz: !!c.blitz, rem: Object.assign({}, c.rem), current: cur || (state ? state.current : 1), since: n, turnStart: n - (c.turnMs - c.turnLeft), frozen: !cur };
+    clk = { on: true, total: c.total, turnMs: c.turnMs, blitz: !!c.blitz, wait: c.started === false, rem: Object.assign({}, c.rem), current: cur || (state ? state.current : 1), since: n, turnStart: n - (c.turnMs - c.turnLeft), frozen: !cur };
   }
   function botTurn() { return ai.active && botNow(); }
   function clockLive() {                                   // { 1: ms totales, 2: ms totales, turn: ms de la jugada } a este instante
     if (!clk) return null;
     var n = clkPausedAt || performance.now(), out = Object.assign({}, clk.rem, { turn: clk.turnMs, cur: clk.current });
-    if (!clk.frozen && !botTurn()) { out[clk.current] = Math.max(0, clk.rem[clk.current] - (n - clk.since)); out.turn = clk.turnMs ? Math.max(0, clk.turnMs - (n - clk.turnStart)) : Infinity; }
+    if (!clk.frozen && !clk.wait && !botTurn()) { out[clk.current] = Math.max(0, clk.rem[clk.current] - (n - clk.since)); out.turn = clk.turnMs ? Math.max(0, clk.turnMs - (n - clk.turnStart)) : Infinity; }
     return out;
   }
   function clockSwitch() {                                 // se hizo una jugada local: se descuenta lo gastado y pasa el turno
     if (!clk || clk.frozen) return;
+    if (clk.wait) { clk.wait = false; var n0 = performance.now(); clk.current = state.current; clk.since = clk.turnStart = n0; clockLog[state.moves.length - 1] = Object.assign({}, clk.rem); return; }   // primera ficha: recién ahora arranca el tiempo
     var n = performance.now(), lm = state.moves[state.moves.length - 1]; if (!(ai.active && lm && isBotSeat(lm.seat || lm.player))) clk.rem[clk.current] = Math.max(0, clk.rem[clk.current] - (n - clk.since));
     clk.current = state.current; clk.since = clk.turnStart = n;
     clockLog[state.moves.length - 1] = Object.assign({}, clk.rem);
@@ -4880,7 +4881,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     [1, 2, 3, 4].forEach(function (p) {
       var el = $('clock' + p); if (!el) return;
       el.hidden = !l || clk.rem[p] === undefined; if (el.hidden) return;
-      var active = !clk.frozen && !isOver() && state.current === p && !botTurn();
+      var active = !clk.frozen && !clk.wait && !isOver() && state.current === p && !botTurn();
       el.querySelector('.ctot').textContent = fmtClock(l[p]);
       el.querySelector('.cturn').textContent = active && clk.turnMs ? fmtClock(l.turn) : '';
       el.classList.toggle('low', active && (l.turn <= 10000 || l[p] <= 30000));
@@ -4895,7 +4896,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     if (paused && !clkPausedAt) clkPausedAt = performance.now();
     else if (!paused && clkPausedAt) { var d = performance.now() - clkPausedAt; clkPausedAt = 0; clk.since += d; clk.turnStart += d; }
     renderClocks();
-    if (online.active || paused || isOver() || clk.frozen || botTurn()) return;
+    if (online.active || paused || isOver() || clk.frozen || clk.wait || botTurn()) return;
     var l = clockLive();
     if (l[clk.current] <= 0 || (clk.turnMs && l.turn <= 0)) timeoutEnd(clk.current);   // en online decide el servidor
   }
@@ -5137,10 +5138,11 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     var p = toCanvas(e), c = snap(p.x, p.y, false); if (!c) return;
     kbd = c;
     if (online.active && turnSeat() !== online.seat) { setStatus(t(online.spectator ? 'spec.noPlay' : 'online.wait'), true); sfx('error'); return; }
-    if (P.get(state, c.x, c.y) !== P.EMPTY) { setStatus(t('err.OCCUPIED'), true); sfx('error'); return; }
-    var grab = !!(pending && cfg.confirm !== 'none' && pending.x === c.x && pending.y === c.y);
-    drag = { mouse: e.pointerType !== 'touch', id: e.pointerId, grab: grab, prev: pending, cell: c, f: p, vec: null, lifted: false, liftStart: 0, cssX: e.clientX, cssY: e.clientY };
+    var occupied = P.get(state, c.x, c.y) !== P.EMPTY;        // se puede apoyar el dedo sobre otras fichas y arrastrar: la ficha nueva flota por encima y se suelta en un lugar libre
+    var grab = !occupied && !!(pending && cfg.confirm !== 'none' && pending.x === c.x && pending.y === c.y);
+    drag = { mouse: e.pointerType !== 'touch', id: e.pointerId, grab: grab, occupied: occupied, prev: pending, cell: c, f: p, vec: null, lifted: false, liftStart: 0, cssX: e.clientX, cssY: e.clientY };
     try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+    if (occupied) return;
     if (!grab) {
       var bad = P.validateMove(state, c.x, c.y);
       if (bad) { pending = hover = null; setStatus(t('err.' + bad), true); sfx('error'); }
@@ -5166,6 +5168,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     try { canvas.releasePointerCapture(d.id); } catch (err) {}
     if (!state || isOver() || cancelled) { pending = d.prev; hover = null; setStatus(''); render(); return; }
     if (!d.lifted) {                                          // toque simple, sin arrastrar
+      if (d.occupied) { hover = null; setStatus(t('err.OCCUPIED'), true); sfx('error'); render(); return; }       // tocó una casilla ocupada (sin arrastrar)
       if (d.grab) {                                                                  // toque sobre la ficha pendiente
         if (cfg.confirm === 'double') { setStatus(''); tryMove(d.cell.x, d.cell.y); }  // doble toque: juega
         else { hover = null; setStatus(t('hud.tapHintButton'), true); render(); }       // modo botón: no hace nada, avisa
@@ -5477,16 +5480,25 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       bg.addColorStop(0, th.board.bg[0]); bg.addColorStop(1, th.board.bg[1]);
       ctx.fillStyle = bg; ctx.fillRect(0, 0, W, W);
     }
-    // líneas (con resplandor si el tema lo pide)
+    // líneas (con resplandor si el tema lo pide). Grosor ENTERO y posición alineada al píxel: todas las líneas quedan iguales y nítidas
+    // (con medios píxeles unas se veían más gruesas o borrosas que otras). El borde exterior es un poco más marcado.
     ctx.save();
-    ctx.strokeStyle = th.board.line; ctx.lineWidth = Math.max(1, metrics.cell * (th.board.lineGlow ? 0.05 : 0.04));
+    var lw = Math.max(1, Math.round(metrics.cell * (th.board.lineGlow ? 0.05 : 0.04))), lwB = lw + Math.max(1, Math.round(lw * 0.7));
+    var snapL = function (v, w) { return Math.round(v - (w % 2 ? 0.5 : 0)) + (w % 2 ? 0.5 : 0); };
+    ctx.strokeStyle = th.board.line; ctx.lineWidth = lw; ctx.lineCap = 'butt';
     if (th.board.lineGlow) { ctx.shadowColor = th.board.lineGlow; ctx.shadowBlur = metrics.cell * 0.4; }
     ctx.beginPath();
-    for (i = 0; i < n; i++) {
-      ctx.moveTo(px(0), px(i)); ctx.lineTo(px(n - 1), px(i));
-      ctx.moveTo(px(i), px(0)); ctx.lineTo(px(i), px(n - 1));
+    var a0 = snapL(px(0), lw), a1 = snapL(px(n - 1), lw);
+    for (i = 1; i < n - 1; i++) {
+      var q = snapL(px(i), lw);
+      ctx.moveTo(a0, q); ctx.lineTo(a1, q);
+      ctx.moveTo(q, a0); ctx.lineTo(q, a1);
     }
-    ctx.stroke(); ctx.restore();
+    ctx.stroke();
+    ctx.lineWidth = lwB; ctx.lineJoin = 'miter';
+    var b0 = snapL(px(0), lwB), b1 = snapL(px(n - 1), lwB);
+    ctx.strokeRect(b0, b0, b1 - b0, b1 - b0);
+    ctx.restore();
     // puntos estrella + centro
     ctx.save(); ctx.fillStyle = th.board.star;
     if (th.board.lineGlow) { ctx.shadowColor = th.board.lineGlow; ctx.shadowBlur = metrics.cell * 0.5; }
