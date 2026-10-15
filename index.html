@@ -519,6 +519,16 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 .daily-info { margin: 14px 0 6px; text-align: center; font-weight: 700; font-size: 17px; }
 .daily-res { margin: 12px 0; padding: 12px 14px; border-radius: 12px; text-align: center; font-weight: 700; background: var(--panel, rgba(0,0,0,.06)); border: 1px solid var(--line, rgba(0,0,0,.15)); }
 #dailyOverlay .hint, #dailyOverlay .online-msg { text-align: center; }
+.board { list-style: none; margin: 10px 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.board li { display: grid; grid-template-columns: 2.2em 1fr auto; gap: 8px; align-items: center; padding: 9px 12px; border-radius: 10px; background: var(--panel, rgba(0,0,0,.06)); border: 1px solid var(--line, rgba(0,0,0,.12)); font-size: 14px; }
+.board li.me { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; font-weight: 700; }
+.board li .pos { font-weight: 800; text-align: center; opacity: .85; }
+.board li .who { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.board li .val { opacity: .85; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.board li.none { opacity: .6; }
+.board li.gap { display: block; text-align: center; background: none; border: none; opacity: .6; padding: 2px; }
+#boardTabs.btns { display: flex; flex-direction: row; gap: 8px; }
+#boardTabs .btn { flex: 1; }
 </style>
 </head>
 <body>
@@ -622,7 +632,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v50</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v51</p></div>
     <div class="btns">
       <button class="btn primary" id="btnResume" hidden data-i18n="menu.resume"></button>
       <button class="btn primary" id="btnPlay" data-i18n="menu.play"></button>
@@ -715,9 +725,25 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       <button class="btn primary" id="btnDailyPlay" data-i18n="daily.play"></button>
       <button class="btn primary" id="btnDailyLogin" hidden data-i18n="daily.login"></button>
       <button class="btn" id="btnDailyShare" hidden data-i18n="daily.share"></button>
+      <button class="btn" id="btnDailyBoard" data-i18n="daily.board"></button>
       <button class="btn" id="btnDailyBack" data-i18n="menu.back"></button>
     </div>
     <p class="hint" data-i18n="daily.ranking"></p>
+  </div>
+</div>
+
+<!-- Desafío diario: ranking -->
+<div class="overlay screen" id="boardOverlay">
+  <div class="screen-body">
+    <h2 data-i18n="daily.boardTitle"></h2>
+    <div class="btns" id="boardTabs">
+      <button class="btn primary" id="boardTabToday" data-i18n="daily.tabToday"></button>
+      <button class="btn" id="boardTabWeek" data-i18n="daily.tabWeek"></button>
+    </div>
+    <p class="hint" id="boardRule"></p>
+    <ol class="board" id="boardList"></ol>
+    <p class="online-msg" id="boardMsg" role="status" aria-live="polite"></p>
+    <div class="btns"><button class="btn" id="btnBoardBack" data-i18n="menu.back"></button></div>
   </div>
 </div>
 
@@ -1090,6 +1116,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     <div class="btns">
       <button class="btn primary" id="btnRematch" data-i18n="end.rematch"></button>
       <button class="btn primary" id="btnEndShare" hidden data-i18n="daily.share"></button>
+      <button class="btn" id="btnEndRank" hidden data-i18n="daily.board"></button>
       <button class="btn" id="btnEndBoard" data-i18n="end.viewBoard"></button>
       <button class="btn" id="btnEndVideo" hidden data-i18n="video.make"></button>
       <button class="btn" id="btnEndCopy" data-i18n="moves.copyAll"></button>
@@ -1098,7 +1125,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 50;</script>
+<script>window.PENTE_VERSION = 51;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -3542,7 +3569,21 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     "daily.shareDraw": "🤝 Empate en {moves} jugadas · {time}",
     "daily.shareText": "Pente Diario #{n} · {date}\n{line}\nRival: {level}\n{url}",
     "daily.copied": "Copiado: pegalo donde quieras.",
-    "daily.resync": "Se volvió a sincronizar la partida con el servidor."
+    "daily.resync": "Se volvió a sincronizar la partida con el servidor.",
+    "daily.board": "Ver ranking",
+    "daily.boardTitle": "Ranking del desafío",
+    "daily.tabToday": "Hoy",
+    "daily.tabWeek": "Semana",
+    "daily.boardRule": "Gana quien ganó en menos jugadas; el tiempo desempata.",
+    "daily.weekRule": "Semana del {date}. Cada día suma puntos según tu puesto: 10, 7, 5, 4, 3, 2… y 1 por cualquier victoria.",
+    "daily.boardEmpty": "Todavía nadie terminó el desafío. Ponete primera.",
+    "daily.boardLoading": "Cargando el ranking…",
+    "daily.boardErr": "No se pudo cargar el ranking. Probá de nuevo en un rato.",
+    "daily.rowWin": "{moves} jugadas · {time}",
+    "daily.rowNoWin": "no ganó",
+    "daily.rowWeek": "{points} pts · {wins} de {played} ganadas",
+    "daily.you": "vos",
+    "daily.more": "… y {n} más"
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -3620,7 +3661,21 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     "daily.shareDraw": "🤝 Draw in {moves} moves · {time}",
     "daily.shareText": "Pente Daily #{n} · {date}\n{line}\nOpponent: {level}\n{url}",
     "daily.copied": "Copied: paste it anywhere.",
-    "daily.resync": "The game was re-synced with the server."
+    "daily.resync": "The game was re-synced with the server.",
+    "daily.board": "View ranking",
+    "daily.boardTitle": "Challenge ranking",
+    "daily.tabToday": "Today",
+    "daily.tabWeek": "Week",
+    "daily.boardRule": "Fewest moves wins; time breaks ties.",
+    "daily.weekRule": "Week of {date}. Each day gives points by place: 10, 7, 5, 4, 3, 2… and 1 for any win.",
+    "daily.boardEmpty": "Nobody has finished the challenge yet. Be the first.",
+    "daily.boardLoading": "Loading the ranking…",
+    "daily.boardErr": "Couldn't load the ranking. Try again in a while.",
+    "daily.rowWin": "{moves} moves · {time}",
+    "daily.rowNoWin": "didn't win",
+    "daily.rowWeek": "{points} pts · {wins} of {played} won",
+    "daily.you": "you",
+    "daily.more": "… and {n} more"
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -5133,7 +5188,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   /* ---------- Desafío diario ----------
    * Una partida por día contra la máquina, misma posición para todos. La juega el servidor (valida cada ficha, mueve la máquina y mide el tiempo);
    * acá solo se dibuja. El tablero se mueve al instante con lo que pongo yo, y la respuesta de la máquina llega del servidor. */
-  var daily = { active: false, net: null, conn: '', info: null, result: null, t0: 0, wantPlay: false };
+  var daily = { active: false, net: null, conn: '', info: null, result: null, t0: 0, wantPlay: false, boardOpen: false, boardFrom: 'daily', board: null, tab: 'today' };
   var DAILY_KEY = 'pente.daily';
   function dailyStore() { try { var d = JSON.parse(localStorage.getItem(DAILY_KEY) || '{}'); return d && typeof d === 'object' && d.days ? d : { days: {} }; } catch (e) { return { days: {} }; } }
   function dailyRemember(r) {
@@ -5176,10 +5231,10 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       onMessage: onDailyMessage
     });
   }
-  function dailyHello() { dailyToken(function (tk) { if (daily.net) daily.net.send({ t: daily.active || daily.wantPlay ? 'dailyStart' : 'dailyInfo', jwt: tk }); }); }
+  function dailyHello() { dailyToken(function (tk) { if (!daily.net) return; if (daily.boardOpen) daily.net.send({ t: 'dailyBoard', jwt: tk }); else daily.net.send({ t: daily.active || daily.wantPlay ? 'dailyStart' : 'dailyInfo', name: ($('name1').value || '').trim().slice(0, 18) || undefined, jwt: tk }); }); }
   function dailyClose() { if (daily.net) { daily.net.close(); daily.net = null; } daily.conn = ''; }
 
-  function dailyOpen() { daily.wantPlay = false; daily.info = null; renderDaily(); open('dailyOverlay'); dailyConnect(); }
+  function dailyOpen() { daily.boardOpen = false; daily.wantPlay = false; daily.info = null; renderDaily(); open('dailyOverlay'); dailyConnect(); }
   function renderDaily() {
     var i = daily.info, A = typeof Auth !== 'undefined' ? Auth : null, logged = !!(A && A.user);
     $('dailyInfo').textContent = i ? t('daily.info', { n: i.n, date: dailyDate(i.date), level: dailyLevel(i.level) }) : '';
@@ -5220,6 +5275,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       daily.info = m;
       if (daily.wantPlay && m.status !== 'done' && !m.needAccount) { dailyApplyView(m); return; }
       daily.wantPlay = false; dailyMsg(''); if ($('dailyOverlay').classList.contains('open')) renderDaily();
+    } else if (m.t === 'dailyBoard') {
+      daily.board = m; if ($('boardOverlay').classList.contains('open')) renderBoard();
     } else if (m.t === 'dailyMove') {
       if (!daily.active) return;
       if (m.result) { daily.result = m.result; dailyRemember(m.result); }
@@ -5232,7 +5289,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
         setStatus(''); render(); setTimeout(showEnd, 300);
       } else if (m.result) dailyEndRefresh();
     } else if (m.t === 'error') {
-      if (m.code === 'NEED_ACCOUNT') { daily.wantPlay = false; if (daily.info) daily.info.needAccount = true; renderDaily(); }
+      if (m.code === 'SERVER_ERROR' && daily.boardOpen) { $('boardMsg').textContent = t('daily.boardErr'); }
+      else if (m.code === 'NEED_ACCOUNT') { daily.wantPlay = false; if (daily.info) daily.info.needAccount = true; renderDaily(); }
       else if (m.code === 'ILLEGAL' && daily.active && daily.net) dailyHello();   // desfasaje: se pide la partida entera de nuevo
     }
   }
@@ -5257,6 +5315,42 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     var done = function () { setStatus(t('daily.copied'), true); dailyMsg(t('daily.copied')); };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () {}); else done();
   }
+  /* Ranking */
+  function boardOpen(from) {
+    daily.boardOpen = true; daily.boardFrom = from; daily.board = null; daily.tab = 'today';
+    renderBoard(); open('boardOverlay'); dailyConnect(); if (daily.net && daily.net.isOpen()) dailyHello();
+  }
+  function renderBoard() {
+    var b = daily.board, ls = $('boardList'), today = daily.tab === 'today';
+    $('boardTabToday').classList.toggle('primary', today); $('boardTabWeek').classList.toggle('primary', !today);
+    $('boardRule').textContent = today ? t('daily.boardRule') : (b ? t('daily.weekRule', { date: dailyDate(b.weekFrom) }) : '');
+    ls.innerHTML = '';
+    if (!b) { $('boardMsg').textContent = t('daily.boardLoading'); return; }
+    $('boardMsg').textContent = '';
+    var part = today ? b.today : b.week;
+    if (!part.rows.length) { $('boardMsg').textContent = t('daily.boardEmpty'); return; }
+    function row(r) {
+      var li = document.createElement('li'); if (r.me) li.className = 'me'; if (today && !r.win) li.className += ' none';
+      var pos = document.createElement('span'); pos.className = 'pos'; pos.textContent = r.rank ? String(r.rank) : '–';
+      var who = document.createElement('span'); who.className = 'who'; who.textContent = (r.avatar ? PP.emojiOf(r.avatar) + ' ' : '') + r.name + (r.me ? ' (' + t('daily.you') + ')' : '');
+      var val = document.createElement('span'); val.className = 'val';
+      val.textContent = today ? (r.win ? t('daily.rowWin', { moves: r.moves, time: fmtMs(r.ms) }) : t('daily.rowNoWin')) : t('daily.rowWeek', { points: r.points, wins: r.wins, played: r.played });
+      li.appendChild(pos); li.appendChild(who); li.appendChild(val); return li;
+    }
+    part.rows.forEach(function (r) { ls.appendChild(row(r)); });
+    if (part.mine) { var g = document.createElement('li'); g.className = 'gap'; g.textContent = '…'; ls.appendChild(g); ls.appendChild(row(part.mine)); }
+    else if (part.total > part.rows.length) { var g2 = document.createElement('li'); g2.className = 'gap'; g2.textContent = t('daily.more', { n: part.total - part.rows.length }); ls.appendChild(g2); }
+  }
+  $('boardTabToday').addEventListener('click', function () { daily.tab = 'today'; renderBoard(); });
+  $('boardTabWeek').addEventListener('click', function () { daily.tab = 'week'; renderBoard(); });
+  $('btnBoardBack').addEventListener('click', function () {
+    daily.boardOpen = false;
+    if (daily.boardFrom === 'end' && daily.active) { open('endOverlay'); updateRematchUi(); return; }
+    if (!daily.active) dailyClose();
+    daily.wantPlay = false; daily.info = null; renderDaily(); open('dailyOverlay'); dailyConnect();
+  });
+  $('btnDailyBoard').addEventListener('click', function () { boardOpen('daily'); });
+  $('btnEndRank').addEventListener('click', function () { boardOpen('end'); });
   $('btnDaily').addEventListener('click', dailyOpen);
   $('btnDailyBack').addEventListener('click', function () { daily.wantPlay = false; if (!daily.active) dailyClose(); open('playOverlay'); });
   $('btnDailyPlay').addEventListener('click', function () { daily.wantPlay = true; dailyMsg(t('daily.connecting')); dailyConnect(); dailyHello(); });
@@ -6016,7 +6110,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   }
   function updateRematchUi() {
     var btn = $('btnRematch'), hint = $('endHint'), leave = $('btnEndMenu');
-    $('btnEndShare').hidden = !(daily.active && daily.result);
+    $('btnEndShare').hidden = !(daily.active && daily.result); $('btnEndRank').hidden = !(daily.active && daily.result);
     if (daily.active) { btn.hidden = true; hint.textContent = daily.result ? t('daily.ranking') : ''; leave.textContent = t('end.toMenu'); return; }
     btn.hidden = !!online.spectator;
     if (online.spectator) { hint.textContent = ''; leave.textContent = t('online.leave'); return; }
