@@ -529,6 +529,36 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 .board li.gap { display: block; text-align: center; background: none; border: none; opacity: .6; padding: 2px; }
 #boardTabs.btns { display: flex; flex-direction: row; gap: 8px; }
 #boardTabs .btn { flex: 1; }
+
+/* Jugar: tarjeta del desafío + fichas */
+.hero { position: relative; display: block; width: 100%; margin: 14px 0 12px; padding: 18px 18px 16px; border-radius: 18px; text-align: left; overflow: hidden; color: var(--accent-ink);
+  background: linear-gradient(145deg, var(--accent), color-mix(in srgb, var(--accent) 70%, #fff 0%)); border: 0; box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 28%, transparent); }
+.hero::before { content: ""; position: absolute; right: -18px; top: -18px; width: 150px; height: 150px; opacity: .22; pointer-events: none;
+  background-image: linear-gradient(currentColor 1.5px, transparent 1.5px), linear-gradient(90deg, currentColor 1.5px, transparent 1.5px); background-size: 25px 25px; transform: rotate(8deg); }
+.hero::after { content: ""; position: absolute; right: 76px; top: 34px; width: 30px; height: 30px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle at 35% 30%, #5a5a5a, #111 70%); box-shadow: 36px 26px 0 -2px #f4f4f4, 36px 26px 0 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.3); }
+.hero > * { position: relative; display: block; }
+.hero-top { display: flex !important; align-items: center; justify-content: space-between; gap: 8px; }
+.hero-tag { font-size: 11px; font-weight: 800; letter-spacing: .12em; opacity: .75; }
+.hero-streak { font-size: 13px; font-weight: 800; background: rgba(0,0,0,.14); padding: 3px 9px; border-radius: 999px; margin-right: 70px; }
+.hero-title { font-size: 28px; font-weight: 800; line-height: 1.1; margin: 8px 0 4px; }
+.hero-sub { font-size: 14px; opacity: .85; margin-right: 84px; min-height: 2.6em; }
+.hero-cta { margin-top: 12px; font-weight: 800; font-size: 15px; }
+.hero.done { background: var(--panel-2); color: var(--text); box-shadow: none; border: 1px solid var(--line); }
+.hero.done .hero-streak { background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--accent); }
+.hero.done .hero-cta { color: var(--accent); }
+.hero:active { transform: scale(.985); }
+.tiles { display: flex; flex-direction: column; gap: 10px; margin-bottom: 6px; }
+.tile { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 16px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); text-align: left; color: var(--text); }
+.tile:hover { border-color: var(--accent); }
+.tile.primary { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--panel)); color: var(--text); }
+.tile-ic { flex: none; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 12px; background: var(--panel-2); color: var(--accent); }
+.tile-tx { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.tile-t { font-weight: 800; font-size: 17px; }
+.tile-s { font-size: 13px; color: var(--muted); line-height: 1.25; }
+.chip { display: block; margin: -10px auto 18px; padding: 7px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); }
+.chip.done { color: var(--muted); background: transparent; border-color: var(--line); }
+@media (prefers-reduced-motion: no-preference) { .hero, .tile { transition: transform .12s, border-color .15s; } }
 </style>
 </head>
 <body>
@@ -632,7 +662,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v51</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v52</p></div>
+    <button type="button" class="chip" id="menuDaily"></button>
     <div class="btns">
       <button class="btn primary" id="btnResume" hidden data-i18n="menu.resume"></button>
       <button class="btn primary" id="btnPlay" data-i18n="menu.play"></button>
@@ -701,13 +732,18 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 <div class="overlay screen" id="playOverlay">
   <div class="screen-body">
     <h2 data-i18n="menu.play"></h2>
-    <div class="btns">
-      <button class="btn primary" id="btnDaily" data-i18n="daily.menu"></button>
-      <button class="btn primary" id="btnLocal" data-i18n="menu.local"></button>
-      <button class="btn primary" id="btnOnline" data-i18n="menu.online"></button>
-      <button class="btn" id="btnTutorial" data-i18n="menu.tutorial"></button>
-      <button class="btn" id="btnPlayBack" data-i18n="menu.back"></button>
+    <button type="button" class="hero" id="btnDaily">
+      <span class="hero-top"><span class="hero-tag" data-i18n="daily.heroTag"></span><span class="hero-streak" id="heroStreak" hidden></span></span>
+      <span class="hero-title" id="heroTitle"></span>
+      <span class="hero-sub" id="heroSub"></span>
+      <span class="hero-cta" id="heroCta"></span>
+    </button>
+    <div class="tiles">
+      <button type="button" class="tile" id="btnLocal"><span class="tile-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="5"/><circle cx="15" cy="15" r="5"/></svg></span><span class="tile-tx"><span class="tile-t" data-i18n="menu.local"></span><span class="tile-s" data-i18n="play.localSub"></span></span></button>
+      <button type="button" class="tile" id="btnOnline"><span class="tile-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z"/></svg></span><span class="tile-tx"><span class="tile-t" data-i18n="menu.online"></span><span class="tile-s" data-i18n="play.onlineSub"></span></span></button>
+      <button type="button" class="tile" id="btnTutorial"><span class="tile-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4z"/><path d="M7 9.5V15c0 1.5 2.2 3 5 3s5-1.5 5-3V9.5"/></svg></span><span class="tile-tx"><span class="tile-t" data-i18n="menu.tutorial"></span><span class="tile-s" data-i18n="play.tutorialSub"></span></span></button>
     </div>
+    <div class="btns"><button class="btn" id="btnPlayBack" data-i18n="menu.back"></button></div>
   </div>
 </div>
 
@@ -1125,7 +1161,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 51;</script>
+<script>window.PENTE_VERSION = 52;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -1491,6 +1527,90 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     winsNeededForBestOf: winsNeededForBestOf,
     COLS: COLS, coordName: coordName, parseCoord: parseCoord
   };
+});
+</script>
+<script>
+/* Desafío diario de Pente. Lógica pura (sin DOM ni red): la usa el servidor para armar la partida del día.
+ *   PenteDaily.dayKey(ms)        -> 'AAAA-MM-DD' (día en hora Argentina, UTC-3)
+ *   PenteDaily.spec('AAAA-MM-DD') -> { date, n, size, level, setup:[[x,y],...] }   (igual para todos ese día)
+ *   PenteDaily.aiRng(date, k)     -> función de azar fija para la jugada k de la IA (así la máquina juega igual para todos)
+ * La posición de salida son 8 fichas alternadas (4 y 4) y mueve la persona (negras). */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./core/pente.js'));
+  else root.PenteDaily = factory(root.PenteCore);
+})(typeof self !== 'undefined' ? self : this, function (P) {
+  'use strict';
+  var SIZE = 13, SETUP_STONES = 8, DAY0 = Date.UTC(2026, 9, 15);       // el #1 es el 15/10/2026
+  var LEVEL_BY_DOW = ['hard', 'easy', 'easy', 'medium', 'medium', 'hard', 'hard'];   // domingo..sábado: lunes y martes suaves, fin de semana duro
+
+  function dayKey(ms) { return new Date((ms === undefined ? Date.now() : ms) - 3 * 3600 * 1000).toISOString().slice(0, 10); }
+  function dayNumber(key) { var p = key.split('-'); return Math.round((Date.UTC(+p[0], +p[1] - 1, +p[2]) - DAY0) / 86400000) + 1; }
+  function hash(str) {                                                  // cadena -> entero de 32 bits (cyrb53 recortado)
+    var h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (var i = 0; i < str.length; i++) { var c = str.charCodeAt(i); h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677); }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    return (h1 ^ (h1 >>> 15)) >>> 0;
+  }
+  function mulberry(seed) {
+    var a = seed >>> 0;
+    return function () { a = (a + 0x6D2B79F5) | 0; var t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+  function validKey(k) { return typeof k === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(k) && !isNaN(Date.parse(k)); }
+
+  function spec(key) {
+    var rng = mulberry(hash('pente-daily:' + key)), lo = 3, hi = SIZE - 4, tries = 0;
+    for (;;) {
+      tries++;
+      var s = P.createGame({ size: SIZE, tournamentRule: false }), setup = [], seen = {}, ok = true;
+      while (setup.length < SETUP_STONES) {
+        var x = lo + Math.floor(rng() * (hi - lo + 1)), y = lo + Math.floor(rng() * (hi - lo + 1)), k = x + ',' + y;
+        if (seen[k]) continue;
+        seen[k] = 1;
+        var r = P.playMove(s, x, y, s.current);
+        if (!r.ok || r.won || r.captured.length) { ok = false; break; }         // sin capturas ni victorias de entrada
+        s = r.state; setup.push([x, y]);
+      }
+      if (ok && s.status === 'playing' && s.current === 1) {
+        return { date: key, n: dayNumber(key), size: SIZE, level: LEVEL_BY_DOW[new Date(key + 'T12:00:00Z').getUTCDay()], setup: setup };
+      }
+      if (tries > 200) throw new Error('daily: no se pudo armar la posición');
+    }
+  }
+  function startState(sp) {                                              // partida lista para jugar desde la posición del día
+    var s = P.createGame({ size: sp.size, tournamentRule: false });
+    sp.setup.forEach(function (m) { s = P.playMove(s, m[0], m[1], s.current).state; });
+    return s;
+  }
+  function aiRng(key, k) { return mulberry(hash('pente-daily-ai:' + key + ':' + k)); }
+
+
+  /* ---------- Ranking ----------
+   * Del día: gana quien ganó la partida en MENOS jugadas; el tiempo desempata. Quien no ganó (perdió, empató o se rindió) figura al final, sin puesto.
+   * De la semana (lunes a domingo): cada día se dan puntos según el puesto (10, 7, 5, 4, 3, 2, 2, 2, 2, 2 y 1 para el resto de los que ganaron). */
+  var POINTS = [10, 7, 5, 4, 3, 2, 2, 2, 2, 2];
+  function addDays(key, n) { var p = key.split('-'); return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2] + n)).toISOString().slice(0, 10); }
+  function weekStart(key) { var dow = new Date(key + 'T12:00:00Z').getUTCDay(); return addDays(key, -((dow + 6) % 7)); }   // lunes
+  function byScore(a, b) { return (a.moves - b.moves) || (a.ms - b.ms) || (a.uid < b.uid ? -1 : a.uid > b.uid ? 1 : 0); }
+  function rankDay(rows) {
+    var done = (rows || []).filter(function (r) { return r && r.finished !== false; });
+    var w = done.filter(function (r) { return r.win; }).sort(byScore), o = done.filter(function (r) { return !r.win; }).sort(byScore);
+    return w.map(function (r, i) { return Object.assign({}, r, { rank: i + 1 }); }).concat(o.map(function (r) { return Object.assign({}, r, { rank: null }); }));
+  }
+  function rankWeek(byDay) {                                             // { 'AAAA-MM-DD': [filas del día] }
+    var acc = {};
+    Object.keys(byDay).forEach(function (d) {
+      rankDay(byDay[d]).forEach(function (r) {
+        var a = acc[r.uid] || (acc[r.uid] = { uid: r.uid, points: 0, wins: 0, played: 0, moves: 0, ms: 0 });
+        a.played++;
+        if (r.win) { a.wins++; a.moves += r.moves; a.ms += r.ms; a.points += r.rank <= POINTS.length ? POINTS[r.rank - 1] : 1; }
+      });
+    });
+    return Object.keys(acc).map(function (k) { return acc[k]; })
+      .sort(function (a, b) { return (b.points - a.points) || (b.wins - a.wins) || (a.moves - b.moves) || (a.ms - b.ms) || (a.uid < b.uid ? -1 : 1); })
+      .map(function (r, i) { return Object.assign(r, { rank: i + 1 }); });
+  }
+
+  return { dayKey: dayKey, addDays: addDays, weekStart: weekStart, rankDay: rankDay, rankWeek: rankWeek, POINTS: POINTS, dayNumber: dayNumber, validKey: validKey, spec: spec, startState: startState, aiRng: aiRng, SIZE: SIZE };
 });
 </script>
 <script>
@@ -3583,7 +3703,21 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     "daily.rowNoWin": "no ganó",
     "daily.rowWeek": "{points} pts · {wins} de {played} ganadas",
     "daily.you": "vos",
-    "daily.more": "… y {n} más"
+    "daily.more": "… y {n} más",
+    "daily.heroTag": "DESAFÍO DE HOY",
+    "daily.heroTitle": "Desafío #{n}",
+    "daily.heroSub": "Rival: {level} · una sola partida · el mismo tablero para todos",
+    "daily.heroPlay": "Jugar ahora",
+    "daily.heroDone": "Ver resultado y ranking",
+    "daily.heroDoneWin": "✅ Ganaste en {moves} jugadas · {time}",
+    "daily.heroDoneLoss": "❌ Hoy no salió · mañana hay otro",
+    "daily.heroStreak": "🔥 {n}",
+    "daily.heroStreakRisk": "🔥 {n} · no la pierdas",
+    "daily.chipTodo": "Desafío de hoy sin jugar",
+    "daily.chipDone": "Desafío de hoy listo",
+    "play.localSub": "En este dispositivo: con un amigo o contra la máquina",
+    "play.onlineSub": "Con código, salas públicas o amigos",
+    "play.tutorialSub": "Las reglas en un par de minutos"
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -3675,7 +3809,21 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     "daily.rowNoWin": "didn't win",
     "daily.rowWeek": "{points} pts · {wins} of {played} won",
     "daily.you": "you",
-    "daily.more": "… and {n} more"
+    "daily.more": "… and {n} more",
+    "daily.heroTag": "TODAY'S CHALLENGE",
+    "daily.heroTitle": "Challenge #{n}",
+    "daily.heroSub": "Opponent: {level} · one game only · same board for everyone",
+    "daily.heroPlay": "Play now",
+    "daily.heroDone": "See result and ranking",
+    "daily.heroDoneWin": "✅ You won in {moves} moves · {time}",
+    "daily.heroDoneLoss": "❌ Not today · there's a new one tomorrow",
+    "daily.heroStreak": "🔥 {n}",
+    "daily.heroStreakRisk": "🔥 {n} · don't lose it",
+    "daily.chipTodo": "Today's challenge not played",
+    "daily.chipDone": "Today's challenge done",
+    "play.localSub": "On this device: with a friend or against the machine",
+    "play.onlineSub": "With a code, public rooms or friends",
+    "play.tutorialSub": "The rules in a couple of minutes"
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -5351,6 +5499,18 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   });
   $('btnDailyBoard').addEventListener('click', function () { boardOpen('daily'); });
   $('btnEndRank').addEventListener('click', function () { boardOpen('end'); });
+  /* Tarjeta del desafío en "Jugar" y chip en el menú: se arman con lo que hay en el dispositivo (sin pedir nada al servidor). */
+  function renderHero() {
+    if (!window.PenteDaily) return;
+    var key = window.PenteDaily.dayKey(), sp = window.PenteDaily.spec(key), mine = dailyStore().days[key], st = dailyStreak(key);
+    $('heroTitle').textContent = t('daily.heroTitle', { n: sp.n });
+    $('heroSub').textContent = mine ? (mine.win ? t('daily.heroDoneWin', { moves: mine.moves, time: fmtMs(mine.ms) }) : t('daily.heroDoneLoss')) : t('daily.heroSub', { level: dailyLevel(sp.level) });
+    $('heroCta').textContent = (mine ? t('daily.heroDone') : t('daily.heroPlay')) + '  →';
+    var hs = $('heroStreak'); hs.hidden = !st; hs.textContent = st ? t(mine ? 'daily.heroStreak' : 'daily.heroStreakRisk', { n: st }) : '';
+    $('btnDaily').classList.toggle('done', !!mine);
+    var chip = $('menuDaily'); chip.textContent = (mine ? '✓ ' + t('daily.chipDone') : t('daily.chipTodo')) + (st ? '  ·  🔥 ' + st : ''); chip.classList.toggle('done', !!mine);
+  }
+  $('menuDaily').addEventListener('click', dailyOpen);
   $('btnDaily').addEventListener('click', dailyOpen);
   $('btnDailyBack').addEventListener('click', function () { daily.wantPlay = false; if (!daily.active) dailyClose(); open('playOverlay'); });
   $('btnDailyPlay').addEventListener('click', function () { daily.wantPlay = true; dailyMsg(t('daily.connecting')); dailyConnect(); dailyHello(); });
@@ -6063,6 +6223,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     closeAll();
     if (id === 'menuOverlay') $('btnResume').hidden = !(state && !isOver());
     if (id === 'playOverlay') $('btnTutorial').classList.toggle('primary', !tutDone());
+    if (id === 'playOverlay' || id === 'menuOverlay') renderHero();
     $(id).classList.add('open');
     document.body.classList.toggle('in-screen', $(id).classList.contains('screen'));
     var sc = $(id); if (sc.scrollTo) sc.scrollTo(0, 0);
