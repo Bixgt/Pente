@@ -537,17 +537,9 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   background-image: linear-gradient(rgba(0,0,0,0) 0, rgba(0,0,0,0) 0); }
 .hero-board::before { content: ""; position: absolute; inset: 0; opacity: .22; color: inherit;
   background-image: linear-gradient(currentColor 1.5px, transparent 1.5px), linear-gradient(90deg, currentColor 1.5px, transparent 1.5px); background-size: 25px 25px; }
-.hero-stone { position: absolute !important; width: 30px; height: 30px; border-radius: 50%; pointer-events: none; box-shadow: 0 0 0 1.5px rgba(0,0,0,.28), 0 3px 6px rgba(0,0,0,.3), inset 0 -3px 4px rgba(0,0,0,.28); }
-.hero-stone.s1 { left: 61px; top: 86px; background: radial-gradient(circle at 34% 28%, var(--s1a), var(--s1b) 78%); }
-.hero-stone.s2 { left: 86px; top: 61px; background: radial-gradient(circle at 34% 28%, var(--s2a), var(--s2b) 78%); }
-.hero-stone::after { content: ""; position: absolute; left: 20%; top: 14%; width: 34%; height: 24%; border-radius: 50%; background: rgba(255,255,255,.55); filter: blur(1px); transform: rotate(-30deg); }
-.hero-stone.s1::after { opacity: .5; }
-[data-theme="papel"] .hero-stone { box-shadow: 0 0 0 1.5px rgba(0,0,0,.35), 0 2px 4px rgba(0,0,0,.25); }
-[data-theme="papel"] .hero-stone.s1 { background: repeating-linear-gradient(35deg, transparent 0 2px, rgba(255,255,255,.22) 2px 3px), radial-gradient(circle at 40% 35%, var(--s1a), var(--s1b) 85%); }
-[data-theme="papel"] .hero-stone.s2 { background: repeating-linear-gradient(-30deg, transparent 0 2px, rgba(255,255,255,.28) 2px 3px), radial-gradient(circle at 40% 35%, var(--s2a), var(--s2b) 85%); }
-[data-theme="papel"] .hero-stone::after { display: none; }
-[data-theme="glow"] .hero-stone.s1 { box-shadow: 0 0 0 1.5px rgba(255,255,255,.55), 0 0 12px var(--s1b), inset 0 -3px 4px rgba(0,0,0,.2); }
-[data-theme="glow"] .hero-stone.s2 { box-shadow: 0 0 0 1.5px rgba(255,255,255,.55), 0 0 12px var(--s2b), inset 0 -3px 4px rgba(0,0,0,.2); }
+.hero-stone { position: absolute !important; width: 34px; height: 34px; pointer-events: none; }
+.hero-stone.s1 { left: 58.75px; top: 83.75px; }
+.hero-stone.s2 { left: 83.75px; top: 58.75px; }
 .hero.done .hero-stone { opacity: .85; }
 .ico { width: 1.05em; height: 1.05em; flex: none; vertical-align: -.14em; }
 .hero-streak, .chip:has(.ico) { display: inline-flex; align-items: center; gap: 5px; }
@@ -706,7 +698,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v55</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v56</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -782,7 +774,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       <span class="hero-title" id="heroTitle"></span>
       <span class="hero-sub" id="heroSub"></span>
       <span class="hero-cta" id="heroCta"></span>
-      <i class="hero-board" aria-hidden="true"><i class="hero-stone s1"></i><i class="hero-stone s2"></i></i>
+      <i class="hero-board" aria-hidden="true"><img class="hero-stone s1" alt="" width="34" height="34"><img class="hero-stone s2" alt="" width="34" height="34"></i>
     </button>
     <div class="tiles">
       <button type="button" class="tile" id="btnLocal"><span class="tile-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="5"/><circle cx="15" cy="15" r="5"/></svg></span><span class="tile-tx"><span class="tile-t" data-i18n="menu.local"></span><span class="tile-s" data-i18n="play.localSub"></span></span></button>
@@ -1221,7 +1213,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 55;</script>
+<script>window.PENTE_VERSION = 56;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -1651,10 +1643,12 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   function addDays(key, n) { var p = key.split('-'); return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2] + n)).toISOString().slice(0, 10); }
   function weekStart(key) { var dow = new Date(key + 'T12:00:00Z').getUTCDay(); return addDays(key, -((dow + 6) % 7)); }   // lunes
   function byScore(a, b) { return (a.moves - b.moves) || (a.ms - b.ms) || (a.uid < b.uid ? -1 : a.uid > b.uid ? 1 : 0); }
-  function rankDay(rows) {
-    var done = (rows || []).filter(function (r) { return r && r.finished !== false; });
-    var w = done.filter(function (r) { return r.win; }).sort(byScore), o = done.filter(function (r) { return !r.win; }).sort(byScore);
-    return w.map(function (r, i) { return Object.assign({}, r, { rank: i + 1 }); }).concat(o.map(function (r) { return Object.assign({}, r, { rank: null }); }));
+  function rankDay(rows) {                                               // ganaron (por jugadas y tiempo) → terminaron sin ganar → siguen jugando / lo dejaron a medias
+    var all = (rows || []).filter(function (r) { return r; });
+    var w = all.filter(function (r) { return r.finished !== false && r.win; }).sort(byScore), o = all.filter(function (r) { return r.finished !== false && !r.win; }).sort(byScore), p = all.filter(function (r) { return r.finished === false; }).sort(byScore);
+    return w.map(function (r, i) { return Object.assign({}, r, { rank: i + 1 }); })
+      .concat(o.map(function (r) { return Object.assign({}, r, { rank: null }); }))
+      .concat(p.map(function (r) { return Object.assign({}, r, { rank: null, playing: true }); }));
   }
   function rankWeek(byDay) {                                             // { 'AAAA-MM-DD': [filas del día] }
     var acc = {};
@@ -3860,6 +3854,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     "daily.boardLoading": "Cargando el ranking…",
     "daily.boardErr": "No se pudo cargar el ranking. Probá de nuevo en un rato.",
     "daily.rowWin": "{moves} jugadas · {time}",
+    "daily.rowPlaying": "Jugando · {moves} jugadas",
     "daily.rowNoWin": "no ganó",
     "daily.rowWeek": "{points} pts · {wins} de {played} ganadas",
     "daily.you": "vos",
@@ -3998,6 +3993,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     "daily.boardLoading": "Loading the ranking…",
     "daily.boardErr": "Couldn't load the ranking. Try again in a while.",
     "daily.rowWin": "{moves} moves · {time}",
+    "daily.rowPlaying": "Playing · {moves} moves",
     "daily.rowNoWin": "didn't win",
     "daily.rowWeek": "{points} pts · {wins} of {played} won",
     "daily.you": "you",
@@ -5577,10 +5573,17 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     var ks = Object.keys(d.days).sort(); while (ks.length > 120) delete d.days[ks.shift()];
     try { localStorage.setItem(DAILY_KEY, JSON.stringify(d)); } catch (e) {}
   }
+  function dailyTried(date) {                                    // "participé hoy": con una ficha puesta ya cuenta para la racha, aunque no termines
+    if (!date) return; var d = dailyStore(); d.tried = d.tried || {}; if (d.tried[date]) return; d.tried[date] = 1;
+    var ks = Object.keys(d.tried).sort(); while (ks.length > 120) delete d.tried[ks.shift()];
+    try { localStorage.setItem(DAILY_KEY, JSON.stringify(d)); } catch (e) {}
+  }
   function dateAdd(key, n) { var p = key.split('-'); return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2] + n)).toISOString().slice(0, 10); }
   function dailyStreak(today) {                                  // días seguidos jugados; si hoy todavía no jugó, cuenta desde ayer
-    var days = dailyStore().days, k = days[today] ? today : dateAdd(today, -1), n = 0;
-    while (days[k]) { n++; k = dateAdd(k, -1); }
+    var st = dailyStore(), days = st.days, tried = st.tried || {};
+    function did(k) { return days[k] || tried[k]; }                // jugar cuenta aunque no ganes, y aunque lo dejes a medias
+    var k = did(today) ? today : dateAdd(today, -1), n = 0;
+    while (did(k)) { n++; k = dateAdd(k, -1); }
     return n;
   }
   function fmtMs(ms) { var sec = Math.max(0, Math.round((ms || 0) / 1000)); return Math.floor(sec / 60) + ':' + ('0' + (sec % 60)).slice(-2); }
@@ -5645,7 +5648,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   }
   function onDailyMessage(m) {
     if (m.t === 'daily') {
-      if (m.status === 'done') dailyRemember(m.result);
+      if (m.status === 'done') dailyRemember(m.result); else if (m.status === 'playing' && m.moves && m.moves.length) dailyTried(m.date);
       if (daily.active && (m.status === 'playing' || m.status === 'new')) {   // reconexión: si lo local no coincide con el servidor, se vuelve a dibujar
         if (state && state.moves.length !== m.setup.length + m.moves.length) { dailyApplyView(m); setStatus(t('daily.resync'), true); return; }
         daily.info = m;
@@ -5659,6 +5662,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       daily.board = m; if ($('boardOverlay').classList.contains('open')) renderBoard();
     } else if (m.t === 'dailyMove') {
       if (!daily.active) return;
+      if (daily.info) dailyTried(daily.info.date);
       if (m.result) { daily.result = m.result; dailyRemember(m.result); }
       if (m.ai) {
         var tok = ai.token, st = state;
@@ -5719,7 +5723,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       var who = document.createElement('span'); who.className = 'who'; who.textContent = (r.avatar ? PP.emojiOf(r.avatar) + ' ' : '') + r.name + (r.me ? ' (' + t('daily.you') + ')' : '');
       who.appendChild(lvChip(r.xp));
       var val = document.createElement('span'); val.className = 'val';
-      val.textContent = today ? (r.win ? t('daily.rowWin', { moves: r.moves, time: fmtMs(r.ms) }) : t('daily.rowNoWin')) : t('daily.rowWeek', { points: r.points, wins: r.wins, played: r.played });
+      val.textContent = today ? (r.win ? t('daily.rowWin', { moves: r.moves, time: fmtMs(r.ms) }) : r.playing ? t('daily.rowPlaying', { moves: r.moves }) : t('daily.rowNoWin')) : t('daily.rowWeek', { points: r.points, wins: r.wins, played: r.played });
       li.appendChild(pos); li.appendChild(who); li.appendChild(val); return li;
     }
     part.rows.forEach(function (r) { ls.appendChild(row(r)); });
@@ -5744,8 +5748,20 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     flame: '<svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8.6 .8c.5 2.3 3.6 3.9 3.6 7.6A4.2 4.2 0 0 1 8 12.7 4.2 4.2 0 0 1 3.8 8.5c0-1.6.7-2.7 1.5-3.5.1 1 .5 1.7 1.2 2C6.2 5 6.9 2.6 8.6.8zM8 14.8c-1 0-1.8-.8-1.8-1.7 0-.9.9-1.4 1.8-2.4.9 1 1.8 1.5 1.8 2.4 0 .9-.8 1.7-1.8 1.7z" fill="currentColor" fill-rule="evenodd"/></svg>'
   };
   function esc(x) { return String(x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  // Las fichas de la tarjeta son las MISMAS del juego: se dibujan con el mismo código sobre un lienzo chico (según el tablero y las piedras elegidas)
+  function stoneImg(player, size) {
+    var cv = document.createElement('canvas'), save = { ctx: ctx, cell: metrics.cell, off: metrics.off }, out = '';
+    cv.width = cv.height = size;
+    try { ctx = cv.getContext('2d'); metrics.cell = size * 0.36 / stoneK(); drawStonePx(size / 2, size / 2, player, 1, false, 1, 0, 3); out = cv.toDataURL('image/png'); } catch (e) {}
+    ctx = save.ctx; metrics.cell = save.cell; metrics.off = save.off; return out;
+  }
+  function renderHeroStones() {
+    var a = document.querySelector('.hero-stone.s1'), b = document.querySelector('.hero-stone.s2'); if (!a || !b) return;
+    var d = Math.round(72 * Math.min(2, window.devicePixelRatio || 1)); a.src = stoneImg(1, d); b.src = stoneImg(2, d);
+  }
   function renderHero() {
     if (!window.PenteDaily) return;
+    renderHeroStones();
     var key = window.PenteDaily.dayKey(), sp = window.PenteDaily.spec(key), mine = dailyStore().days[key], st = dailyStreak(key);
     $('heroTitle').textContent = t('daily.heroTitle', { n: sp.n });
     var sub = $('heroSub');
