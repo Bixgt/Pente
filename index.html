@@ -729,7 +729,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v59</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v60</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -1260,7 +1260,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 59;</script>
+<script>window.PENTE_VERSION = 60;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -5918,6 +5918,13 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     var ks = Object.keys(d.tried).sort(); while (ks.length > 120) delete d.tried[ks.shift()];
     try { localStorage.setItem(DAILY_KEY, JSON.stringify(d)); } catch (e) {}
   }
+  function dailyMerge(days) {                                    // días jugados que informa el servidor (la racha vale igual en todos tus aparatos)
+    if (!Array.isArray(days)) return false;
+    var d = dailyStore(); d.tried = d.tried || {}; var changed = false;
+    days.forEach(function (k) { if (/^\d{4}-\d{2}-\d{2}$/.test(k) && !d.tried[k]) { d.tried[k] = 1; changed = true; } });
+    if (changed) { var ks = Object.keys(d.tried).sort(); while (ks.length > 120) delete d.tried[ks.shift()]; try { localStorage.setItem(DAILY_KEY, JSON.stringify(d)); } catch (e) {} }
+    return changed;
+  }
   function dateAdd(key, n) { var p = key.split('-'); return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2] + n)).toISOString().slice(0, 10); }
   function dailyStreak(today) {                                  // días seguidos jugados; si hoy todavía no jugó, cuenta desde ayer
     var st = dailyStore(), days = st.days, tried = st.tried || {};
@@ -5957,7 +5964,13 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   function dailyHello() { dailyToken(function (tk) { if (!daily.net) return; if (daily.boardOpen) daily.net.send({ t: 'dailyBoard', jwt: tk }); else daily.net.send({ t: daily.active || daily.wantPlay ? 'dailyStart' : 'dailyInfo', name: ($('name1').value || '').trim().slice(0, 18) || undefined, jwt: tk }); }); }
   function dailyClose() { if (daily.net) { daily.net.close(); daily.net = null; } daily.conn = ''; }
 
-  function dailyOpen() { daily.boardOpen = false; daily.wantPlay = false; daily.info = null; renderDaily(); open('dailyOverlay'); dailyConnect(); }
+  var dailySyncAt = 0;
+  function dailySyncQuiet() {                                    // al abrir el menú, con cuenta: trae del servidor los días jugados y el resultado de hoy (máx. 1 vez cada 10 min)
+    var A = typeof Auth !== 'undefined' ? Auth : null;
+    if (!A || !A.user || daily.net || daily.active || Date.now() - dailySyncAt < 10 * 60 * 1000 || !serverUrl()) return;
+    dailySyncAt = Date.now(); daily.quiet = true; dailyConnect();
+  }
+  function dailyOpen() { daily.quiet = false; daily.boardOpen = false; daily.wantPlay = false; daily.info = null; renderDaily(); open('dailyOverlay'); dailyConnect(); }
   function renderDaily() {
     var i = daily.info, A = typeof Auth !== 'undefined' ? Auth : null, logged = !!(A && A.user);
     $('dailyInfo').textContent = i ? t('daily.info', { n: i.n, date: dailyDate(i.date), level: dailyLevel(i.level) }) : '';
@@ -5989,6 +6002,9 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   function onDailyMessage(m) {
     if (m.t === 'daily') {
       if (m.status === 'done') dailyRemember(m.result); else if (m.status === 'playing' && m.moves && m.moves.length) dailyTried(m.date);
+      var merged = dailyMerge(m.played);
+      if (daily.quiet && !daily.active && !$('dailyOverlay').classList.contains('open') && !daily.boardOpen) { daily.quiet = false; dailyClose(); daily.info = null; renderHero(); return; }   // sincronización en silencio desde el menú
+      if (merged) renderHero();
       if (daily.active && (m.status === 'playing' || m.status === 'new')) {   // reconexión: si lo local no coincide con el servidor, se vuelve a dibujar
         if (state && state.moves.length !== m.setup.length + m.moves.length) { dailyApplyView(m); setStatus(t('daily.resync'), true); return; }
         daily.info = m;
@@ -6932,6 +6948,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     if (id === 'playOverlay' || id === 'menuOverlay') renderHero();
     $(id).classList.add('open');
     if (id === 'menuOverlay') { renderXpMini(); renderMenuBg(); }
+    if (id === 'menuOverlay' || id === 'playOverlay') dailySyncQuiet();
     document.body.classList.toggle('in-screen', $(id).classList.contains('screen'));
     var sc = $(id); if (sc.scrollTo) sc.scrollTo(0, 0);
     musicScene();
@@ -7032,7 +7049,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       },
       onOpen: function () {
         if (online.token && online.code) { online.rejoining = true; online.net.send({ t: 'rejoin', code: online.code, token: online.token }); }
-        else if (online.spectator && online.code) { online.rejoining = true; online.net.send({ t: 'spectate', code: online.code }); }   // se cortó la conexión: vuelve a mirar
+        else if (online.spectator && online.code) { online.rejoining = true; online.net.send({ t: 'spectate', code: online.code, name: (online.intent && online.intent.name) || myName() }); }   // se cortó la conexión: vuelve a mirar (con su nombre)
         else if (online.intent) online.net.send(online.intent);
         else if (rooms.open) { requestRooms(); lobbyJoin(); }
       },
