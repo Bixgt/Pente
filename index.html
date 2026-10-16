@@ -595,6 +595,11 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 
 /* Nivel verificado junto al nombre (ranking, amigos, perfil) */
 .lvchip { display: inline-block; margin-left: 7px; padding: 1px 7px; border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: .02em; vertical-align: 1px; background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--accent); }
+
+/* Menú: tablero tenue de fondo (mismas fichas del juego) */
+#menuBg { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; opacity: .55;
+  -webkit-mask-image: radial-gradient(ellipse 95% 85% at 50% 50%, #000 30%, transparent 100%); mask-image: radial-gradient(ellipse 95% 85% at 50% 50%, #000 30%, transparent 100%); }
+#menuOverlay .screen-body { position: relative; z-index: 1; }
 </style>
 </head>
 <body>
@@ -690,6 +695,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 
 <!-- Menú principal (pantalla propia: el juego no se ve detrás) -->
 <div class="overlay screen" id="menuOverlay">
+  <canvas id="menuBg" aria-hidden="true"></canvas>
   <div class="screen-body">
     <div class="menu-top">
       <div class="menu-top-l">
@@ -698,7 +704,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v56</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v57</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -910,6 +916,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
         <div class="seg" data-cfg="stoneSize" role="group"><button type="button" class="seg-opt" data-val="small" data-i18n="cfg.size.small"></button><button type="button" class="seg-opt" data-val="normal" data-i18n="cfg.size.normal"></button><button type="button" class="seg-opt" data-val="large" data-i18n="cfg.size.large"></button></div></div>
       <label class="check"><input type="checkbox" data-cfg="coords"><span><span data-i18n="cfg.coords"></span><small data-i18n="cfg.coordsHint"></small></span></label>
       <label class="check"><input type="checkbox" data-cfg="lastMove"><span><span data-i18n="cfg.lastMove"></span></span></label>
+      <label class="check"><input type="checkbox" data-cfg="menuBg"><span><span data-i18n="cfg.menuBg"></span><small data-i18n="cfg.menuBgHint"></small></span></label>
       <label class="check"><input type="checkbox" data-cfg="anim"><span><span data-i18n="cfg.anim"></span><small data-i18n="cfg.animHint"></small></span></label>
       <div class="field"><span class="lbl" data-i18n="cfg.captureFx"></span>
         <div class="seg" data-cfg="captureFx" role="group"><button type="button" class="seg-opt" data-val="shatter" data-i18n="cfg.fx.shatter"></button><button type="button" class="seg-opt" data-val="fade" data-i18n="cfg.fx.fade"></button><button type="button" class="seg-opt" data-val="none" data-i18n="cfg.fx.none"></button></div>
@@ -1213,7 +1220,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 56;</script>
+<script>window.PENTE_VERSION = 57;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -2685,6 +2692,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       'cfg.coords': 'Mostrar letras y números',
       'cfg.coordsHint': 'Las coordenadas (A–T, 1–19) en los bordes. Apagadas, el tablero gana un poco de tamaño.',
       'cfg.lastMove': 'Marcar la última jugada',
+      'cfg.menuBg': 'Tablero de fondo en el menú',
+      'cfg.menuBgHint': 'Una grilla tenue con algunas fichas detrás del menú. Apagalo si preferís el menú liso.',
       'cfg.anim': 'Animaciones',
       'cfg.animHint': 'La ficha se levanta y cae suave. Apagalo si tu celular va lento o te marea.',
       'cfg.stoneSize': 'Tamaño de las fichas',
@@ -2998,6 +3007,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       'cfg.coords': 'Show letters and numbers',
       'cfg.coordsHint': 'The coordinates (A–T, 1–19) on the edges. Turned off, the board gets a bit bigger.',
       'cfg.lastMove': 'Mark the last move',
+      'cfg.menuBg': 'Menu background board',
+      'cfg.menuBgHint': 'A faint grid with a few stones behind the menu. Turn it off for a plain menu.',
       'cfg.anim': 'Animations',
       'cfg.animHint': 'The stone lifts and drops softly. Turn it off if your phone is slow or it makes you dizzy.',
       'cfg.stoneSize': 'Stone size',
@@ -5289,7 +5300,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 
   /* Configuración del dispositivo (pantalla "Configuración"): se guarda en localStorage y se aplica al instante. */
   var coarse = matchMedia('(pointer: coarse)').matches, reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var CFG_DEFAULTS = { confirm: 'button', lift: 'mid', guides: true, coords: true, lastMove: true, anim: true, stoneSize: 'normal', zone: true, captureFx: 'shatter', chat: true, botDelay: true, loupe: false, gem1: 'azul', gem2: 'verde' };
+  var CFG_DEFAULTS = { confirm: 'button', lift: 'mid', guides: true, coords: true, lastMove: true, anim: true, stoneSize: 'normal', zone: true, captureFx: 'shatter', chat: true, botDelay: true, loupe: false, gem1: 'azul', gem2: 'verde', menuBg: true };
   var CFG_ALLOWED = { confirm: ['button', 'double', 'none'], lift: ['low', 'mid', 'high'], stoneSize: ['small', 'normal', 'large'], captureFx: ['shatter', 'fade', 'none'], gem1: window.Themes.gems.map(function (g) { return g.id; }), gem2: window.Themes.gems.map(function (g) { return g.id; }) };
   function cleanCfg(raw) {
     var c = {}, k;
@@ -5759,6 +5770,35 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     var a = document.querySelector('.hero-stone.s1'), b = document.querySelector('.hero-stone.s2'); if (!a || !b) return;
     var d = Math.round(72 * Math.min(2, window.devicePixelRatio || 1)); a.src = stoneImg(1, d); b.src = stoneImg(2, d);
   }
+  // Fondo del menú: un tablero grande y tenue con una partida a medias, dibujado con las mismas fichas del juego
+  var MENU_SEED = 11;
+  function renderMenuBg() {
+    var cv = $('menuBg'); if (!cv) return;
+    cv.hidden = !cfg.menuBg; if (!cfg.menuBg) return;
+    var w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return;
+    var dpr = Math.min(2, window.devicePixelRatio || 1), cell = Math.max(38, Math.min(56, Math.round(Math.min(w, h) / 9)));
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    var save = { ctx: ctx, cell: metrics.cell, off: metrics.off }, g = cv.getContext('2d'), th = theme();
+    var cs = getComputedStyle(document.documentElement), line = cs.getPropertyValue('--line').trim() || '#888';
+    var ox = Math.round(w * 0.5 / cell) * cell, oy = Math.round((h - cell * 2.2) / cell) * cell;
+    g.scale(dpr, dpr); g.strokeStyle = line; g.lineWidth = 1.2; g.beginPath();
+    for (var x = ox % cell; x <= w; x += cell) { g.moveTo(x + .5, 0); g.lineTo(x + .5, h); }
+    for (var y = oy % cell; y <= h; y += cell) { g.moveTo(0, y + .5); g.lineTo(w, y + .5); }
+    g.stroke(); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var body = document.querySelector('#menuOverlay .screen-body'), br = body ? body.getBoundingClientRect() : { left: 0, right: 0, top: 0, bottom: 0 }, pad = cell * 0.5, rnd = MENU_SEED, n = 0;
+    try {
+      ctx = g; metrics.cell = cell / stoneK() * 0.42;
+      for (var gy = -Math.ceil(oy / cell); gy <= Math.ceil((h - oy) / cell); gy++) for (var gx = -Math.ceil(ox / cell); gx <= Math.ceil((w - ox) / cell); gx++) {
+        rnd = (rnd * 1103515245 + 12345) & 0x7fffffff; if ((rnd >> 8) % 100 >= 5) continue;      // ~1 de cada 20 cruces tiene ficha; siempre las mismas
+        var sx = ox + gx * cell + .5, sy = oy + gy * cell + .5;
+        if (sx > br.left - pad && sx < br.right + pad && sy > br.top - pad && sy < br.bottom + pad) continue;   // nunca detrás de los botones
+        drawStonePx(sx, sy, 1 + (n++ % 2), 1, false, 1, 0, (gx * 7 + gy * 13 + 24 + n) % 12);
+      }
+    } catch (e) {}
+    ctx = save.ctx; metrics.cell = save.cell; metrics.off = save.off;
+  }
+  var menuBgTimer = 0;
+  window.addEventListener('resize', function () { clearTimeout(menuBgTimer); menuBgTimer = setTimeout(function () { if ($('menuOverlay').classList.contains('open')) renderMenuBg(); }, 150); });
   function renderHero() {
     if (!window.PenteDaily) return;
     renderHeroStones();
@@ -6556,8 +6596,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     if (id === 'menuOverlay') $('btnResume').hidden = !(state && !isOver());
     if (id === 'playOverlay') $('btnTutorial').classList.toggle('primary', !tutDone());
     if (id === 'playOverlay' || id === 'menuOverlay') renderHero();
-    if (id === 'menuOverlay') renderXpMini();
     $(id).classList.add('open');
+    if (id === 'menuOverlay') { renderXpMini(); renderMenuBg(); }
     document.body.classList.toggle('in-screen', $(id).classList.contains('screen'));
     var sc = $(id); if (sc.scrollTo) sc.scrollTo(0, 0);
     musicScene();
@@ -8019,6 +8059,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   function cfgChanged(key) {
     if (key === 'chat' && !cfg.chat) chatReset();
     if (key === 'confirm') { pending = hover = null; }           // al cambiar de modo se descarta la ficha a medio confirmar
+    if (key === 'menuBg') renderMenuBg();
     saveCfg(); syncCfgUi(); render(); updateSide();
   }
   document.querySelectorAll('.seg[data-cfg] .seg-opt').forEach(function (b) {
