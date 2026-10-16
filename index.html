@@ -600,6 +600,9 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 .xptoast { position: fixed; left: 50%; top: 14px; z-index: 60; transform: translate(-50%, -140%); padding: 10px 16px; border-radius: 999px; font-weight: 800; color: var(--accent-ink); background: var(--accent); box-shadow: 0 6px 20px rgba(0,0,0,.35); pointer-events: none; }
 .xptoast.show { transform: translate(-50%, 0); }
 @media (prefers-reduced-motion: no-preference) { .xptoast { transition: transform .35s cubic-bezier(.2,1.2,.4,1); } }
+
+/* Nivel verificado junto al nombre (ranking, amigos, perfil) */
+.lvchip { display: inline-block; margin-left: 7px; padding: 1px 7px; border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: .02em; vertical-align: 1px; background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--accent); }
 </style>
 </head>
 <body>
@@ -703,7 +706,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v54</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v55</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -1218,7 +1221,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 54;</script>
+<script>window.PENTE_VERSION = 55;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -1858,7 +1861,14 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     return { xp: clean(s), gained: gained, parts: parts, from: from, to: to, ups: to.level - from.level, unlocked: unlocked };
   }
 
-  return { MAX_LEVEL: MAX_LEVEL, MIN_MOVES: MIN_MOVES, CASUAL_CAP: CASUAL_CAP, AVATAR_LEVEL: AVATAR_LEVEL, GEM_LEVEL: GEM_LEVEL, need: need, cumulative: cumulative, levelOf: levelOf, titleIndex: titleIndex,
+  /* Lo que reconoce el SERVIDOR (verificado): desafío diario terminado y partida online entre dos cuentas. Mismos números que award(). */
+  var ONLINE_DAILY_CAP = 10;                                          // partidas online por día que dan XP verificado (evita que dos amigos se regalen XP)
+  function dailyGain(win, streak, firstTime) {
+    var n = 30 + (win ? 30 : 0), st = Math.max(0, Math.min(7, streak || 0)); if (st > 1) n += 5 * st; if (firstTime) n += FIRSTS.daily; return n;
+  }
+  function onlineGain(win) { return 20 + (win ? 20 : 0); }
+
+  return { ONLINE_DAILY_CAP: ONLINE_DAILY_CAP, dailyGain: dailyGain, onlineGain: onlineGain, MAX_LEVEL: MAX_LEVEL, MIN_MOVES: MIN_MOVES, CASUAL_CAP: CASUAL_CAP, AVATAR_LEVEL: AVATAR_LEVEL, GEM_LEVEL: GEM_LEVEL, need: need, cumulative: cumulative, levelOf: levelOf, titleIndex: titleIndex,
     clean: clean, merge: merge, unlocksAt: unlocksAt, nextUnlock: nextUnlock, avatarOk: avatarOk, gemOk: gemOk, award: award };
 });
 </script>
@@ -3868,6 +3878,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     "play.localSub": "En este dispositivo: con un amigo o contra la máquina",
     "play.onlineSub": "Con código, salas públicas o amigos",
     "play.tutorialSub": "Las reglas en un par de minutos",
+    "xp.lvShort": "Nv {n}",
     "xp.level": "Nivel {n}",
     "xp.title.1": "Primera ficha",
     "xp.title.2": "Come pares",
@@ -4005,6 +4016,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     "play.localSub": "On this device: with a friend or against the machine",
     "play.onlineSub": "With a code, public rooms or friends",
     "play.tutorialSub": "The rules in a couple of minutes",
+    "xp.lvShort": "Lv {n}",
     "xp.level": "Level {n}",
     "xp.title.1": "First stone",
     "xp.title.2": "Pair eater",
@@ -5705,6 +5717,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       var li = document.createElement('li'); if (r.me) li.className = 'me'; if (today && !r.win) li.className += ' none';
       var pos = document.createElement('span'); pos.className = 'pos'; pos.textContent = r.rank ? String(r.rank) : '–';
       var who = document.createElement('span'); who.className = 'who'; who.textContent = (r.avatar ? PP.emojiOf(r.avatar) + ' ' : '') + r.name + (r.me ? ' (' + t('daily.you') + ')' : '');
+      who.appendChild(lvChip(r.xp));
       var val = document.createElement('span'); val.className = 'val';
       val.textContent = today ? (r.win ? t('daily.rowWin', { moves: r.moves, time: fmtMs(r.ms) }) : t('daily.rowNoWin')) : t('daily.rowWeek', { points: r.points, wins: r.wins, played: r.played });
       li.appendChild(pos); li.appendChild(who); li.appendChild(val); return li;
@@ -5763,6 +5776,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     if (r.ups) buildGemPickers();
     return r;
   }
+  // Nivel VERIFICADO (lo da el servidor) como globito: el que ven los demás
+  function lvChip(xp) { var l = XP.levelOf(xp || 0).level, c = document.createElement('span'); c.className = 'lvchip'; c.textContent = t('xp.lvShort', { n: l }); c.title = xpTitle(l); return c; }
   function xpTitle(level) { return t('xp.title.' + XP.titleIndex(level)); }
   function unlockText(list) {
     return list.map(function (u) { return u.type === 'avatar' ? PP.emojiOf(u.id) : t('gem.' + u.id); }).join(' · ');
@@ -7544,7 +7559,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   function socialNote(txt, bad) { if (social.from === 'lobby') lobbyNote(txt); else if ($('pviewOverlay').classList.contains('open')) { $('pvMsg').textContent = txt || ''; $('pvMsg').classList.toggle('bad', !!bad); } else frMsg(txt, bad); }
   function frRow(p, buttons) {
     var row = el('div', 'fr-row'); row.appendChild(el('span', 'fr-av', PP.emojiOf(p.avatar)));
-    var nm = el('button', 'fr-name', p.name); nm.type = 'button'; nm.addEventListener('click', function () { viewPlayer(p.name, 'friends'); }); row.appendChild(nm);
+    var nm = el('button', 'fr-name', p.name); nm.type = 'button'; nm.addEventListener('click', function () { viewPlayer(p.name, 'friends'); }); if (p.status === 'accepted') nm.appendChild(lvChip(p.xp)); row.appendChild(nm);
     var bx = el('span', 'fr-btns');
     buttons.forEach(function (b) { var x = el('button', 'btn small' + (b.cls ? ' ' + b.cls : ''), b.label); x.type = 'button'; x.addEventListener('click', b.fn); bx.appendChild(x); });
     row.appendChild(bx); return row;
@@ -7585,7 +7600,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   }
   function pvRender() {
     var v = social.view; if (!v) return;
-    $('pvAv').textContent = PP.emojiOf(v.avatar); $('pvName').textContent = v.name; $('pvRel').textContent = t('pv.' + (v.relation || 'none'));
+    $('pvAv').textContent = PP.emojiOf(v.avatar); $('pvName').textContent = v.name; $('pvName').appendChild(lvChip(v.xp)); $('pvRel').textContent = t('pv.' + (v.relation || 'none'));
     var st = PP.cleanStats(v.stats), has = Object.keys(st).length > 0;
     $('pvStats').hidden = !!v.hidden; $('pvCharts').hidden = !!v.hidden; if (v.hidden) { $('pvStats').innerHTML = ''; $('pvCharts').innerHTML = ''; } else { fillStats($('pvStats'), st); fillCharts($('pvCharts'), st); }
     $('pvNote').textContent = v.hidden ? t('pv.hidden') : has ? t('pv.note') : t('pv.noGames');
