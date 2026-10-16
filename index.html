@@ -600,6 +600,31 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 #menuBg { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; opacity: .55;
   -webkit-mask-image: radial-gradient(ellipse 95% 85% at 50% 50%, #000 30%, transparent 100%); mask-image: radial-gradient(ellipse 95% 85% at 50% 50%, #000 30%, transparent 100%); }
 #menuOverlay .screen-body { position: relative; z-index: 1; }
+
+/* Personajes de fichas */
+.has-svg svg, .av-svg svg { display: block; width: 100%; height: 100%; }
+.av-inline { display: inline-block; width: 1.5em; height: 1.5em; vertical-align: -.4em; }
+.av-inline svg { display: block; width: 100%; height: 100%; }
+.sq-av .has-svg, #avEmoji.has-svg { width: 38px; height: 38px; display: block; }
+.fr-av.has-svg { width: 34px; height: 34px; display: block; flex: none; }
+.pv-av.has-svg { width: 96px; height: 96px; display: block; }
+.char-row { display: flex; align-items: center; gap: 14px; }
+.char-prev { width: 76px; height: 76px; flex: none; border-radius: 16px; background: var(--bg); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 40px; overflow: hidden; }
+.char-prev svg { width: 100%; height: 100%; display: block; }
+.cust-prev { width: 190px; height: 190px; margin: 6px auto 10px; border-radius: 22px; background: var(--panel-2); border: 1px solid var(--line); overflow: hidden; }
+.cust-prev svg { width: 100%; height: 100%; display: block; }
+.cust-tabs { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 8px; scrollbar-width: none; }
+.cust-tabs button { flex: none; padding: 8px 13px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel-2); color: var(--text); font-weight: 600; font-size: 13px; }
+.cust-tabs button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.cust-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(86px, 1fr)); gap: 8px; margin-bottom: 8px; }
+.cust-opt { position: relative; padding: 4px 4px 6px; border-radius: 14px; border: 2px solid var(--line); background: var(--panel-2); color: var(--text); font-size: 11px; font-weight: 600; text-align: center; }
+.cust-opt .tile { display: block; width: 100%; aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: var(--bg); }
+.cust-opt .tile svg { display: block; width: 100%; height: 100%; }
+.cust-opt[aria-pressed="true"] { border-color: var(--accent); }
+.cust-opt.locked .tile { opacity: .4; filter: grayscale(1); }
+.cust-opt .lk { position: absolute; top: 8px; right: 8px; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 999px; background: rgba(0,0,0,.65); color: #fff; }
+.sq-av .has-svg, #avEmoji.has-svg, .fr-av.has-svg { border-radius: 10px; overflow: hidden; }
+.av-inline { border-radius: 6px; overflow: hidden; }
 </style>
 </head>
 <body>
@@ -704,7 +729,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v57</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v58</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -715,6 +740,19 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       <button class="btn" id="btnRules" data-i18n="menu.rules"></button>
       <button class="btn" id="btnInstall" hidden data-i18n="inst.btn"></button>
     </div>
+  </div>
+</div>
+
+<!-- Personalizar el personaje -->
+<div class="overlay screen" id="customOverlay">
+  <div class="screen-body">
+    <h2 data-i18n="av.title"></h2>
+    <p class="sub" data-i18n="av.sub"></p>
+    <div class="cust-prev" id="custPrev"></div>
+    <div class="cust-tabs" id="custTabs" role="tablist"></div>
+    <div class="cust-grid" id="custGrid"></div>
+    <p class="hint" id="custNote"></p>
+    <div class="btns"><button type="button" class="btn" id="btnCustRandom" data-i18n="av.random"></button><button type="button" class="btn primary" id="btnCustSave" data-i18n="av.save"></button></div>
   </div>
 </div>
 
@@ -1120,6 +1158,8 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   <div class="screen-body">
     <h2 data-i18n="prof.title"></h2>
     <p class="sub" data-i18n="prof.sub"></p>
+    <div class="field"><span class="lbl" data-i18n="av.mine"></span>
+      <div class="char-row"><span class="char-prev" id="profChar"></span><button type="button" class="btn primary" id="btnCustom" data-i18n="av.btn"></button></div></div>
     <div class="field"><label class="lbl" for="profName" data-i18n="prof.name"></label><input type="text" id="profName" maxlength="20" autocomplete="off" data-i18n-ph="prof.namePh"></div>
     <div class="field" id="nameClaim" hidden><label class="lbl" for="claimName" data-i18n="name.label"></label>
       <div class="claim-row"><input type="text" id="claimName" maxlength="20" autocomplete="off" data-i18n-ph="name.ph"><button class="btn primary" id="btnNameOk" disabled data-i18n="name.btn"></button></div>
@@ -1220,7 +1260,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 57;</script>
+<script>window.PENTE_VERSION = 58;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -1789,6 +1829,14 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   var TITLE_AT = [1, 4, 8, 13, 19, 26, 34, 43];                       // nivel desde el que rige cada título (xp.title.1 ... xp.title.8)
   var AVATAR_LEVEL = { a13: 3, a14: 5, a15: 8, a16: 11, a17: 14, a18: 18, a19: 24, a20: 30 };   // los 12 primeros avatares son libres
   var GEM_LEVEL = { oro: 6, neon: 9, coral: 12, obsidiana: 16, galaxia: 22 };                    // las 9 piedras de siempre son libres
+  // Personalizar avatar: nivel desde el que se puede elegir cada pieza (lo que no figura es libre desde el nivel 1)
+  var PART_LEVEL = {
+    body: { esbelto: 3, panzon: 6, hombros: 10, columna: 15 },
+    hair: { rodete: 2, melena: 5, rulos: 8, mohicano: 12, casco: 17 },
+    face: { lengua: 2, dormido: 3, lloron: 4, cool: 7, enamorado: 9, travieso: 11, asustado: 13, rico: 16, mareado: 20 },
+    color: { coral: 2, violeta: 4, cian: 8, blanca: 14, negra: 19 },
+    hairColor: { pelirrojo: 3, blanco: 6, celeste: 12, violeta: 18 }
+  };
   var FIRSTS = { tutorial: 50, daily: 25 };                          // premio por única vez; 'mode:<modo>' vale 20
 
   function num(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? Math.min(v, CAP) : 0; }
@@ -1830,6 +1878,11 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     Object.keys(GEM_LEVEL).forEach(function (id) { var lv = GEM_LEVEL[id]; if (lv > level && (!best || lv < best.level)) best = { type: 'gem', id: id, level: lv }; });
     return best;
   }
+  function partLevel(kind, id) { return (PART_LEVEL[kind] && PART_LEVEL[kind][id]) || 1; }
+  function partOk(kind, id, level) { return level >= partLevel(kind, id); }
+  function partsAt(level) {                                          // piezas de personaje que se destraban justo en ese nivel
+    var out = []; Object.keys(PART_LEVEL).forEach(function (k) { Object.keys(PART_LEVEL[k]).forEach(function (id) { if (PART_LEVEL[k][id] === level) out.push({ kind: k, id: id }); }); }); return out;
+  }
   function avatarOk(id, level) { return !AVATAR_LEVEL[id] || level >= AVATAR_LEVEL[id]; }
   function gemOk(id, level) { return !GEM_LEVEL[id] || level >= GEM_LEVEL[id]; }
 
@@ -1858,7 +1911,10 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     } else if (ev.k === 'first') first(ev.id);
     var gained = parts.reduce(function (a, p) { return a + p.n; }, 0), from = levelOf(s.t), t1 = num(s.t + gained), to = levelOf(t1);
     s.t = t1;
-    var unlocked = []; for (var l = from.level + 1; l <= to.level; l++) unlocksAt(l).forEach(function (u) { unlocked.push({ type: u.type, id: u.id, level: l }); });
+    var unlocked = []; for (var l = from.level + 1; l <= to.level; l++) {
+      unlocksAt(l).forEach(function (u) { unlocked.push({ type: u.type, id: u.id, level: l }); });
+      var pa = partsAt(l); if (pa.length) unlocked.push({ type: 'parts', n: pa.length, level: l });
+    }
     return { xp: clean(s), gained: gained, parts: parts, from: from, to: to, ups: to.level - from.level, unlocked: unlocked };
   }
 
@@ -1870,7 +1926,149 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   function onlineGain(win) { return 20 + (win ? 20 : 0); }
 
   return { ONLINE_DAILY_CAP: ONLINE_DAILY_CAP, dailyGain: dailyGain, onlineGain: onlineGain, MAX_LEVEL: MAX_LEVEL, MIN_MOVES: MIN_MOVES, CASUAL_CAP: CASUAL_CAP, AVATAR_LEVEL: AVATAR_LEVEL, GEM_LEVEL: GEM_LEVEL, need: need, cumulative: cumulative, levelOf: levelOf, titleIndex: titleIndex,
-    clean: clean, merge: merge, unlocksAt: unlocksAt, nextUnlock: nextUnlock, avatarOk: avatarOk, gemOk: gemOk, award: award };
+    clean: clean, merge: merge, unlocksAt: unlocksAt, nextUnlock: nextUnlock, avatarOk: avatarOk, PART_LEVEL: PART_LEVEL, partLevel: partLevel, partOk: partOk, partsAt: partsAt, gemOk: gemOk, award: award };
+});
+</script>
+<script>
+/* Avatares armados con fichas de Pente: cuerpo + pelo + cara + colores, todo combinable.
+ * Lógica pura (sin DOM): devuelve SVG como texto. Se prueba en Node.
+ * Código de un avatar: 'c.<cuerpo>.<pelo>.<cara>.<color>.<colorPelo>'  (ej: 'c.curvy.melena.guino.rosa.rubio'). */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.PenteAvatar = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+  var BODIES = ['fornido', 'panzon', 'columna', 'hombros', 'curvy', 'pollera', 'esbelto', 'redondito'];
+  var HAIRS = ['ninguno', 'rodete', 'coleta', 'colitas', 'melena', 'rulos', 'mohicano', 'corto', 'casco'];
+  var FACES = ['feliz', 'guino', 'enojado', 'sorprendido', 'lengua', 'enamorado', 'rico', 'lloron', 'dormido', 'cool', 'travieso', 'asustado', 'mareado'];
+  var COLORS = { negra: ['#707070', '#0b0b0b', '#2a2a2a'], blanca: ['#ffffff', '#cfc8b8', '#9a9484'], azul: ['#a0c6ff', '#0d2a9a', '#1b2f9c'], verde: ['#aaf5aa', '#0a6a28', '#10692e'],
+    rosa: ['#ffd0ec', '#e0147a', '#a30d58'], cian: ['#eaffff', '#17bfe0', '#0f8aa3'], ambar: ['#ffe3a0', '#c26d0a', '#8a4a06'], violeta: ['#e5c8ff', '#6a24c8', '#431585'], coral: ['#ffc2b3', '#e0452c', '#a02a16'] };
+  var HAIR_COLORS = { castano: ['#a8756a', '#4a2a22'], rubio: ['#ffe6a8', '#d89a1a'], negro: ['#6a6a72', '#17151a'], pelirrojo: ['#ffb27a', '#b8400f'], celeste: ['#bfe9ff', '#2a8fd0'], violeta: ['#e0c2ff', '#7a2fd0'], blanco: ['#ffffff', '#c4c9d4'] };
+  var INK = '#1c1a22', uid = 0;
+
+  function pick(list, v, d) { return list.indexOf(v) >= 0 ? v : d; }
+  function normalize(s) {
+    s = s && typeof s === 'object' ? s : {};
+    return { body: pick(BODIES, s.body, 'fornido'), hair: pick(HAIRS, s.hair, 'ninguno'), face: pick(FACES, s.face, 'feliz'),
+      color: COLORS[s.color] ? s.color : 'azul', hairColor: HAIR_COLORS[s.hairColor] ? s.hairColor : 'castano' };
+  }
+  function encode(s) { s = normalize(s); return ['c', s.body, s.hair, s.face, s.color, s.hairColor].join('.'); }
+  function decode(code) {
+    var p = String(code || '').split('.'); if (p[0] !== 'c' || p.length !== 6) return null;
+    var s = { body: p[1], hair: p[2], face: p[3], color: p[4], hairColor: p[5] };
+    return BODIES.indexOf(s.body) >= 0 && HAIRS.indexOf(s.hair) >= 0 && FACES.indexOf(s.face) >= 0 && COLORS[s.color] && HAIR_COLORS[s.hairColor] ? s : null;
+  }
+
+  /* ---------- cuerpos: devuelven { limbs, stones, head:{x,y,r} } ---------- */
+  function bodyDef(id, K) {
+    var st = K.st, ln = K.ln;
+    switch (id) {
+      case 'fornido': return { head: { x: 50, y: 17, r: 11 },
+        limbs: ln('M40 82 Q37 90 36 95', 4.6) + ln('M60 82 Q63 90 64 95', 4.6) + ln('M31 95 h8', 4) + ln('M61 95 h8', 4) + ln('M23 42 Q13 52 22 62', 4.4) + ln('M77 42 Q87 52 78 62', 4.4),
+        stones: st(50, 43, 14) + st(29, 39, 9) + st(71, 39, 9) + st(50, 67, 12) + st(24, 63, 4.4) + st(76, 63, 4.4) };
+      case 'panzon': return { head: { x: 46, y: 17, r: 11 },
+        limbs: ln('M33 82 Q28 90 24 93', 4.6) + ln('M66 82 Q72 88 75 93', 4.6) + ln('M19 93 h8', 4) + ln('M73 93 h8', 4) + ln('M42 28 L45 36', 4) + ln('M36 52 L18 48 L22 38', 4.4) + ln('M62 48 L82 44 L76 56', 4.4),
+        stones: st(47, 40, 8.5) + st(50, 65, 19.5) };
+      case 'columna': return { head: { x: 50, y: 17, r: 10 },
+        limbs: ln('M43 82 L41 95', 4.4) + ln('M57 82 L59 95', 4.4) + ln('M36 95 h8', 4) + ln('M57 95 h9', 4) + ln('M33 46 Q21 58 27 72', 4.4) + ln('M67 46 Q79 58 73 72', 4.4),
+        stones: st(40, 41, 9) + st(60, 41, 9) + st(50, 45, 9) + st(50, 58, 7.5) + st(50, 69, 7) + st(44, 80, 5.5) + st(57, 80, 5.5) };
+      case 'hombros': return { head: { x: 50, y: 14, r: 10 },
+        limbs: ln('M42 78 Q32 86 30 95', 4.6) + ln('M58 78 Q68 86 70 95', 4.6) + ln('M25 95 h8', 4) + ln('M66 95 h8', 4) + ln('M16 44 Q5 56 15 70', 4.4) + ln('M84 44 Q95 56 85 70', 4.4),
+        stones: st(50, 42, 18) + st(24, 42, 10.5) + st(76, 42, 10.5) + st(50, 73, 8.5) };
+      case 'curvy': return { head: { x: 50, y: 17, r: 11 },
+        limbs: ln('M42 82 Q40 90 40 95', 4.2) + ln('M58 82 Q60 90 60 95', 4.2) + ln('M35 95 h8', 4) + ln('M57 95 h8', 4) + ln('M40 42 Q28 54 32 68', 4.2) + ln('M60 42 Q72 54 68 68', 4.2),
+        stones: st(50, 38, 8.5) + st(50, 52, 5.5) + st(50, 68, 14) };
+      case 'pollera': return { head: { x: 50, y: 17, r: 11 },
+        limbs: ln('M43 82 L42 95', 4.2) + ln('M57 82 L58 95', 4.2) + ln('M37 95 h8', 4) + ln('M55 95 h8', 4) + ln('M42 42 Q30 52 28 62', 4.2) + ln('M58 42 Q72 38 80 26', 4.2),
+        stones: st(50, 40, 8.5) + st(50, 55, 6.5) + st(34, 71, 6) + st(42, 73, 6.5) + st(50, 74, 7) + st(58, 73, 6.5) + st(66, 71, 6) + st(80, 24, 4) };
+      case 'esbelto': return { head: { x: 50, y: 17, r: 11 },
+        limbs: ln('M44 66 L40 80 L42 95', 4.2) + ln('M56 66 L60 80 L58 95', 4.2) + ln('M37 95 h8', 4) + ln('M55 95 h8', 4) + ln('M42 38 Q28 50 32 66', 4.2) + ln('M58 38 Q72 50 68 66', 4.2),
+        stones: st(50, 37, 7.5) + st(50, 49, 6) + st(50, 60, 6.5) };
+      case 'redondito': return { head: { x: 50, y: 30, r: 15 },
+        limbs: ln('M40 76 Q38 88 36 94', 4.6) + ln('M60 76 Q62 88 64 94', 4.6) + ln('M31 94 h8', 4) + ln('M61 94 h8', 4) + ln('M34 60 Q22 62 20 72', 4.4) + ln('M66 60 Q78 62 80 72', 4.4),
+        stones: st(50, 64, 15) };
+    }
+    return { head: { x: 50, y: 20, r: 11 }, limbs: '', stones: '' };
+  }
+
+  /* ---------- pelo: { back, front } según la cabeza h ---------- */
+  function hairDef(id, h, K) {
+    var s = function (dx, dy, r) { return K.hs(h.x + dx * h.r, h.y + dy * h.r, r * h.r); }, back = '', front = '', cap = '';
+    function crown(y1, y2) {                                          // pelo pegado a la cabeza: gorrito de fichas fundido con el contorno de la cabeza
+      var dx = Math.sqrt(1 - y1 * y1) * h.r, ex = h.x - dx, fx = h.x + dx, ey = h.y + y1 * h.r;
+      return '<path d="M' + ex + ' ' + ey + ' A' + h.r + ' ' + h.r + ' 0 0 1 ' + fx + ' ' + ey + ' Q' + h.x + ' ' + (h.y + y2 * h.r) + ' ' + ex + ' ' + ey + ' Z" fill="url(#' + K.hid + ')" stroke="rgba(0,0,0,.25)" stroke-width=".5" stroke-linejoin="round"/><ellipse cx="' + (h.x - h.r * .35) + '" cy="' + (h.y - h.r * .78) + '" rx="' + h.r * .28 + '" ry="' + h.r * .13 + '" fill="#fff" opacity=".35" transform="rotate(-20 ' + (h.x - h.r * .35) + ' ' + (h.y - h.r * .78) + ')"/>';
+    }
+    switch (id) {
+      case 'rodete': back = s(0, -1.08, .52); cap = crown(-.58, -.85); break;
+      case 'coleta': back = s(1.0, -.75, .42) + s(1.35, -.3, .36) + s(1.5, .2, .3); cap = crown(-.58, -.8); break;
+      case 'colitas': back = s(-1.15, -.75, .55) + s(-1.3, -.15, .45) + s(1.15, -.75, .55) + s(1.3, -.15, .45); cap = crown(-.58, -.8); break;
+      case 'melena': back = s(-.95, -.5, .62) + s(.95, -.5, .62) + s(-1.2, .25, .55) + s(1.2, .25, .55) + s(-1.25, .95, .46) + s(1.25, .95, .46); cap = crown(-.6, -.82); break;
+      case 'rulos': back = s(-1.0, -.5, .6) + s(1.0, -.5, .6) + s(-1.15, .1, .5) + s(1.15, .1, .5); cap = crown(-.52, -.78); front = s(-.55, -.92, .42) + s(.0, -1.02, .44) + s(.55, -.92, .42); break;
+      case 'mohicano': back = s(0, -1.0, .45) + s(0, -1.5, .4) + s(.2, -1.95, .36) + s(-.2, -1.8, .3); break;
+      case 'corto': back = s(-.92, -.05, .42) + s(.92, -.05, .42); cap = crown(-.5, -.72); break;
+      case 'casco': front = '<path d="M' + (h.x - h.r * 1.08) + ' ' + (h.y - .05 * h.r) + ' Q' + (h.x - h.r * 1.08) + ' ' + (h.y - h.r * 1.5) + ' ' + h.x + ' ' + (h.y - h.r * 1.5) + ' Q' + (h.x + h.r * 1.08) + ' ' + (h.y - h.r * 1.5) + ' ' + (h.x + h.r * 1.08) + ' ' + (h.y - .05 * h.r) + '" fill="none" stroke="' + K.l + '" stroke-width="3.8" stroke-linecap="round"/>' + K.hs(h.x, h.y - h.r * 1.75, h.r * .32) + K.hs(h.x - h.r * .45, h.y - h.r * 1.6, h.r * .27) + K.hs(h.x + h.r * .45, h.y - h.r * 1.6, h.r * .27); break;
+    }
+    return { back: back, cap: cap, front: front };
+  }
+
+  /* ---------- caras: estilo caricatura (ojos grandes con contorno, cejas, dientes) ---------- */
+  function faceDef(id, h) {
+    var u = h.r / 10, X = h.x, Y = h.y, k = INK, sw = (.62 * u).toFixed(2);
+    function P(d, fill, w, extra) { return '<path d="' + d + '" fill="' + (fill || 'none') + '" stroke="' + (fill === '#fff' || !fill || fill === 'none' || fill === k ? k : k) + '" stroke-width="' + (w || sw) + '" stroke-linecap="round" stroke-linejoin="round"' + (extra || '') + '/>'; }
+    function eye(dx, dy, rx, ry, px, py, pr) {                       // ojo de caricatura: blanco con contorno + pupila
+      var cx = X + dx * u, cy = Y + dy * u;
+      return '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + rx * u + '" ry="' + ry * u + '" fill="#fff" stroke="' + k + '" stroke-width="' + sw + '"/><circle cx="' + (cx + (px || 0) * u) + '" cy="' + (cy + (py || 0) * u) + '" r="' + (pr || 1.05) * u + '" fill="' + k + '"/>';
+    }
+    function brow(dx, dy, ang, len, w) { var x = X + dx * u, y = Y + dy * u, l = (len || 2.6) * u, a = ang * Math.PI / 180; return '<path d="M' + (x - Math.cos(a) * l) + ' ' + (y - Math.sin(a) * l) + ' L' + (x + Math.cos(a) * l) + ' ' + (y + Math.sin(a) * l) + '" stroke="' + k + '" stroke-width="' + (w || 1.1) * u + '" stroke-linecap="round"/>'; }
+    function arc(dx, dy, w, bend) { return '<path d="M' + (X + (dx - w) * u) + ' ' + (Y + dy * u) + ' q' + w * u + ' ' + bend * u + ' ' + 2 * w * u + ' 0" fill="none" stroke="' + k + '" stroke-width="' + sw + '" stroke-linecap="round"/>'; }
+    function grin(w, d, teeth) {                                     // boca grande sonriente con dientes
+      var x0 = X - w * u, x1 = X + w * u, y0 = Y + 3.4 * u, y1 = Y + (3.4 + d) * u, o = '<path d="M' + x0 + ' ' + y0 + ' Q' + X + ' ' + (y1 + d * u * .5) + ' ' + x1 + ' ' + y0 + ' Q' + X + ' ' + (y0 + .6 * u) + ' ' + x0 + ' ' + y0 + ' Z" fill="#fff" stroke="' + k + '" stroke-width="' + sw + '" stroke-linejoin="round"/>';
+      if (teeth) o += '<path d="M' + (X - w * .5 * u) + ' ' + (y0 + .9 * u) + ' V' + (y1 - .2 * u) + ' M' + X + ' ' + (y0 + .6 * u) + ' V' + (y1 + .5 * u) + ' M' + (X + w * .5 * u) + ' ' + (y0 + .9 * u) + ' V' + (y1 - .2 * u) + '" stroke="' + k + '" stroke-width="' + .4 * u + '"/>';
+      return o;
+    }
+    var o = '';
+    switch (id) {
+      case 'feliz': o = eye(-3.4, -1.4, 2.4, 3, 0, .3) + eye(3.4, -1.4, 2.4, 3, 0, .3) + brow(-3.4, -5.2, -12, 2.4) + brow(3.4, -5.2, 12, 2.4) + grin(5, 3, true); break;
+      case 'guino': o = arc(-3.4, -1.2, 2.4, -2.4) + eye(3.4, -1.4, 2.4, 3, .2, .2) + brow(3.4, -5.4, 10, 2.4) + grin(4.4, 2.6, false); break;
+      case 'enojado': o = eye(-3.4, -.8, 2.4, 2, .5, .3) + eye(3.4, -.8, 2.4, 2, -.5, .3) + brow(-3.4, -4.1, 22, 3, 1.4) + brow(3.4, -4.1, -22, 3, 1.4) +
+        '<rect x="' + (X - 4.3 * u) + '" y="' + (Y + 3.2 * u) + '" width="' + 8.6 * u + '" height="' + 3.6 * u + '" rx="' + 1.2 * u + '" fill="#fff" stroke="' + k + '" stroke-width="' + sw + '"/><path d="M' + (X - 4.3 * u) + ' ' + (Y + 5 * u) + ' h' + 8.6 * u + ' M' + (X - 1.4 * u) + ' ' + (Y + 3.2 * u) + ' v' + 3.6 * u + ' M' + (X + 1.4 * u) + ' ' + (Y + 3.2 * u) + ' v' + 3.6 * u + '" stroke="' + k + '" stroke-width="' + .4 * u + '"/>'; break;
+      case 'sorprendido': o = eye(-3.4, -1.6, 2.6, 3.4, 0, 0, .8) + eye(3.4, -1.6, 2.6, 3.4, 0, 0, .8) + brow(-3.4, -6.2, -8, 2.4) + brow(3.4, -6.2, 8, 2.4) + '<ellipse cx="' + X + '" cy="' + (Y + 4.6 * u) + '" rx="' + 2 * u + '" ry="' + 2.6 * u + '" fill="' + k + '"/><ellipse cx="' + X + '" cy="' + (Y + 5.6 * u) + '" rx="' + 1.1 * u + '" ry="' + .8 * u + '" fill="#e0556a"/>'; break;
+      case 'lengua': o = eye(-3.4, -1.4, 2.4, 3, 0, .3) + eye(3.4, -1.4, 2.4, 3, 0, .3) + brow(-3.4, -5.2, -10, 2.4) + brow(3.4, -5.2, 10, 2.4) +
+        '<path d="M' + (X - 2 * u) + ' ' + (Y + 4.2 * u) + ' v' + 2.4 * u + ' a' + 2 * u + ' ' + 2 * u + ' 0 0 0 ' + 4 * u + ' 0 v' + -2.4 * u + ' z" fill="#f0708a" stroke="' + k + '" stroke-width="' + sw + '"/>' + P('M' + (X - 5 * u) + ' ' + (Y + 3.2 * u) + ' Q' + X + ' ' + (Y + 6.4 * u) + ' ' + (X + 5 * u) + ' ' + (Y + 3.2 * u)); break;
+      case 'enamorado': o = ['-3.4', '3.4'].map(function (dx) { var cx = X + dx * u, cy = Y - 1.2 * u; return '<path d="M' + cx + ' ' + (cy + 2.2 * u) + ' C' + (cx - 3.6 * u) + ' ' + (cy - .2 * u) + ' ' + (cx - 1.6 * u) + ' ' + (cy - 2.8 * u) + ' ' + cx + ' ' + (cy - 1 * u) + ' C' + (cx + 1.6 * u) + ' ' + (cy - 2.8 * u) + ' ' + (cx + 3.6 * u) + ' ' + (cy - .2 * u) + ' ' + cx + ' ' + (cy + 2.2 * u) + ' Z" fill="#e0243c" stroke="' + k + '" stroke-width="' + .5 * u + '"/>'; }).join('') + brow(-3.4, -5.4, -10, 2.4) + brow(3.4, -5.4, 10, 2.4) + grin(4.6, 2.8, false); break;
+      case 'rico': o = ['-3.4', '3.4'].map(function (dx) { return '<ellipse cx="' + (X + dx * u) + '" cy="' + (Y - 1.4 * u) + '" rx="' + 2.6 * u + '" ry="' + 3.1 * u + '" fill="#fff" stroke="' + k + '" stroke-width="' + sw + '"/><text x="' + (X + dx * u) + '" y="' + (Y - .2 * u) + '" font-family="Arial,sans-serif" font-weight="900" font-size="' + 4.6 * u + '" text-anchor="middle" fill="#14a34a">$</text>'; }).join('') + brow(-3.4, -5.6, -10, 2.4) + brow(3.4, -5.6, 10, 2.4) + grin(5, 3, true); break;
+      case 'lloron': o = eye(-3.4, -1, 2.3, 2.7, 0, .8) + eye(3.4, -1, 2.3, 2.7, 0, .8) + brow(-3.4, -4.6, 18, 2.6) + brow(3.4, -4.6, -18, 2.6) +
+        ['-5.6', '5.6'].map(function (dx) { return '<path d="M' + (X + dx * u) + ' ' + (Y + 1.6 * u) + ' q' + -.9 * u + ' ' + 1.8 * u + ' 0 ' + 2.4 * u + ' q' + .9 * u + ' ' + -.6 * u + ' 0 ' + -2.4 * u + ' z" fill="#5ab4ff" stroke="' + k + '" stroke-width="' + .35 * u + '"/>'; }).join('') + P('M' + (X - 3.4 * u) + ' ' + (Y + 5.8 * u) + ' q' + 1.1 * u + ' ' + -1.6 * u + ' ' + 2.2 * u + ' 0 t' + 2.2 * u + ' 0 t' + 2.2 * u + ' 0'); break;
+      case 'dormido': o = arc(-3.4, -1, 2.4, 2.4) + arc(3.4, -1, 2.4, 2.4) + '<ellipse cx="' + X + '" cy="' + (Y + 4.6 * u) + '" rx="' + 1.6 * u + '" ry="' + 1.3 * u + '" fill="' + k + '"/>' + '<text x="' + (X + 7 * u) + '" y="' + (Y - 5.5 * u) + '" font-family="Arial,sans-serif" font-weight="800" font-size="' + 4 * u + '" fill="#9fc8ff" stroke="' + k + '" stroke-width="' + .25 * u + '">z</text>'; break;
+      case 'cool': o = '<path d="M' + (X - 6.4 * u) + ' ' + (Y - 2.8 * u) + ' h' + 12.8 * u + ' v' + 2.4 * u + ' q0 ' + 2.8 * u + ' ' + -2.8 * u + ' ' + 2.8 * u + ' h' + -1.6 * u + ' q' + -2.4 * u + ' 0 ' + -2.4 * u + ' ' + -2.6 * u + ' q' + -.4 * u + ' ' + -.8 * u + ' ' + -.8 * u + ' 0 q0 ' + 2.6 * u + ' ' + -2.4 * u + ' ' + 2.6 * u + ' h' + -1.6 * u + ' q' + -2.8 * u + ' 0 ' + -2.8 * u + ' ' + -2.8 * u + ' z" fill="' + k + '"/><circle cx="' + (X - 3.4 * u) + '" cy="' + (Y - 1.8 * u) + '" r="' + .7 * u + '" fill="#fff" opacity=".6"/>' + P('M' + (X - 3 * u) + ' ' + (Y + 4.2 * u) + ' Q' + (X + 1 * u) + ' ' + (Y + 6 * u) + ' ' + (X + 4 * u) + ' ' + (Y + 3.2 * u)); break;
+      case 'travieso': o = eye(-3.4, -1.2, 2.4, 3, 1, .4) + eye(3.4, -1.2, 2.4, 3, 1, .4) + brow(-3.4, -4.6, 16, 2.4) + brow(3.4, -5.8, -14, 2.4) + P('M' + (X - 4 * u) + ' ' + (Y + 4 * u) + ' Q' + (X + 1 * u) + ' ' + (Y + 6.8 * u) + ' ' + (X + 5 * u) + ' ' + (Y + 2.6 * u)) + '<rect x="' + (X + 1 * u) + '" y="' + (Y + 4.5 * u) + '" width="' + 1.6 * u + '" height="' + 1.8 * u + '" fill="#fff" stroke="' + k + '" stroke-width="' + .35 * u + '"/>'; break;
+      case 'asustado': o = eye(-3.4, -1.6, 2.7, 3.5, 0, 0, .7) + eye(3.4, -1.6, 2.7, 3.5, 0, 0, .7) + brow(-3.4, -6.4, -16, 2.6) + brow(3.4, -6.4, 16, 2.6) +
+        '<path d="M' + (X - 4.4 * u) + ' ' + (Y + 5 * u) + ' q' + 1.1 * u + ' ' + -2.2 * u + ' ' + 2.2 * u + ' 0 t' + 2.2 * u + ' 0 t' + 2.2 * u + ' 0 t' + 2.2 * u + ' 0 v' + 1.8 * u + ' h' + -8.8 * u + ' z" fill="#fff" stroke="' + k + '" stroke-width="' + sw + '" stroke-linejoin="round"/>'; break;
+      case 'mareado': o = ['-3.4', '3.4'].map(function (dx) { var cx = X + dx * u, cy = Y - 1.2 * u; return '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + 2.6 * u + '" ry="' + 3 * u + '" fill="#fff" stroke="' + k + '" stroke-width="' + sw + '"/><path d="M' + cx + ' ' + cy + ' m' + 0 + ' 0 a' + .6 * u + ' ' + .6 * u + ' 0 1 1 ' + 1.2 * u + ' 0 a' + 1.3 * u + ' ' + 1.3 * u + ' 0 1 1 ' + -2.6 * u + ' 0 a' + 2 * u + ' ' + 2 * u + ' 0 1 1 ' + 3.6 * u + ' 0" fill="none" stroke="' + k + '" stroke-width="' + .45 * u + '" stroke-linecap="round"/>'; }).join('') + brow(-3.4, -5.4, 6, 2.4) + brow(3.4, -5.4, -6, 2.4) + P('M' + (X - 3.6 * u) + ' ' + (Y + 5 * u) + ' q' + 1.2 * u + ' ' + -1.8 * u + ' ' + 2.4 * u + ' 0 t' + 2.4 * u + ' 0 t' + 2.4 * u + ' 0'); break;
+    }
+    return o;
+  }
+
+  function render(spec, opts) {
+    var s = normalize(spec), c = COLORS[s.color], hc = HAIR_COLORS[s.hairColor], n = ++uid, id = 'pa' + n, hid = id + 'h';
+    opts = opts || {};
+    var defs = '<defs><radialGradient id="' + id + '" cx=".34" cy=".28" r=".85"><stop offset="0" stop-color="' + c[0] + '"/><stop offset="1" stop-color="' + c[1] + '"/></radialGradient>' +
+      '<radialGradient id="' + hid + '" cx=".34" cy=".28" r=".85"><stop offset="0" stop-color="' + hc[0] + '"/><stop offset="1" stop-color="' + hc[1] + '"/></radialGradient>' +
+      '<filter id="' + id + 's" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="1.6" stdDeviation="1.2" flood-color="#000" flood-opacity=".45"/></filter></defs>';
+    function stone(x, y, r, fill) {
+      return '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="url(#' + (fill || id) + ')" filter="url(#' + id + 's)"/><ellipse cx="' + (x - r * .32) + '" cy="' + (y - r * .42) + '" rx="' + r * .28 + '" ry="' + r * .18 + '" fill="#fff" opacity=".35" transform="rotate(-30 ' + (x - r * .32) + ' ' + (y - r * .42) + ')"/>';
+    }
+    var K = { hid: hid, l: c[2], st: function (x, y, r) { return stone(x, y, r); }, hs: function (x, y, r) { return stone(x, y, r, hid); },
+      ln: function (d, w) { return '<path d="' + d + '" fill="none" stroke="' + c[2] + '" stroke-width="' + (w || 4.4) + '" stroke-linecap="round" stroke-linejoin="round"/>'; } };
+    var b = bodyDef(s.body, K), h = b.head, hair = hairDef(s.hair, h, K);
+    var g = b.limbs + b.stones + hair.back + stone(h.x, h.y, h.r) + hair.cap + faceDef(s.face, h) + hair.front;
+    var bg = opts.bg === undefined ? (s.color === 'negra' ? '#d6d9e2' : 'rgba(255,255,255,.08)') : opts.bg;
+    var vb = '0 0 100 100';
+    if (opts.zoom) { var hz = .9 * h.r * opts.zoom, hcx = 5 + .9 * h.x, hcy = 8 + .9 * h.y - (opts.zoomUp || 0) * h.r; vb = (hcx - hz).toFixed(1) + ' ' + (hcy - hz).toFixed(1) + ' ' + (2 * hz).toFixed(1) + ' ' + (2 * hz).toFixed(1); }   // acercamiento a la cabeza (para elegir cara o pelo)
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="' + vb + '"' + (opts.size ? ' width="' + opts.size + '" height="' + opts.size + '"' : '') + ' role="img">' + (bg ? (opts.zoom ? '<rect x="' + vb.split(' ')[0] + '" y="' + vb.split(' ')[1] + '" width="' + vb.split(' ')[2] + '" height="' + vb.split(' ')[3] + '" fill="' + bg + '"/>' : '<rect width="100" height="100" rx="18" fill="' + bg + '"/>') : '') + defs + '<g transform="translate(5 8) scale(.9)">' + g + '</g></svg>';
+  }
+
+  return { BODIES: BODIES, HAIRS: HAIRS, FACES: FACES, COLORS: Object.keys(COLORS), HAIR_COLORS: Object.keys(HAIR_COLORS), normalize: normalize, encode: encode, decode: decode, render: render };
 });
 </script>
 <script>
@@ -1909,7 +2107,10 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     var xp = XP.clean(st.xp); if (xp.t || xp.f.length || xp.dd) out.xp = xp;      // XP y niveles (xp.js): viaja junto con las estadísticas
     return out;
   }
-  function validAvatar(a) { return AVATARS.some(function (x) { return x[0] === a; }) ? a : 'a1'; }
+  var CODE = /^c\.[a-z]{3,12}\.[a-z]{3,12}\.[a-z]{3,12}\.[a-z]{3,12}\.[a-z]{3,12}$/;      // personaje armado: 'c.cuerpo.pelo.cara.color.colorPelo' (ver avatar.js)
+  function avatarLib() { try { if (typeof window !== 'undefined') return window.PenteAvatar || null; return require('./avatar.js'); } catch (e) { return null; } }
+  function isCode(a) { return typeof a === 'string' && CODE.test(a) && (function (A) { return !A || !!A.decode(a); })(avatarLib()); }
+  function validAvatar(a) { return isCode(a) || AVATARS.some(function (x) { return x[0] === a; }) ? a : 'a1'; }
   function ts(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 && v < 4102444800000 ? v : 0; }
   function cleanUid(u) { u = String(u == null ? '' : u); return /^[0-9a-fA-F-]{36}$/.test(u) ? u.toLowerCase() : ''; }
   function cleanEmail(e) { e = String(e == null ? '' : e).trim().slice(0, 120); return /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(e) ? e : ''; }
@@ -1987,7 +2188,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     return { profile: normalize(prof), prefs: (!useLocalPrefs && R.at > 0) ? R.prefs : null, push: push, body: body };
   }
 
-  return { merge: merge, mergeStats: mergeStats, cleanStats: cleanStats, AVATARS: AVATARS, MODES: MODES, NAME_MAX: NAME_MAX, emojiOf: emojiOf, cleanName: cleanName, empty: empty, normalize: normalize, record: record, totals: totals };
+  return { merge: merge, mergeStats: mergeStats, cleanStats: cleanStats, AVATARS: AVATARS, MODES: MODES, NAME_MAX: NAME_MAX, emojiOf: emojiOf, isCode: isCode, cleanName: cleanName, empty: empty, normalize: normalize, record: record, totals: totals };
 });
 </script>
 <script>
@@ -2597,7 +2798,11 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       },
       saveProfile: function (body) {
         var row = { id: session.user.id, avatar: body.avatar, prefs: body.prefs, stats: body.stats };
-        return authed('POST', '/rest/v1/profiles?on_conflict=id', row, { Prefer: 'resolution=merge-duplicates,return=minimal' }).then(function () { return true; });
+        var post = function (r) { return authed('POST', '/rest/v1/profiles?on_conflict=id', r, { Prefer: 'resolution=merge-duplicates,return=minimal' }).then(function () { return true; }); };
+        return post(row).catch(function (e) {                      // si la base todavía no acepta personajes armados (falta supabase/avatar.sql), se guarda lo demás con un avatar clásico
+          if (/^c\./.test(String(row.avatar || ''))) return post(Object.assign({}, row, { avatar: 'a1' }));
+          throw e;
+        });
       },
       nameAvailable: function (name) {
         return authed('POST', '/rest/v1/rpc/name_available', { p: String(name == null ? '' : name) }).then(function (r) { return r === 'ok' || r === 'taken' ? r : 'invalid'; });
@@ -3460,7 +3665,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     'prof.sub': 'Tu nombre, tu avatar y tus partidas.',
     'prof.name': 'Tu nombre',
     'prof.namePh': 'Cómo te llaman',
-    'prof.avatar': 'Avatar',
+    'prof.avatar': 'Avatares clásicos',
     'prof.stats': 'Estadísticas',
     'prof.played': 'Jugadas',
     'prof.won': 'Ganadas',
@@ -3491,7 +3696,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     'prof.sub': 'Your name, your avatar and your games.',
     'prof.name': 'Your name',
     'prof.namePh': 'What people call you',
-    'prof.avatar': 'Avatar',
+    'prof.avatar': 'Classic avatars',
     'prof.stats': 'Stats',
     'prof.played': 'Played',
     'prof.won': 'Won',
@@ -3915,7 +4120,69 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     "gem.neon": "Neón",
     "gem.coral": "Coral",
     "gem.obsidiana": "Obsidiana",
-    "gem.galaxia": "Galaxia"
+    "gem.galaxia": "Galaxia",
+    "av.tab.body": "Cuerpo",
+    "av.tab.hair": "Pelo",
+    "av.tab.face": "Cara",
+    "av.tab.color": "Color",
+    "av.tab.hairColor": "Color de pelo",
+    "av.title": "Tu personaje",
+    "av.sub": "Armalo con fichas: cuerpo, pelo y cara. Lo ven tus amigos y aparece en el ranking.",
+    "av.btn": "Personalizar",
+    "av.random": "Al azar",
+    "av.save": "Listo",
+    "av.back": "Volver",
+    "av.lockedAt": "Nivel {n}",
+    "av.lockedNote": "Se destraba en el nivel {n}",
+    "av.newParts": "{n} piezas nuevas para tu personaje",
+    "av.classic": "Clásicos",
+    "av.mine": "Mi personaje",
+    "av.body.fornido": "Fornido",
+    "av.body.panzon": "Panzón",
+    "av.body.columna": "Columna",
+    "av.body.hombros": "Hombros",
+    "av.body.curvy": "Curvy",
+    "av.body.pollera": "Pollera",
+    "av.body.esbelto": "Esbelto",
+    "av.body.redondito": "Redondito",
+    "av.hair.ninguno": "Sin pelo",
+    "av.hair.rodete": "Rodete",
+    "av.hair.coleta": "Coleta",
+    "av.hair.colitas": "Colitas",
+    "av.hair.melena": "Melena",
+    "av.hair.rulos": "Rulos",
+    "av.hair.mohicano": "Mohicano",
+    "av.hair.corto": "Corto",
+    "av.hair.casco": "Casco",
+    "av.face.feliz": "Feliz",
+    "av.face.guino": "Guiño",
+    "av.face.enojado": "Enojado",
+    "av.face.sorprendido": "Sorprendido",
+    "av.face.lengua": "Lengua",
+    "av.face.enamorado": "Enamorado",
+    "av.face.rico": "Rico",
+    "av.face.lloron": "Llorón",
+    "av.face.dormido": "Dormido",
+    "av.face.cool": "Cool",
+    "av.face.travieso": "Travieso",
+    "av.face.asustado": "Asustado",
+    "av.face.mareado": "Mareado",
+    "av.color.negra": "Negra",
+    "av.color.blanca": "Blanca",
+    "av.color.azul": "Azul",
+    "av.color.verde": "Verde",
+    "av.color.rosa": "Rosa",
+    "av.color.cian": "Cian",
+    "av.color.ambar": "Ámbar",
+    "av.color.violeta": "Violeta",
+    "av.color.coral": "Coral",
+    "av.hairColor.castano": "Castaño",
+    "av.hairColor.rubio": "Rubio",
+    "av.hairColor.negro": "Negro",
+    "av.hairColor.pelirrojo": "Pelirrojo",
+    "av.hairColor.celeste": "Celeste",
+    "av.hairColor.violeta": "Violeta",
+    "av.hairColor.blanco": "Blanco"
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -4054,7 +4321,69 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     "gem.neon": "Neon",
     "gem.coral": "Coral",
     "gem.obsidiana": "Obsidian",
-    "gem.galaxia": "Galaxy"
+    "gem.galaxia": "Galaxy",
+    "av.tab.body": "Body",
+    "av.tab.hair": "Hair",
+    "av.tab.face": "Face",
+    "av.tab.color": "Color",
+    "av.tab.hairColor": "Hair color",
+    "av.title": "Your character",
+    "av.sub": "Build it out of stones: body, hair and face. Friends see it and it shows in the ranking.",
+    "av.btn": "Customize",
+    "av.random": "Random",
+    "av.save": "Done",
+    "av.back": "Back",
+    "av.lockedAt": "Level {n}",
+    "av.lockedNote": "Unlocks at level {n}",
+    "av.newParts": "{n} new pieces for your character",
+    "av.classic": "Classic",
+    "av.mine": "My character",
+    "av.body.fornido": "Buff",
+    "av.body.panzon": "Round belly",
+    "av.body.columna": "Column",
+    "av.body.hombros": "Broad",
+    "av.body.curvy": "Curvy",
+    "av.body.pollera": "Skirt",
+    "av.body.esbelto": "Slim",
+    "av.body.redondito": "Chibi",
+    "av.hair.ninguno": "Bald",
+    "av.hair.rodete": "Bun",
+    "av.hair.coleta": "Ponytail",
+    "av.hair.colitas": "Pigtails",
+    "av.hair.melena": "Long",
+    "av.hair.rulos": "Curls",
+    "av.hair.mohicano": "Mohawk",
+    "av.hair.corto": "Short",
+    "av.hair.casco": "Helmet",
+    "av.face.feliz": "Happy",
+    "av.face.guino": "Wink",
+    "av.face.enojado": "Angry",
+    "av.face.sorprendido": "Surprised",
+    "av.face.lengua": "Tongue",
+    "av.face.enamorado": "In love",
+    "av.face.rico": "Rich",
+    "av.face.lloron": "Crying",
+    "av.face.dormido": "Sleepy",
+    "av.face.cool": "Cool",
+    "av.face.travieso": "Naughty",
+    "av.face.asustado": "Scared",
+    "av.face.mareado": "Dizzy",
+    "av.color.negra": "Black",
+    "av.color.blanca": "White",
+    "av.color.azul": "Blue",
+    "av.color.verde": "Green",
+    "av.color.rosa": "Pink",
+    "av.color.cian": "Cyan",
+    "av.color.ambar": "Amber",
+    "av.color.violeta": "Purple",
+    "av.color.coral": "Coral",
+    "av.hairColor.castano": "Brown",
+    "av.hairColor.rubio": "Blond",
+    "av.hairColor.negro": "Black",
+    "av.hairColor.pelirrojo": "Ginger",
+    "av.hairColor.celeste": "Sky blue",
+    "av.hairColor.violeta": "Purple",
+    "av.hairColor.blanco": "White"
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -5731,7 +6060,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     function row(r) {
       var li = document.createElement('li'); if (r.me) li.className = 'me'; if (today && !r.win) li.className += ' none';
       var pos = document.createElement('span'); pos.className = 'pos'; pos.textContent = r.rank ? String(r.rank) : '–';
-      var who = document.createElement('span'); who.className = 'who'; who.textContent = (r.avatar ? PP.emojiOf(r.avatar) + ' ' : '') + r.name + (r.me ? ' (' + t('daily.you') + ')' : '');
+      var who = document.createElement('span'); who.className = 'who'; who.innerHTML = (r.avatar ? avInline(r.avatar, 24) + ' ' : '') + esc(r.name + (r.me ? ' (' + t('daily.you') + ')' : ''));
       who.appendChild(lvChip(r.xp));
       var val = document.createElement('span'); val.className = 'val';
       val.textContent = today ? (r.win ? t('daily.rowWin', { moves: r.moves, time: fmtMs(r.ms) }) : r.playing ? t('daily.rowPlaying', { moves: r.moves }) : t('daily.rowNoWin')) : t('daily.rowWeek', { points: r.points, wins: r.wins, played: r.played });
@@ -5836,7 +6165,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   function lvChip(xp) { var l = XP.levelOf(xp || 0).level, c = document.createElement('span'); c.className = 'lvchip'; c.textContent = t('xp.lvShort', { n: l }); c.title = xpTitle(l); return c; }
   function xpTitle(level) { return t('xp.title.' + XP.titleIndex(level)); }
   function unlockText(list) {
-    return list.map(function (u) { return u.type === 'avatar' ? PP.emojiOf(u.id) : t('gem.' + u.id); }).join(' · ');
+    return list.map(function (u) { return u.type === 'avatar' ? PP.emojiOf(u.id) : u.type === 'parts' ? t('av.newParts', { n: u.n }) : t('gem.' + u.id); }).join(' · ');
   }
   function partLabel(k) {
     if (k.indexOf('first:mode:') === 0) { var m = k.slice(11); return t('xp.part.mode', { mode: m === 'ffa' ? t('four.ffa') : m === 'four' ? t('four.p4') : t('mode.' + m) }); }
@@ -6555,7 +6884,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       el.classList.toggle('active', !isOver() && state.current === p);
       el.classList.toggle('offline', online.active && seatsOf(p).some(function (x) { return !online.connected[x]; }));
       var mine = !tut.active && ((ai.active && p === ai.human) || (online.active && !online.spectator && p === online.me));
-      $('pname' + p).textContent = (mine ? PP.emojiOf(profile.avatar) + ' ' : '') + (names[p] || '…') + (online.active && online.me === p && online.players !== 4 ? ' ' + t('online.you') : '');
+      $('pname' + p).innerHTML = (mine ? avInline(profile.avatar, 24) + ' ' : '') + esc((names[p] || '…') + (online.active && online.me === p && online.players !== 4 ? ' ' + t('online.you') : ''));
       var tw = state.options.capturesToWin;
       $('caps' + p).innerHTML = tw > 20 ? '' : pips(state.captures[p], tw) + '<span>' + state.captures[p] + '/' + tw + '</span>';   // gomoku: sin capturas
     });
@@ -7516,7 +7845,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   /* ---------- Perfil ---------- */
   function renderProfileBtn() {
     var lbl = profile.name ? t('menu.profile') + ' · ' + profile.name : t('menu.profile');
-    $('avEmoji').textContent = PP.emojiOf(profile.avatar); $('btnProfile').setAttribute('aria-label', lbl); $('btnProfile').title = lbl;
+    setAv($('avEmoji'), profile.avatar, 38); $('btnProfile').setAttribute('aria-label', lbl); $('btnProfile').title = lbl;
   }
   function applyProfileName() {                               // el nombre del perfil rellena los campos de nombre (se pueden cambiar partida por partida)
     ['name1', 'onName', 'rName'].forEach(function (id) { if ($(id)) $(id).value = profile.name; });
@@ -7571,7 +7900,53 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     });
     box.appendChild(c3);
   }
+
+  /* ---------- Personajes de fichas (avatar.js) ---------- */
+  var AV = window.PenteAvatar;
+  function avSpec(a) { return AV && PP.isCode(a) ? AV.decode(a) : null; }
+  var HEAD = { zoom: 3.1, zoomUp: -.9 };                           // lugares chicos: se ve cabeza y hombros (el cuerpo entero no se entiende a 30 px)
+  function avInline(a, px) {                                       // para texto corrido: personaje en miniatura o emoji
+    var sp = avSpec(a); return sp ? '<span class="av-inline">' + AV.render(sp, Object.assign({ size: px || 24 }, HEAD)) + '</span>' : esc(PP.emojiOf(a));
+  }
+  function setAv(node, a, px, full) {                              // un lugar con el avatar: personaje (SVG) o emoji
+    var sp = avSpec(a); node.classList.toggle('has-svg', !!sp);
+    if (sp) node.innerHTML = AV.render(sp, Object.assign({ size: px || 40 }, full ? {} : HEAD)); else node.textContent = PP.emojiOf(a);
+  }
+  var AVK = ['body', 'hair', 'face', 'color', 'hairColor'], cust = { spec: null, tab: 'body' };
+  function avList(k) { return k === 'body' ? AV.BODIES : k === 'hair' ? AV.HAIRS : k === 'face' ? AV.FACES : k === 'color' ? AV.COLORS : AV.HAIR_COLORS; }
+  function custOpen() { cust.spec = AV.normalize(avSpec(profile.avatar) || { body: 'fornido', hair: 'corto', face: 'feliz', color: 'azul', hairColor: 'castano' }); cust.tab = 'body'; $('custNote').textContent = ''; renderCust(); open('customOverlay'); }
+  function renderCust() {
+    var lv = myLevel().level, tabs = $('custTabs'), grid = $('custGrid');
+    $('custPrev').innerHTML = AV.render(cust.spec, { size: 190, bg: '' });
+    tabs.innerHTML = '';
+    AVK.forEach(function (k) {
+      var b = el('button', '', t('av.tab.' + k)); b.type = 'button'; b.setAttribute('aria-pressed', String(cust.tab === k));
+      b.addEventListener('click', function () { cust.tab = k; $('custNote').textContent = ''; renderCust(); }); tabs.appendChild(b);
+    });
+    grid.innerHTML = '';
+    avList(cust.tab).forEach(function (id) {
+      var sp = Object.assign({}, cust.spec); sp[cust.tab] = id;
+      var lock = !XP.partOk(cust.tab, id, lv), zoom = cust.tab === 'face' ? { zoom: 1.5 } : cust.tab === 'hair' ? { zoom: 2.4, zoomUp: .35 } : {};
+      var b = el('button', 'cust-opt' + (lock ? ' locked' : '')); b.type = 'button'; b.setAttribute('aria-pressed', String(cust.spec[cust.tab] === id));
+      var tile = el('span', 'tile'); tile.innerHTML = AV.render(sp, Object.assign({ size: 90 }, zoom)); b.appendChild(tile);
+      b.appendChild(document.createTextNode(t('av.' + cust.tab + '.' + id)));
+      if (lock) { var lk = el('span', 'lk', t('av.lockedAt', { n: XP.partLevel(cust.tab, id) })); b.appendChild(lk); b.setAttribute('aria-disabled', 'true'); }
+      b.addEventListener('click', function () {
+        if (lock) { $('custNote').textContent = t('av.lockedNote', { n: XP.partLevel(cust.tab, id) }); return; }
+        $('custNote').textContent = ''; cust.spec[cust.tab] = id; renderCust();
+      });
+      grid.appendChild(b);
+    });
+  }
+  $('btnCustom').addEventListener('click', custOpen);
+  $('btnCustRandom').addEventListener('click', function () {
+    var lv = myLevel().level; AVK.forEach(function (k) { var ok = avList(k).filter(function (id) { return XP.partOk(k, id, lv); }); cust.spec[k] = ok[Math.floor(Math.random() * ok.length)]; }); renderCust();
+  });
+  $('btnCustSave').addEventListener('click', function () {
+    profile.avatar = AV.encode(cust.spec); profile.nameAt = Date.now(); saveProfile(); renderProfileBtn(); scheduleSync(1500); renderProfile(); open('profileOverlay');
+  });
   function renderProfile() {
+    setAv($('profChar'), profile.avatar, 76, true);
     var g = $('avatarGrid'); g.innerHTML = '';
     var mylv = myLevel().level;
     PP.AVATARS.forEach(function (a) {
@@ -7614,7 +7989,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   function frMsg(txt, bad) { var m = $('frMsg'); m.textContent = txt || ''; m.classList.toggle('bad', !!bad); }
   function socialNote(txt, bad) { if (social.from === 'lobby') lobbyNote(txt); else if ($('pviewOverlay').classList.contains('open')) { $('pvMsg').textContent = txt || ''; $('pvMsg').classList.toggle('bad', !!bad); } else frMsg(txt, bad); }
   function frRow(p, buttons) {
-    var row = el('div', 'fr-row'); row.appendChild(el('span', 'fr-av', PP.emojiOf(p.avatar)));
+    var row = el('div', 'fr-row'); var fav = el('span', 'fr-av'); setAv(fav, p.avatar, 34); row.appendChild(fav);
     var nm = el('button', 'fr-name', p.name); nm.type = 'button'; nm.addEventListener('click', function () { viewPlayer(p.name, 'friends'); }); if (p.status === 'accepted') nm.appendChild(lvChip(p.xp)); row.appendChild(nm);
     var bx = el('span', 'fr-btns');
     buttons.forEach(function (b) { var x = el('button', 'btn small' + (b.cls ? ' ' + b.cls : ''), b.label); x.type = 'button'; x.addEventListener('click', b.fn); bx.appendChild(x); });
@@ -7656,7 +8031,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   }
   function pvRender() {
     var v = social.view; if (!v) return;
-    $('pvAv').textContent = PP.emojiOf(v.avatar); $('pvName').textContent = v.name; $('pvName').appendChild(lvChip(v.xp)); $('pvRel').textContent = t('pv.' + (v.relation || 'none'));
+    setAv($('pvAv'), v.avatar, 96, true); $('pvName').textContent = v.name; $('pvName').appendChild(lvChip(v.xp)); $('pvRel').textContent = t('pv.' + (v.relation || 'none'));
     var st = PP.cleanStats(v.stats), has = Object.keys(st).length > 0;
     $('pvStats').hidden = !!v.hidden; $('pvCharts').hidden = !!v.hidden; if (v.hidden) { $('pvStats').innerHTML = ''; $('pvCharts').innerHTML = ''; } else { fillStats($('pvStats'), st); fillCharts($('pvCharts'), st); }
     $('pvNote').textContent = v.hidden ? t('pv.hidden') : has ? t('pv.note') : t('pv.noGames');
