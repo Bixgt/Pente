@@ -729,7 +729,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v58</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v59</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -1260,7 +1260,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 58;</script>
+<script>window.PENTE_VERSION = 59;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -6151,7 +6151,12 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 
   /* ---------- XP y niveles (reglas en xp.js) ---------- */
   function myXp() { return XP.clean(profile.stats && profile.stats.xp); }
-  function myLevel() { return XP.levelOf(myXp().t); }
+  /* Modo "todo desbloqueado" (para probar): abrir el juego con ?unlock=1 en ese aparato (y ?unlock=0 para sacarlo). No toca el XP real ni el nivel que ven los demás. */
+  var UNLOCK_ALL = (function () {
+    var q = qs('unlock'), k = 'pente.unlockAll';
+    try { if (q === '1') localStorage.setItem(k, '1'); else if (q === '0') localStorage.removeItem(k); return localStorage.getItem(k) === '1'; } catch (e) { return q === '1'; }
+  })();
+  function myLevel() { return XP.levelOf(UNLOCK_ALL ? XP.cumulative(XP.MAX_LEVEL) : myXp().t); }
   function xpModeKey() { if (!state) return 'classic'; if (state.ffa) return 'ffa'; if (state.players === 4) return 'four'; return (online.active ? online.mode : gameMode) || 'classic'; }
   function grantXp(ev) {
     var today = window.PenteDaily ? window.PenteDaily.dayKey() : new Date().toISOString().slice(0, 10), before = myXp(), r = XP.award(before, ev, today);
