@@ -712,6 +712,11 @@ html[data-theme="papel"] #menuBg { opacity: .9; }
   .fr-btns { display: none; flex-basis: 100%; justify-content: flex-end; padding-bottom: 4px; }
   .fr-row.open .fr-btns { display: flex; }
 }
+
+/* Sala de espera persistente */
+.held { background: var(--panel-2); border: 2px solid var(--accent); border-radius: var(--radius); padding: 12px 14px; margin: 0 0 14px; }
+.held .hint { margin: 4px 0 8px; }
+.held .btns { margin-top: 6px; }
 </style>
 </head>
 <body>
@@ -1096,6 +1101,8 @@ html[data-theme="papel"] #menuBg { opacity: .9; }
   <div class="screen-body">
     <h2 data-i18n="online.title"></h2>
     <p class="sub" data-i18n="online.sub"></p>
+    <div class="held" id="heldRoom" hidden><b data-i18n="online.heldTitle"></b><p class="hint" id="heldSub"></p>
+      <div class="btns"><button class="btn primary" id="btnHeldBack" data-i18n="online.heldBack"></button><button class="btn" id="btnHeldClose" data-i18n="online.closeRoom"></button></div></div>
     <div class="field"><label class="lbl" for="onName" data-i18n="online.yourName"></label><input type="text" id="onName" maxlength="18" autocomplete="off"></div>
     <button type="button" class="acc acc-link" id="btnOpenRooms"><span class="acc-head"><span data-i18n="online.rooms"></span><span class="acc-chev" aria-hidden="true"></span></span></button>
     <section class="acc" data-grp="online" id="accJoin">
@@ -1175,8 +1182,10 @@ html[data-theme="papel"] #menuBg { opacity: .9; }
     <div class="btns">
       <button class="btn primary" id="btnCopyLink" data-i18n="online.copyLink"></button>
       <button class="btn" id="btnShare" hidden data-i18n="online.share"></button>
+      <button class="btn" id="btnWaitHold" hidden data-i18n="online.hold"></button>
       <button class="btn" id="btnWaitCancel" data-i18n="online.cancel"></button>
     </div>
+    <p class="hint" id="waitKeep" hidden data-i18n="online.waitKeep"></p>
     <p class="online-msg" id="waitMsg" role="status" aria-live="polite"></p>
   </div>
 </div>
@@ -3122,6 +3131,15 @@ html[data-theme="papel"] #menuBg { opacity: .9; }
       'online.copied': 'Enlace copiado',
       'online.copyFail': 'No se pudo copiar. Copialo a mano.',
       'online.share': 'Compartir',
+      'online.hold': 'Salir y seguir esperando',
+      'online.closeRoom': 'Cerrar sala',
+      'online.waitKeep': 'Podés salir y volver: la sala sigue abierta hasta que la cierres vos, y se cierra sola si pasan 15 minutos sin nadie adentro. Solo podés tener una sala abierta a la vez.',
+      'online.heldTitle': 'Tenés una sala abierta',
+      'online.heldSub': 'Código {code}. Esperando rival. Se cierra sola si pasan 15 minutos sin nadie adentro.',
+      'online.heldBack': 'Volver a la sala',
+      'online.roomClosed': 'Sala cerrada.',
+      'online.roomReplaced': 'Esa sala se cerró porque abriste otra.',
+      'online.heldBlock': 'Ya tenés una sala abierta. Volvé a ella o cerrala para crear otra.',
       'online.cancel': 'Cancelar',
       'online.you': '(vos)',
       'online.yourTurn': 'Tu turno',
@@ -3437,6 +3455,15 @@ html[data-theme="papel"] #menuBg { opacity: .9; }
       'online.copied': 'Link copied',
       'online.copyFail': 'Couldn\'t copy. Copy it by hand.',
       'online.share': 'Share',
+      'online.hold': 'Leave and keep waiting',
+      'online.closeRoom': 'Close room',
+      'online.waitKeep': 'You can leave and come back: the room stays open until you close it, and closes by itself after 15 minutes with nobody inside. You can only have one open room at a time.',
+      'online.heldTitle': 'You have an open room',
+      'online.heldSub': 'Code {code}. Waiting for an opponent. It closes by itself after 15 minutes with nobody inside.',
+      'online.heldBack': 'Back to the room',
+      'online.roomClosed': 'Room closed.',
+      'online.roomReplaced': 'That room was closed because you opened another.',
+      'online.heldBlock': 'You already have an open room. Go back to it or close it to create another.',
       'online.cancel': 'Cancel',
       'online.you': '(you)',
       'online.yourTurn': 'Your turn',
@@ -6084,7 +6111,7 @@ window.NEON_IMG = {
   var rooms = { open: false, timer: 0 };
   var online = { bots: {}, mode: 'classic', ffa: false,
     spectator: false, specN: 0, lastCode: '', isPublic: false, cid: '',
-    active: false, net: null, url: '', conn: 'closed', code: '', token: '', me: 0, intent: null, rejoining: false,
+    active: false, net: null, url: '', conn: 'closed', code: '', token: '', me: 0, intent: null, rejoining: false, mine: false,
     over: null, connected: { 1: true, 2: true, 3: true, 4: true }, rematch: { 1: false, 2: false, 3: false, 4: false }, seat: 0, players: 2,
     rivalLeftAt: 0, claimTimer: null, awaiting: false, awaitTimer: null
   };
@@ -7802,7 +7829,18 @@ window.NEON_IMG = {
     if (q && /^wss?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/?$/.test(q)) return q;     // ?server= solo vale para pruebas locales
     return String(window.PENTE_SERVER || '').trim();
   }
-  function saveSession() { try { localStorage.setItem(SESSION_KEY, JSON.stringify({ code: online.code, token: online.token, url: online.url })); } catch (e) {} }
+  function saveSession() { try { localStorage.setItem(SESSION_KEY, JSON.stringify({ code: online.code, token: online.token, url: online.url, mine: !!online.mine })); } catch (e) {} }
+  /* Sala de espera persistente: el creador puede salir SIN cerrarla (queda guardada con held:true) y volver desde Online → "Tenés una sala abierta".
+   * El servidor la cierra sola si pasan 15 min sin nadie adentro, y solo se permite una por aparato (dev). */
+  function devId() { try { var d = localStorage.getItem('pente.dev'); if (!/^[A-Za-z0-9_-]{12,64}$/.test(d || '')) { d = 'd' + Math.random().toString(36).slice(2, 12) + Date.now().toString(36); localStorage.setItem('pente.dev', d); } return d; } catch (e) { return ''; } }
+  function heldRoom() { var s = loadSession(), u = serverUrl(); return s && s.held && s.mine && u && s.url === u ? s : null; }
+  function renderHeld() { var h = heldRoom(); $('heldRoom').hidden = !h; if (h) $('heldSub').textContent = t('online.heldSub', { code: h.code }); }
+  function holdRoom() {
+    var s = { code: online.code, token: online.token, url: online.url || serverUrl(), mine: true, held: true };
+    leaveOnline(false);
+    try { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); } catch (e) {}
+    renderHeld(); onlineMsg(''); open('onlineOverlay');
+  }
   function loadSession() { try { var v = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); return v && v.code && v.token ? v : null; } catch (e) { return null; } }
   function clearSession() { try { localStorage.removeItem(SESSION_KEY); } catch (e) {} }
   function onlineMsg(txt) { $('onlineMsg').textContent = txt || ''; }
@@ -7839,7 +7877,7 @@ window.NEON_IMG = {
     tutStop(); aiStop(); localOver = null; videoDiscard(); endSeen = recorded = false;
     var url = serverUrl();
     if (!url) { onlineMsg(t('online.noServer')); return; }
-    intent.name = myName();
+    intent.name = myName(); if (intent.t === 'create' || intent.t === 'join') intent.dev = devId();
     online.intent = intent; online.token = ''; online.code = '';
     onlineMsg(t('online.connecting'));
     var go = function () { if (online.intent !== intent) return; if (!online.net) ensureNet(url); else if (online.net.isOpen()) online.net.send(intent); };
@@ -7855,7 +7893,7 @@ window.NEON_IMG = {
     clearTimeout(online.awaitTimer); clearClaim();
     online.net = null; online.active = false; online.conn = 'closed'; online.code = ''; online.token = ''; online.me = 0;
     online.spectator = false; online.specN = 0; online.cid = ''; chatReset(); stopRooms(); fx.length = 0; $('btnSpectateOffer').hidden = true;
-    online.intent = null; online.invite = null; online.seek = false; online.rejoining = false; online.over = null; online.awaiting = false; online.rivalLeftAt = 0;
+    online.intent = null; online.invite = null; online.seek = false; online.rejoining = false; online.mine = false; online.over = null; online.awaiting = false; online.rivalLeftAt = 0;
     online.connected = { 1: true, 2: true, 3: true, 4: true }; online.rematch = { 1: false, 2: false, 3: false, 4: false }; online.seat = 0; online.players = 2; online.bots = {}; online.mode = 'classic'; online.ffa = false; seatNames = {};
     clearSession(); updateOnlineButtons(); updateRematchUi();
     if (wasActive) { videoDiscard(); state = null; clk = null; hover = pending = null; setStatus(''); render(); }
@@ -7868,11 +7906,18 @@ window.NEON_IMG = {
         stopRooms(); $('btnSpectateOffer').hidden = true;
         online.active = true; online.code = m.code; online.seat = m.you; online.me = m.you ? teamOfSeat(m.you) : 0; online.spectator = !!m.spectator; online.cid = m.spectator ? m.id : 'p' + m.you;
         if (chat.code !== m.code) { chatReset(); chat.code = m.code; }          // si solo se reconectó, se conservan los silenciados
-        if (!m.spectator) { online.token = m.token; saveSession(); }       // los espectadores no tienen lugar que recuperar
+        if (!m.spectator) { if (online.intent && online.intent.t === 'create') online.mine = true; else if (online.intent && online.intent.t === 'join') online.mine = false; online.token = m.token; saveSession(); }       // los espectadores no tienen lugar que recuperar
         online.intent = null; online.rejoining = false; onlineMsg(''); updateOnlineButtons();
         if (online.invite && !m.spectator && m.you === 1) inviteSend(m.code);
         if (online.seek && !m.spectator && m.you === 1) seekSend();
         break;
+      case 'roomClosed': {
+        var waitOpen = $('waitOverlay').classList.contains('open');
+        clearTimeout(online.closeTimer); leaveOnline(false);
+        onlineMsg(t(m.why === 'replaced' ? 'online.roomReplaced' : m.why === 'gone' ? 'online.roomGone' : 'online.roomClosed')); renderHeld();
+        if (waitOpen) open('playOverlay');
+        break;
+      }
       case 'seekRes': $('waitMsg').textContent = m.ok ? t(m.n ? 'seek.sent' : 'seek.nobody', { n: m.n }) : t(m.reason === 'rate' ? 'seek.rate' : 'seek.err'); break;
       case 'inviteRes': inviteResult(m); break;
       case 'inviteDeclined': $('waitMsg').textContent = t(m.reason === 'busy' ? 'ch.busy' : 'ch.declined', { name: m.name || '' }); break;
@@ -7999,6 +8044,7 @@ window.NEON_IMG = {
       document.querySelectorAll('#botLevel .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.val === botPick)); });
     }
     $('waitVis').textContent = t(online.isPublic ? 'online.waitPublic' : 'online.waitPrivate') + (online.mode !== 'classic' ? ' · ' + t('mode.' + online.mode) : '');
+    $('btnWaitHold').hidden = !online.mine; $('waitKeep').hidden = !online.mine; $('btnWaitCancel').textContent = t(online.mine ? 'online.closeRoom' : 'online.cancel');
     open('waitOverlay');
   }
 
@@ -8010,7 +8056,7 @@ window.NEON_IMG = {
     if ((m.code === 'ROOM_NOT_FOUND' || m.code === 'BAD_TOKEN') && online.rejoining) {
       var wasActive = online.active;                 // la sala vieja ya no existe (el servidor se reinició o venció)
       leaveOnline(false);
-      if (wasActive) { onlineMsg(t('online.roomGone')); open('onlineOverlay'); } else if (rooms.open) roomsMsg(txt);
+      if (wasActive) { onlineMsg(t('online.roomGone')); open('onlineOverlay'); } else if (rooms.open) roomsMsg(txt); else { onlineMsg(t('online.roomGone')); renderHeld(); }
       return;
     }
     if (online.active) { setStatus(txt, true); return; }
@@ -8028,7 +8074,8 @@ window.NEON_IMG = {
     var code = qs('sala'), ses = loadSession();
     if (code) { try { history.replaceState(null, '', location.href.replace(/([?&])sala=[^&#]*&?/, '$1').replace(/[?&]$/, '')); } catch (e) {} }
     code = code ? String(code).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5) : '';
-    if (url && ses && ses.url === url && (!code || ses.code === code)) { online.code = ses.code; online.token = ses.token; ensureNet(url); }   // volver a la sala donde estaba
+    if (url && ses && ses.held && !code) { renderHeld(); }          // sala en pausa: no se entra sola, se vuelve desde Online
+    else if (url && ses && ses.url === url && (!code || ses.code === code)) { online.mine = !!ses.mine; online.code = ses.code; online.token = ses.token; ensureNet(url); }   // volver a la sala donde estaba
     else if (code) { $('onCode').value = code; onlineMsg(url ? '' : t('online.noServer')); open('onlineOverlay'); accOpenJoin(); }
   }
 
@@ -8374,7 +8421,7 @@ window.NEON_IMG = {
   $('btnEndMenu').addEventListener('click', function () { if (online.active) leaveOnline(false); open('menuOverlay'); });
   $('btnClaim').addEventListener('click', function () { if (online.net) online.net.send({ t: 'claimWin' }); });
   $('btnOnline').addEventListener('click', function () {
-    function showOnlineMenu() { accSummaries(); $('btnSpectateOffer').hidden = true; onlineMsg(serverUrl() ? '' : t('online.noServer')); open('onlineOverlay'); }
+    function showOnlineMenu() { renderHeld(); accSummaries(); $('btnSpectateOffer').hidden = true; onlineMsg(serverUrl() ? '' : t('online.noServer')); open('onlineOverlay'); }
     function go() {
       aiStop();
       if (online.net) {
@@ -8387,6 +8434,7 @@ window.NEON_IMG = {
   });
   $('btnOnlineBack').addEventListener('click', function () { if (online.net && !online.active) leaveOnline(false); open('playOverlay'); });
   $('btnCreateRoom').addEventListener('click', function () {
+    if (heldRoom()) { onlineMsg(t('online.heldBlock')); renderHeld(); return; }
     online.isPublic = vis === 'public';
     startOnline({ t: 'create', opts: { variant: modeVariant(settings.mode), blitz: settings.mode === 'blitz', bullet: settings.mode === 'bullet', tournamentRule: settings.tournamentRule, exactFive: settings.exactFive, size: settings.size, timer: settings.timer, players: plPick >= 4 ? 4 : 2, ffa: plPick === 5, public: online.isPublic } });
   });
@@ -8397,7 +8445,25 @@ window.NEON_IMG = {
   }
   $('btnJoinRoom').addEventListener('click', joinFromInput);
   $('onCode').addEventListener('keydown', function (e) { if (e.key === 'Enter') joinFromInput(); });
-  $('btnWaitCancel').addEventListener('click', function () { leaveOnline(false); open('playOverlay'); });
+  $('btnWaitCancel').addEventListener('click', function () {
+    if (online.mine && online.net && online.net.isOpen() && online.code && online.token) {       // cerrar la sala a mano: el servidor confirma con roomClosed (si no contesta, se sale igual)
+      online.net.send({ t: 'closeRoom', code: online.code, token: online.token });
+      clearTimeout(online.closeTimer); online.closeTimer = setTimeout(function () { leaveOnline(false); renderHeld(); open('playOverlay'); }, 1500);
+    } else { leaveOnline(false); open('playOverlay'); }
+  });
+  $('btnWaitHold').addEventListener('click', holdRoom);
+  $('btnHeldBack').addEventListener('click', function () {
+    var s = heldRoom(); if (!s) { renderHeld(); return; }
+    if (online.net) leaveOnline(false);
+    online.code = s.code; online.token = s.token; online.mine = true; online.intent = null; online.url = s.url; saveSession();       // ya no está "en pausa": si recarga, vuelve sola
+    onlineMsg(t('online.connecting')); ensureNet(s.url);
+  });
+  $('btnHeldClose').addEventListener('click', function () {
+    var s = heldRoom(); if (!s) { renderHeld(); return; }
+    if (online.net) leaveOnline(false);
+    online.intent = { t: 'closeRoom', code: s.code, token: s.token }; onlineMsg(t('online.connecting')); ensureNet(s.url);
+    clearTimeout(online.closeTimer); online.closeTimer = setTimeout(function () { clearSession(); if (online.net) { online.net.close(); online.net = null; } online.intent = null; renderHeld(); onlineMsg(t('online.roomClosed')); }, 4000);
+  });
   $('btnCopyLink').addEventListener('click', function () {
     var link = inviteLink();
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(link).then(function () { $('waitMsg').textContent = t('online.copied'); }, function () { $('waitMsg').textContent = link; });
