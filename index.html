@@ -625,6 +625,40 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 .cust-opt .lk { position: absolute; top: 8px; right: 8px; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 999px; background: rgba(0,0,0,.65); color: #fff; }
 .sq-av .has-svg, #avEmoji.has-svg, .fr-av.has-svg { border-radius: 10px; overflow: hidden; }
 .av-inline { border-radius: 6px; overflow: hidden; }
+
+/* ---------- Flecha de volver, consejos y pantalla grande ---------- */
+.backarrow { position: fixed; top: max(10px, env(safe-area-inset-top)); left: max(10px, env(safe-area-inset-left)); z-index: 3; width: 44px; height: 44px; min-height: 44px; padding: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--panel-2); border: 1px solid var(--line); color: var(--text); cursor: pointer; }
+.backarrow:hover { border-color: var(--accent); }
+.backarrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.overlay.screen:not(#menuOverlay) .screen-body { padding-top: 58px; }
+.back-dup { display: none !important; }
+.menu-tip { position: fixed; left: 50%; bottom: max(18px, env(safe-area-inset-bottom)); transform: translate(-50%, 16px); width: min(92vw, 520px); z-index: 2; box-sizing: border-box; padding: 11px 16px; border-radius: 14px; background: var(--panel-2); border: 1px solid var(--line); box-shadow: 0 6px 22px rgba(0,0,0,.28); font-size: 14px; line-height: 1.4; text-align: center; opacity: 0; pointer-events: none; transition: opacity .45s, transform .45s; }
+.menu-tip.on { opacity: 1; transform: translate(-50%, 0); }
+.menu-tip[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { .menu-tip { transition: opacity .2s; transform: translate(-50%, 0); } }
+
+@media (min-width: 900px) {
+  .screen-body { width: min(100%, 760px); }
+  .screen-body.settings { width: min(100%, 760px); }
+  #playOverlay .screen-body, #localOverlay .screen-body, #onlineOverlay .screen-body, #roomsOverlay .screen-body, #friendsOverlay .screen-body, #profileOverlay .screen-body, #tnOverlay .screen-body { width: min(100%, 980px); }
+  .screen-body.wide { max-width: 980px; }
+  .screen-body .btns { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .screen-body .btns .btn { min-height: 52px; }
+  #playOverlay .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  #playOverlay .tile { height: 100%; }
+  .overlay.screen:not(#menuOverlay) .screen-body { padding-top: 66px; }
+  .backarrow { top: 18px; left: 22px; }
+
+  /* Menú: marca a la izquierda, botones a la derecha */
+  #menuOverlay .screen-body { width: min(100%, 1040px); display: grid; grid-template-columns: 1fr 1fr; column-gap: 72px; align-items: center; margin: auto; }
+  #menuOverlay .menu-top { grid-column: 1 / -1; }
+  #menuOverlay .brand { grid-column: 1; grid-row: 2 / span 3; margin: 0; align-self: center; }
+  #menuOverlay .brand h1 { font-size: clamp(72px, 9vw, 124px); }
+  #menuOverlay .chip, #menuOverlay .xpmini { grid-column: 1; }
+  #menuOverlay .btns { grid-column: 2; grid-row: 2 / span 3; display: flex; flex-direction: column; margin: 0; gap: 12px; }
+  #menuOverlay .btns .btn { min-height: 56px; font-size: 18px; }
+  .menu-tip { width: min(70vw, 620px); }
+}
 </style>
 </head>
 <body>
@@ -721,6 +755,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 <!-- Menú principal (pantalla propia: el juego no se ve detrás) -->
 <div class="overlay screen" id="menuOverlay">
   <canvas id="menuBg" aria-hidden="true"></canvas>
+  <div class="menu-tip" id="menuTip" role="status" aria-live="polite" hidden></div>
   <div class="screen-body">
     <div class="menu-top">
       <div class="menu-top-l">
@@ -729,7 +764,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v60</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v61</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -752,7 +787,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     <div class="cust-tabs" id="custTabs" role="tablist"></div>
     <div class="cust-grid" id="custGrid"></div>
     <p class="hint" id="custNote"></p>
-    <div class="btns"><button type="button" class="btn" id="btnCustRandom" data-i18n="av.random"></button><button type="button" class="btn primary" id="btnCustSave" data-i18n="av.save"></button></div>
+    <div class="btns"><button type="button" class="btn" id="btnCustRandom" data-i18n="av.random"></button><button type="button" class="btn primary" id="btnCustSave" data-i18n="av.save"></button><button type="button" class="btn" id="btnCustBack" data-i18n="menu.back"></button></div>
   </div>
 </div>
 
@@ -1260,7 +1295,7 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 60;</script>
+<script>window.PENTE_VERSION = 61;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -4182,7 +4217,17 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     "av.hairColor.pelirrojo": "Pelirrojo",
     "av.hairColor.celeste": "Celeste",
     "av.hairColor.violeta": "Violeta",
-    "av.hairColor.blanco": "Blanco"
+    "av.hairColor.blanco": "Blanco",
+    "tip.1": "Cinco en línea gana, pero ojo: encerrar exactamente dos fichas rivales también las captura. Cinco pares y ganás igual.",
+    "tip.2": "El desafío diario suma racha 🔥 aunque no lo ganes. Lo que cuenta es jugarlo.",
+    "tip.3": "¿Primera vez? En Jugar → Tutorial aprendés las reglas en un rato, sin apuro.",
+    "tip.4": "Podés pasarle el link de tu sala a un amigo: tocá el link y entra directo a jugar.",
+    "tip.5": "En Online → salas podés mirar partidas de otros y chatear mientras mirás.",
+    "tip.6": "Una línea de cuatro abierta de los dos lados casi no tiene defensa. Cortala antes.",
+    "tip.7": "Si jugás logueado contra otra cuenta, sumás XP verificada para el ranking.",
+    "tip.8": "Si la pantalla te distrae, en Configuración podés apagar el tablero de fondo del menú.",
+    "tip.9": "Capturar no es solo sumar pares: también te abre espacio para armar tu línea.",
+    "tip.10": "Cada nivel que subís destraba cosas nuevas. Jugar seguido rinde más que jugar mucho un solo día."
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -4383,7 +4428,17 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     "av.hairColor.pelirrojo": "Ginger",
     "av.hairColor.celeste": "Sky blue",
     "av.hairColor.violeta": "Purple",
-    "av.hairColor.blanco": "White"
+    "av.hairColor.blanco": "White",
+    "tip.1": "Five in a row wins, but watch out: surrounding exactly two enemy stones captures them too. Five pairs wins as well.",
+    "tip.2": "The daily challenge adds to your 🔥 streak even if you don't win. Playing it is what counts.",
+    "tip.3": "First time? Play → Tutorial teaches the rules at your own pace.",
+    "tip.4": "You can send your room link to a friend: one tap and they're in.",
+    "tip.5": "In Online → rooms you can watch other people's games and chat while you do.",
+    "tip.6": "An open four (both ends free) is almost impossible to defend. Cut it earlier.",
+    "tip.7": "Playing logged in against another account earns verified XP for the ranking.",
+    "tip.8": "If the menu board distracts you, you can turn it off in Settings.",
+    "tip.9": "Captures aren't just points: they also open space to build your own line.",
+    "tip.10": "Every level you gain unlocks new things. Playing often beats one marathon day."
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -6142,6 +6197,22 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     } catch (e) {}
     ctx = save.ctx; metrics.cell = save.cell; metrics.off = save.off;
   }
+  /* ---------- Consejos pasajeros en el menú ---------- */
+  var TIP_N = 10, tipOrder = [], tipShow = 0, tipHide = 0, tipLoop = 0;
+  function nextTip() {
+    if (!tipOrder.length) { for (var i = 1; i <= TIP_N; i++) tipOrder.push(i); for (var j = tipOrder.length - 1; j > 0; j--) { var k = Math.floor(Math.random() * (j + 1)), x = tipOrder[j]; tipOrder[j] = tipOrder[k]; tipOrder[k] = x; } }
+    return tipOrder.pop();
+  }
+  function showTip() {
+    var el = $('menuTip'); if (!el || !$('menuOverlay').classList.contains('open')) return;
+    el.textContent = '💡 ' + t('tip.' + nextTip()); el.hidden = false;
+    void el.offsetWidth; el.classList.add('on');
+    clearTimeout(tipHide); tipHide = setTimeout(function () { el.classList.remove('on'); setTimeout(function () { if (!el.classList.contains('on')) el.hidden = true; }, 500); }, 7000);
+  }
+  function tipsStart() {
+    tipsStop(); tipShow = setTimeout(function () { showTip(); tipLoop = setInterval(showTip, 28000); }, 5000);
+  }
+  function tipsStop() { clearTimeout(tipShow); clearInterval(tipLoop); clearTimeout(tipHide); var el = $('menuTip'); if (el) { el.classList.remove('on'); el.hidden = true; } }
   var menuBgTimer = 0;
   window.addEventListener('resize', function () { clearTimeout(menuBgTimer); menuBgTimer = setTimeout(function () { if ($('menuOverlay').classList.contains('open')) renderMenuBg(); }, 150); });
   function renderHero() {
@@ -6940,14 +7011,14 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
     }, 120);
   }
   var musicT = 0;
-  function closeAll() { stopRooms(); document.querySelectorAll('.overlay').forEach(function (o) { o.classList.remove('open'); }); document.body.classList.remove('in-screen'); musicScene(); }
+  function closeAll() { tipsStop(); stopRooms(); document.querySelectorAll('.overlay').forEach(function (o) { o.classList.remove('open'); }); document.body.classList.remove('in-screen'); musicScene(); }
   function open(id) {
     closeAll();
     if (id === 'menuOverlay') $('btnResume').hidden = !(state && !isOver());
     if (id === 'playOverlay') $('btnTutorial').classList.toggle('primary', !tutDone());
     if (id === 'playOverlay' || id === 'menuOverlay') renderHero();
     $(id).classList.add('open');
-    if (id === 'menuOverlay') { renderXpMini(); renderMenuBg(); }
+    if (id === 'menuOverlay') { renderXpMini(); renderMenuBg(); tipsStart(); }
     if (id === 'menuOverlay' || id === 'playOverlay') dailySyncQuiet();
     document.body.classList.toggle('in-screen', $(id).classList.contains('screen'));
     var sc = $(id); if (sc.scrollTo) sc.scrollTo(0, 0);
@@ -7469,6 +7540,35 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   $('btnPlay').addEventListener('click', function () { open('playOverlay'); });
   $('btnPlayBack').addEventListener('click', function () { open('menuOverlay'); });
   $('btnMenu').addEventListener('click', function () { open('menuOverlay'); });
+
+  /* ---------- Flecha de volver (arriba a la izquierda) y botón "atrás" del navegador/celu ---------- */
+  $('btnCustBack').addEventListener('click', function () { open('profileOverlay'); });
+  (function () {
+    var arrow = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>';
+    document.querySelectorAll('.overlay.screen').forEach(function (scr) {
+      if (scr.id === 'menuOverlay') return;
+      var orig = scr.querySelector('[id$="Back"],[id$="Close"],#btnWaitCancel'); if (!orig) return;
+      var a = document.createElement('button'); a.type = 'button'; a.className = 'backarrow'; a.innerHTML = arrow;
+      a.setAttribute('data-i18n-aria', 'menu.back'); a.setAttribute('aria-label', t('menu.back'));
+      a.addEventListener('click', function () { orig.click(); });
+      scr.insertBefore(a, scr.firstChild);
+      if (orig.getAttribute('data-i18n') === 'menu.back') orig.classList.add('back-dup');         // el botón de abajo queda oculto (la flecha lo reemplaza)
+    });
+    // Una sola entrada "de reserva" en el historial: el botón atrás la consume y la volvemos a poner, así nunca saca de la página.
+    function guard() { try { history.pushState({ pente: 1 }, ''); } catch (e) {} }
+    try { history.replaceState({ pente: 0 }, ''); } catch (e) {}
+    guard();
+    function backAction() {
+      var dlg = document.querySelector('.overlay.dialog.open');
+      if (dlg) { var c = { dlgOverlay: 'dlgNo', whoOverlay: 'whoClose', installOverlay: 'instClose', pauseOverlay: 'pauseResume' }[dlg.id]; if (c && $(c)) $(c).click(); return; }
+      var scr = document.querySelector('.overlay.screen.open');
+      if (scr) { var ar = scr.querySelector('.backarrow'); if (ar) ar.click(); return; }       // el menú principal es la raíz: se queda
+      if ($('endOverlay').classList.contains('open')) { $('btnEndBoard').click(); return; }
+      if (state || online.active) $('btnMenu').click();
+    }
+    window.addEventListener('popstate', function () { guard(); backAction(); });
+    window.__navBack = backAction;
+  })();
   $('btnRules').addEventListener('click', function () { open('rulesOverlay'); });
   $('btnRulesClose').addEventListener('click', function () { open('menuOverlay'); });
   $('btnRestart').addEventListener('click', function () {
