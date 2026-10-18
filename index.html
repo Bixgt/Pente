@@ -193,6 +193,22 @@ body.in-screen .app { visibility: hidden; }
 .chatform .btn { min-height: 44px; padding: 8px 14px; }
 #btnSide { white-space: nowrap; }
 
+/* Escritorio: el tablero ocupa TODO el hueco que dejan el encabezado y los botones (antes quedaba en ~650 px aunque sobrara pantalla).
+ * La .app pasa a medir el alto de la ventana y el tablero toma el menor entre el ancho y el alto disponibles de su caja (container query). */
+@media (min-width: 1100px) and (min-height: 560px) {
+  .app { max-width: min(1800px, 100vw) !important; height: 100vh; height: 100dvh; min-height: 0; }
+  .stage { min-height: 0; }
+  .board-wrap { container-type: size; }
+  #board { width: min(100cqw, 100cqh, 1400px); }
+  /* encabezado compacto: nombre, reloj y capturas en una sola línea */
+  .app { padding-top: 6px; padding-bottom: 6px; gap: 6px; }
+  .player { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 14px; padding: 5px 12px; }
+  .player[hidden] { display: none; }
+  .player .clock, .player .caps { margin-top: 0; }
+  .status { min-height: 1.6em; }
+  .actions { min-height: 0; }
+  .actions .btn { padding-top: 8px; padding-bottom: 8px; }
+}
 @media (min-width: 1100px) {
   .app { max-width: 1300px; }
   /* Escritorio: jugadas a la IZQUIERDA, tablero al centro, chat a la DERECHA. Columnas iguales => el tablero y los textos quedan centrados. */
@@ -5027,17 +5043,17 @@ body.in-tut .btn.gamecfg { display: none; }
       css: { '--bg': '#0f1a1e', '--panel': '#17262c', '--panel-2': '#203239', '--line': '#37575f', '--accent-ink': '#04181c', '--accent': '#53c8d6', '--s1a': '#5b5b64', '--s1b': '#09090c', '--s2a': '#fffefa', '--s2b': '#d8cbae', '--s3a': '#ffd2c2', '--s3b': '#d65a3e', '--s4a': '#cfe6ff', '--s4b': '#3f7ccb',
              '--board-shadow': '0 10px 30px rgba(0,0,0,.45)' },
       // sand: true -> la arena se genera por código. shell: las fichas son conchas (dos formas por color), ver shellSprite() en ui.js
-      board: { sand: true, groove: true, waves: true, bg: ['#f1e1b4', '#d6b87c'], line: 'rgba(92,62,28,.82)', lineGlow: null, star: 'rgba(92,62,28,.9)', label: 'rgba(95,65,30,.85)', labelHi: '#b3401c' },
+      board: { sand: true, groove: true, waves: true, dust: true, bg: ['#f1e1b4', '#d6b87c'], line: 'rgba(92,62,28,.82)', lineGlow: null, star: 'rgba(92,62,28,.9)', label: 'rgba(95,65,30,.85)', labelHi: '#b3401c' },
       stones: { 1: { a: '#5b5b64', b: '#09090c', glow: null, shell: 'black' }, 2: { a: '#fffefa', b: '#d8cbae', glow: null, shell: 'white' }, 3: { a: '#ffd2c2', b: '#d65a3e', glow: null, shell: 'coral' }, 4: { a: '#cfe6ff', b: '#3f7ccb', glow: null, shell: 'blue' } },
       last: { ring: '#e0603a', dot: { 1: '#f4f1ea', 2: '#111111', 3: '#ffffff', 4: '#ffffff' } },
       zone: { fill: 'rgba(90,60,20,.16)', stroke: 'rgba(90,60,20,.5)' },
-      win: '#e0603a', winStyle: 'ring', pendingRing: '#2b6fe8', kbd: '#b3401c', beta: true, sfx: 'playa'
+      win: '#e0603a', winStyle: 'ring', pendingRing: '#2b6fe8', kbd: '#b3401c', sfx: 'playa'
     }
   ];
   var OTHER_GEMS = ['rojo', 'ambar', 'violeta', 'turquesa', 'rosa'];
   // todos contra todos: las piedras 3 y 4 del tablero Tradicional son las primeras de esta lista que no usen los dos jugadores 1 y 2
   function extraGems(g1, g2) { return OTHER_GEMS.filter(function (g) { return g !== g1 && g !== g2; }).slice(0, 2); }
-  var ORDER = ['clasico', 'tradicional', 'glow', 'papel'];       // orden en el selector
+  var ORDER = ['clasico', 'tradicional', 'glow', 'papel', 'playa'];       // orden en el selector
   list.sort(function (x, y) { return ORDER.indexOf(x.id) - ORDER.indexOf(y.id); });
   var byId = {};
   list.forEach(function (th) { byId[th.id] = th; });
@@ -5969,6 +5985,7 @@ window.SHELL_IMG = {
     var v = rotCache.map[x + ',' + y]; return v === undefined ? -1 : v;
   }
   function angleOf(idx) { var h = Math.imul(idx + 1, 2654435761) >>> 0; h = Math.imul(h ^ (h >>> 15), 2246822519) >>> 0; h ^= h >>> 13; return (h % 6283) / 1000; }
+  var heldSpin = 0;
   function nextAngle() { return state && theme().stones[state.current].shell ? angleOf(state.moves.length) : 0; }     // giro de la ficha que se va a apoyar (el mismo que va a tener al soltarla)
   var animReq = 0, dropHints = 0, tapHints = 0;
   var hover = null;       // {x,y} previsualización (mouse / toque pendiente)
@@ -6125,6 +6142,7 @@ window.SHELL_IMG = {
 
   // Sonido y vibración de una jugada ya resuelta (captured = lista de fichas capturadas, ended = terminó la partida).
   function moveFeedback(captured, ended, winner) {
+    if (theme().board.dust && state && state.lastMove) spawnDust(state.lastMove.x, state.lastMove.y);
     if (captured.length) { sfx('place'); setTimeout(function () { sfx('capture'); }, 70); buzz([10, 40, 18]); }
     else { sfx('place'); buzz(8); }
     if (ended) setTimeout(function () { sfx(online.active && !online.spectator ? (winner === online.me ? 'win' : 'lose') : (ai.active && winner && winner !== ai.human ? 'lose' : 'win')); }, 380);
@@ -6751,7 +6769,7 @@ window.SHELL_IMG = {
     }
     if (cfg.confirm === 'none') { hover = null; tryMove(c.x, c.y); return; }
     pending = c; hover = null; kbd = c;
-    settle = cfg.anim ? { x0: pos.x, y0: pos.y, c: c, t0: performance.now(), dur: 130, player: state.current, rot: nextAngle() } : null;
+    settle = cfg.anim ? { x0: pos.x, y0: pos.y, c: c, t0: performance.now(), dur: 130, player: state.current, rot0: heldSpin, rot1: nextAngle() } : null;
     if (dropHints < 2) { dropHints++; setStatus(t(cfg.confirm === 'double' ? 'hud.dragHintDouble' : 'hud.dragHint'), true); } else setStatus('');
     render();
   }
@@ -6781,9 +6799,9 @@ window.SHELL_IMG = {
   function px(i) { return metrics.off + i * metrics.cell; }
 
   function seedOf(x, y, p) { return (x * 7 + y * 13 + p * 5) % 12; }                 // cada casilla tiene su propio garabato (siempre el mismo)
-  function rotFor(x, y, player) {                      // giro de una concha (solo temas con conchas)
+  function rotFor(x, y, player) {                      // giro de una concha YA apoyada (al azar, fijo para esa jugada); las vistas previas van derechas
     if (!theme().stones[player].shell) return 0;
-    var i = moveIndexOf(x, y); return angleOf(i < 0 ? (state ? state.moves.length : 0) : i);      // las que todavía no están jugadas (vista previa) usan el giro de la próxima
+    var i = moveIndexOf(x, y); return i < 0 ? 0 : angleOf(i);
   }
   function drawStone(x, y, player, alpha, highlight) { drawStonePx(px(x), px(y), player, alpha, highlight, 1, 0, seedOf(x, y, player), rotFor(x, y, player)); }
   // scale > 1 y lift (0..1) = ficha levantada: más grande y con sombra más lejana
@@ -6841,7 +6859,7 @@ window.SHELL_IMG = {
     if (spriteCount > 160) { sprites = {}; spriteCount = 0; }
     var im = shellImgs[kind], SS = 2, pad = Math.ceil(r0 * 0.3) + 2, size = Math.ceil((r0 + pad) * 2), N = size * SS, rnd = rng(seed * 31 + 9);
     var cv = document.createElement('canvas'); cv.width = cv.height = N;
-    var g = cv.getContext('2d'), k = 2.15 * r0 * SS / Math.max(im.width, im.height);
+    var g = cv.getContext('2d'), k = 1.95 * r0 * SS / Math.max(im.width, im.height);
     g.translate(N / 2, N / 2); g.imageSmoothingQuality = 'high';
     g.drawImage(im, -im.width * k / 2, -im.height * k / 2, im.width * k, im.height * k);
     var original = (kind === 'spiral' && color === 'black') || (kind === 'scallop' && color === 'white');
@@ -7385,6 +7403,7 @@ window.SHELL_IMG = {
       }
     }
     if (fx.length) drawFx(performance.now());
+    if (dust.length) drawDust(performance.now());
     if (holding) { drawHeld(th); if (cfg.loupe) drawLoupe(th); drawHeldStone(); }   // la lupa se saca antes de dibujar la ficha en el aire: así se ve la intersección sin tapar
     else if (settle) drawSettle();
     // cursor de teclado
@@ -7395,7 +7414,7 @@ window.SHELL_IMG = {
     if (replayBusy) return;
     updateHud();
     var now = performance.now();
-    if (!animReq && ((drag && drag.lifted && (cfg.anim || now - drag.liftStart < 150)) || settle || fx.length || (tut.active && tut.marks.length && cfg.anim))) animReq = requestAnimationFrame(function () { animReq = 0; render(); });
+    if (!animReq && ((drag && drag.lifted && (cfg.anim || now - drag.liftStart < 150)) || settle || fx.length || dust.length || (tut.active && tut.marks.length && cfg.anim))) animReq = requestAnimationFrame(function () { animReq = 0; render(); });
   }
 
 
@@ -7411,6 +7430,29 @@ window.SHELL_IMG = {
       if (mode === 'shatter') for (var k = 0; k < SHARDS; k++) sh.push({ v: 0.55 + Math.random() * 0.9, rot: (Math.random() - 0.5) * 7, up: 0.2 + Math.random() * 0.6 });
       (arr || fx).push({ x: c.x, y: c.y, p: c.p || owner, seed: seedOf(c.x, c.y, c.p || owner), t0: t0 + i * 40, dur: mode === 'shatter' ? 720 : 480, mode: mode, shards: sh, jit: Math.random() * Math.PI });
     });
+  }
+  /* Polvo de arena (tema Playa): al apoyar la ficha se levanta un soplo muy leve de arenita. Poco y breve a propósito. */
+  var dust = [];
+  function spawnDust(x, y) {
+    if (!cfg.anim) return;
+    var parts = [], n = 10, k; for (k = 0; k < n; k++) parts.push({ a: (k / n) * Math.PI * 2 + Math.random() * 0.6, v: 0.55 + Math.random() * 0.7, r: 0.035 + Math.random() * 0.04, up: 0.1 + Math.random() * 0.25 });
+    dust.push({ x: x, y: y, t0: performance.now(), dur: 560, parts: parts });
+    setTimeout(render, 0);
+  }
+  function drawDust(now) {
+    dust = dust.filter(function (d) { return now - d.t0 < d.dur; });
+    for (var i = 0; i < dust.length; i++) {
+      var d = dust[i], k = (now - d.t0) / d.dur, e = easeOut(k), cx = px(d.x), cy = px(d.y), c = metrics.cell;
+      ctx.save();
+      var g = ctx.createRadialGradient(cx, cy, c * 0.1, cx, cy, c * (0.35 + 0.55 * e));          // nubecita de fondo
+      g.addColorStop(0, 'rgba(226,200,150,' + (0.16 * (1 - k)) + ')'); g.addColorStop(1, 'rgba(226,200,150,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, c * (0.35 + 0.55 * e), 0, 6.3); ctx.fill();
+      d.parts.forEach(function (p) {                                                                // granitos que salen y se apagan
+        var dist = c * (0.25 + 0.5 * p.v) * e, x = cx + Math.cos(p.a) * dist, y = cy + Math.sin(p.a) * dist * 0.8 - c * p.up * e;
+        ctx.fillStyle = 'rgba(214,184,130,' + (0.5 * (1 - k) * (1 - k)) + ')'; ctx.beginPath(); ctx.arc(x, y, c * p.r * (1 - 0.4 * k), 0, 6.3); ctx.fill();
+      });
+      ctx.restore();
+    }
   }
   function drawFx(now) {
     fx = fx.filter(function (f) { return now - f.t0 < f.dur; });
@@ -7467,13 +7509,14 @@ window.SHELL_IMG = {
   }
   function drawHeldStone() {
     var pos = heldPos(), bad = !!dragError(drag.cell);
-    var tt = cfg.anim ? performance.now() : 0, spin = theme().stones[state.current].shell ? nextAngle() : tt * 0.0009, bob = cfg.anim ? Math.sin(tt * 0.003) : 0;     // flota y gira muy despacito (~7 s por vuelta)
+    var tt = cfg.anim ? performance.now() : 0, spin = tt * 0.0009, bob = cfg.anim ? Math.sin(tt * 0.003) : 0;     // flota y gira muy despacito (~7 s por vuelta)
+    heldSpin = spin;
     drawStonePx(pos.x, pos.y + bob * metrics.cell * 0.05, state.current, bad ? 0.65 : 1, false, 1.28 + bob * 0.03, 1, undefined, spin);
   }
   function drawSettle() {
     var k = Math.min(1, (performance.now() - settle.t0) / settle.dur), e = easeOut(k);
     var x = settle.x0 + (px(settle.c.x) - settle.x0) * e, y = settle.y0 + (px(settle.c.y) - settle.y0) * e;
-    drawStonePx(x, y, settle.player, 0.85 + 0.15 * e, false, 1.28 - 0.28 * e, 1 - e, undefined, settle.rot || 0);
+    drawStonePx(x, y, settle.player, 0.85 + 0.15 * e, false, 1.28 - 0.28 * e, 1 - e, undefined, (settle.rot0 || 0) + ((settle.rot1 || 0) - (settle.rot0 || 0)) * e);
   }
 
   /* ---------- Temas ---------- */
@@ -7505,7 +7548,6 @@ window.SHELL_IMG = {
   function buildThemePicker() {
     var box = $('themePicker'); box.innerHTML = '';
     window.Themes.list.forEach(function (th) {
-      if (th.beta && qs('playa') !== '1' && themeId !== th.id) return;          // en prueba: se ve solo abriendo el juego con ?playa=1
       var b = document.createElement('button'); b.type = 'button'; b.className = 'theme-opt'; b.dataset.id = th.id;
       var sw = document.createElement('span'); sw.className = 'swatch';
       sw.style.background = 'linear-gradient(135deg,' + th.board.bg[0] + ',' + th.board.bg[1] + ')';
