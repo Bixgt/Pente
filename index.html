@@ -7691,7 +7691,7 @@ window.NEON_BREAK = {
     captured.forEach(function (c, i) {
       var sh = [];
       if (mode === 'shatter') for (var k = 0; k < SHARDS; k++) sh.push({ v: 0.55 + Math.random() * 0.9, rot: (Math.random() - 0.5) * 7, up: 0.2 + Math.random() * 0.6 });
-      (arr || fx).push({ x: c.x, y: c.y, p: c.p || owner, seed: seedOf(c.x, c.y, c.p || owner), t0: t0 + i * 40, dur: mode === 'shatter' ? ((theme().stones[c.p || owner] || {}).neon ? 820 : 720) : 480, mode: mode, shards: sh, jit: Math.random() * Math.PI });
+      (arr || fx).push({ x: c.x, y: c.y, p: c.p || owner, seed: seedOf(c.x, c.y, c.p || owner), t0: t0 + i * 40, dur: mode === 'shatter' ? ((theme().stones[c.p || owner] || {}).neon ? 420 : 720) : 480, mode: mode, shards: sh, jit: Math.random() * Math.PI });
     });
   }
   /* Polvo de arena (tema Playa): al apoyar la ficha se levanta un soplo muy leve de arenita. Poco y breve a propósito. */
