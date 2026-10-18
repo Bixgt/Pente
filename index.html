@@ -782,7 +782,7 @@ body.in-tut .btn.gamecfg { display: none; }
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v63</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v64</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -1363,7 +1363,7 @@ body.in-tut .btn.gamecfg { display: none; }
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 63;</script>
+<script>window.PENTE_VERSION = 64;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -8474,7 +8474,11 @@ body.in-tut .btn.gamecfg { display: none; }
   /* ---------- Amigos y perfiles de otras personas (supabase/friends.sql) ---------- */
   var social = { ov: null, from: 'friends', view: null };
   function socialOk() { return !!(Auth && Auth.user && profile.nameSet); }
-  function frErr(e) { return t(e && e.status === 404 ? 'fr.notEnabled' : e && e.code === 'network' ? 'auth.err.network' : e && e.code === 'auth' ? 'auth.err.expired' : 'fr.err'); }
+  function frErr(e) {
+    var base = t(e && e.status === 404 ? 'fr.notEnabled' : e && e.code === 'network' ? 'auth.err.network' : e && e.code === 'auth' ? 'auth.err.expired' : 'fr.err');
+    var d = e && e.code !== 'network' && e.code !== 'auth' && e.status !== 404 ? String(e.message || '').replace(/\s+/g, ' ').slice(0, 140) : '';
+    return d && d !== (e && e.code) ? base + ' [' + (e.status || '?') + ': ' + d + ']' : base;     // el motivo técnico ayuda a encontrar qué falta en la base
+  }
   function frMsg(txt, bad) { var m = $('frMsg'); m.textContent = txt || ''; m.classList.toggle('bad', !!bad); }
   function socialNote(txt, bad) { if (social.from === 'lobby') lobbyNote(txt); else if ($('pviewOverlay').classList.contains('open')) { $('pvMsg').textContent = txt || ''; $('pvMsg').classList.toggle('bad', !!bad); } else frMsg(txt, bad); }
   function frRow(p, buttons) {
