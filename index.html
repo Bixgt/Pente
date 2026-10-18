@@ -668,6 +668,14 @@ body.in-tut .btn.gamecfg { display: none; }
 .flag { font-family: 'FlagsPente', 'PenteSans', system-ui, sans-serif; margin-right: 6px; font-weight: 400; letter-spacing: 0; }
 .flag.flag-big { font-size: 34px; margin: 0 0 0 10px; line-height: 1; }
 .flag[hidden] { display: none; }
+
+.cust-link { width: 100%; margin: 4px 0 10px; }
+
+.seek-toast { position: fixed; top: max(12px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 45; width: min(94vw, 560px); box-sizing: border-box; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 14px; background: var(--panel-2); border: 1px solid var(--accent); box-shadow: 0 8px 26px rgba(0,0,0,.4); }
+.seek-toast[hidden] { display: none; }
+.seek-txt { flex: 1; min-width: 0; font-size: 14px; line-height: 1.3; }
+.seek-toast .btn.small { min-height: 38px; padding: 6px 12px; flex: none; }
+@media (min-width: 900px) { #playOverlay .tiles { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); } }
 </style>
 </head>
 <body>
@@ -774,7 +782,7 @@ body.in-tut .btn.gamecfg { display: none; }
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v62</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v63</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -783,6 +791,7 @@ body.in-tut .btn.gamecfg { display: none; }
       <button class="btn" id="btnTourn" data-i18n="tn.menu"></button>
       <button class="btn" id="btnFriends"><span data-i18n="fr.btn"></span><b class="badge" id="frBadge" hidden></b></button>
       <button class="btn" id="btnStats" data-i18n="prof.stats"></button>
+      <button class="btn" id="btnCustomize" data-i18n="cz.title"></button>
       <button class="btn" id="btnRules" data-i18n="menu.rules"></button>
       <button class="btn" id="btnInstall" hidden data-i18n="inst.btn"></button>
     </div>
@@ -869,6 +878,7 @@ body.in-tut .btn.gamecfg { display: none; }
     <div class="tiles">
       <button type="button" class="tile" id="btnLocal"><span class="tile-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="5"/><circle cx="15" cy="15" r="5"/></svg></span><span class="tile-tx"><span class="tile-t" data-i18n="menu.local"></span><span class="tile-s" data-i18n="play.localSub"></span></span></button>
       <button type="button" class="tile" id="btnOnline"><span class="tile-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z"/></svg></span><span class="tile-tx"><span class="tile-t" data-i18n="menu.online"></span><span class="tile-s" data-i18n="play.onlineSub"></span></span></button>
+      <button type="button" class="tile" id="btnSeek"><span class="tile-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span><span class="tile-tx"><span class="tile-t" data-i18n="seek.btn"></span><span class="tile-s" data-i18n="seek.sub"></span></span></button>
       <button type="button" class="tile" id="btnTutorial"><span class="tile-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4z"/><path d="M7 9.5V15c0 1.5 2.2 3 5 3s5-1.5 5-3V9.5"/></svg></span><span class="tile-tx"><span class="tile-t" data-i18n="menu.tutorial"></span><span class="tile-s" data-i18n="play.tutorialSub"></span></span></button>
     </div>
     <div class="btns"><button class="btn" id="btnPlayBack" data-i18n="menu.back"></button></div>
@@ -972,25 +982,12 @@ body.in-tut .btn.gamecfg { display: none; }
   </div>
 </div>
 
-<div class="overlay screen" id="settingsOverlay">
+<!-- Personalización (aspecto del juego) -->
+<div class="overlay screen" id="customizeOverlay">
   <div class="screen-body settings">
-    <h2 id="cfgTitle" data-i18n="cfg.title"></h2>
-    <div class="tabs" role="tablist" id="cfgTabs">
-      <button type="button" role="tab" class="tab" data-tab="sound" data-i18n="cfg.tab.sound"></button>
-      <button type="button" role="tab" class="tab" data-tab="graphics" data-i18n="cfg.tab.graphics"></button>
-      <button type="button" role="tab" class="tab" data-tab="controls" data-i18n="cfg.tab.controls"></button>
-      <button type="button" role="tab" class="tab" data-tab="game" data-i18n="cfg.tab.game"></button>
-    </div>
-
-    <section class="tabpanel" id="tab-sound" role="tabpanel">
-      <label class="check"><input type="checkbox" id="optSound"><span><span data-i18n="cfg.sound"></span><small data-i18n="cfg.soundHint"></small></span></label>
-      <div class="field"><label class="lbl" for="cfgVolume"><span data-i18n="cfg.volume"></span> <b id="cfgVolumeVal"></b></label><input type="range" id="cfgVolume" min="0" max="100" step="5"></div>
-      <label class="check"><input type="checkbox" id="optMusic"><span><span data-i18n="mus.on"></span><small data-i18n="mus.hint"></small></span></label>
-      <div class="field"><label class="lbl" for="cfgMusicVol"><span data-i18n="mus.volume"></span> <b id="cfgMusicVolVal"></b></label><input type="range" id="cfgMusicVol" min="0" max="100" step="5"></div>
-      <label class="check"><input type="checkbox" id="optVibrate"><span><span data-i18n="cfg.vibrate"></span><small data-i18n="cfg.vibrateHint"></small></span></label>
-    </section>
-
-    <section class="tabpanel" id="tab-graphics" role="tabpanel" hidden>
+    <h2 data-i18n="cz.title"></h2>
+    <p class="sub" data-i18n="cz.sub"></p>
+    <section class="cz-panel" id="tab-graphics">
       <div class="field"><span class="lbl" data-i18n="cfg.theme"></span><div class="themes" id="themePicker" role="group"></div></div>
       <div class="field" id="gemField" hidden><span class="lbl" data-i18n="cfg.gems"></span>
         <div class="gem-row"><span class="gem-who" data-i18n="player.1"></span><div class="gem-picker" id="gemPicker1" role="group"></div></div>
@@ -1006,6 +1003,27 @@ body.in-tut .btn.gamecfg { display: none; }
         <div class="seg" data-cfg="captureFx" role="group"><button type="button" class="seg-opt" data-val="shatter" data-i18n="cfg.fx.shatter"></button><button type="button" class="seg-opt" data-val="fade" data-i18n="cfg.fx.fade"></button><button type="button" class="seg-opt" data-val="none" data-i18n="cfg.fx.none"></button></div>
         <p class="hint" data-i18n="cfg.captureFxHint"></p></div>
     </section>
+    <div class="btns"><button class="btn primary" id="btnCustomizeBack" data-i18n="menu.back"></button></div>
+  </div>
+</div>
+
+<div class="overlay screen" id="settingsOverlay">
+  <div class="screen-body settings">
+    <h2 id="cfgTitle" data-i18n="cfg.title"></h2>
+    <button type="button" class="btn cust-link" id="btnToCustom" data-i18n="cz.link"></button>
+    <div class="tabs" role="tablist" id="cfgTabs">
+      <button type="button" role="tab" class="tab" data-tab="sound" data-i18n="cfg.tab.sound"></button>
+      <button type="button" role="tab" class="tab" data-tab="controls" data-i18n="cfg.tab.controls"></button>
+      <button type="button" role="tab" class="tab" data-tab="game" data-i18n="cfg.tab.game"></button>
+    </div>
+
+    <section class="tabpanel" id="tab-sound" role="tabpanel">
+      <label class="check"><input type="checkbox" id="optSound"><span><span data-i18n="cfg.sound"></span><small data-i18n="cfg.soundHint"></small></span></label>
+      <div class="field"><label class="lbl" for="cfgVolume"><span data-i18n="cfg.volume"></span> <b id="cfgVolumeVal"></b></label><input type="range" id="cfgVolume" min="0" max="100" step="5"></div>
+      <label class="check"><input type="checkbox" id="optMusic"><span><span data-i18n="mus.on"></span><small data-i18n="mus.hint"></small></span></label>
+      <div class="field"><label class="lbl" for="cfgMusicVol"><span data-i18n="mus.volume"></span> <b id="cfgMusicVolVal"></b></label><input type="range" id="cfgMusicVol" min="0" max="100" step="5"></div>
+      <label class="check"><input type="checkbox" id="optVibrate"><span><span data-i18n="cfg.vibrate"></span><small data-i18n="cfg.vibrateHint"></small></span></label>
+    </section>
 
     <section class="tabpanel" id="tab-controls" role="tabpanel" hidden>
       <div class="field"><span class="lbl" data-i18n="cfg.confirm"></span>
@@ -1019,6 +1037,7 @@ body.in-tut .btn.gamecfg { display: none; }
     </section>
 
     <section class="tabpanel" id="tab-game" role="tabpanel" hidden>
+      <label class="check"><input type="checkbox" data-cfg="seekAlerts"><span><span data-i18n="cfg.seekAlerts"></span><small data-i18n="cfg.seekAlertsHint"></small></span></label>
       <label class="check"><input type="checkbox" data-cfg="botDelay"><span><span data-i18n="cfg.botDelay"></span><small data-i18n="cfg.botDelayHint"></small></span></label>
       <label class="check"><input type="checkbox" data-cfg="chat"><span><span data-i18n="cfg.chat"></span><small data-i18n="cfg.chatHint"></small></span></label>
       <label class="check"><input type="checkbox" data-cfg="zone"><span><span data-i18n="cfg.zone"></span><small data-i18n="cfg.zoneHint"></small></span></label>
@@ -1031,6 +1050,12 @@ body.in-tut .btn.gamecfg { display: none; }
 </div>
 
 <!-- Online: crear o unirse -->
+<div class="seek-toast" id="seekToast" role="status" aria-live="polite" hidden>
+  <span class="seek-txt" id="seekTxt"></span>
+  <button type="button" class="btn primary small" id="seekYes" data-i18n="seek.join"></button>
+  <button type="button" class="btn small" id="seekX" data-i18n-aria="a11y.close">✕</button>
+</div>
+
 <div class="overlay screen" id="onlineOverlay">
   <div class="screen-body">
     <h2 data-i18n="online.title"></h2>
@@ -1338,7 +1363,7 @@ body.in-tut .btn.gamecfg { display: none; }
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 62;</script>
+<script>window.PENTE_VERSION = 63;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -4085,6 +4110,7 @@ body.in-tut .btn.gamecfg { display: none; }
     "mode.pairs3": "Pares y tríos",
     "mode.triples": "Solo tríos",
     "mode.gomoku": "Gomoku",
+    "theme.playa": "Playa",
     "mode.bullet": "Bullet 🚀",
     "mode.hint.bullet": "Pente clásico con 1 minuto por jugador en total y sin tiempo por jugada. Si se te acaba el reloj, perdés.",
     "mode.blitz": "Blitz ⚡",
@@ -4293,7 +4319,22 @@ body.in-tut .btn.gamecfg { display: none; }
     "inv.watch": "se podrá mirar en las salas",
     "inv.yes": "Aceptar",
     "inv.no": "Ahora no",
-    "err.RESERVED": "Esa sala está reservada para otra persona."
+    "err.RESERVED": "Esa sala está reservada para otra persona.",
+    "cz.title": "Personalización",
+    "cz.sub": "Elegí cómo se ve tu tablero y tus fichas.",
+    "cz.link": "Personalización · tablero y fichas →",
+    "seek.btn": "Buscar partida",
+    "seek.sub": "Avisamos a los demás para ver quién se suma",
+    "seek.need": "Para buscar partida necesitás tu cuenta con nombre definitivo (Perfil → Cuenta).",
+    "seek.sent": "Avisamos a {n} persona(s) conectada(s). Esperando que alguien se sume…",
+    "seek.nobody": "Ahora no hay nadie más conectado. La sala queda abierta: compartí el link o esperá un rato.",
+    "seek.rate": "Ya avisaste hace instantes (se puede cada 1 minuto). La sala sigue abierta.",
+    "seek.err": "No pudimos mandar el aviso. La sala queda abierta: compartí el link o el código.",
+    "seek.toast": "{name} busca rival · {rules}",
+    "seek.join": "Unirme",
+    "seek.leaveGame": "Vas a dejar la partida actual para unirte. ¿Seguro?",
+    "cfg.seekAlerts": "Avisos de gente que busca partida",
+    "cfg.seekAlertsHint": "Un cartelito cuando alguien toca \"Buscar partida\". Con el juego en segundo plano, también una notificación del navegador (si la permitiste)."
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -4318,6 +4359,7 @@ body.in-tut .btn.gamecfg { display: none; }
     "mode.pairs3": "Pairs & triples",
     "mode.triples": "Triples only",
     "mode.gomoku": "Gomoku",
+    "theme.playa": "Beach",
     "mode.bullet": "Bullet 🚀",
     "mode.hint.bullet": "Classic Pente with 1 minute per player in total and no per-move time. If your clock runs out, you lose.",
     "mode.blitz": "Blitz ⚡",
@@ -4526,7 +4568,22 @@ body.in-tut .btn.gamecfg { display: none; }
     "inv.watch": "it can be watched in the rooms",
     "inv.yes": "Accept",
     "inv.no": "Not now",
-    "err.RESERVED": "That room is reserved for someone else."
+    "err.RESERVED": "That room is reserved for someone else.",
+    "cz.title": "Customize",
+    "cz.sub": "Pick how your board and stones look.",
+    "cz.link": "Customize · board and stones →",
+    "seek.btn": "Find a game",
+    "seek.sub": "We let others know to see who joins",
+    "seek.need": "To find a game you need your account with a final name (Profile → Account).",
+    "seek.sent": "We notified {n} online player(s). Waiting for someone to join…",
+    "seek.nobody": "Nobody else is online right now. The room stays open: share the link or wait a while.",
+    "seek.rate": "You just did that (once per minute). The room is still open.",
+    "seek.err": "We couldn't send the alert. The room stays open: share the link or the code.",
+    "seek.toast": "{name} is looking for an opponent · {rules}",
+    "seek.join": "Join",
+    "seek.leaveGame": "You'll leave your current game to join. Sure?",
+    "cfg.seekAlerts": "Alerts when someone looks for a game",
+    "cfg.seekAlertsHint": "A small banner when someone taps \"Find a game\". With the game in the background, also a browser notification (if you allowed it)."
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -4964,6 +5021,17 @@ body.in-tut .btn.gamecfg { display: none; }
       zone: { fill: 'rgba(0,0,0,.07)', stroke: 'rgba(0,0,0,.45)' },
       win: '#c0261d', winStyle: 'pen', pendingRing: '#e8791f', kbd: '#c0261d'
     }
+    ,{
+      id: 'playa',
+      css: { '--bg': '#0f1a1e', '--panel': '#17262c', '--panel-2': '#203239', '--line': '#37575f', '--accent-ink': '#04181c', '--accent': '#53c8d6', '--s1a': '#5b5b64', '--s1b': '#09090c', '--s2a': '#fffefa', '--s2b': '#d8cbae', '--s3a': '#ffd2c2', '--s3b': '#d65a3e', '--s4a': '#cfe6ff', '--s4b': '#3f7ccb',
+             '--board-shadow': '0 10px 30px rgba(0,0,0,.45)' },
+      // sand: true -> la arena se genera por código. shell: las fichas son conchas (dos formas por color), ver shellSprite() en ui.js
+      board: { sand: true, bg: ['#f1e1b4', '#d6b87c'], line: 'rgba(92,62,28,.82)', lineGlow: null, star: 'rgba(92,62,28,.9)', label: 'rgba(95,65,30,.85)', labelHi: '#b3401c' },
+      stones: { 1: { a: '#5b5b64', b: '#09090c', glow: null, shell: 'black' }, 2: { a: '#fffefa', b: '#d8cbae', glow: null, shell: 'white' }, 3: { a: '#ffd2c2', b: '#d65a3e', glow: null, shell: 'coral' }, 4: { a: '#cfe6ff', b: '#3f7ccb', glow: null, shell: 'blue' } },
+      last: { ring: '#e0603a', dot: { 1: '#f4f1ea', 2: '#111111', 3: '#ffffff', 4: '#ffffff' } },
+      zone: { fill: 'rgba(90,60,20,.16)', stroke: 'rgba(90,60,20,.5)' },
+      win: '#e0603a', winStyle: 'ring', pendingRing: '#2b6fe8', kbd: '#b3401c', beta: true
+    }
   ];
   var OTHER_GEMS = ['rojo', 'ambar', 'violeta', 'turquesa', 'rosa'];
   // todos contra todos: las piedras 3 y 4 del tablero Tradicional son las primeras de esta lista que no usen los dos jugadores 1 y 2
@@ -4972,7 +5040,7 @@ body.in-tut .btn.gamecfg { display: none; }
   list.sort(function (x, y) { return ORDER.indexOf(x.id) - ORDER.indexOf(y.id); });
   var byId = {};
   list.forEach(function (th) { byId[th.id] = th; });
-  root.Themes = { list: list, byId: byId, defaultId: 'clasico', gems: gems, gemStone: gemStone, extraGems: extraGems };
+  root.Themes = { list: list, byId: byId, defaultId: 'tradicional', gems: gems, gemStone: gemStone, extraGems: extraGems };
 })(typeof self !== 'undefined' ? self : this);
 </script>
 <script src="config.js"></script>
@@ -5772,7 +5840,7 @@ body.in-tut .btn.gamecfg { display: none; }
 
   /* Configuración del dispositivo (pantalla "Configuración"): se guarda en localStorage y se aplica al instante. */
   var coarse = matchMedia('(pointer: coarse)').matches, reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var CFG_DEFAULTS = { confirm: 'button', lift: 'mid', guides: true, coords: true, lastMove: true, anim: true, stoneSize: 'normal', zone: true, captureFx: 'shatter', chat: true, botDelay: true, loupe: false, gem1: 'azul', gem2: 'verde', menuBg: true };
+  var CFG_DEFAULTS = { confirm: 'button', lift: 'mid', guides: true, coords: true, lastMove: true, anim: true, stoneSize: 'normal', zone: true, captureFx: 'shatter', chat: true, botDelay: true, loupe: false, gem1: 'azul', gem2: 'verde', menuBg: true, seekAlerts: true };
   var CFG_ALLOWED = { confirm: ['button', 'double', 'none'], lift: ['low', 'mid', 'high'], stoneSize: ['small', 'normal', 'large'], captureFx: ['shatter', 'fade', 'none'], gem1: window.Themes.gems.map(function (g) { return g.id; }), gem2: window.Themes.gems.map(function (g) { return g.id; }) };
   function cleanCfg(raw) {
     var c = {}, k;
@@ -6603,7 +6671,7 @@ body.in-tut .btn.gamecfg { display: none; }
   }
   function layout() {      // con coordenadas hay margen sup./izq. para letras y números; sin ellas el tablero aprovecha ese espacio
     var n = boardN();
-    if (cfg.coords) { metrics.cell = metrics.w / (n + 0.65); metrics.off = metrics.cell * 1.15; }
+    if (cfg.coords) { metrics.cell = metrics.w / (n + 1.3); metrics.off = metrics.cell * 1.15; }     // margen parejo en los 4 lados: letras arriba y abajo, números a izquierda y derecha
     else { metrics.cell = metrics.w / n; metrics.off = metrics.cell * 0.5; }
   }
   function px(i) { return metrics.off + i * metrics.cell; }
@@ -6617,6 +6685,7 @@ body.in-tut .btn.gamecfg { display: none; }
     var th = theme(), st = th.stones[player]; hlPlayer = player;
     var r = metrics.cell * stoneK() * (scale || 1);
     if (st.gem) { drawGem(cx, cy, r, st.gem, alpha, highlight, lift || 0, spin || 0); return; }
+    if (st.shell) { drawShell(cx, cy, st, alpha, highlight, scale || 1, lift || 0, seed === undefined ? 3 : seed, r, th, player); return; }
     if (st.scribble) { drawScribble(cx, cy, st, alpha, highlight, scale || 1, lift || 0, seed === undefined ? 3 : seed, r, th, spin || 0); return; }
     ctx.save(); ctx.globalAlpha = alpha;
     if (st.glow) { ctx.shadowColor = st.glow; ctx.shadowBlur = r * (1.2 + (lift || 0) * 0.8); }
@@ -6629,6 +6698,78 @@ body.in-tut .btn.gamecfg { display: none; }
     if (highlight) drawWinMark(cx, cy, r, player, th, seed === undefined ? 3 : seed);
   }
 
+
+
+  /* ---------- Conchas (tema Playa) ----------
+   * Cada color tiene DOS formas de concha: vieira (abanico con costillas) y caracol (espiral). Cuál toca en cada casilla lo decide la casilla
+   * (seedOf), así que siempre es la misma. Se dibujan por código en un sprite chico y se reutilizan. */
+  var SHELL_COL = {
+    black: { a: '#5b5b64', b: '#09090c', rib: 'rgba(0,0,0,.55)', hi: 'rgba(255,255,255,.42)', edge: 'rgba(0,0,0,.75)', mouth: '#000000' },
+    white: { a: '#fffefa', b: '#d8cbae', rib: 'rgba(125,96,58,.42)', hi: 'rgba(255,255,255,.95)', edge: 'rgba(110,84,48,.6)', mouth: '#b79a72' },
+    coral: { a: '#ffd2c2', b: '#d65a3e', rib: 'rgba(120,30,10,.4)', hi: 'rgba(255,255,255,.7)', edge: 'rgba(110,30,10,.6)', mouth: '#a63a22' },
+    blue:  { a: '#cfe6ff', b: '#3f7ccb', rib: 'rgba(10,40,100,.4)', hi: 'rgba(255,255,255,.7)', edge: 'rgba(10,40,100,.6)', mouth: '#1f4f99' }
+  };
+  function shellKind(seed) { return (seed % 2) ? 'spiral' : 'scallop'; }
+  function shellSprite(color, seed, r0) {
+    var kind = shellKind(seed), key = 'sh|' + kind + '|' + color + '|' + (seed % 6) + '|' + Math.round(r0 * 4);
+    if (sprites[key]) return sprites[key];
+    if (spriteCount > 160) { sprites = {}; spriteCount = 0; }
+    var C = SHELL_COL[color] || SHELL_COL.white, pad = Math.ceil(r0 * 0.35) + 2, size = Math.ceil((r0 + pad) * 2), cv = document.createElement('canvas');
+    cv.width = cv.height = size;
+    var g = cv.getContext('2d'), rnd = rng(seed * 29 + 5), R = r0, i, a;
+    g.translate(size / 2, size / 2); g.lineCap = 'round'; g.lineJoin = 'round';
+    g.rotate((rnd() - 0.5) * (kind === 'scallop' ? 0.7 : 6.28));
+    if (kind === 'scallop') {
+      // abanico: la charnela abajo, el borde ondulado arriba
+      var hx = 0, hy = R * 0.9, RF = R * 1.72, half = 0.98, N = 7, th0 = -Math.PI / 2 - half, st = (half * 2) / N;
+      var grd = g.createRadialGradient(hx - R * 0.15, hy - RF * 0.55, R * 0.1, hx, hy - RF * 0.35, RF * 0.95); grd.addColorStop(0, C.a); grd.addColorStop(1, C.b);
+      g.beginPath(); g.moveTo(hx - R * 0.42, hy + R * 0.02);
+      for (i = 0; i < N; i++) {
+        var a0 = th0 + i * st, a1 = a0 + st, am = (a0 + a1) / 2;
+        if (i === 0) g.lineTo(hx + Math.cos(a0) * RF, hy + Math.sin(a0) * RF);
+        g.quadraticCurveTo(hx + Math.cos(am) * RF * 1.13, hy + Math.sin(am) * RF * 1.13, hx + Math.cos(a1) * RF, hy + Math.sin(a1) * RF);
+      }
+      g.lineTo(hx + R * 0.42, hy + R * 0.02); g.closePath(); g.fillStyle = grd; g.fill();
+      g.strokeStyle = C.edge; g.lineWidth = Math.max(1, R * 0.06); g.stroke();
+      g.save(); g.clip();
+      g.strokeStyle = C.rib; g.lineWidth = Math.max(1, R * 0.055);
+      for (i = 0; i <= N; i++) { a = th0 + i * st; g.beginPath(); g.moveTo(hx + Math.cos(a) * RF * 0.12, hy + Math.sin(a) * RF * 0.12); g.lineTo(hx + Math.cos(a) * RF * 1.15, hy + Math.sin(a) * RF * 1.15); g.stroke(); }
+      g.strokeStyle = C.hi; g.lineWidth = Math.max(1, R * 0.04);
+      for (i = 0; i < N; i++) { a = th0 + (i + 0.5) * st; g.beginPath(); g.moveTo(hx + Math.cos(a) * RF * 0.25, hy + Math.sin(a) * RF * 0.25); g.lineTo(hx + Math.cos(a) * RF * 0.98, hy + Math.sin(a) * RF * 0.98); g.stroke(); }
+      g.strokeStyle = C.rib; g.lineWidth = Math.max(1, R * 0.04);
+      [0.5, 0.74].forEach(function (k) { g.beginPath(); g.arc(hx, hy, RF * k, th0, th0 + half * 2); g.stroke(); });
+      g.restore();
+      g.fillStyle = C.b; g.strokeStyle = C.edge; g.lineWidth = Math.max(1, R * 0.05);       // las "orejitas" de la charnela
+      g.beginPath(); g.moveTo(hx - R * 0.62, hy + R * 0.1); g.lineTo(hx - R * 0.34, hy - R * 0.14); g.lineTo(hx + R * 0.34, hy - R * 0.14); g.lineTo(hx + R * 0.62, hy + R * 0.1); g.closePath(); g.fill(); g.stroke();
+    } else {
+      // caracol: cuerpo redondo con la espiral y la boca asomando
+      var body = g.createRadialGradient(-R * 0.3, -R * 0.35, R * 0.1, 0, 0, R * 1.05); body.addColorStop(0, C.a); body.addColorStop(1, C.b);
+      g.beginPath();
+      for (i = 0; i <= 40; i++) { a = i / 40 * Math.PI * 2; var rr = R * (0.96 + 0.05 * Math.sin(a * 3 + 1) + (Math.cos(a - 0.9) > 0.8 ? 0.07 : 0)); i ? g.lineTo(Math.cos(a) * rr, Math.sin(a) * rr) : g.moveTo(rr, 0); }
+      g.closePath(); g.fillStyle = body; g.fill(); g.strokeStyle = C.edge; g.lineWidth = Math.max(1, R * 0.06); g.stroke();
+      g.save(); g.clip();
+      var turns = 3.1, steps = 90;
+      for (var pass = 0; pass < 2; pass++) {
+        g.strokeStyle = pass ? C.hi : C.rib; g.lineWidth = Math.max(1, R * (pass ? 0.035 : 0.075)); g.beginPath();
+        for (i = 0; i <= steps; i++) { var tt = i / steps, ang = tt * turns * Math.PI * 2 + 0.6, rad = R * 1.02 * Math.pow(tt, 0.78) + (pass ? R * 0.05 : 0); i ? g.lineTo(Math.cos(ang) * rad, Math.sin(ang) * rad) : g.moveTo(Math.cos(ang) * rad, Math.sin(ang) * rad); }
+        g.stroke();
+      }
+      g.restore();
+      var ma = 0.6 + turns * Math.PI * 2, mx = Math.cos(ma) * R * 0.62, my = Math.sin(ma) * R * 0.62;      // la boca
+      g.save(); g.translate(mx, my); g.rotate(ma + 1.57); g.fillStyle = C.mouth; g.strokeStyle = C.edge; g.lineWidth = Math.max(1, R * 0.05);
+      g.beginPath(); g.ellipse(0, 0, R * 0.2, R * 0.31, 0, 0, Math.PI * 2); g.fill(); g.stroke();
+      g.strokeStyle = C.hi; g.lineWidth = Math.max(1, R * 0.035); g.beginPath(); g.ellipse(0, 0, R * 0.2, R * 0.31, 0, 3.6, 5.4); g.stroke(); g.restore();
+    }
+    return (sprites[key] = { cv: cv, size: size }, spriteCount++, sprites[key]);
+  }
+  function drawShell(cx, cy, st, alpha, highlight, scale, lift, seed, r, th, player) {
+    var sp = shellSprite(st.shell, seed, r / scale * 1.1), s = sp.size * scale;
+    ctx.save(); ctx.globalAlpha = alpha;
+    ctx.shadowColor = 'rgba(70,45,15,' + (0.5 - 0.12 * (lift || 0)) + ')'; ctx.shadowBlur = r * (0.3 + (lift || 0) * 0.7); ctx.shadowOffsetY = r * (0.1 + (lift || 0) * 0.5); ctx.shadowOffsetX = r * 0.04;
+    ctx.drawImage(sp.cv, cx - s / 2, cy - s / 2, s, s);
+    ctx.restore();
+    if (highlight) drawWinMark(cx, cy, r, player, th, seed);
+  }
 
   /* ---------- Fichas de garabato (tema Papel) ---------- */
   var sprites = {}, spriteCount = 0;
@@ -6769,6 +6910,28 @@ body.in-tut .btn.gamecfg { display: none; }
 
   /* Madera: veta ondulada clara y oscura, juntas de tablas, un poco de ruido y viñeta. Se genera una vez por tamaño. */
   var woodCache = {};
+
+  /* Arena: degradé cálido, ondas del mar sobre la arena, granitos, unas pocas piedritas y una orilla más húmeda abajo. Se genera una vez por tamaño. */
+  var sandCache = {};
+  function sandFor(W) {
+    if (sandCache[W]) return sandCache[W];
+    var cv = document.createElement('canvas'); cv.width = cv.height = W; var g = cv.getContext('2d'), rnd = rng(2024), i, x;
+    var bg = g.createLinearGradient(0, 0, W, W); bg.addColorStop(0, '#f1e1b4'); bg.addColorStop(0.55, '#e4cb92'); bg.addColorStop(1, '#d6b87c'); g.fillStyle = bg; g.fillRect(0, 0, W, W);
+    g.lineCap = 'round';
+    for (i = 0; i < 26; i++) {                                       // ondas de arena (como las que deja el agua)
+      var y0 = (i + rnd() * 0.8) / 26 * W, amp = W * (0.004 + rnd() * 0.01), fr = (1.2 + rnd() * 2.2) * Math.PI / W, ph = rnd() * 6.28;
+      g.strokeStyle = rnd() < 0.55 ? 'rgba(140,100,40,' + (0.05 + rnd() * 0.07) + ')' : 'rgba(255,248,220,' + (0.12 + rnd() * 0.18) + ')';
+      g.lineWidth = Math.max(1, W / 380 * (0.7 + rnd() * 1.4)); g.beginPath();
+      for (x = 0; x <= W; x += W / 40) { var y = y0 + Math.sin(x * fr + ph) * amp + Math.sin(x * fr * 2.3 + ph * 1.7) * amp * 0.4 + x * 0.04; x ? g.lineTo(x, y) : g.moveTo(x, y); }
+      g.stroke();
+    }
+    for (i = 0; i < Math.round(W * W / 90); i++) { g.fillStyle = rnd() < 0.5 ? 'rgba(120,85,35,' + (0.05 + rnd() * 0.16) + ')' : 'rgba(255,250,230,' + (0.1 + rnd() * 0.3) + ')'; g.fillRect(rnd() * W, rnd() * W, 1 + (rnd() < 0.15 ? 1 : 0), 1); }
+    for (i = 0; i < 16; i++) { var px0 = rnd() * W, py0 = rnd() * W, pr = W * (0.002 + rnd() * 0.004); g.fillStyle = 'rgba(110,80,40,' + (0.18 + rnd() * 0.2) + ')'; g.beginPath(); g.ellipse(px0, py0, pr * 1.4, pr, rnd() * 3, 0, 6.3); g.fill(); g.fillStyle = 'rgba(255,245,215,.35)'; g.beginPath(); g.ellipse(px0 - pr * 0.3, py0 - pr * 0.3, pr * 0.6, pr * 0.35, 0, 0, 6.3); g.fill(); }
+    var wet = g.createLinearGradient(0, W * 0.78, 0, W); wet.addColorStop(0, 'rgba(120,85,40,0)'); wet.addColorStop(1, 'rgba(120,85,40,.22)'); g.fillStyle = wet; g.fillRect(0, W * 0.78, W, W * 0.22);
+    var v = g.createRadialGradient(W / 2, W / 2, W * 0.4, W / 2, W / 2, W * 0.8); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(90,60,20,.2)'); g.fillStyle = v; g.fillRect(0, 0, W, W);
+    g.strokeStyle = 'rgba(95,65,28,.55)'; g.lineWidth = Math.max(2, W / 240); g.strokeRect(W * 0.01, W * 0.01, W * 0.98, W * 0.98);     // marco de madera de playa
+    return (sandCache[W] = cv);
+  }
   function woodFor(W) {
     if (woodCache[W]) return woodCache[W];
     var cv = document.createElement('canvas'); cv.width = cv.height = W; var g = cv.getContext('2d'), rnd = rng(31337), i, x, k;
@@ -6855,10 +7018,10 @@ body.in-tut .btn.gamecfg { display: none; }
       var hiX = active && active.x === i, hiY = active && active.y === i;
       ctx.font = (hiX ? '800 ' : '600 ') + Math.round(c * (th.board.paper ? 0.56 : 0.5)) + 'px ' + uiFont();
       ctx.fillStyle = hiX ? th.board.labelHi : th.board.label;
-      ctx.fillText(P.COLS.charAt(i), px(i), c * 0.45);
+      ctx.fillText(P.COLS.charAt(i), px(i), c * 0.45); ctx.fillText(P.COLS.charAt(i), px(i), metrics.w - c * 0.45);
       ctx.font = (hiY ? '800 ' : '600 ') + Math.round(c * (th.board.paper ? 0.56 : 0.5)) + 'px ' + uiFont();
       ctx.fillStyle = hiY ? th.board.labelHi : th.board.label;
-      ctx.fillText(String(i + 1), c * 0.45, px(i));
+      ctx.fillText(String(i + 1), c * 0.45, px(i)); ctx.fillText(String(i + 1), metrics.w - c * 0.45, px(i));
     }
     ctx.restore();
   }
@@ -6872,6 +7035,7 @@ body.in-tut .btn.gamecfg { display: none; }
     // fondo del tablero
     if (th.board.paper) ctx.drawImage(paperFor(W), 0, 0);
     else if (th.board.wood) ctx.drawImage(woodFor(W), 0, 0);
+    else if (th.board.sand) ctx.drawImage(sandFor(W), 0, 0);
     else {
       var bg = ctx.createLinearGradient(0, 0, W, W);
       bg.addColorStop(0, th.board.bg[0]); bg.addColorStop(1, th.board.bg[1]);
@@ -7061,6 +7225,7 @@ body.in-tut .btn.gamecfg { display: none; }
   function buildThemePicker() {
     var box = $('themePicker'); box.innerHTML = '';
     window.Themes.list.forEach(function (th) {
+      if (th.beta && qs('playa') !== '1' && themeId !== th.id) return;          // en prueba: se ve solo abriendo el juego con ?playa=1
       var b = document.createElement('button'); b.type = 'button'; b.className = 'theme-opt'; b.dataset.id = th.id;
       var sw = document.createElement('span'); sw.className = 'swatch';
       sw.style.background = 'linear-gradient(135deg,' + th.board.bg[0] + ',' + th.board.bg[1] + ')';
@@ -7260,7 +7425,7 @@ body.in-tut .btn.gamecfg { display: none; }
     clearTimeout(online.awaitTimer); clearClaim();
     online.net = null; online.active = false; online.conn = 'closed'; online.code = ''; online.token = ''; online.me = 0;
     online.spectator = false; online.specN = 0; online.cid = ''; chatReset(); stopRooms(); fx.length = 0; $('btnSpectateOffer').hidden = true;
-    online.intent = null; online.invite = null; online.rejoining = false; online.over = null; online.awaiting = false; online.rivalLeftAt = 0;
+    online.intent = null; online.invite = null; online.seek = false; online.rejoining = false; online.over = null; online.awaiting = false; online.rivalLeftAt = 0;
     online.connected = { 1: true, 2: true, 3: true, 4: true }; online.rematch = { 1: false, 2: false, 3: false, 4: false }; online.seat = 0; online.players = 2; online.bots = {}; online.mode = 'classic'; online.ffa = false; seatNames = {};
     clearSession(); updateOnlineButtons(); updateRematchUi();
     if (wasActive) { videoDiscard(); state = null; clk = null; hover = pending = null; setStatus(''); render(); }
@@ -7276,7 +7441,9 @@ body.in-tut .btn.gamecfg { display: none; }
         if (!m.spectator) { online.token = m.token; saveSession(); }       // los espectadores no tienen lugar que recuperar
         online.intent = null; online.rejoining = false; onlineMsg(''); updateOnlineButtons();
         if (online.invite && !m.spectator && m.you === 1) inviteSend(m.code);
+        if (online.seek && !m.spectator && m.you === 1) seekSend();
         break;
+      case 'seekRes': $('waitMsg').textContent = m.ok ? t(m.n ? 'seek.sent' : 'seek.nobody', { n: m.n }) : t(m.reason === 'rate' ? 'seek.rate' : 'seek.err'); break;
       case 'inviteRes': inviteResult(m); break;
       case 'inviteDeclined': $('waitMsg').textContent = t(m.reason === 'busy' ? 'ch.busy' : 'ch.declined', { name: m.name || '' }); break;
       case 'rooms': renderRooms(m.rooms); break;
@@ -7670,6 +7837,7 @@ body.in-tut .btn.gamecfg { display: none; }
   setInterval(inviteSync, 20000); setTimeout(inviteSync, 4000);
   function invRules(o) { o = o || {}; var mode = o.bullet ? 'bullet' : o.blitz ? 'blitz' : o.variant || 'classic'; return t('mode.' + mode) + ' · ' + (o.size || 13) + '×' + (o.size || 13); }
   function onInviteMessage(m) {
+    if (m && m.t === 'looking') { onLooking(m); return; }
     if (!m || m.t !== 'invite' || !m.code || !m.from) return;
     if (online.active || daily.active || tut.active) { if (inv.net) inv.net.send({ t: 'inviteNo', code: m.code, name: myName(), reason: 'busy' }); return; }
     inv.cur = m;
@@ -7695,6 +7863,35 @@ body.in-tut .btn.gamecfg { display: none; }
     var watch = $('chWatch').checked; online.invite = { to: ch.id, name: ch.name }; ch = null; online.isPublic = watch;
     startOnline({ t: 'create', opts: { variant: modeVariant(settings.mode), blitz: settings.mode === 'blitz', bullet: settings.mode === 'bullet', tournamentRule: settings.tournamentRule, exactFive: settings.exactFive, size: settings.size, timer: settings.timer, players: 2, public: watch, hold: true } });
   });
+  /* ---------- Buscar partida: avisa a las cuentas conectadas que alguien busca rival ---------- */
+  var seekT = 0, seekCur = null;
+  function seekHide() { clearTimeout(seekT); $('seekToast').hidden = true; seekCur = null; }
+  function onLooking(m) {
+    if (!m || !m.code || !m.from || !cfg.seekAlerts) return;
+    if (online.active || daily.active || tut.active) return;
+    seekCur = m;
+    var txt = t('seek.toast', { name: m.from.name, rules: invRules(m.opts) });
+    $('seekTxt').textContent = txt; $('seekToast').hidden = false; clearTimeout(seekT); seekT = setTimeout(seekHide, 30000);
+    try { sfx('levelup'); } catch (e) {}
+    try { if (document.hidden && 'Notification' in window && Notification.permission === 'granted') { var nt = new Notification('Pente', { body: txt, tag: 'pente-seek' }); nt.onclick = function () { try { window.focus(); } catch (e) {} nt.close(); }; } } catch (e) {}
+  }
+  $('seekX').addEventListener('click', seekHide);
+  $('seekYes').addEventListener('click', function () {
+    var m = seekCur; seekHide(); if (!m) return;
+    var go = function () { $('btnSpectateOffer').hidden = true; startOnline({ t: 'join', code: m.code }); };
+    if (state && !isOver() && !online.active) ask(t('seek.leaveGame'), t('seek.join'), go); else go();
+  });
+  function seekStart() {
+    if (!socialOk()) { onlineMsg(t('seek.need')); open('onlineOverlay'); return; }
+    try { if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission(); } catch (e) {}
+    online.isPublic = true; online.seek = true;
+    startOnline({ t: 'create', opts: { variant: modeVariant(settings.mode), blitz: settings.mode === 'blitz', bullet: settings.mode === 'bullet', tournamentRule: settings.tournamentRule, exactFive: settings.exactFive, size: settings.size, timer: settings.timer, players: 2, public: true } });
+  }
+  $('btnSeek').addEventListener('click', seekStart);
+  function seekSend() {
+    if (!online.seek || !online.net) return; online.seek = false;
+    Auth.accessToken().then(function (tk) { if (online.net) online.net.send({ t: 'seek', jwt: tk, avatar: profile.avatar, country: myCountry }); });
+  }
   function inviteSend(code) {
     var iv = online.invite; if (!iv || !online.net) return;
     Auth.accessToken().then(function (tk) { if (online.net && online.invite === iv) online.net.send({ t: 'invite', to: iv.to, code: code, jwt: tk, avatar: profile.avatar, country: myCountry }); });
@@ -8752,10 +8949,16 @@ body.in-tut .btn.gamecfg { display: none; }
   var cfgFromGame = false;                                    // la configuración se abrió desde la partida: al volver se retoma la partida
   function openCfg(fromGame) {
     var tab = 'sound'; try { tab = sessionStorage.getItem('pente.tab') || 'sound'; } catch (e) {}
+    if (!document.getElementById('tab-' + tab)) tab = 'sound';
     cfgFromGame = !!fromGame; syncCfgUi(); showTab(tab); open('settingsOverlay');
   }
   $('btnSettings').addEventListener('click', function () { openCfg(false); });
   $('btnGameCfg').addEventListener('click', function () { openCfg(true); });
+  var czFrom = 'menuOverlay';
+  function openCustomize(from) { czFrom = from; syncCfgUi(); open('customizeOverlay'); }
+  $('btnCustomize').addEventListener('click', function () { openCustomize('menuOverlay'); });
+  $('btnToCustom').addEventListener('click', function () { openCustomize('settingsOverlay'); });
+  $('btnCustomizeBack').addEventListener('click', function () { open(czFrom); });
   $('btnSettingsBack').addEventListener('click', function () { if (cfgFromGame) { cfgFromGame = false; closeAll(); aiMaybeMove(); if (state && isOver()) updateResultBtn(); } else open('menuOverlay'); });
   $('btnCfgReset').addEventListener('click', function () {
     ask(t('cfg.resetConfirm'), t('dlg.reset'), function () {
