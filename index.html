@@ -724,6 +724,12 @@ html[data-theme="papel"] #menuBg { opacity: .9; }
 html[data-theme="playa"] #menuBg { opacity: 1; -webkit-mask-image: none; mask-image: none; }
 html[data-theme="playa"] #menuOverlay { --bg: #e9d9a8; --panel: #f6ecc9; --panel-2: #f3e4b8; --text: #3a2812; --muted: #6a5330; --line: #b99a5c; --accent: #2fb0bf; --accent-ink: #042126; color: var(--text); }
 html[data-theme="playa"] #menuOverlay .chip { color: #0b5560; background: rgba(246,236,201,.85); border-color: #2fb0bf; }
+/* Playa: los textos chicos caían sobre la grilla de la arena y no se leían → color más oscuro y una "chapa" de arena detrás */
+html[data-theme="playa"] #menuOverlay .brand .sub { color: #3a2812; font-weight: 600; display: inline-block; padding: 3px 12px; border-radius: 999px; background: rgba(246,236,201,.9); }
+html[data-theme="playa"] #menuOverlay .brand .ver { opacity: 1; color: #5a4424; display: inline-block; padding: 1px 8px; border-radius: 999px; background: rgba(246,236,201,.85); }
+html[data-theme="playa"] #menuOverlay .xpmini { background: rgba(246,236,201,.9); border-radius: 999px; padding: 6px 12px; color: #3a2812; font-weight: 600; }
+html[data-theme="playa"] #menuOverlay .xpmini .xp-lv { color: #3a2812; }
+html[data-theme="playa"] #menuOverlay .xpbar i { background: #2fb0bf; }
 html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
 
 /* Chat privado */
@@ -737,6 +743,8 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
 .dm-form input { flex: 1; min-width: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px; color: var(--text); font: inherit; }
 .fr-more.dot { position: relative; }
 .fr-more.dot::after { content: ''; position: absolute; top: 4px; right: 5px; width: 9px; height: 9px; border-radius: 50%; background: var(--danger); }
+.gm-h { margin: 18px 0 6px; font-size: 14px; color: var(--muted); }
+.gm-h[hidden] { display: none; }
 </style>
 </head>
 <body>
@@ -1257,7 +1265,7 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
 <div class="overlay screen" id="pviewOverlay">
   <div class="screen-body">
     <div class="pv-head"><span class="pv-av" id="pvAv"></span><div><h2 id="pvName"></h2><p class="sub" id="pvRel"></p></div></div>
-    <div class="field" id="pvStatsBox"><span class="lbl" data-i18n="prof.stats"></span><div class="prof-stats" id="pvStats"></div><div class="charts" id="pvCharts"></div><p class="hint" id="pvNote"></p></div>
+    <div class="field" id="pvStatsBox"><span class="lbl" data-i18n="prof.stats"></span><div class="prof-stats" id="pvStats"></div><h3 class="gm-h" data-i18n="prof.byType"></h3><div class="prof-stats" id="pvGm"></div><div class="charts" id="pvCharts"></div><p class="hint" id="pvNote"></p></div>
     <p class="hint" id="pvMsg" role="status" aria-live="polite"></p>
     <div class="btns" id="pvActions"></div>
     <div class="btns"><button class="btn primary" id="btnPviewBack" data-i18n="menu.back"></button></div>
@@ -1402,6 +1410,8 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
   <div class="screen-body">
     <h2 data-i18n="prof.stats"></h2>
     <div class="prof-stats" id="profStats"></div>
+    <h3 class="gm-h" data-i18n="prof.byType"></h3>
+    <div class="prof-stats" id="profGm"></div>
     <div class="charts" id="profCharts"></div>
     <p class="hint" id="statsNote"></p>
     <div class="btns"><button class="btn primary" id="btnStatsBack" data-i18n="menu.back"></button></div>
@@ -2269,6 +2279,7 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
   var AVATARS = [['a1', '🦊'], ['a2', '🐼'], ['a3', '🐯'], ['a4', '🦉'], ['a5', '🐙'], ['a6', '🦄'], ['a7', '🐢'], ['a8', '🦋'], ['a9', '🐸'], ['a10', '🐧'], ['a11', '🦁'], ['a12', '🐳'],
     ['a13', '🐲'], ['a14', '🦖'], ['a15', '🐺'], ['a16', '🦅'], ['a17', '🐝'], ['a18', '🦈'], ['a19', '🐉'], ['a20', '👑']];   // los 8 últimos se destraban con el nivel (xp.js)
   var MODES = ['ai_beginner', 'ai_easy', 'ai_medium', 'ai_hard', 'local', 'online'];
+  var GTYPES = ['classic', 'triples', 'gomoku', 'blitz', 'bullet', 'four', 'ffa', 'daily'];   // tipos de juego (stats.gm): modo de reglas, 2 vs 2, todos contra todos y desafío diario
   var NAME_MAX = 20, CAP = 1000000;
 
   function emojiOf(id) { for (var i = 0; i < AVATARS.length; i++) if (AVATARS[i][0] === id) return AVATARS[i][1]; return AVATARS[0][1]; }
@@ -2276,6 +2287,15 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
   function num(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? Math.min(v, CAP) : 0; }
   function empty() { return { v: 1, name: '', avatar: 'a1', stats: {}, uid: '', email: '', base: {}, nameAt: 0, prefsAt: 0, nameSet: false }; }
 
+  function cleanGm(g) {                          // partidas por tipo de juego: { classic:{p,w,l,d}, ... }; en todos vale p >= w+l+d (las de "local" y 2 vs 2 en un aparato solo suman p)
+    var out = {}; g = g && typeof g === 'object' ? g : {};
+    GTYPES.forEach(function (k) {
+      var s = g[k]; if (!s || typeof s !== 'object') return;
+      var r = { p: num(s.p), w: num(s.w), l: num(s.l), d: num(s.d) }; r.p = Math.max(r.p, r.w + r.l + r.d);
+      if (r.p) out[k] = r;
+    });
+    return out;
+  }
   function cleanStats(st) {
     var out = {};
     st = st && typeof st === 'object' ? st : {};
@@ -2286,6 +2306,7 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
       else r.p = Math.max(r.p, r.w + r.l + r.d);
       if (r.p) out[m] = r;
     });
+    var gm = cleanGm(st.gm); if (Object.keys(gm).length) out.gm = gm;
     var xp = XP.clean(st.xp); if (xp.t || xp.f.length || xp.dd) out.xp = xp;      // XP y niveles (xp.js): viaja junto con las estadísticas
     return out;
   }
@@ -2321,6 +2342,17 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
     return p;
   }
 
+  // Suma una partida al tipo de juego (stats.gm). result: 'win' | 'loss' | 'draw' | 'played'. Devuelve un perfil nuevo.
+  function recordType(profile, type, result) {
+    var p = normalize(profile);
+    if (GTYPES.indexOf(type) < 0) return p;
+    var gm = p.stats.gm || {}, s = gm[type] || { p: 0, w: 0, l: 0, d: 0 };
+    s.p = num(s.p + 1);
+    var k = result === 'win' ? 'w' : result === 'loss' ? 'l' : result === 'draw' ? 'd' : ''; if (k) s[k] = num(s[k] + 1);
+    gm[type] = s; p.stats.gm = gm;
+    return p;
+  }
+
   function totals(profile) {
     var t = { p: 0, w: 0, l: 0, d: 0 };
     MODES.forEach(function (m) { var s = profile.stats[m]; if (s) { t.p += s.p; t.w += s.w; t.l += s.l; t.d += s.d; } });
@@ -2338,6 +2370,13 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
       if (m === 'local') o.w = o.l = o.d = 0; else o.p = Math.max(o.p, o.w + o.l + o.d);
       if (o.p) out[m] = o;
     });
+    var gm = {}, lg = local.gm || {}, bg = base.gm || {}, rg = remote.gm || {};
+    GTYPES.forEach(function (k) {
+      var l = lg[k] || {}, b = bg[k] || {}, r = rg[k] || {}, o = {};
+      ['p', 'w', 'l', 'd'].forEach(function (f) { o[f] = num((r[f] || 0) + Math.max(0, (l[f] || 0) - (b[f] || 0))); });
+      o.p = Math.max(o.p, o.w + o.l + o.d); if (o.p) gm[k] = o;
+    });
+    if (Object.keys(gm).length) out.gm = gm;
     var xp = XP.merge(local.xp, base.xp, remote.xp); if (xp.t || xp.f.length || xp.dd) out.xp = xp;
     return out;
   }
@@ -2371,7 +2410,7 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
     return { profile: normalize(prof), prefs: (!useLocalPrefs && R.at > 0) ? R.prefs : null, push: push, body: body };
   }
 
-  return { merge: merge, mergeStats: mergeStats, cleanStats: cleanStats, AVATARS: AVATARS, MODES: MODES, NAME_MAX: NAME_MAX, emojiOf: emojiOf, isCode: isCode, cleanName: cleanName, empty: empty, normalize: normalize, record: record, totals: totals };
+  return { merge: merge, mergeStats: mergeStats, cleanStats: cleanStats, AVATARS: AVATARS, MODES: MODES, NAME_MAX: NAME_MAX, emojiOf: emojiOf, isCode: isCode, cleanName: cleanName, empty: empty, normalize: normalize, record: record, recordType: recordType, GTYPES: GTYPES, totals: totals };
 });
 </script>
 <script>
@@ -3886,6 +3925,10 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
     'prof.mode.ai_hard': 'Máquina · Muy difícil',
     'prof.mode.local': 'Local (2 personas)',
     'prof.mode.online': 'Online',
+    'prof.byType': 'Por tipo de juego',
+    'prof.gmNote': 'La tabla por tipo de juego cuenta lo que se jugó desde tus dispositivos (máquina, local, online, 2 contra 2 y desafío diario); no la verifica el servidor.',
+    'prof.gt.classic': 'Clásico', 'prof.gt.triples': 'Solo tríos', 'prof.gt.gomoku': 'Gomoku', 'prof.gt.blitz': 'Blitz ⚡', 'prof.gt.bullet': 'Bullet 🚀',
+    'prof.gt.four': '2 contra 2', 'prof.gt.ffa': 'Todos contra todos', 'prof.gt.daily': 'Desafío diario',
     'prof.reset': 'Borrar mis datos',
     'prof.resetConfirm': '¿Borrar nombre, avatar y estadísticas de este dispositivo? No se puede deshacer.'
   });
@@ -3917,6 +3960,10 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
     'prof.mode.ai_hard': 'Machine · Very hard',
     'prof.mode.local': 'Local (2 people)',
     'prof.mode.online': 'Online',
+    'prof.byType': 'By game type',
+    'prof.gmNote': 'The by-game-type table counts what was played from your devices (machine, local, online, 2 vs 2 and daily challenge); the server does not verify it.',
+    'prof.gt.classic': 'Classic', 'prof.gt.triples': 'Triples only', 'prof.gt.gomoku': 'Gomoku', 'prof.gt.blitz': 'Blitz ⚡', 'prof.gt.bullet': 'Bullet 🚀',
+    'prof.gt.four': '2 vs 2', 'prof.gt.ffa': 'Free for all', 'prof.gt.daily': 'Daily challenge',
     'prof.reset': 'Delete my data',
     'prof.resetConfirm': 'Delete name, avatar and stats from this device? This can\'t be undone.'
   });
@@ -6161,6 +6208,10 @@ window.NEON_BREAK = {
   function angleOf(idx) { var h = Math.imul(idx + 1, 2654435761) >>> 0; h = Math.imul(h ^ (h >>> 15), 2246822519) >>> 0; h ^= h >>> 13; return (h % 6283) / 1000; }
   var heldSpin = 0;
   function rotates(p) { var s = theme().stones[p]; return !!(s && (s.shell || s.neon)); }     // Playa y Neón: las fichas quedan giradas al azar
+  function spinFrom(cur, target) {                      // el giro de la ficha en el aire crece sin parar (miles de radianes): se reduce a la vuelta más corta hacia el ángulo final, si no daba muchas vueltas al caer
+    var T = Math.PI * 2, d = ((target - cur) % T + T) % T; if (d > Math.PI) d -= T;
+    return target - d;
+  }
   function nextAngle() { return state && rotates(state.current) ? angleOf(state.moves.length) : 0; }     // giro de la ficha que se va a apoyar (el mismo que va a tener al soltarla)
   var animReq = 0, dropHints = 0, tapHints = 0;
   var hover = null;       // {x,y} previsualización (mouse / toque pendiente)
@@ -6550,7 +6601,8 @@ window.NEON_BREAK = {
   }
   function dailyGrant() {                                        // el XP del desafío se da una vez, cuando la partida termina en vivo (no al volver a ver un resultado viejo)
     var r = daily.result; if (!r || daily.xpFor === r.date) return;
-    daily.xpFor = r.date; xpLast = grantXp({ k: 'daily', win: !!r.win, moves: r.moves, streak: dailyStreak(r.date), date: r.date });
+    daily.xpFor = r.date; profile = PP.recordType(profile, 'daily', r.win ? 'win' : r.draw ? 'draw' : 'loss'); saveProfile(); scheduleSync(1500);
+    xpLast = grantXp({ k: 'daily', win: !!r.win, moves: r.moves, streak: dailyStreak(r.date), date: r.date });
   }
   function dailyEnd() {
     recorded = endSeen = true; dailyGrant();
@@ -6999,7 +7051,7 @@ window.NEON_BREAK = {
     }
     if (cfg.confirm === 'none') { hover = null; tryMove(c.x, c.y); return; }
     pending = c; hover = null; kbd = c;
-    settle = cfg.anim ? { x0: pos.x, y0: pos.y, c: c, t0: performance.now(), dur: 130, player: state.current, rot0: heldSpin, rot1: nextAngle() } : null;
+    settle = cfg.anim ? { x0: pos.x, y0: pos.y, c: c, t0: performance.now(), dur: 130, player: state.current, rot0: spinFrom(heldSpin, nextAngle()), rot1: nextAngle() } : null;
     if (dropHints < 2) { dropHints++; setStatus(t(cfg.confirm === 'double' ? 'hud.dragHintDouble' : 'hud.dragHint'), true); } else setStatus('');
     render();
   }
@@ -7068,7 +7120,7 @@ window.NEON_BREAK = {
     });
   })();
   /* Rotura del aro (6 cuadros por color): se agrieta, se parte en tubos, salen chispas y se apaga. Se mezclan cuadros contiguos para que sea suave. */
-  var neonBreak = {}, NEON_RING_FR = 0.57, BREAK_RING_FR = 0.67, BREAK_N = 6;
+  var neonBreak = {}, NEON_RING_FR = 0.57, BREAK_RING_FR = 0.67, BREAK_N = 6, BREAK_FROM = 1;      // el cuadro 0 es el aro entero (ya se vio) y el último casi no se ve: se saltean para que se sienta más rápido
   (function loadNeonBreak() {
     if (!window.NEON_BREAK) return;
     Object.keys(window.NEON_BREAK).forEach(function (k) {
@@ -7077,7 +7129,7 @@ window.NEON_BREAK = {
   })();
   function drawNeonBreak(cx, cy, st, r, k, rot) {
     var im = neonBreak[st.neon]; if (!im) return false;
-    var fw = im.width / BREAK_N, size = r * 3.7 * NEON_RING_FR / BREAK_RING_FR, pos = Math.min(BREAK_N - 1, k * (BREAK_N - 1) * 1.0001), i0 = Math.floor(pos), fr = pos - i0, i1 = Math.min(BREAK_N - 1, i0 + 1);
+    var fw = im.width / BREAK_N, size = r * 3.7 * NEON_RING_FR / BREAK_RING_FR, pos = Math.min(BREAK_N - 1, BREAK_FROM + k * (BREAK_N - 1 - BREAK_FROM) * 1.0001), i0 = Math.floor(pos), fr = pos - i0, i1 = Math.min(BREAK_N - 1, i0 + 1);
     ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.imageSmoothingQuality = 'high'; ctx.translate(cx, cy); ctx.rotate(rot || 0); cx = cy = 0;
     ctx.globalAlpha = 1 - fr * (i1 > i0 ? 1 : 0); ctx.drawImage(im, i0 * fw, 0, fw, im.height, cx - size / 2, cy - size / 2, size, size);
     if (i1 > i0 && fr > 0) { ctx.globalAlpha = fr; ctx.drawImage(im, i1 * fw, 0, fw, im.height, cx - size / 2, cy - size / 2, size, size); }
@@ -7730,7 +7782,7 @@ window.NEON_BREAK = {
     captured.forEach(function (c, i) {
       var sh = [];
       if (mode === 'shatter') for (var k = 0; k < SHARDS; k++) sh.push({ v: 0.55 + Math.random() * 0.9, rot: (Math.random() - 0.5) * 7, up: 0.2 + Math.random() * 0.6 });
-      (arr || fx).push({ x: c.x, y: c.y, p: c.p || owner, seed: seedOf(c.x, c.y, c.p || owner), t0: t0 + i * 40, dur: mode === 'shatter' ? ((theme().stones[c.p || owner] || {}).neon ? 420 : 720) : 480, mode: mode, shards: sh, jit: Math.random() * Math.PI });
+      (arr || fx).push({ x: c.x, y: c.y, p: c.p || owner, seed: seedOf(c.x, c.y, c.p || owner), t0: t0 + i * 40, dur: mode === 'shatter' ? ((theme().stones[c.p || owner] || {}).neon ? 300 : 720) : 480, mode: mode, shards: sh, jit: Math.random() * Math.PI });
     });
   }
   /* Polvo de arena (tema Playa): al apoyar la ficha se levanta un soplo muy leve de arenita. Poco y breve a propósito. */
@@ -7958,13 +8010,17 @@ window.NEON_BREAK = {
   function updateResultBtn() { $('btnResult').hidden = !(state && isOver() && endSeen && !$('endOverlay').classList.contains('open') && !document.body.classList.contains('in-screen')); }
   // Suma la partida terminada a las estadísticas (una sola vez por partida; el tutorial y mirar online no cuentan)
   function recordResult() {
-    if (recorded || tut.active || !state || !isOver() || online.spectator || (state.players === 4 && !online.active)) return;   // el 2vs2 sin conexión no suma estadísticas (todavía)
+    if (recorded || tut.active || !state || !isOver() || online.spectator) return;
     recorded = true;
+    if (state.players === 4 && !online.active) { profile = PP.recordType(profile, xpModeKey(), 'played'); saveProfile(); scheduleSync(1500); return; }      // 2 vs 2 en un aparato: se cuenta como jugada (no hay un "yo")
     var w = online.active ? (online.over ? online.over.winner : state.winner) : localOver ? localOver.winner : state.winner;
     var mode = online.active ? 'online' : ai.active ? 'ai_' + ai.level : 'local', me = online.active ? online.me : ai.active ? ai.human : 0;
     var meT = online.active && state.players === 4 && !state.ffa ? teamOfSeat(online.seat) : me;           // en 2 contra 2 gana el equipo
     xpLast = grantXp({ k: mode === 'online' ? 'online' : mode === 'local' ? 'local' : 'ai', win: !!meT && w === meT, draw: !w, moves: state.moves.length, mode: xpModeKey() });
+    var res = !meT ? 'played' : !w ? 'draw' : w === meT ? 'win' : 'loss';
+    if (mode !== 'online' || state.moves.length >= XP.MIN_MOVES) profile = PP.recordType(profile, xpModeKey(), res);     // por tipo de juego (en online, igual que el servidor: desde 10 jugadas)
     if (mode === 'online') {                                  // las online las registra el servidor (solo entre dos cuentas); acá solo se refresca lo verificado
+      saveProfile(); scheduleSync(1500);
       if (Auth && Auth.user && !online.spectator) setTimeout(function () { syncProfile(); }, 2500);
       return;
     }
@@ -9018,6 +9074,18 @@ window.NEON_BREAK = {
       [s.p, s.w, s.l, s.d].forEach(function (v, i) { cell('n' + (v ? '' : ' z'), loc && i > 0 ? '–' : String(v)); });
     });
   }
+  function fillGm(box, stats) {                               // tabla por tipo de juego (modo de reglas, 2 vs 2, todos contra todos, desafío diario)
+    box.innerHTML = '';
+    var gm = stats.gm || {}, any = false;
+    function cell(cls, txt) { var d = document.createElement('div'); d.className = cls; d.textContent = txt; box.appendChild(d); }
+    [['', ''], ['prof.hP', 'prof.played'], ['prof.hW', 'prof.won'], ['prof.hL', 'prof.lost'], ['prof.hD', 'prof.drawn']].forEach(function (k) { cell('h', k[0] ? t(k[0]) : ''); if (k[0]) box.lastChild.title = t(k[1]); });
+    PP.GTYPES.forEach(function (g) {
+      var s = gm[g] || { p: 0, w: 0, l: 0, d: 0 }; if (s.p) any = true;
+      cell('m', t('prof.gt.' + g));
+      [s.p, s.w, s.l, s.d].forEach(function (v) { cell('n' + (v ? '' : ' z'), String(v)); });
+    });
+    box.hidden = box.previousElementSibling.hidden = false;
+  }
   /* Gráficos de estadísticas (propias y de otras personas). Solo cuentan partidas con resultado: contra la máquina y online. */
   function fillCharts(box, stats) {
     box.innerHTML = '';
@@ -9121,9 +9189,9 @@ window.NEON_BREAK = {
   }
   var statsFrom = 'menuOverlay';
   function renderStats() {
-    fillStats($('profStats'), ownStats()); fillCharts($('profCharts'), PP.cleanStats(ownStats()));
+    fillStats($('profStats'), ownStats()); fillGm($('profGm'), PP.cleanStats(ownStats())); fillCharts($('profCharts'), PP.cleanStats(ownStats()));
     var tot = PP.totals(profile);
-    $('statsNote').textContent = (tot.p ? t('prof.localNote') : t('prof.noGames')) + ' ' + t('prof.onlineNote');
+    $('statsNote').textContent = (tot.p ? t('prof.localNote') : t('prof.noGames')) + ' ' + t('prof.onlineNote') + ' ' + t('prof.gmNote');
   }
   $('btnStats').addEventListener('click', function () { statsFrom = 'menuOverlay'; renderStats(); open('statsOverlay'); });
   $('btnProfStats').addEventListener('click', function () { statsFrom = 'profileOverlay'; renderStats(); open('statsOverlay'); });
@@ -9213,7 +9281,7 @@ window.NEON_BREAK = {
     var v = social.view; if (!v) return;
     setAv($('pvAv'), v.avatar, 96, true); $('pvName').textContent = v.name; $('pvName').appendChild(lvChip(v.xp)); var vfl = flagChip(v.country); if (vfl) $('pvName').insertBefore(vfl, $('pvName').firstChild); $('pvRel').textContent = t('pv.' + (v.relation || 'none'));
     var st = PP.cleanStats(v.stats), has = Object.keys(st).length > 0;
-    $('pvStats').hidden = !!v.hidden; $('pvCharts').hidden = !!v.hidden; if (v.hidden) { $('pvStats').innerHTML = ''; $('pvCharts').innerHTML = ''; } else { fillStats($('pvStats'), st); fillCharts($('pvCharts'), st); }
+    $('pvStats').hidden = !!v.hidden; $('pvCharts').hidden = !!v.hidden; if (v.hidden) { $('pvStats').innerHTML = ''; $('pvGm').innerHTML = ''; $('pvGm').previousElementSibling.hidden = true; $('pvCharts').innerHTML = ''; } else { fillStats($('pvStats'), st); fillGm($('pvGm'), st); fillCharts($('pvCharts'), st); }
     $('pvNote').textContent = v.hidden ? t('pv.hidden') : has ? t('pv.note') : t('pv.noGames');
     var box = $('pvActions'); box.innerHTML = '';
     function btn(label, cls, fn) { var b = el('button', 'btn' + (cls ? ' ' + cls : ''), label); b.type = 'button'; b.addEventListener('click', fn); box.appendChild(b); }
