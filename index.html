@@ -5319,6 +5319,8 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
   }
 
   // Muestras de audio (mp3 en base64): se decodifican una sola vez y se reproducen con volumen propio. Si todavía no están listas, suena la receta sintética.
+  // Ajuste de volumen de cada muestra (medido con ebur128: Confirmarficha = -23,2 LUFS, Confirmarficha2 = -26,6 LUFS → la primera se baja 3,4 dB para igualarlas)
+  var SAMPLE_GAIN = { playaPlace: 0.68, playaPlace2: 1 };
   var samples = {}, placeN = 0;     // placeN: cuenta las fichas apoyadas para alternar los dos sonidos de Playa
   function loadSample(name) {
     var src = root.PENTE_SAMPLES && root.PENTE_SAMPLES[name]; if (!src || samples[name] !== undefined || !ctx) return;
@@ -5377,7 +5379,7 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
       }
     },
     playa: {
-      place:   function () { var nm = (placeN++ % 2) ? 'playaPlace2' : 'playaPlace'; if (sample(nm, 0.95)) return; sweep(0.085, 0.5, 1500, 800, 0, 0.7); grains(8, 0.14, 0.2, 0.02); click(0.018, 0.3, 3800, 0.004); },
+      place:   function () { var nm = (placeN++ % 2) ? 'playaPlace2' : 'playaPlace'; if (sample(nm, 0.95 * (SAMPLE_GAIN[nm] || 1))) return; sweep(0.085, 0.5, 1500, 800, 0, 0.7); grains(8, 0.14, 0.2, 0.02); click(0.018, 0.3, 3800, 0.004); },
       pick:    function () { grains(3, 0.05, 0.14); sweep(0.05, 0.14, 2600, 1800, 0, 0.8); },
       capture: function () {
         tone(1500, 950, 0.05, 'triangle', 0.24); tone(1220, 790, 0.06, 'triangle', 0.2, 0.05);      // dos conchas que chocan
@@ -7014,7 +7016,7 @@ window.NEON_BREAK = {
 
   /* ---------- Dibujo ---------- */
   function resize() {
-    var cssW = canvas.clientWidth || 600, dpr = window.devicePixelRatio || 1;
+    var cssW = canvas.clientWidth || 600, dpr = Math.min(2, window.devicePixelRatio || 1);       // tope 2: en celulares de 3x el tablero tenía 2,25 veces más píxeles de los necesarios y se trababa
     canvas.width = Math.round(cssW * dpr); canvas.height = Math.round(cssW * dpr);
     metrics.w = canvas.width;
     render();
@@ -7061,7 +7063,7 @@ window.NEON_BREAK = {
     if (!window.NEON_IMG) return;
     Object.keys(window.NEON_IMG).forEach(function (k) {
       var im = new Image();
-      im.onload = function () { neonImgs[k] = im; if (typeof render === 'function') try { render(); } catch (e) {} };
+      im.onload = function () { neonImgs[k] = im; baseCache.ver++; if (typeof render === 'function') try { render(); } catch (e) {} };
       im.src = window.NEON_IMG[k];
     });
   })();
@@ -7112,7 +7114,7 @@ window.NEON_BREAK = {
     if (!window.SHELL_IMG) return;
     ['spiral', 'scallop'].forEach(function (k) {
       var im = new Image();
-      im.onload = function () { shellImgs[k] = im; sprites = {}; spriteCount = 0; if (typeof render === 'function') try { render(); } catch (e) {} };
+      im.onload = function () { shellImgs[k] = im; sprites = {}; spriteCount = 0; baseCache.ver++; if (typeof render === 'function') try { render(); } catch (e) {} };
       im.src = window.SHELL_IMG[k];
     });
   })();
@@ -7451,7 +7453,7 @@ window.NEON_BREAK = {
   function wavesFrame(now) {
     if (!wavesWanted()) { wavesSync(); return; }
     wv.raf = requestAnimationFrame(wavesFrame);
-    if (now - wv.last < 33) return;                                   // ~30 cuadros por segundo alcanza para el mar
+    if (now - wv.last < 45 || (drag && drag.lifted) || settle) return;     // ~22 cuadros por segundo alcanza para el mar; se frena mientras se arrastra una ficha (ahí manda la fluidez del dedo)
     wv.last = now; wavesDraw(now / 1000);
   }
   function wavesDraw(t) {
@@ -7484,7 +7486,7 @@ window.NEON_BREAK = {
       g.restore();
     }
     g.restore();
-    var keepCtx = ctx; ctx = g; try { drawLabels(theme()); } finally { ctx = keepCtx; }      // letras y números por encima del agua
+    g.drawImage(labelsLayer(theme(), W), 0, 0);                    // letras y números por encima del agua (capa ya dibujada)
   }
   function woodFor(W) {
     if (woodCache[W]) return woodCache[W];
@@ -7580,12 +7582,28 @@ window.NEON_BREAK = {
     ctx.restore();
   }
 
-  function render() {
-    if (!metrics.w) return;
-    layout();
-    var th = theme(), W = metrics.w, n = boardN(), i;
-    if (drag && drag.lifted) updateDragTarget();
-    if (settle && performance.now() - settle.t0 >= settle.dur) settle = null;
+  /* Capa base del tablero (fondo + líneas + letras + zona prohibida + fichas): se dibuja UNA vez y después se pega de un saque.
+   * Antes se rehacía entera en cada cuadro (al arrastrar, al pasar el dedo, en las animaciones), y en el celu con fichas grandes se trababa.
+   * Se vuelve a armar solo si cambia algo que se ve en ella (la clave de abajo). */
+  var baseCache = { cv: null, key: '', st: null, ver: 0 }, labelCache = { cv: null, key: '' };
+  // Letras y números en su propia capa (cambia solo cuando el mouse/dedo pasa a otra fila o columna, porque esas se resaltan)
+  function labelsLayer(th, W) {
+    var active = (drag && drag.lifted ? drag.cell : null) || pending || hover || (kbdOn && document.activeElement === canvas ? kbd : null);
+    var key = [W, boardN(), th.id, active ? active.x + ',' + active.y : '-'].join('|');
+    if (!labelCache.cv || labelCache.key !== key || labelCache.cv.width !== W) {
+      var cv = labelCache.cv || document.createElement('canvas'); if (cv.width !== W || cv.height !== W) { cv.width = W; cv.height = W; }
+      var g = cv.getContext('2d'), keep = ctx; g.clearRect(0, 0, W, W); ctx = g;
+      try { drawLabels(th); } finally { ctx = keep; }
+      labelCache.cv = cv; labelCache.key = key;
+    }
+    return labelCache.cv;
+  }
+  function baseKey(W, n) {
+    var th = theme();
+    return [W, n, th.id, cfg.coords ? 1 : 0, cfg.zone ? 1 : 0, tut.active ? 1 : 0, cfg.stoneSize, cfg.gem1, cfg.gem2, baseCache.ver, state ? state.moves.length + ':' + (state.winLine ? state.winLine.length : 0) + ':' + state.status : '-'].join('|');
+  }
+  function drawBase(th, W, n) {
+    var i;
     // fondo del tablero
     if (th.board.paper) ctx.drawImage(paperFor(W), 0, 0);
     else if (th.board.wood) ctx.drawImage(woodFor(W), 0, 0);
@@ -7597,7 +7615,7 @@ window.NEON_BREAK = {
     }
     // líneas (con resplandor si el tema lo pide). Grosor ENTERO y posición alineada al píxel: todas las líneas quedan iguales y nítidas
     // (con medios píxeles unas se veían más gruesas o borrosas que otras). El borde exterior es un poco más marcado.
-    if (th.board.groove) { ctx.drawImage(grooveFor(W, n, metrics.cell, metrics.off), 0, 0); if (cfg.coords) drawLabels(th); wavesSync(); if (!state) { $('btnConfirm').hidden = true; return; } }
+    if (th.board.groove) { ctx.drawImage(grooveFor(W, n, metrics.cell, metrics.off), 0, 0); if (!state) { $('btnConfirm').hidden = true; return false; } }
     else {
     ctx.save();
     var lw = Math.max(1, Math.round(metrics.cell * (th.board.lineGlow ? 0.05 : 0.04))), lwB = lw + Math.max(1, Math.round(lw * 0.7));
@@ -7624,9 +7642,7 @@ window.NEON_BREAK = {
       ctx.beginPath(); ctx.arc(px(a), px(b), metrics.cell * (a === mid && b === mid ? 0.13 : 0.09), 0, Math.PI * 2); ctx.fill();
     }); });
     ctx.restore();
-    if (cfg.coords) drawLabels(th);
-    if (!state) { $('btnConfirm').hidden = true; return; }
-    wavesSync();
+    if (!state) { $('btnConfirm').hidden = true; return false; }
     }
 
     // Regla de torneo: en la 2ª ficha del J1 se sombrea el cuadrado de 5x5 del centro (prohibido)
@@ -7646,6 +7662,29 @@ window.NEON_BREAK = {
         drawStone(x, y, v, 1, !!winSet[x + ',' + y]);
       }
     }
+    return true;
+  }
+  function drawBaseCached(th, W, n) {
+    if (!state || replayBusy) return drawBase(th, W, n);
+    var key = baseKey(W, n);
+    if (!baseCache.cv || baseCache.st !== state || baseCache.key !== key || baseCache.cv.width !== W) {
+      var cv = baseCache.cv || document.createElement('canvas'); if (cv.width !== W || cv.height !== W) { cv.width = W; cv.height = W; }
+      var keep = ctx, g = cv.getContext('2d'); g.clearRect(0, 0, W, W); ctx = g;
+      try { drawBase(th, W, n); } finally { ctx = keep; }
+      baseCache.cv = cv; baseCache.key = key; baseCache.st = state;
+    }
+    ctx.drawImage(baseCache.cv, 0, 0); return true;
+  }
+  function render() {
+    if (!metrics.w) return;
+    layout();
+    var th = theme(), W = metrics.w, n = boardN(), i;
+    if (drag && drag.lifted) updateDragTarget();
+    if (settle && performance.now() - settle.t0 >= settle.dur) settle = null;
+    wavesSync();
+    var baseOk = drawBaseCached(th, W, n);
+    if (cfg.coords) ctx.drawImage(labelsLayer(th, W), 0, 0);
+    if (baseOk === false) return;
     drawMarks();
     // última jugada
     if (state.lastMove && cfg.lastMove) {
