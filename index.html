@@ -745,6 +745,23 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
 .fr-more.dot::after { content: ''; position: absolute; top: 4px; right: 5px; width: 9px; height: 9px; border-radius: 50%; background: var(--danger); }
 .gm-h { margin: 18px 0 6px; font-size: 14px; color: var(--muted); }
 .gm-h[hidden] { display: none; }
+
+/* Torneos online */
+.tno-code { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 6px 0 12px; }
+.tno-code .lbl { margin: 0; }
+.tno-code b { font-size: 22px; letter-spacing: .18em; font-variant-numeric: tabular-nums; }
+.tno-code[hidden], #tnoLobby[hidden], #tnoRun[hidden], #tnoInviteBox[hidden] { display: none; }
+.tno-card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; margin: 0 0 14px; }
+.tno-card .tn-h { margin-top: 0; }
+.tno-vs { font-size: 20px; font-weight: 800; margin: 2px 0 4px; }
+.tno-card .btns { margin-top: 10px; }
+.tno-pl { display: flex; align-items: center; gap: 8px; }
+.tno-nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tno-tag { color: var(--muted); }
+.tno-dot { font-size: 10px; color: var(--muted); opacity: .5; }
+.tno-dot.on { color: var(--ok, #5ad19a); opacity: 1; }
+.tn-duel.mine { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+#tnoCodeIn { flex: 1; min-width: 0; text-transform: uppercase; letter-spacing: .18em; text-align: center; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; color: var(--text); font: inherit; }
 </style>
 </head>
 <body>
@@ -886,7 +903,13 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
   <div class="screen-body">
     <h2 data-i18n="tn.title"></h2>
     <p class="sub" data-i18n="tn.sub"></p>
-    <div class="btns"><button class="btn primary" id="tnCreate" data-i18n="tn.create"></button></div>
+    <div class="roomlist" id="tnoLive"></div>
+    <div class="btns"><button class="btn primary" id="tnoCreate" data-i18n="tno.createOnline"></button></div>
+    <p class="hint" data-i18n="tno.createOnlineSub"></p>
+    <div class="field"><label class="lbl" for="tnoCodeIn" data-i18n="tno.joinTitle"></label>
+      <div class="tn-row"><input type="text" id="tnoCodeIn" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" data-i18n-ph="tno.codePh"><button type="button" class="btn primary" id="tnoJoin" data-i18n="tno.join"></button></div></div>
+    <p class="online-msg" id="tnoListMsg" role="status" aria-live="polite"></p>
+    <div class="btns"><button class="btn" id="tnCreate" data-i18n="tno.localCreate"></button></div>
     <div class="roomlist" id="tnList"></div>
     <div class="btns"><button class="btn" id="tnBack" data-i18n="menu.back"></button></div>
   </div>
@@ -903,12 +926,41 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
       <div class="field"><label class="lbl" for="tnMin" data-i18n="tn.min"></label><input type="number" id="tnMin" min="1" max="63" value="2" inputmode="numeric"></div>
       <div class="field" id="tnCutBox"><label class="lbl" for="tnCut" data-i18n="tn.cut"></label><select id="tnCut"><option>2</option><option selected>4</option><option>8</option><option>16</option></select></div>
     </div>
-    <div class="field"><label class="lbl" for="tnPlayers" data-i18n="tn.players"></label><textarea id="tnPlayers" rows="7" autocomplete="off" spellcheck="false"></textarea>
+    <p class="hint" id="tnoNewNote" hidden></p>
+    <div class="field" id="tnPlayersBox"><label class="lbl" for="tnPlayers" data-i18n="tn.players"></label><textarea id="tnPlayers" rows="7" autocomplete="off" spellcheck="false"></textarea>
       <div class="tn-row"><span class="hint" id="tnCount"></span><button type="button" class="btn small" id="tnShuffle" data-i18n="tn.shuffle"></button></div></div>
     <div id="tnCheck" aria-live="polite"></div>
     <div class="btns">
       <button class="btn primary" id="tnStart" data-i18n="tn.start"></button>
       <button class="btn" id="tnNewBack" data-i18n="menu.back"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Torneo online -->
+<div class="overlay screen" id="tnoOverlay">
+  <div class="screen-body wide">
+    <h2 id="tnoTitle"></h2>
+    <p class="hint" id="tnoInfo"></p>
+    <div class="tno-code" id="tnoCodeBox"><span class="lbl" data-i18n="tno.code"></span><b id="tnoCode"></b><button type="button" class="btn small" id="tnoCopy" data-i18n="tno.copy"></button><button type="button" class="btn small" id="tnoLink" data-i18n="tno.copyLink"></button></div>
+    <div id="tnoChamp"></div>
+    <div id="tnoMe" class="tno-me"></div>
+    <div id="tnoLobby">
+      <h3 class="tn-h" id="tnoPlayersH"></h3><div id="tnoPlayers"></div>
+      <div id="tnoInviteBox"><h3 class="tn-h" data-i18n="tno.invite"></h3><div id="tnoFriends"></div></div>
+      <div id="tnoCheck" aria-live="polite"></div>
+      <div class="btns"><button class="btn primary" id="tnoStart" data-i18n="tno.start"></button></div>
+      <p class="hint" id="tnoStartHint" data-i18n="tno.startHint"></p>
+    </div>
+    <div id="tnoRun">
+      <div class="tn-tabs" id="tnoTabs"><button type="button" data-t="fx" aria-pressed="true" data-i18n="tn.fixture"></button><button type="button" data-t="st" aria-pressed="false" data-i18n="tn.table"></button></div>
+      <div id="tnoBody"></div>
+    </div>
+    <p class="online-msg" id="tnoMsg" role="status" aria-live="polite"></p>
+    <p class="hint" data-i18n="tno.resetNote"></p>
+    <div class="btns">
+      <button class="btn" id="tnoBack" data-i18n="menu.back"></button>
+      <button class="btn danger" id="tnoLeave"></button>
     </div>
   </div>
 </div>
@@ -5124,6 +5176,184 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
 })(typeof self !== 'undefined' ? self : this);
 </script>
 <script>
+/* Textos de torneos online — es */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.es, {
+    'tno.createOnline': 'Crear torneo online',
+    'tno.createOnlineSub': 'La gente se une con un código o por invitación y juega los duelos desde acá.',
+    'tno.localCreate': 'Torneo local (cargás vos los resultados)',
+    'tno.joinTitle': 'Unirme con un código',
+    'tno.codePh': 'Código de 5 letras',
+    'tno.join': 'Unirme',
+    'tno.live': 'Tu torneo online',
+    'tno.newTitle': 'Nuevo torneo online',
+    'tno.newNote': 'Las partidas se juegan con las reglas que elegiste en Jugar: {rules}. Después de crearlo vas a poder sumar gente por código o invitando amigos, y al iniciar se arman los cruces solos.',
+    'tno.create': 'Crear torneo',
+    'tno.code': 'Código',
+    'tno.copy': 'Copiar código',
+    'tno.copyLink': 'Copiar link',
+    'tno.copied': 'Copiado',
+    'tno.shareText': 'Sumate a mi torneo de Pente «{name}»: {url}',
+    'tno.info': '{format} · mejor de {b} · {n} participantes',
+    'tno.players': 'Participantes · {n}',
+    'tno.you': 'vos',
+    'tno.orgTag': 'organizador',
+    'tno.kick': 'Sacar',
+    'tno.kickConfirm': '¿Sacar a {name} del torneo?',
+    'tno.invite': 'Invitar amigos',
+    'tno.inviteBtn': 'Invitar',
+    'tno.inviteNeed': 'Para invitar amigos necesitás una cuenta con nombre elegido. Igual podés compartir el código.',
+    'tno.noFriends': 'Todavía no tenés amigos agregados. Compartí el código.',
+    'tno.inviteSent': 'Invitación enviada a {name}.',
+    'tno.invite.offline': '{name} no está conectado ahora: pasale el código.',
+    'tno.invite.already': '{name} ya está en el torneo.',
+    'tno.invite.rate': 'Esperá un segundito entre invitaciones.',
+    'tno.invite.error': 'No se pudo invitar. Probá de nuevo.',
+    'tno.start': 'Iniciar torneo',
+    'tno.startHint': 'Al iniciar ya no puede sumarse nadie más y se sortean los cruces.',
+    'tno.waitOrg': 'Esperando que el organizador inicie el torneo. Mientras tanto, no cierres esta pantalla.',
+    'tno.leave': 'Salir del torneo',
+    'tno.leaveConfirm': '¿Salir del torneo? Si ya empezó, perdés por walkover los duelos que te falten.',
+    'tno.close': 'Cerrar torneo',
+    'tno.closeConfirm': '¿Cerrar el torneo para todos? No se puede deshacer.',
+    'tno.back': 'Volver al torneo',
+    'tno.myDuel': 'Tu duelo',
+    'tno.vs': 'contra {name}',
+    'tno.score': 'Van {a} – {b}',
+    'tno.play': 'Jugar partida {n}',
+    'tno.ready': 'Listo. Esperando a {name}…',
+    'tno.rivalReady': '{name} ya está listo para jugar.',
+    'tno.cancel': 'Cancelar',
+    'tno.opensYou': 'La abrís vos (movés primero).',
+    'tno.opensHim': 'La abre {name}.',
+    'tno.noDuel': 'Por ahora no tenés ningún duelo para jugar. Mirá el fixture: cuando se arme tu próximo cruce, aparece acá.',
+    'tno.withdrawn': 'Estás retirado del torneo.',
+    'tno.inGame': 'Tu partida está en juego.',
+    'tno.backToGame': 'Volver a la partida',
+    'tno.live2': 'En juego',
+    'tno.draw': 'La partida terminó en empate: se vuelve a jugar.',
+    'tno.busy': 'El servidor está lleno ahora. Probá de nuevo en un momento.',
+    'tno.conn': 'Conectando con el torneo…',
+    'tno.reconnecting': 'Sin conexión. Reintentando…',
+    'tno.retry': 'Reintentar',
+    'tno.invalid': 'Todavía no se puede iniciar',
+    'tno.resetNote': 'Se pierde si el servidor se reinicia: los torneos viven en su memoria.',
+    'tno.invTitle': '{name} te invita a un torneo',
+    'tno.invText': '«{tn}» · {format} · {rules}',
+    'tno.err.TN_NOT_FOUND': 'No existe un torneo con ese código (o ya se cerró).',
+    'tno.err.TN_NAME': 'Ya hay alguien con ese nombre en el torneo. Cambialo en tu perfil o en Online y probá de nuevo.',
+    'tno.err.TN_FULL': 'El torneo está lleno.',
+    'tno.err.TN_STARTED': 'El torneo ya empezó: no se puede entrar.',
+    'tno.err.BAD_TOKEN': 'Ya no estás en ese torneo.',
+    'tno.err.NOT_ORGANIZER': 'Eso lo puede hacer solo el organizador.',
+    'tno.err.TN_INVALID': 'No se puede iniciar: ',
+    'tno.err.SERVER_BUSY': 'El servidor está lleno ahora. Probá en un rato.',
+    'tno.err.TN_NOT_RUNNING': 'El torneo no está en curso.',
+    'tno.err.TN_BAD_DUEL': 'Ese duelo ya no está disponible.',
+    'tno.err.ALREADY_IN_TOURNEY': 'Ya estás en un torneo desde este navegador: salí primero.',
+    'tno.err.ORG_CANNOT_LEAVE': 'El organizador cierra el torneo en vez de salir.',
+    'tno.err.RATE_LIMIT': 'Más despacio…',
+    'tno.err.other': 'Algo falló. Probá de nuevo.',
+    'tno.closed.owner': 'El organizador cerró el torneo.',
+    'tno.closed.expired': 'El torneo se cerró por inactividad.',
+    'tno.closed.left': 'Saliste del torneo.',
+    'tno.closed.kicked': 'El organizador te sacó del torneo.',
+    'tno.closed.replaced': 'Se cerró porque creaste otro torneo desde este aparato.',
+    'tno.closed.gone': 'Ese torneo ya no existe.'
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
+/* Online tournaments texts — en */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.en, {
+    'tno.createOnline': 'Create online tournament',
+    'tno.createOnlineSub': 'People join with a code or an invitation and play their duels right here.',
+    'tno.localCreate': 'Local tournament (you enter the results)',
+    'tno.joinTitle': 'Join with a code',
+    'tno.codePh': '5-letter code',
+    'tno.join': 'Join',
+    'tno.live': 'Your online tournament',
+    'tno.newTitle': 'New online tournament',
+    'tno.newNote': 'Games use the rules you picked in Play: {rules}. After creating it you can add people by code or by inviting friends, and when you start, the pairings are drawn automatically.',
+    'tno.create': 'Create tournament',
+    'tno.code': 'Code',
+    'tno.copy': 'Copy code',
+    'tno.copyLink': 'Copy link',
+    'tno.copied': 'Copied',
+    'tno.shareText': 'Join my Pente tournament "{name}": {url}',
+    'tno.info': '{format} · best of {b} · {n} participants',
+    'tno.players': 'Participants · {n}',
+    'tno.you': 'you',
+    'tno.orgTag': 'organizer',
+    'tno.kick': 'Remove',
+    'tno.kickConfirm': 'Remove {name} from the tournament?',
+    'tno.invite': 'Invite friends',
+    'tno.inviteBtn': 'Invite',
+    'tno.inviteNeed': 'To invite friends you need an account with a chosen name. You can still share the code.',
+    'tno.noFriends': 'You have no friends added yet. Share the code.',
+    'tno.inviteSent': 'Invitation sent to {name}.',
+    'tno.invite.offline': '{name} is not online right now: send them the code.',
+    'tno.invite.already': '{name} is already in the tournament.',
+    'tno.invite.rate': 'Wait a second between invitations.',
+    'tno.invite.error': 'Could not invite. Try again.',
+    'tno.start': 'Start tournament',
+    'tno.startHint': 'Once started nobody else can join and the pairings are drawn.',
+    'tno.waitOrg': 'Waiting for the organizer to start the tournament. Keep this screen open.',
+    'tno.leave': 'Leave tournament',
+    'tno.leaveConfirm': 'Leave the tournament? If it has started, you forfeit your remaining duels.',
+    'tno.close': 'Close tournament',
+    'tno.closeConfirm': 'Close the tournament for everyone? This cannot be undone.',
+    'tno.back': 'Back to the tournament',
+    'tno.myDuel': 'Your duel',
+    'tno.vs': 'against {name}',
+    'tno.score': '{a} – {b}',
+    'tno.play': 'Play game {n}',
+    'tno.ready': 'Ready. Waiting for {name}…',
+    'tno.rivalReady': '{name} is ready to play.',
+    'tno.cancel': 'Cancel',
+    'tno.opensYou': 'You open it (you move first).',
+    'tno.opensHim': '{name} opens it.',
+    'tno.noDuel': 'You have no duel to play right now. Check the fixture: your next pairing will show up here.',
+    'tno.withdrawn': 'You have withdrawn from the tournament.',
+    'tno.inGame': 'Your game is in progress.',
+    'tno.backToGame': 'Back to the game',
+    'tno.live2': 'Playing',
+    'tno.draw': 'The game ended in a draw: it will be played again.',
+    'tno.busy': 'The server is full right now. Try again in a moment.',
+    'tno.conn': 'Connecting to the tournament…',
+    'tno.reconnecting': 'Offline. Retrying…',
+    'tno.retry': 'Retry',
+    'tno.invalid': 'Cannot start yet',
+    'tno.resetNote': 'It is lost if the server restarts: tournaments live in its memory.',
+    'tno.invTitle': '{name} invites you to a tournament',
+    'tno.invText': '"{tn}" · {format} · {rules}',
+    'tno.err.TN_NOT_FOUND': 'There is no tournament with that code (or it was closed).',
+    'tno.err.TN_NAME': 'Someone with that name is already in the tournament. Change yours in your profile or in Online and try again.',
+    'tno.err.TN_FULL': 'The tournament is full.',
+    'tno.err.TN_STARTED': 'The tournament has already started: you cannot join.',
+    'tno.err.BAD_TOKEN': 'You are no longer in that tournament.',
+    'tno.err.NOT_ORGANIZER': 'Only the organizer can do that.',
+    'tno.err.TN_INVALID': 'It cannot start: ',
+    'tno.err.SERVER_BUSY': 'The server is full right now. Try again later.',
+    'tno.err.TN_NOT_RUNNING': 'The tournament is not running.',
+    'tno.err.TN_BAD_DUEL': 'That duel is no longer available.',
+    'tno.err.ALREADY_IN_TOURNEY': 'You are already in a tournament from this browser: leave it first.',
+    'tno.err.ORG_CANNOT_LEAVE': 'The organizer closes the tournament instead of leaving.',
+    'tno.err.RATE_LIMIT': 'Slow down…',
+    'tno.err.other': 'Something went wrong. Try again.',
+    'tno.closed.owner': 'The organizer closed the tournament.',
+    'tno.closed.expired': 'The tournament was closed for inactivity.',
+    'tno.closed.left': 'You left the tournament.',
+    'tno.closed.kicked': 'The organizer removed you from the tournament.',
+    'tno.closed.replaced': 'It was closed because you created another tournament from this device.',
+    'tno.closed.gone': 'That tournament no longer exists.'
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
 /* Temas del tablero. Cada tema es solo DATOS: para sumar uno nuevo, agregar un objeto a "list"
  * (y su nombre en i18n como 'theme.<id>'). El dibujo y el menú lo toman solos. */
 (function (root) {
@@ -8038,7 +8268,8 @@ window.NEON_BREAK = {
     var btn = $('btnRematch'), hint = $('endHint'), leave = $('btnEndMenu');
     $('btnEndShare').hidden = !(daily.active && daily.result); $('btnEndRank').hidden = !(daily.active && daily.result);
     if (daily.active) { btn.hidden = true; hint.textContent = daily.result ? t('daily.ranking') : ''; leave.textContent = t('end.toMenu'); return; }
-    btn.hidden = !!online.spectator;
+    btn.hidden = !!online.spectator || !!online.tourney;
+    if (online.tourney) { hint.textContent = ''; leave.textContent = t('tno.back'); return; }
     if (online.spectator) { hint.textContent = ''; leave.textContent = t('online.leave'); return; }
     if (!online.active) { btn.disabled = false; btn.textContent = t('end.rematch'); hint.textContent = ''; leave.textContent = t('end.toMenu'); return; }
     var me = online.seat, other = rematchOther();
@@ -8127,7 +8358,7 @@ window.NEON_BREAK = {
     clearTimeout(online.awaitTimer); clearClaim();
     online.net = null; online.active = false; online.conn = 'closed'; online.code = ''; online.token = ''; online.me = 0;
     online.spectator = false; online.specN = 0; online.cid = ''; chatReset(); stopRooms(); fx.length = 0; $('btnSpectateOffer').hidden = true;
-    online.intent = null; online.invite = null; online.seek = false; online.rejoining = false; online.mine = false; online.over = null; online.awaiting = false; online.rivalLeftAt = 0;
+    online.intent = null; online.invite = null; online.seek = false; online.rejoining = false; online.mine = false; online.tourney = false; online.over = null; online.awaiting = false; online.rivalLeftAt = 0;
     online.connected = { 1: true, 2: true, 3: true, 4: true }; online.rematch = { 1: false, 2: false, 3: false, 4: false }; online.seat = 0; online.players = 2; online.bots = {}; online.mode = 'classic'; online.ffa = false; seatNames = {};
     clearSession(); updateOnlineButtons(); updateRematchUi();
     if (wasActive) { videoDiscard(); state = null; clk = null; hover = pending = null; setStatus(''); render(); }
@@ -8305,6 +8536,9 @@ window.NEON_BREAK = {
     var url = serverUrl();
     try { $('onName').value = profile.name || localStorage.getItem('pente.name') || ''; } catch (e) {}
     if (url) { try { fetch(window.PenteNet.httpBase(url) + '/health', { mode: 'no-cors' }).catch(function () {}); } catch (e) {} }   // despierta al servidor
+    var tcode = qs('t'); if (tcode) { try { history.replaceState(null, '', location.href.replace(/([?&])t=[^&#]*&?/, '$1').replace(/[?&]$/, '')); } catch (e) {} }
+    if (tno.code && tno.token && url) tnoConnect();                       // torneo online en curso: se vuelve a conectar solo
+    if (tcode && url) { setTimeout(function () { open('tnOverlay'); tnoJoinCode(tcode); }, 300); }
     var code = qs('sala'), ses = loadSession();
     if (code) { try { history.replaceState(null, '', location.href.replace(/([?&])sala=[^&#]*&?/, '$1').replace(/[?&]$/, '')); } catch (e) {} }
     code = code ? String(code).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5) : '';
@@ -8549,6 +8783,7 @@ window.NEON_BREAK = {
   function invRules(o) { o = o || {}; var mode = o.bullet ? 'bullet' : o.blitz ? 'blitz' : o.variant || 'classic'; return t('mode.' + mode) + ' · ' + (o.size || 13) + '×' + (o.size || 13); }
   function onInviteMessage(m) {
     if (m && m.t === 'looking') { onLooking(m); return; }
+    if (m && m.t === 'tinvite') { onTInvite(m); return; }
     if (!m || m.t !== 'invite' || !m.code || !m.from) return;
     if (online.active || daily.active || tut.active) { if (inv.net) inv.net.send({ t: 'inviteNo', code: m.code, name: myName(), reason: 'busy' }); return; }
     inv.cur = m;
@@ -8557,9 +8792,10 @@ window.NEON_BREAK = {
     $('inviteOverlay').classList.add('open'); $('invYes').focus();
     try { sfx('levelup'); } catch (e) {}
   }
-  $('invNo').addEventListener('click', function () { $('inviteOverlay').classList.remove('open'); if (inv.cur && inv.net) inv.net.send({ t: 'inviteNo', code: inv.cur.code, name: myName() }); inv.cur = null; });
+  $('invNo').addEventListener('click', function () { $('inviteOverlay').classList.remove('open'); if (inv.cur && inv.cur.t === 'tinvite') { inv.cur = null; return; } if (inv.cur && inv.net) inv.net.send({ t: 'inviteNo', code: inv.cur.code, name: myName() }); inv.cur = null; });
   $('invYes').addEventListener('click', function () {
     $('inviteOverlay').classList.remove('open'); var m = inv.cur; inv.cur = null; if (!m) return;
+    if (m.t === 'tinvite') { tnoJoinCode(m.code); return; }
     $('btnSpectateOffer').hidden = true; startOnline({ t: 'join', code: m.code });
   });
   function challengeOpen(p) {
@@ -8652,7 +8888,7 @@ window.NEON_BREAK = {
     if (online.active) { if (online.net && online.net.send({ t: 'rematch' })) { online.rematch[online.seat] = true; updateRematchUi(); } return; }
     rematch();
   });
-  $('btnEndMenu').addEventListener('click', function () { if (online.active) leaveOnline(false); open('menuOverlay'); });
+  $('btnEndMenu').addEventListener('click', function () { var tourney = !!online.tourney && !!tno.code; if (online.active) leaveOnline(false); if (tourney) { tnoConnect(); tnoOpen(); } else open('menuOverlay'); });
   $('btnClaim').addEventListener('click', function () { if (online.net) online.net.send({ t: 'claimWin' }); });
   $('btnOnline').addEventListener('click', function () {
     function showOnlineMenu() { renderHeld(); accSummaries(); $('btnSpectateOffer').hidden = true; onlineMsg(serverUrl() ? '' : t('online.noServer')); open('onlineOverlay'); }
@@ -9811,9 +10047,9 @@ window.NEON_BREAK = {
       row.appendChild(info); row.appendChild(b); box.appendChild(row);
     });
   }
-  $('btnTourn').addEventListener('click', function () { tnLoad(); tnRenderList(); open('tnOverlay'); });
-  $('tnBack').addEventListener('click', function () { open('menuOverlay'); });
-  $('tnCreate').addEventListener('click', function () { tnOpenNew(); });
+  $('btnTourn').addEventListener('click', function () { tnLoad(); tnRenderList(); tnoRenderLive(); open('tnOverlay'); });
+  $('tnBack').addEventListener('click', function () { $('tnoListMsg').textContent = ''; open('menuOverlay'); });
+  $('tnCreate').addEventListener('click', function () { tnOpenNew(false); });
 
   /* --- nuevo --- */
   function tnPlayers() { return $('tnPlayers').value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean); }
@@ -9825,12 +10061,16 @@ window.NEON_BREAK = {
     var b = $('tnBest'), cur = b.value || '3'; b.innerHTML = '';
     PT.BEST_OF.forEach(function (n) { var o = el('option', '', tnBestLabel(n)); o.value = n; b.appendChild(o); }); b.value = cur;
   }
-  function tnOpenNew() {
+  function tnOpenNew(onl) {
+    tn.online = !!onl; $('tnPlayersBox').hidden = tn.online; $('tnCheck').hidden = tn.online;
+    $('tnStart').textContent = t(tn.online ? 'tno.create' : 'tn.start'); document.querySelector('#tnNewOverlay h2').textContent = t(tn.online ? 'tno.newTitle' : 'tn.new');
     tnBuildSelects(); $('tnName').value = ''; $('tnName').placeholder = t('tn.name'); $('tnFormat').value = 'swiss_cut'; $('tnBest').value = '3'; $('tnMin').value = '2'; $('tnCut').value = '4';
     var base = []; for (var i = 1; i <= 8; i++) base.push(t('tn.sample', { n: i }));
     $('tnPlayers').value = base.join('\n'); tnRenderCheck(); open('tnNewOverlay');
+    $('tnoNewNote').hidden = !tn.online; $('tnoNewNote').textContent = t('tno.newNote', { rules: invRules({ variant: modeVariant(settings.mode), blitz: settings.mode === 'blitz', bullet: settings.mode === 'bullet', size: settings.size }) });
   }
   function tnRenderCheck() {
+    if (tn.online) { $('tnCutBox').hidden = $('tnFormat').value !== 'swiss_cut'; $('tnStart').disabled = false; return; }
     $('tnCutBox').hidden = $('tnFormat').value !== 'swiss_cut';
     var pl = tnPlayers(), box = $('tnCheck'); box.innerHTML = ''; $('tnCount').textContent = t('tn.count', { n: pl.length });
     var lower = pl.map(function (x) { return x.toLowerCase(); });
@@ -9851,8 +10091,9 @@ window.NEON_BREAK = {
   }
   ['tnName', 'tnFormat', 'tnBest', 'tnMin', 'tnCut', 'tnPlayers'].forEach(function (id) { $(id).addEventListener('input', tnRenderCheck); });
   $('tnShuffle').addEventListener('click', function () { $('tnPlayers').value = PT.shuffle(tnPlayers(), Date.now() % 100000).join('\n'); tnRenderCheck(); });
-  $('tnNewBack').addEventListener('click', function () { tnRenderList(); open('tnOverlay'); });
+  $('tnNewBack').addEventListener('click', function () { tnRenderList(); tnoRenderLive(); open('tnOverlay'); });
   $('tnStart').addEventListener('click', function () {
+    if (tn.online) { tnoCreate(); return; }
     var S; try { S = PT.create(tnCfg(), tnPlayers()); } catch (e) { $('tnCheck').appendChild(el('div', 'tn-err', e.message)); return; }
     S.meta = { id: 't' + Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36), at: Date.now() };
     tnPut(S); tn.cur = S.meta.id; tn.tab = 'fx'; tnRenderView(); open('tnViewOverlay');
@@ -9874,7 +10115,7 @@ window.NEON_BREAK = {
     seq.push(w);
     return d.games.concat(seq);
   }
-  function tnDuelEl(S, d) {
+  function tnDuelEl(S, d, o) {                      // o = {pid, org, playing} cuando es un torneo online (los resultados se cargan solos)
     var box = el('div', 'tn-duel' + (d.status === 'done' ? ' done' : '')); box.dataset.id = d.id;
     function side(id, sc, win) { var r = el('div', 'tn-p' + (d.status === 'done' ? (win ? ' w' : ' l') : '')); r.appendChild(el(win ? 'b' : 'span', '', id ? tnName(S, id) : t('tn.tbd'))); if (!id) r.firstChild.className = 'tn-tbd'; r.appendChild(el('span', '', id ? String(sc) : '')); return r; }
     if (d.bye) { var r0 = el('div', 'tn-p w'); r0.appendChild(el('b', '', tnName(S, d.a))); r0.appendChild(el('span', '', t('tn.bye'))); box.appendChild(r0); box.classList.add('done'); return box; }
@@ -9882,13 +10123,17 @@ window.NEON_BREAK = {
     var need = (S.cfg.bestOf + 1) / 2;
     if (d.status === 'done') box.appendChild(el('div', 'tn-meta', d.walkover ? t('tn.walkover') : (d.games.length === 1 ? t('tn.game1', { b: S.cfg.bestOf }) : t('tn.games', { b: S.cfg.bestOf, n: d.games.length }))));
     else if (d.a && d.b) {
-      box.appendChild(el('div', 'tn-meta', t('tn.opens', { n: d.games.length + 1, name: tnName(S, PT.opener(d, d.games.length)) }) + (S.cfg.bestOf > 1 ? ' · ' + t('tn.need', { n: need }) : '')));
+      box.appendChild(el('div', 'tn-meta', t('tn.opens', { n: d.games.length + 1, name: tnName(S, PT.opener(d, d.games.length)) }) + (S.cfg.bestOf > 1 ? ' · ' + t('tn.need', { n: need }) : '') + (o && o.playing && o.playing.indexOf(d.id) >= 0 ? ' · ▶ ' + t('tno.live2') : '')));
+      if (o && (d.a === o.pid || d.b === o.pid)) box.classList.add('mine');
+      if (o && !o.org) return box;
       var acts = el('div', 'tn-acts');
       // un toque con el resultado final (arriba – abajo): no hace falta marcar quién ganó cada partida
-      acts.appendChild(el('div', 'tn-meta', t('tn.result')));
-      var chips = el('div', 'tn-chips');
-      tnResults(S, d).forEach(function (r) { var b = el('button', 'btn small', r[0] + ' – ' + r[1]); b.type = 'button'; b.dataset.act = 'r'; b.dataset.sa = r[0]; b.dataset.sb = r[1]; chips.appendChild(b); });
-      acts.appendChild(chips);
+      if (!o) {
+        acts.appendChild(el('div', 'tn-meta', t('tn.result')));
+        var chips = el('div', 'tn-chips');
+        tnResults(S, d).forEach(function (r) { var b = el('button', 'btn small', r[0] + ' – ' + r[1]); b.type = 'button'; b.dataset.act = 'r'; b.dataset.sa = r[0]; b.dataset.sb = r[1]; chips.appendChild(b); });
+        acts.appendChild(chips);
+      }
       var wo = el('div', 'tn-chips');
       [['wa', d.a], ['wb', d.b]].forEach(function (x) { var b = el('button', 'btn small ghost', t('tn.wo', { name: tnName(S, x[1]) })); b.type = 'button'; b.dataset.act = x[0]; wo.appendChild(b); });
       acts.appendChild(wo);
@@ -9896,16 +10141,16 @@ window.NEON_BREAK = {
     }
     return box;
   }
-  function tnFixture(S) {
+  function tnFixture(S, o) {
     var f = document.createDocumentFragment(), pre = S.rounds.filter(function (r) { return r.phase !== 'elim'; }), el2 = S.rounds.filter(function (r) { return r.phase === 'elim'; });
     pre.forEach(function (r) {
       var sec = el('div', 'tn-round'), n = r.duels.filter(function (d) { return d.status === 'done'; }).length;
-      sec.appendChild(el('h3', 'tn-h', r.name + ' · ' + n + '/' + r.duels.length)); r.duels.forEach(function (d) { sec.appendChild(tnDuelEl(S, d)); }); f.appendChild(sec);
+      sec.appendChild(el('h3', 'tn-h', r.name + ' · ' + n + '/' + r.duels.length)); r.duels.forEach(function (d) { sec.appendChild(tnDuelEl(S, d, o)); }); f.appendChild(sec);
     });
     if (el2.length) {
       f.appendChild(el('h3', 'tn-h', t('tn.elim')));
       var br = el('div', 'tn-bracket');
-      el2.forEach(function (r) { var col = el('div', 'tn-col'); col.appendChild(el('h4', '', r.name)); var inner = el('div', 'tn-colin'); r.duels.forEach(function (d) { inner.appendChild(tnDuelEl(S, d)); }); col.appendChild(inner); br.appendChild(col); });
+      el2.forEach(function (r) { var col = el('div', 'tn-col'); col.appendChild(el('h4', '', r.name)); var inner = el('div', 'tn-colin'); r.duels.forEach(function (d) { inner.appendChild(tnDuelEl(S, d, o)); }); col.appendChild(inner); br.appendChild(col); });
       f.appendChild(br);
     } else if (S.cfg.format === 'swiss_cut') f.appendChild(el('p', 'hint', t('tn.cutWait')));
     return f;
@@ -10027,15 +10272,225 @@ window.NEON_BREAK = {
     ask(t('tn.withdrawConfirm', { name: tnName(S, id) }), t('tn.withdraw'), function () { tnApply(function (st) { return PT.withdraw(st, id); }); });
   });
   $('tnTabs').addEventListener('click', function (e) { var b = e.target.closest('button[data-t]'); if (b) { tn.tab = b.dataset.t; tnRenderView(); } });
-  $('tnViewBack').addEventListener('click', function () { tnRenderList(); open('tnOverlay'); });
+  $('tnViewBack').addEventListener('click', function () { tnRenderList(); tnoRenderLive(); open('tnOverlay'); });
   $('tnDelete').addEventListener('click', function () {
     var S = tnGet(); if (!S) return;
     ask(t('tn.deleteConfirm', { name: S.cfg.name }), t('tn.deleteYes'), function () { tn.list = tn.list.filter(function (x) { return x.meta.id !== S.meta.id; }); tnSave(); tnRenderList(); open('tnOverlay'); });
   });
   tnLoad();
 
+  /* ---------- Torneos online ----------
+   * El torneo vive en el servidor (server/tourneys.js). Este navegador mantiene una conexión propia ({t:'tcreate'|'tjoin'|'trejoin'}) y recibe
+   * 'tsnap' (foto completa). Cuando los dos de un duelo tocan "Jugar", el servidor arma la sala y manda tsnap.go: se entra con un rejoin normal. */
+  var TNO_KEY = 'pente.tno', tno = { net: null, code: '', token: '', pid: '', org: false, snap: null, tab: 'fx', intent: null, conn: '', inGame: '', friendsAt: 0 };
+  function tnoSaveSess() { try { if (tno.code && tno.token) localStorage.setItem(TNO_KEY, JSON.stringify({ code: tno.code, token: tno.token })); else localStorage.removeItem(TNO_KEY); } catch (e) {} }
+  function tnoLoadSess() { try { var x = JSON.parse(localStorage.getItem(TNO_KEY) || 'null'); if (x && /^[A-Z0-9]{5}$/.test(x.code) && /^[0-9a-f]{32}$/.test(x.token)) { tno.code = x.code; tno.token = x.token; } } catch (e) {} }
+  function tnoNote(txt, bad) { var n = $('tnoMsg'); n.textContent = txt || ''; n.classList.toggle('err', !!bad); var l = $('tnoListMsg'); if (l) { l.textContent = txt || ''; l.classList.toggle('err', !!bad); } }
+  function tnoErrText(m) { var k = 'tno.err.' + m.code; var x = t(k); if (x === k) x = t('tno.err.other'); return x + (m.code === 'TN_INVALID' && m.detail ? m.detail : ''); }
+  function tnoWithJwt(o, cb) { if (Auth && Auth.user) Auth.accessToken().then(function (tk) { if (tk) o.jwt = tk; cb(o); }, function () { cb(o); }); else cb(o); }
+  function tnoSend(o) { if (!tno.net || !tno.net.isOpen()) return false; if (!o.code) o.code = tno.code; if (!o.token) o.token = tno.token; return tno.net.send(o); }
+  function tnoConnect() {
+    var url = serverUrl(); if (!url) { tnoNote(t('online.noServer'), true); return false; }
+    if (tno.net) return true;
+    tno.net = window.PenteNet.connect(url, {
+      onState: function (s) { tno.conn = s; tnoRender(); },
+      onOpen: function () {
+        if (tno.token && tno.code) tno.net.send({ t: 'trejoin', code: tno.code, token: tno.token });
+        else if (tno.intent) tnoWithJwt(JSON.parse(JSON.stringify(tno.intent)), function (o) { if (tno.net) tno.net.send(o); });
+      },
+      onMessage: tnoOnMessage
+    });
+    return true;
+  }
+  function tnoReset(msg) {
+    if (tno.net) { try { tno.net.close(); } catch (e) {} }
+    tno.net = null; tno.code = tno.token = tno.pid = ''; tno.org = false; tno.snap = null; tno.intent = null; tno.inGame = ''; tnoSaveSess();
+    if (msg) tnoNote(msg, true);
+  }
+  function tnoOnMessage(m) {
+    if (!m || typeof m.t !== 'string') return;
+    switch (m.t) {
+      case 'tjoined': { var fresh = !!tno.intent; tno.code = m.code; tno.token = m.token; tno.pid = m.pid; tno.org = !!m.org; tno.intent = null; tnoSaveSess(); if (fresh && !$('tnoOverlay').classList.contains('open') && !online.active) tnoOpen(); break; }      // al reconectar solo no se abre la pantalla: se queda donde estabas
+      case 'tsnap': tno.snap = m; tnoRender(); tnoCheckGo(m); tnoRenderLive(); break;
+      case 'terror': {
+        if ((m.code === 'BAD_TOKEN' || m.code === 'TN_NOT_FOUND') && (tno.snap || tno.token)) { tnoReset(); tnoNote(t(m.code === 'TN_NOT_FOUND' ? 'tno.closed.gone' : 'tno.err.BAD_TOKEN'), true); if ($('tnoOverlay').classList.contains('open')) { tnRenderList(); tnoRenderLive(); open('tnOverlay'); } break; }
+        if (!tno.snap) { var it = tno.intent; tno.intent = null; if (!tno.token && tno.net) { tno.net.close(); tno.net = null; } if (it && !$('tnoOverlay').classList.contains('open')) tnoNote(tnoErrText(m), true); else tnoNote(tnoErrText(m), true); break; }
+        tnoNote(tnoErrText(m), true); break;
+      }
+      case 'tclosed': {
+        var why = m.why || 'gone'; tnoReset(); tnRenderList(); tnoRenderLive();
+        if (!online.active) open('tnOverlay'); tnoNote(t('tno.closed.' + why) === 'tno.closed.' + why ? t('tno.closed.gone') : t('tno.closed.' + why), false); break;
+      }
+      case 'tinviteRes': {
+        var nm = tno.inviting && tno.inviting[m.to] || ''; if (tno.inviting) delete tno.inviting[m.to];
+        tnoNote(m.ok ? t('tno.inviteSent', { name: nm }) : t('tno.invite.' + (m.reason === 'offline' || m.reason === 'already' || m.reason === 'rate' ? m.reason : 'error'), { name: nm }), !m.ok); break;
+      }
+    }
+  }
+  /* si el servidor dice que hay una partida lista para mí, entro a la sala (otra conexión; esta sigue escuchando el torneo) */
+  function tnoCheckGo(m) {
+    if (!m.go || tno.inGame === m.go.code) return;
+    if (online.active || daily.active || tut.active) { tnoNote(t('tno.inGame'), false); return; }
+    tno.inGame = m.go.code; closeAll(); $('btnSpectateOffer').hidden = true;
+    startOnline({ t: 'rejoin', code: m.go.code, token: m.go.token }); online.tourney = true;
+  }
+  function tnoOpen() { tnoRender(); open('tnoOverlay'); tnoLoadFriends(); if (tno.token && tno.code && tno.net && tno.net.isOpen()) tno.net.send({ t: 'trejoin', code: tno.code, token: tno.token }); }      // pide la foto al día por si se perdió algo
+  function tnoRules(g) { return invRules(g); }
+  /* --- lista de torneos: "volver a mi torneo" --- */
+  function tnoRenderLive() {
+    var box = $('tnoLive'); if (!box) return; box.innerHTML = '';
+    if (!tno.code || !tno.token) return;
+    var m = tno.snap, row = el('div', 'room'), info = el('div', 'info');
+    info.appendChild(el('div', 'who', m ? m.name : tno.code)); info.appendChild(el('div', 'meta', t('tno.live') + ' · ' + tno.code));
+    var b = el('button', 'btn primary', '›'); b.type = 'button'; b.setAttribute('aria-label', t('tno.live'));
+    b.addEventListener('click', function () { tnoConnect(); tnoOpen(); });
+    row.appendChild(info); row.appendChild(b); box.appendChild(row);
+  }
+  /* --- crear / unirse --- */
+  function tnoCreate() {
+    var cfgv = tnCfg(), g = { variant: modeVariant(settings.mode), blitz: settings.mode === 'blitz', bullet: settings.mode === 'bullet', tournamentRule: settings.tournamentRule, exactFive: settings.exactFive, size: settings.size, timer: settings.timer };
+    if (tno.code && tno.token) { tnoNote(t('tno.err.ALREADY_IN_TOURNEY'), true); tnRenderList(); tnoRenderLive(); open('tnOverlay'); return; }
+    tno.snap = null; tno.intent = { t: 'tcreate', name: cfgv.name, cfg: cfgv, game: g, pname: myName(), dev: devId() }; tno.code = tno.token = '';
+    tnoNote('', false); if (!tnoConnect()) { open('tnOverlay'); return; } tnoOpen();
+    if (tno.net.isOpen()) tnoWithJwt(JSON.parse(JSON.stringify(tno.intent)), function (o) { tno.net.send(o); });
+  }
+  function tnoJoinCode(code) {
+    code = String(code || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5);
+    if (code.length !== 5) { tnoNote(t('tno.err.TN_NOT_FOUND'), true); return; }
+    if (tno.code && tno.token) { if (tno.code === code) { tnoConnect(); tnoOpen(); return; } tnoNote(t('tno.err.ALREADY_IN_TOURNEY'), true); tnRenderList(); tnoRenderLive(); open('tnOverlay'); return; }
+    tno.snap = null; tno.intent = { t: 'tjoin', code: code, name: myName() }; tnoNote('', false);
+    if (!tnoConnect()) return;
+    if (tno.net.isOpen()) tnoWithJwt(JSON.parse(JSON.stringify(tno.intent)), function (o) { tno.net.send(o); });
+  }
+  $('tnoCreate').addEventListener('click', function () { tnoNote('', false); if (tno.code && tno.token) { tnoNote(t('tno.err.ALREADY_IN_TOURNEY'), true); return; } tnOpenNew(true); });
+  $('tnoJoin').addEventListener('click', function () { tnoJoinCode($('tnoCodeIn').value); });
+  $('tnoCodeIn').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); tnoJoinCode($('tnoCodeIn').value); } });
+  /* --- amigos para invitar --- */
+  function tnoLoadFriends() {
+    if (!socialOk() || !tno.org) return;
+    if (social.ov && Date.now() - tno.friendsAt < 30000) { tnoRender(); return; }
+    Auth.friendsOverview().then(function (o) { social.ov = o && typeof o === 'object' ? o : { list: [], stats_public: true }; tno.friendsAt = Date.now(); tnoRender(); }, function () {});
+  }
+  function tnoInvite(p) {
+    tno.inviting = tno.inviting || {}; tno.inviting[p.id] = p.name;
+    tnoWithJwt({ t: 'tinvite', to: p.id, avatar: profile.avatar, country: myCountry }, function (o) { tnoSend(o); });
+  }
+  function tnoLink() { var u = location.href.split(/[?#]/)[0] + '?t=' + tno.code, q = qs('server'); if (q && serverUrl() === q) u += '&server=' + encodeURIComponent(q); return u; }
+  function tnoCopy(txt) {
+    var done = function () { tnoNote(t('tno.copied'), false); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, done); else done();
+  }
+  $('tnoCopy').addEventListener('click', function () { tnoCopy(tno.code); });
+  $('tnoLink').addEventListener('click', function () {
+    var text = t('tno.shareText', { name: tno.snap ? tno.snap.name : '', url: tnoLink() });
+    if (navigator.share) { navigator.share({ text: text }).catch(function () {}); return; }
+    tnoCopy(text);
+  });
+  /* --- pantalla --- */
+  function tnoRender() {
+    if (!$('tnoOverlay').classList.contains('open')) return;
+    var m = tno.snap, lobby = $('tnoLobby'), run = $('tnoRun'), me = $('tnoMe');
+    $('tnoCodeBox').hidden = !tno.code; $('tnoCode').textContent = tno.code;
+    if (!m) { $('tnoTitle').textContent = t(tno.conn === 'reconnecting' ? 'tno.reconnecting' : 'tno.conn'); $('tnoInfo').textContent = ''; lobby.hidden = run.hidden = true; me.innerHTML = ''; $('tnoChamp').innerHTML = ''; $('tnoLeave').hidden = !tno.token; $('tnoLeave').textContent = t('tno.leave'); return; }
+    var org = !!(m.you && m.you.org), S = m.S, pid = m.you && m.you.pid, isOpen = m.status === 'open';
+    $('tnoTitle').textContent = m.name;
+    $('tnoInfo').textContent = t('tno.info', { format: tnFmt(m.cfg.format), b: m.cfg.bestOf, n: m.players.length }) + (tno.conn === 'reconnecting' ? ' · ' + t('tno.reconnecting') : '');
+    $('tnoLeave').hidden = false; $('tnoLeave').textContent = t(org ? 'tno.close' : 'tno.leave'); $('tnoLeave').classList.toggle('danger', true);
+    lobby.hidden = !isOpen; run.hidden = isOpen;
+    $('tnoChamp').innerHTML = ''; if (m.status === 'finished' && S) $('tnoChamp').appendChild(el('div', 'tn-champ', '🏆 ' + t('tn.champ', { name: tnName(S, S.champion) })));
+    // participantes
+    var pb = $('tnoPlayers'); pb.innerHTML = ''; $('tnoPlayersH').textContent = t('tno.players', { n: m.players.length });
+    m.players.forEach(function (p) {
+      var row = el('div', 'fr-row tno-pl'), nm = el('span', 'tno-nm', p.name); row.appendChild(el('span', 'tno-dot' + (p.online ? ' on' : ''), '●'));
+      row.appendChild(nm); if (p.pid === m.org) nm.appendChild(el('small', 'tno-tag', ' · ' + t('tno.orgTag'))); if (p.pid === pid) nm.appendChild(el('small', 'tno-tag', ' · ' + t('tno.you')));
+      if (org && p.pid !== pid) { var k = el('button', 'btn small ghost', t('tno.kick')); k.type = 'button'; k.addEventListener('click', function () { ask(t('tno.kickConfirm', { name: p.name }), t('tno.kick'), function () { tnoSend({ t: 'twithdraw', pid: p.pid }); }); }); row.appendChild(k); }
+      pb.appendChild(row);
+    });
+    // invitar amigos y preview (solo organizador, antes de empezar)
+    $('tnoInviteBox').hidden = !(isOpen && org); $('tnoStart').hidden = !(isOpen && org); $('tnoStartHint').hidden = !(isOpen && org);
+    var fb = $('tnoFriends'); fb.innerHTML = '';
+    if (isOpen && org) {
+      if (!socialOk()) fb.appendChild(el('p', 'hint', t('tno.inviteNeed')));
+      else {
+        var fr = ((social.ov && social.ov.list) || []).filter(function (x) { return x.status === 'accepted'; });
+        if (!fr.length) fb.appendChild(el('p', 'hint', t('tno.noFriends')));
+        fr.forEach(function (p) { fb.appendChild(frRow(p, [{ label: t('tno.inviteBtn'), cls: 'primary', fn: function () { tnoInvite(p); } }])); });
+      }
+    }
+    var ck = $('tnoCheck'); ck.innerHTML = '';
+    if (isOpen && org) {
+      var pv = PT.preview(m.cfg, m.players.map(function (x) { return x.name; }));
+      if (!pv.ok) { ck.appendChild(el('div', 'tn-err', t('tno.invalid'))); pv.errors.forEach(function (e) { ck.appendChild(el('div', 'tn-err', '✗ ' + e.msg)); }); $('tnoStart').disabled = true;
+        if (pv.suggestions && pv.suggestions.length) { ck.appendChild(el('div', 'hint', t('tn.options'))); pv.suggestions.forEach(function (sg) { var bs = el('button', 'btn tn-sug', '→ ' + sg.label); bs.type = 'button'; bs.addEventListener('click', function () { tnoSend({ t: 'tcfg', cfg: sg.cfg }); }); ck.appendChild(bs); }); } }
+      else { pv.lines.forEach(function (l) { ck.appendChild(el('div', 'tn-line', l)); }); $('tnoStart').disabled = false; }
+    } else if (isOpen) ck.appendChild(el('p', 'hint', t('tno.waitOrg')));
+    // mi duelo
+    me.innerHTML = '';
+    if (!isOpen && S) tnoMyDuel(m, me);
+    // fixture / tabla
+    if (!isOpen && S) {
+      Array.prototype.forEach.call($('tnoTabs').children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.t === tno.tab)); });
+      var body = $('tnoBody'); body.innerHTML = ''; body.appendChild(tno.tab === 'fx' ? tnFixture(S, { pid: pid, org: org, playing: m.playing }) : tnTable(S));
+    }
+  }
+  function tnoMyDuel(m, box) {
+    var S = m.S, pid = m.you && m.you.pid, mine = PT.pending(S).filter(function (x) { return x.duel.a === pid || x.duel.b === pid; });
+    var card = el('div', 'tno-card'); box.appendChild(card);
+    if (S.withdrawn.indexOf(pid) >= 0) { card.appendChild(el('p', '', t('tno.withdrawn'))); return; }
+    if (m.status === 'finished') { return box.removeChild(card); }
+    if (!mine.length) { card.appendChild(el('p', 'hint', t('tno.noDuel'))); return; }
+    mine.forEach(function (x) {
+      var d = x.duel, rival = d.a === pid ? d.b : d.a, ready = m.ready[d.id] || [], playing = m.playing.indexOf(d.id) >= 0, n = d.games.length + 1;
+      card.appendChild(el('h3', 'tn-h', t('tno.myDuel') + ' · ' + x.round));
+      card.appendChild(el('div', 'tno-vs', t('tno.vs', { name: tnName(S, rival) })));
+      if (S.cfg.bestOf > 1) card.appendChild(el('div', 'tn-meta', t('tno.score', { a: d.a === pid ? d.score.a : d.score.b, b: d.a === pid ? d.score.b : d.score.a }) + ' · ' + t('tn.need', { n: (S.cfg.bestOf + 1) / 2 })));
+      var first = PT.opener(d, d.games.length);
+      card.appendChild(el('div', 'tn-meta', first === pid ? t('tno.opensYou') : t('tno.opensHim', { name: tnName(S, first) })));
+      var btns = el('div', 'btns');
+      if (playing) {
+        card.appendChild(el('p', '', t('tno.inGame')));
+        if (m.go) { var bg = el('button', 'btn primary', t('tno.backToGame')); bg.type = 'button'; bg.addEventListener('click', function () { tno.inGame = ''; tnoCheckGo(m); }); btns.appendChild(bg); }
+      } else if (ready.indexOf(pid) >= 0) {
+        card.appendChild(el('p', '', t('tno.ready', { name: tnName(S, rival) })));
+        var bc = el('button', 'btn', t('tno.cancel')); bc.type = 'button'; bc.addEventListener('click', function () { tnoSend({ t: 'tunplay', duel: d.id }); }); btns.appendChild(bc);
+      } else {
+        if (ready.indexOf(rival) >= 0) card.appendChild(el('p', 'hint', t('tno.rivalReady', { name: tnName(S, rival) })));
+        var bp = el('button', 'btn primary', t('tno.play', { n: n })); bp.type = 'button'; bp.addEventListener('click', function () { tnoSend({ t: 'tplay', duel: d.id }); }); btns.appendChild(bp);
+      }
+      card.appendChild(btns);
+    });
+    if (m.note === 'draw') card.appendChild(el('p', 'hint', t('tno.draw')));
+    if (m.note === 'busy') card.appendChild(el('p', 'tn-err', t('tno.busy')));
+  }
+  $('tnoStart').addEventListener('click', function () { tnoSend({ t: 'tstart' }); });
+  $('tnoTabs').addEventListener('click', function (e) { var b = e.target.closest('button[data-t]'); if (b) { tno.tab = b.dataset.t; tnoRender(); } });
+  $('tnoBody').addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-act]'); if (!btn || !tno.snap) return;
+    var id = btn.closest('.tn-duel').dataset.id, d = null, S = tno.snap.S;
+    S.rounds.forEach(function (r) { r.duels.forEach(function (x) { if (x.id === id) d = x; }); }); if (!d) return;
+    var w = btn.dataset.act === 'wa' ? d.a : d.b;
+    ask(t('tn.woConfirm', { name: tnName(S, w) }), t('tn.woYes'), function () { tnoSend({ t: 'tforfeit', duel: id, winner: w }); });
+  });
+  $('tnoBack').addEventListener('click', function () { tnRenderList(); tnoRenderLive(); open('tnOverlay'); });
+  $('tnoLeave').addEventListener('click', function () {
+    var m = tno.snap, org = !!(m && m.you && m.you.org);
+    if (!m) { tnoReset(); tnRenderList(); tnoRenderLive(); open('tnOverlay'); return; }
+    ask(t(org ? 'tno.closeConfirm' : 'tno.leaveConfirm'), t(org ? 'tno.close' : 'tno.leave'), function () { tnoSend({ t: org ? 'tclose' : 'tleave' }); });
+  });
+  /* invitación recibida por la conexión de presencia */
+  function onTInvite(m) {
+    if (!m.code || !m.from) return;
+    if (online.active || daily.active || tut.active || (tno.code && tno.token)) return;
+    inv.cur = { t: 'tinvite', code: m.code };
+    $('invTitle').innerHTML = (m.from.avatar ? avInline(m.from.avatar, 28) + ' ' : '') + (flagText(m.from.country) ? '<span class="flag">' + flagText(m.from.country) + '</span>' : '') + esc(t('tno.invTitle', { name: m.from.name }));
+    $('invText').textContent = t('tno.invText', { tn: m.name, format: tnFmt(m.cfg && m.cfg.format || 'swiss_cut'), rules: invRules(m.game) });
+    $('inviteOverlay').classList.add('open'); $('invYes').focus();
+    try { sfx('levelup'); } catch (e) {}
+  }
+  tnoLoadSess();
+
   applyI18n(); buildThemePicker(); syncSizePicker(); syncOpts(); syncMode(); syncVis(); resize(); open('menuOverlay'); initOnline(); updateSide();
-  window.__pente = { get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, startAI: startAI, get ai() { return ai; }, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; }, get tut() { return tut; }, get profile() { return profile; }, get auth() { return Auth; }, get sync() { return sync; }, setChatW: setChatW, syncProfile: syncProfile, get tn() { return tn; } };  // utilidad para pruebas manuales
+  window.__pente = { get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, startAI: startAI, get ai() { return ai; }, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; }, get tut() { return tut; }, get profile() { return profile; }, get auth() { return Auth; }, get sync() { return sync; }, setChatW: setChatW, syncProfile: syncProfile, get tn() { return tn; }, get tno() { return tno; } };  // utilidad para pruebas manuales
 })();
 </script>
 <script>
