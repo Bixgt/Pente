@@ -771,6 +771,51 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
 .tno-dot.on { color: var(--ok, #5ad19a); opacity: 1; }
 .tn-duel.mine { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
 #tnoCodeIn { flex: 1; min-width: 0; text-transform: uppercase; letter-spacing: .18em; text-align: center; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; color: var(--text); font: inherit; }
+
+/* ---------- Configuración (pantalla): banner de personalización, pestañas con ícono y tarjeta de opciones ---------- */
+#settingsOverlay .screen-body.settings { width: min(100%, 560px); }
+#settingsOverlay h2 { font-size: 34px; margin: 0 0 14px; }
+#settingsOverlay .cust-link { display: flex; align-items: center; gap: 16px; width: 100%; text-align: left; padding: 14px 16px; margin: 0 0 16px; min-height: 76px; border: 2px solid var(--accent); border-radius: 16px; position: relative; overflow: hidden;
+  background: linear-gradient(100deg, color-mix(in srgb, var(--accent) 16%, var(--panel)), color-mix(in srgb, var(--accent) 7%, var(--panel))); font-weight: 400; }
+#settingsOverlay .cust-link::before { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 42%; pointer-events: none; opacity: .09; background: repeating-conic-gradient(var(--accent) 0 25%, transparent 0 50%) 0 0 / 30px 30px; -webkit-mask-image: linear-gradient(90deg, transparent, #000); mask-image: linear-gradient(90deg, transparent, #000); }
+#settingsOverlay .cl-ico { flex: none; color: var(--accent); }
+#settingsOverlay .cl-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; position: relative; }
+#settingsOverlay .cl-txt b { font-size: 19px; font-weight: 700; }
+#settingsOverlay .cl-txt small { color: var(--muted); font-size: 14px; }
+#settingsOverlay .cl-chev { flex: none; color: var(--accent); position: relative; }
+#settingsOverlay .tabs { gap: 10px; margin: 0 0 14px; }
+#settingsOverlay .tab { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 56px; font-size: 16px; font-weight: 600; border-radius: 14px; background: var(--panel); }
+#settingsOverlay .tab .ti { flex: none; color: var(--muted); }
+#settingsOverlay .tab[aria-selected="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--panel)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent), 0 4px 18px color-mix(in srgb, var(--accent) 18%, transparent); }
+#settingsOverlay .tab[aria-selected="true"] .ti { color: var(--accent); }
+#settingsOverlay .tabpanel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 6px 18px 10px; }
+#settingsOverlay .tabpanel[hidden] { display: none; }
+#settingsOverlay .cfg-item { padding: 16px 0; border-bottom: 1px solid color-mix(in srgb, var(--line) 55%, transparent); }
+#settingsOverlay .cfg-item:last-of-type { border-bottom: 0; }
+#settingsOverlay .check { display: flex; align-items: flex-start; gap: 16px; margin: 0; }
+#settingsOverlay .check .ci { flex: none; color: var(--text); opacity: .9; margin-top: 2px; }
+#settingsOverlay .check .ct { font-size: 18px; font-weight: 700; display: block; }
+#settingsOverlay .check small { font-size: 15px; }
+#settingsOverlay .check input[type=checkbox] { appearance: none; -webkit-appearance: none; width: 38px; height: 38px; margin: 0; flex: none; border-radius: 8px; border: 2px solid var(--line); background: var(--text); cursor: pointer; display: grid; place-items: center; }
+#settingsOverlay .check input[type=checkbox]:checked { background: var(--accent); border-color: var(--accent); }
+#settingsOverlay .check input[type=checkbox]:checked::after { content: ""; width: 10px; height: 18px; border: solid var(--accent-ink, #1a1208); border-width: 0 4px 4px 0; transform: rotate(45deg) translate(-1px, -2px); }
+#settingsOverlay .check input[type=checkbox]:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+#settingsOverlay .cfg-item .field { margin: 12px 0 0 0; padding-left: 108px; }
+#settingsOverlay .cfg-item .lbl { font-size: 16px; }
+#settingsOverlay .cfg-item .lbl b { color: var(--accent); }
+#settingsOverlay input[type=range] { -webkit-appearance: none; appearance: none; height: 10px; min-height: 10px; border-radius: 999px; margin: 14px 0 6px; background: linear-gradient(90deg, var(--accent) var(--p, 50%), color-mix(in srgb, var(--text) 14%, transparent) var(--p, 50%)); outline-offset: 6px; }
+#settingsOverlay input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); border: 3px solid var(--panel); box-shadow: 0 0 0 1px var(--accent); }
+#settingsOverlay input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); border: 3px solid var(--panel); box-shadow: 0 0 0 1px var(--accent); }
+#settingsOverlay input[type=range]:disabled { opacity: .45; }
+#settingsOverlay .cfg-foot { margin: 6px 0 4px; padding-top: 12px; border-top: 1px solid color-mix(in srgb, var(--line) 55%, transparent); }
+@media (max-width: 480px) {
+  #settingsOverlay h2 { font-size: 28px; }
+  #settingsOverlay .cfg-item .field { padding-left: 0; }
+  #settingsOverlay .check { gap: 12px; } #settingsOverlay .check .ci { width: 26px; height: 26px; }
+  #settingsOverlay .tab { gap: 6px; font-size: 14px; padding: 8px 2px; } #settingsOverlay .tab .ti { width: 20px; height: 20px; }
+  #settingsOverlay .tabpanel { padding: 4px 14px 8px; }
+}
+#settingsOverlay .tabpanel > .check { margin: 16px 0; } #settingsOverlay .tabpanel > .check input[type=checkbox] { width: 30px; height: 30px; }
 </style>
 </head>
 <body>
@@ -1153,19 +1198,20 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
 <div class="overlay screen" id="settingsOverlay">
   <div class="screen-body settings">
     <h2 id="cfgTitle" data-i18n="cfg.title"></h2>
-    <button type="button" class="btn cust-link" id="btnToCustom" data-i18n="cz.link"></button>
+    <button type="button" class="btn cust-link" id="btnToCustom"><svg class="cl-ico" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 3l3 3-9 9-3-3z"/><path d="M9 12c-2.5 0-4 1.6-4 4 0 1.5-.8 2.6-2 3 3.5 1 8 .5 8-3.5"/></svg><span class="cl-txt"><b data-i18n="cz.linkT"></b><small data-i18n="cz.linkS"></small></span><svg class="cl-chev" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
     <div class="tabs" role="tablist" id="cfgTabs">
-      <button type="button" role="tab" class="tab" data-tab="sound" data-i18n="cfg.tab.sound"></button>
-      <button type="button" role="tab" class="tab" data-tab="controls" data-i18n="cfg.tab.controls"></button>
-      <button type="button" role="tab" class="tab" data-tab="game" data-i18n="cfg.tab.game"></button>
+      <button type="button" role="tab" class="tab" data-tab="sound"><svg class="ti" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg><span data-i18n="cfg.tab.sound"></span></button>
+      <button type="button" role="tab" class="tab" data-tab="controls"><svg class="ti" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h12a4 4 0 0 1 4 4.2l-.7 4.3a2.4 2.4 0 0 1-4 1.4L15 16H9l-2.3 2a2.4 2.4 0 0 1-4-1.4L2 12.2A4 4 0 0 1 6 8z"/><path d="M7.5 10.5v3M6 12h3"/><circle cx="15.5" cy="11.3" r=".9" fill="currentColor"/><circle cx="17.7" cy="13" r=".9" fill="currentColor"/></svg><span data-i18n="cfg.tab.controls"></span></button>
+      <button type="button" role="tab" class="tab" data-tab="game"><svg class="ti" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span data-i18n="cfg.tab.game"></span></button>
     </div>
 
     <section class="tabpanel" id="tab-sound" role="tabpanel">
-      <label class="check"><input type="checkbox" id="optSound"><span><span data-i18n="cfg.sound"></span><small data-i18n="cfg.soundHint"></small></span></label>
-      <div class="field"><label class="lbl" for="cfgVolume"><span data-i18n="cfg.volume"></span> <b id="cfgVolumeVal"></b></label><input type="range" id="cfgVolume" min="0" max="100" step="5"></div>
-      <label class="check"><input type="checkbox" id="optMusic"><span><span data-i18n="mus.on"></span><small data-i18n="mus.hint"></small></span></label>
-      <div class="field"><label class="lbl" for="cfgMusicVol"><span data-i18n="mus.volume"></span> <b id="cfgMusicVolVal"></b></label><input type="range" id="cfgMusicVol" min="0" max="100" step="5"></div>
-      <label class="check"><input type="checkbox" id="optVibrate"><span><span data-i18n="cfg.vibrate"></span><small data-i18n="cfg.vibrateHint"></small></span></label>
+      <div class="cfg-item"><label class="check"><input type="checkbox" id="optSound"><svg class="ci" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg><span><span class="ct" data-i18n="cfg.sound"></span><small data-i18n="cfg.soundHint"></small></span></label>
+        <div class="field"><label class="lbl" for="cfgVolume"><span data-i18n="cfg.volume"></span> <b id="cfgVolumeVal"></b></label><input type="range" id="cfgVolume" min="0" max="100" step="5"></div></div>
+      <div class="cfg-item"><label class="check"><input type="checkbox" id="optMusic"><svg class="ci" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3" fill="currentColor"/><circle cx="17" cy="16" r="3" fill="currentColor"/></svg><span><span class="ct" data-i18n="mus.on"></span><small data-i18n="mus.hint"></small></span></label>
+        <div class="field"><label class="lbl" for="cfgMusicVol"><span data-i18n="mus.volume"></span> <b id="cfgMusicVolVal"></b></label><input type="range" id="cfgMusicVol" min="0" max="100" step="5"></div></div>
+      <div class="cfg-item"><label class="check"><input type="checkbox" id="optVibrate"><svg class="ci" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="4" width="8" height="16" rx="2"/><path d="M4 9v6"/><path d="M20 9v6"/><path d="M1.5 11v2"/><path d="M22.5 11v2"/></svg><span><span class="ct" data-i18n="cfg.vibrate"></span><small data-i18n="cfg.vibrateHint"></small></span></label></div>
+      <p class="hint cfg-foot" data-i18n="cfg.hintSaved"></p>
     </section>
 
     <section class="tabpanel" id="tab-controls" role="tabpanel" hidden>
@@ -1187,7 +1233,6 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
       <div class="btns"><button type="button" class="btn" id="btnCfgReset" data-i18n="cfg.reset"></button></div>
     </section>
 
-    <p class="hint" data-i18n="cfg.hintSaved"></p>
     <div class="btns"><button class="btn primary" id="btnSettingsBack" data-i18n="menu.back"></button></div>
   </div>
 </div>
@@ -4544,6 +4589,8 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
     "err.RESERVED": "Esa sala está reservada para otra persona.",
     "cz.title": "Personalización",
     "cz.sub": "Elegí cómo se ve tu tablero y tus fichas.",
+    "cz.linkT": "Personalización · tablero y fichas",
+    "cz.linkS": "Elegí el estilo del tablero, las fichas y más.",
     "cz.link": "Personalización · tablero y fichas →",
     "seek.btn": "Buscar partida",
     "seek.sub": "Avisamos a los demás para ver quién se suma",
@@ -4793,6 +4840,8 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
     "err.RESERVED": "That room is reserved for someone else.",
     "cz.title": "Customize",
     "cz.sub": "Pick how your board and stones look.",
+    "cz.linkT": "Customize · board and stones",
+    "cz.linkS": "Pick the board style, the stones and more.",
     "cz.link": "Customize · board and stones →",
     "seek.btn": "Find a game",
     "seek.sub": "We let others know to see who joins",
@@ -10029,6 +10078,7 @@ window.NEON_BREAK = {
     $('optMusic').checked = M ? M.isEnabled() : false;
     $('cfgMusicVol').value = mv; $('cfgMusicVolVal').textContent = mv + '%';
     $('cfgMusicVol').disabled = !(M && M.isEnabled());
+    cfgFill();
   }
   function cfgChanged(key) {
     if (key === 'chat' && !cfg.chat) chatReset();
@@ -10048,6 +10098,8 @@ window.NEON_BREAK = {
   $('optVibrate').addEventListener('change', function () { if (!S) return; S.setVibrate($('optVibrate').checked); syncCfgUi(); buzz(30); });
   $('cfgVolume').addEventListener('input', function () { if (!S) return; S.setVolume($('cfgVolume').value / 100); $('cfgVolumeVal').textContent = $('cfgVolume').value + '%'; });
   $('cfgVolume').addEventListener('change', function () { sfx('place'); });       // al soltar el deslizador suena una muestra
+  function cfgFill() { document.querySelectorAll('#settingsOverlay input[type=range]').forEach(function (r) { r.style.setProperty('--p', ((r.value - r.min) / (r.max - r.min) * 100) + '%'); }); }
+  document.querySelectorAll('#settingsOverlay input[type=range]').forEach(function (r) { r.addEventListener('input', cfgFill); });
   function showTab(id) {
     document.querySelectorAll('#cfgTabs .tab').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.tab === id)); });
     document.querySelectorAll('.tabpanel').forEach(function (p) { p.hidden = p.id !== 'tab-' + id; });
