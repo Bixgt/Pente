@@ -816,6 +816,49 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
   #settingsOverlay .tabpanel { padding: 4px 14px 8px; }
 }
 #settingsOverlay .tabpanel > .check { margin: 16px 0; } #settingsOverlay .tabpanel > .check input[type=checkbox] { width: 30px; height: 30px; }
+
+/* ---------- Tablero de práctica ---------- */
+.lab-panel { display: flex; flex-direction: column; gap: 9px; background: var(--panel); border: 2px solid var(--accent); border-radius: var(--radius); padding: 12px 14px; min-height: 0; overflow-y: auto; }
+.lab-panel[hidden] { display: none; }
+.lab-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.lab-tray { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.lab-tool { display: flex; align-items: center; justify-content: center; min-height: 58px; padding: 4px; border-radius: 14px; border: 2px solid var(--line); background: var(--panel-2); color: var(--text, inherit); cursor: pointer; }
+.lab-tool canvas { width: 44px; height: 44px; pointer-events: none; }
+.lab-tool[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent) inset; }
+.lab-hist { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.lab-hist .btn { min-height: 46px; font-size: 18px; }
+.lab-hist .btn:disabled { opacity: .35; cursor: default; }
+.lab-pos { text-align: center; font-size: 13px; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+.lab-sw { display: flex; align-items: center; gap: 10px; font-weight: 700; min-height: 36px; cursor: pointer; }
+.lab-sw input { width: 22px; height: 22px; accent-color: var(--accent); }
+.lab-hint { color: var(--muted); font-size: 12.5px; line-height: 1.3; margin: -4px 0 0; }
+.lab-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.lab-row label { display: flex; flex-direction: column; gap: 3px; font-size: 12px; font-weight: 700; color: var(--muted); }
+.lab-row select, .lab-panel textarea { font: inherit; font-size: 14px; color: inherit; background: transparent; border: 2px solid var(--line); border-radius: 10px; padding: 7px 8px; }
+.lab-row select option { color: #111; }
+.lab-panel textarea { width: 100%; box-sizing: border-box; resize: vertical; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; }
+.lab-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.lab-acts .btn { flex: 1 1 auto; }
+.lab-paste[hidden] { display: none; }
+.lab-paste { display: flex; flex-direction: column; gap: 8px; }
+.lab-err { margin: 0; color: #e5604f; font-size: 13px; font-weight: 700; }
+.lab-err:empty { display: none; }
+body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab #btnPause, body.in-lab #btnConfirm, body.in-lab #chatBox, body.in-lab #btnChatShow { display: none !important; }
+@media (min-width: 1100px) {
+  .lab-panel { grid-column: 3; grid-row: 1; contain: size; }
+}
+@media (max-width: 1099px) {
+  /* Celular: jugadores, tablero y debajo la bandeja (compacta) */
+  body.in-lab .stage { display: contents; }
+  body.in-lab .board-wrap { order: 1; flex: none; }
+  body.in-lab .actions { order: 2; min-height: 0; }
+  body.in-lab .lab-panel { order: 3; flex: 1 0 auto; overflow: visible; padding: 10px 12px; gap: 7px; }
+  body.in-lab .lab-hint { display: none; }
+  body.in-lab .lab-paste .lab-hint { display: block; }
+  body.in-lab #board { width: min(100%, max(260px, calc(100vh - 430px)), 900px); }
+}
+.lab-note { text-align: center; font-size: 13px; font-weight: 700; color: var(--accent); }
+.lab-note:empty { display: none; }
 </style>
 </head>
 <body>
@@ -861,6 +904,38 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
       </div>
     </section>
     <div class="board-wrap"><canvas id="board" tabindex="0" role="application"></canvas></div>
+    <section class="lab-panel" id="labPanel" hidden data-i18n-aria="a11y.lab">
+      <div class="lab-top"><b data-i18n="lab.title"></b><button type="button" class="btn small" id="labExit" data-i18n="lab.exit"></button></div>
+      <div class="lab-tray" id="labTray" role="toolbar" data-i18n-aria="a11y.lab">
+        <button type="button" class="lab-tool" data-tool="1" data-i18n-aria="lab.tool1" data-i18n-title="lab.tool1"><canvas width="56" height="56"></canvas></button>
+        <button type="button" class="lab-tool" data-tool="2" data-i18n-aria="lab.tool2" data-i18n-title="lab.tool2"><canvas width="56" height="56"></canvas></button>
+        <button type="button" class="lab-tool" data-tool="erase" data-i18n-aria="lab.toolErase" data-i18n-title="lab.toolErase"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 20H9l-5-5a2 2 0 010-2.8l9-9a2 2 0 012.8 0l5 5a2 2 0 010 2.8L12 20"/><path d="M8 9l7 7"/></svg></button>
+        <button type="button" class="lab-tool" data-tool="pen" data-i18n-aria="lab.toolPen" data-i18n-title="lab.toolPen"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>
+      </div>
+      <div class="lab-hist">
+        <button type="button" class="btn" id="labBack" data-i18n-aria="lab.back" data-i18n-title="lab.back">◀</button>
+        <button type="button" class="btn" id="labPlay" data-i18n-aria="lab.play" data-i18n-title="lab.play">▶▶</button>
+        <button type="button" class="btn" id="labFwd" data-i18n-aria="lab.fwd" data-i18n-title="lab.fwd">▶</button>
+      </div>
+      <div class="lab-pos" id="labPos" role="status" aria-live="polite"></div>
+      <div class="lab-note" id="labNote" role="status" aria-live="polite"></div>
+      <label class="lab-sw"><input type="checkbox" id="labCap" checked><span data-i18n="lab.cap"></span></label>
+      <small class="lab-hint" data-i18n="lab.capHint"></small>
+      <label class="lab-sw"><input type="checkbox" id="labAlt" checked><span data-i18n="lab.alt"></span></label>
+      <div class="lab-row"><label><span data-i18n="lab.size"></span><select id="labSize"><option value="13" data-i18n="lab.size13"></option><option value="19" data-i18n="lab.size19"></option></select></label>
+        <label><span data-i18n="lab.rules"></span><select id="labVar"><option value="classic" data-i18n="lab.v.classic"></option><option value="pairs3" data-i18n="lab.v.pairs3"></option><option value="triples" data-i18n="lab.v.triples"></option><option value="gomoku" data-i18n="lab.v.gomoku"></option></select></label></div>
+      <div class="lab-acts">
+        <button type="button" class="btn primary" id="labPasteBtn" data-i18n="lab.paste"></button>
+        <button type="button" class="btn" id="labClearMarks" data-i18n="lab.clearMarks"></button>
+        <button type="button" class="btn" id="labReset" data-i18n="lab.reset"></button>
+      </div>
+      <div class="lab-paste" id="labPasteBox" hidden>
+        <p class="lab-hint" data-i18n="lab.pasteHelp"></p>
+        <textarea id="labTxt" rows="6" spellcheck="false" data-i18n-ph="lab.pastePh"></textarea>
+        <p class="lab-err" id="labErr" role="alert"></p>
+        <div class="lab-acts"><button type="button" class="btn primary" id="labLoad" data-i18n="lab.load"></button><button type="button" class="btn" id="labPasteCancel" data-i18n="lab.cancel"></button></div>
+      </div>
+    </section>
 
     <aside class="side" id="side" data-tab="moves" data-i18n-aria="a11y.sidePanel">
       <div class="grip grip-sheet" id="sheetGrip" role="separator" aria-orientation="horizontal" tabindex="0" data-i18n-aria="chat.resize" data-i18n-title="chat.resize"></div>
@@ -1068,6 +1143,7 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
       <button type="button" class="tile" id="btnOnline"><span class="tile-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z"/></svg></span><span class="tile-tx"><span class="tile-t" data-i18n="menu.online"></span><span class="tile-s" data-i18n="play.onlineSub"></span></span></button>
       <button type="button" class="tile" id="btnSeek"><span class="tile-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span><span class="tile-tx"><span class="tile-t" data-i18n="seek.btn"></span><span class="tile-s" data-i18n="seek.sub"></span></span></button>
       <button type="button" class="tile" id="btnTutorial"><span class="tile-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4z"/><path d="M7 9.5V15c0 1.5 2.2 3 5 3s5-1.5 5-3V9.5"/></svg></span><span class="tile-tx"><span class="tile-t" data-i18n="menu.tutorial"></span><span class="tile-s" data-i18n="play.tutorialSub"></span></span></button>
+      <button type="button" class="tile" id="btnLab"><span class="tile-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></span><span class="tile-tx"><span class="tile-t" data-i18n="lab.menu"></span><span class="tile-s" data-i18n="lab.menuSub"></span></span></button>
     </div>
     <div class="btns"><button class="btn" id="btnPlayBack" data-i18n="menu.back"></button></div>
   </div>
@@ -1937,6 +2013,83 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
     winsNeededForBestOf: winsNeededForBestOf,
     COLS: COLS, coordName: coordName, parseCoord: parseCoord
   };
+});
+</script>
+<script>
+/* PENTE · Practicar (tablero libre). Lógica pura, sin DOM: leer una partida pegada, recrearla paso a paso, poner/quitar fichas a mano
+ * (con capturas automáticas opcionales). Funciona en navegador (window.PenteLab) y en Node (require). */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./core/pente.js'));
+  else root.PenteLab = factory(root.PenteCore);
+})(typeof self !== 'undefined' ? self : this, function (P) {
+  'use strict';
+
+  var COORD = /\b([A-HJ-T])(\d{1,2})\b/gi;
+
+  /** Lee el texto que copia el botón "Copiar jugadas" (o una lista suelta de coordenadas: "K10 L11 …").
+   *  Devuelve { ok, size, variant, exactFive, moves:[{x,y}], error? }. */
+  function parseGame(text) {
+    text = String(text == null ? '' : text).replace(/\r/g, '').slice(0, 60000);
+    var sm = /Pente\s+(\d{1,2})\s*[×xX]\s*(\d{1,2})/.exec(text), size = sm && (+sm[1] === 13 || +sm[1] === 19) ? +sm[1] : 19;
+    var rl = /^\s*(?:Reglas|Rules)\s*:\s*(.+)$/im.exec(text), rules = rl ? rl[1].toLowerCase() : '';
+    var variant = /gomoku/.test(rules) ? 'gomoku' : /pares y tr|pairs (?:&|and) triples/.test(rules) ? 'pairs3' : /solo tr|triples only/.test(rules) ? 'triples' : 'classic';
+    var exactFive = /exact/.test(rules);
+    var lines = text.split('\n'), picked = [], numbered = false;
+    lines.forEach(function (ln) { var m = /^\s*\d+\s*[.)]\s*(.*)$/.exec(ln); if (m) { numbered = true; picked.push(m[1]); } });
+    if (!numbered) lines.forEach(function (ln) { if (!/Pente|\bvs\b|Reglas|Rules|Fecha|Date|Resultado|Result|\(x\s*=/i.test(ln)) picked.push(ln); });
+    var moves = [], bad = null;
+    picked.forEach(function (body) {
+      if (bad) return;
+      body = body.replace(/x\s*\[[^\]]*\]/gi, ' ');                      // lo capturado no es una jugada
+      var re = new RegExp(COORD.source, 'gi'), m;
+      while ((m = re.exec(body))) { var c = P.parseCoord(m[1] + m[2], size); if (c) moves.push({ x: c.x, y: c.y }); else { bad = { ok: false, size: size, error: 'BAD_COORD', at: moves.length + 1, token: m[0] }; return; } }
+    });
+    if (bad) return bad;
+    if (!moves.length) return { ok: false, size: size, error: 'EMPTY' };
+    return { ok: true, size: size, variant: variant, exactFive: exactFive, moves: moves };
+  }
+
+  /** Recrea la partida: devuelve { states:[estado0, estado1, …], failedAt?, error? }. Sin regla de torneo (lo que se jugó, se acepta). */
+  function replay(g) {
+    var s = P.createGame({ size: g.size, variant: g.variant, tournamentRule: false, exactFive: !!g.exactFive }), states = [s];
+    for (var i = 0; i < g.moves.length; i++) {
+      var r = P.playMove(s, g.moves[i].x, g.moves[i].y, s.current);
+      if (!r.ok) return { states: states, failedAt: i + 1, error: r.error, coord: P.coordName(g.moves[i].x, g.moves[i].y) };
+      s = r.state; states.push(s);
+    }
+    return { states: states };
+  }
+
+  function copy(s) {
+    return { players: s.players, ffa: false, out: {}, size: s.size, board: s.board.slice(), current: s.current, captures: Object.assign({}, s.captures), moves: s.moves.slice(), lastMove: s.lastMove,
+      status: s.status, winner: s.winner, winReasons: s.winReasons.slice(), winLine: s.winLine, options: Object.assign({}, s.options) };
+  }
+  function blank(size, variant) { return P.createGame({ size: size, variant: variant, tournamentRule: false }); }
+
+  /** Pone una ficha de `color` (1|2) a mano. Con capture=true captura según las reglas del modo. Devuelve { ok, state, captured } o { ok:false, error }. */
+  function place(s, x, y, color, capture) {
+    if (!P.inBounds(s, x, y)) return { ok: false, error: 'OUT_OF_BOUNDS' };
+    if (P.get(s, x, y) !== P.EMPTY) return { ok: false, error: 'OCCUPIED' };
+    var n = copy(s), info = capture ? P.captureInfo(s, x, y, color) : { cells: [], points: 0 };
+    n.board[y * n.size + x] = color;
+    info.cells.forEach(function (c) { n.board[c.y * n.size + c.x] = P.EMPTY; });
+    n.captures[color] = (n.captures[color] || 0) + info.points;
+    n.moves.push({ x: x, y: y, player: color, seat: color, captured: info.cells });
+    n.lastMove = { x: x, y: y, player: color };
+    n.current = P.opponent(color); n.status = 'playing'; n.winner = 0; n.winReasons = []; n.winLine = null;
+    return { ok: true, state: n, captured: info.cells };
+  }
+  /** Saca la ficha de (x,y) (no cuenta como captura). */
+  function erase(s, x, y) {
+    if (!P.inBounds(s, x, y) || P.get(s, x, y) === P.EMPTY) return { ok: false, error: 'EMPTY' };
+    var n = copy(s); n.board[y * n.size + x] = P.EMPTY;
+    for (var k = n.moves.length - 1; k >= 0; k--) if (n.moves[k].x === x && n.moves[k].y === y) { n.moves.splice(k, 1); break; }     // la jugada sale también de la lista
+    if (n.lastMove && n.lastMove.x === x && n.lastMove.y === y) n.lastMove = null;
+    n.status = 'playing'; n.winner = 0; n.winReasons = []; n.winLine = null;
+    return { ok: true, state: n };
+  }
+
+  return { parseGame: parseGame, replay: replay, blank: blank, place: place, erase: erase };
 });
 </script>
 <script>
@@ -5451,6 +5604,108 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
 })(typeof self !== 'undefined' ? self : this);
 </script>
 <script>
+/* Textos del tablero de práctica — es */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.es, {
+    'lab.menu': 'Practicar',
+    'lab.menuSub': 'Tablero libre: armá jugadas y repasá partidas',
+    'lab.title': 'Tablero de práctica',
+    'lab.exit': 'Salir',
+    'lab.p1': '1.er jugador',
+    'lab.p2': '2.º jugador',
+    'lab.tool1': 'Ficha del 1.er jugador',
+    'lab.tool2': 'Ficha del 2.º jugador',
+    'lab.toolErase': 'Goma: saca fichas y marcas',
+    'lab.toolPen': 'Lápiz: tocá para marcar, arrastrá para una flecha',
+    'lab.back': 'Atrás',
+    'lab.fwd': 'Adelante',
+    'lab.play': 'Reproducir',
+    'lab.pause': 'Pausar',
+    'lab.pos': 'Paso {i} de {n}',
+    'lab.cap': 'Capturar solas',
+    'lab.capHint': 'Si lo apagás, las fichas no se sacan solas: las quitás vos con la goma.',
+    'lab.alt': 'Alternar colores',
+    'lab.size': 'Tablero',
+    'lab.size13': '13 × 13',
+    'lab.size19': '19 × 19',
+    'lab.rules': 'Reglas',
+    'lab.v.classic': 'Clásico',
+    'lab.v.pairs3': 'Pares y tríos',
+    'lab.v.triples': 'Solo tríos',
+    'lab.v.gomoku': 'Gomoku',
+    'lab.paste': 'Pegar jugadas',
+    'lab.pasteHelp': 'Pegá acá lo que copiaste con “Copiar jugadas” en una partida.',
+    'lab.pastePh': 'Pente 13x13\n1. K7\n2. J8\n…',
+    'lab.load': 'Recrear partida',
+    'lab.cancel': 'Cancelar',
+    'lab.clearMarks': 'Borrar marcas',
+    'lab.reset': 'Vaciar tablero',
+    'lab.resetAsk': 'Se vacía el tablero y se pierde lo que armaste. ¿Seguimos?',
+    'lab.resetYes': 'Vaciar',
+    'lab.loaded': 'Partida cargada: {n} jugadas. Usá las flechas para avanzar.',
+    'lab.failed': 'La jugada {n} ({coord}) no se puede hacer. Te dejé la partida hasta la anterior.',
+    'lab.errEmpty': 'No encontré jugadas en el texto. Probá copiarlas de nuevo con “Copiar jugadas”.',
+    'lab.errCoord': 'No entiendo la jugada “{token}”.',
+    'lab.leaveAsk': '¿Dejar la partida en curso para ir al tablero de práctica?',
+    'lab.leaveYes': 'Ir a practicar',
+    'lab.occupied': 'Ahí ya hay una ficha.',
+    'a11y.lab': 'Herramientas del tablero de práctica'
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
+/* Practice board texts — en */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.en, {
+    'lab.menu': 'Practice',
+    'lab.menuSub': 'Free board: build positions and review games',
+    'lab.title': 'Practice board',
+    'lab.exit': 'Exit',
+    'lab.p1': 'Player 1',
+    'lab.p2': 'Player 2',
+    'lab.tool1': 'Player 1 stone',
+    'lab.tool2': 'Player 2 stone',
+    'lab.toolErase': 'Eraser: removes stones and marks',
+    'lab.toolPen': 'Pencil: tap to mark, drag for an arrow',
+    'lab.back': 'Back',
+    'lab.fwd': 'Forward',
+    'lab.play': 'Play',
+    'lab.pause': 'Pause',
+    'lab.pos': 'Step {i} of {n}',
+    'lab.cap': 'Auto captures',
+    'lab.capHint': 'If you turn it off, stones are not removed on their own: you remove them with the eraser.',
+    'lab.alt': 'Alternate colors',
+    'lab.size': 'Board',
+    'lab.size13': '13 × 13',
+    'lab.size19': '19 × 19',
+    'lab.rules': 'Rules',
+    'lab.v.classic': 'Classic',
+    'lab.v.pairs3': 'Pairs & triples',
+    'lab.v.triples': 'Triples only',
+    'lab.v.gomoku': 'Gomoku',
+    'lab.paste': 'Paste moves',
+    'lab.pasteHelp': 'Paste here what you copied with “Copy moves” in a game.',
+    'lab.pastePh': 'Pente 13x13\n1. K7\n2. J8\n…',
+    'lab.load': 'Recreate game',
+    'lab.cancel': 'Cancel',
+    'lab.clearMarks': 'Clear marks',
+    'lab.reset': 'Clear board',
+    'lab.resetAsk': 'The board will be cleared and what you built is lost. Continue?',
+    'lab.resetYes': 'Clear',
+    'lab.loaded': 'Game loaded: {n} moves. Use the arrows to step through.',
+    'lab.failed': 'Move {n} ({coord}) is not possible. I left the game up to the previous one.',
+    'lab.errEmpty': 'I found no moves in that text. Try copying them again with “Copy moves”.',
+    'lab.errCoord': 'I do not understand the move “{token}”.',
+    'lab.leaveAsk': 'Leave the current game and go to the practice board?',
+    'lab.leaveYes': 'Go practice',
+    'lab.occupied': 'There is already a stone there.',
+    'a11y.lab': 'Practice board tools'
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
 /* Temas del tablero. Cada tema es solo DATOS: para sumar uno nuevo, agregar un objeto a "list"
  * (y su nombre en i18n como 'theme.<id>'). El dibujo y el menú lo toman solos. */
 (function (root) {
@@ -6592,11 +6847,12 @@ window.NEON_BREAK = {
 
   // ¿terminó la partida? (en online puede terminar por abandono, sin que el tablero lo muestre)
   var tut = { active: false, i: 0, solved: false, awaiting: false, marks: [], token: 0, fb: '', fbRaw: '', fbKind: '', timers: [] };   // tutorial interactivo (ver sección al final)
+  var lab = { active: false, hist: [], i: 0, tool: '1', cap: true, alt: true, size: 13, variant: 'classic', hover: null, pen: null, timer: 0, trayKey: '' };   // tablero de práctica (ver sección al final)
   var localOver = null;   // fin por tiempo en partidas locales / contra la máquina: { winner, reason:'timeout' }
-  function isOver() { return !state || state.status !== 'playing' || !!localOver || (online.active && !!online.over); }
-  function canPlayNow() { return !!state && !isOver() && (!tut.active || tut.awaiting) && (!online.active || turnSeat() === online.seat) && (!ai.active || !botNow()); }
+  function isOver() { if (lab.active) return false; return !state || state.status !== 'playing' || !!localOver || (online.active && !!online.over); }
+  function canPlayNow() { return !!state && !lab.active && !isOver() && (!tut.active || tut.awaiting) && (!online.active || turnSeat() === online.seat) && (!ai.active || !botNow()); }
   function turnText() {
-    if (tut.active) return '';
+    if (tut.active || lab.active) return '';
     if (botNow()) return t('ai.thinking', { name: ai.four ? seatNames[P.seatToMove(state)] : names[ai.bot] });
     if (!online.active) return t('hud.turn', { name: state.players === 4 ? seatNames[P.seatToMove(state)] : names[state.current] });
     if (online.conn !== 'open') return t('online.reconnecting');
@@ -7272,7 +7528,7 @@ window.NEON_BREAK = {
 
   /* ---------- Pausa (solo partidas offline: contra la máquina o de a dos en el mismo dispositivo) ---------- */
   function paused() { return $('pauseOverlay').classList.contains('open'); }
-  function canPause() { return !!state && !online.active && !tut.active && !isOver() && !document.body.classList.contains('in-screen') && !$('dlgOverlay').classList.contains('open') && !$('endOverlay').classList.contains('open'); }
+  function canPause() { return !!state && !online.active && !tut.active && !lab.active && !isOver() && !document.body.classList.contains('in-screen') && !$('dlgOverlay').classList.contains('open') && !$('endOverlay').classList.contains('open'); }
   function pauseGame() {
     if (!canPause() || paused()) return;
     if (ai.active) { ai.token++; clearTimeout(ai.timer); ai.thinking = false; }       // la máquina deja de pensar hasta que vuelvas
@@ -7303,6 +7559,7 @@ window.NEON_BREAK = {
   /* Mouse y lápiz: previsualización al pasar y un clic coloca. */
   canvas.addEventListener('pointerdown', function () { if (kbdOn) { kbdOn = false; render(); } }, true);
   canvas.addEventListener('pointermove', function (e) {
+    if (lab.active) { labMove(e); return; }
     if (drag && drag.id === e.pointerId) { e.preventDefault(); dragMove(e); return; }
     if (e.pointerType === 'touch') return;
     if (!canPlayNow()) return;
@@ -7310,7 +7567,7 @@ window.NEON_BREAK = {
     if (!c || (hover && c.x === hover.x && c.y === hover.y)) { if (!c && hover) { hover = null; render(); } return; }
     hover = c; render();
   });
-  canvas.addEventListener('pointerleave', function (e) { if (e.pointerType !== 'touch' && !drag && hover && !pending) { hover = null; render(); } });
+  canvas.addEventListener('pointerleave', function (e) { if (lab.active) { if (!lab.pen && lab.hover) { lab.hover = null; render(); } return; } if (e.pointerType !== 'touch' && !drag && hover && !pending) { hover = null; render(); } });
   canvas.addEventListener('contextmenu', function (e) { e.preventDefault(); });
 
   /* Dedo: tocar marca una intersección exacta (queda una ficha "pendiente"). Si arrastrás, la ficha se levanta POR ENCIMA del dedo
@@ -7331,6 +7588,7 @@ window.NEON_BREAK = {
   function dragError(c) { return state ? P.validateMove(state, c.x, c.y) : 'GAME_OVER'; }
 
   canvas.addEventListener('pointerdown', function (e) {
+    if (lab.active) { labDown(e); return; }
     if (!state || isOver() || drag) return;
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     if (ai.active && botNow()) return;
@@ -7364,6 +7622,7 @@ window.NEON_BREAK = {
   }
 
   function endDrag(e, cancelled) {
+    if (lab.active) { labUp(e, cancelled); return; }
     if (!drag || drag.id !== e.pointerId) return;
     var d = drag; drag = null;
     try { canvas.releasePointerCapture(d.id); } catch (err) {}
@@ -7394,7 +7653,7 @@ window.NEON_BREAK = {
   canvas.addEventListener('pointercancel', function (e) { endDrag(e, true); });
 
   canvas.addEventListener('keydown', function (e) {
-    if (!state) return;
+    if (!state || lab.active) return;
     var d = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key], m = boardN() - 1;
     if (d || e.key === 'Enter' || e.key === ' ') kbdOn = true;
     if (d) { e.preventDefault(); kbd = kbd || { x: centerIdx(), y: centerIdx() }; kbd = { x: Math.max(0, Math.min(m, kbd.x + d[0])), y: Math.max(0, Math.min(m, kbd.y + d[1])) }; hover = kbd; render(); }
@@ -8274,13 +8533,13 @@ window.NEON_BREAK = {
       el.classList.toggle('out', !!(state.out && state.out[p]));
       el.classList.toggle('active', !isOver() && state.current === p);
       el.classList.toggle('offline', online.active && seatsOf(p).some(function (x) { return !online.connected[x]; }));
-      var mine = !tut.active && ((ai.active && p === ai.human) || (online.active && !online.spectator && p === online.me));
+      var mine = !tut.active && !lab.active && ((ai.active && p === ai.human) || (online.active && !online.spectator && p === online.me));
       $('pname' + p).innerHTML = (mine ? avInline(profile.avatar, 24) + ' ' : '') + esc((names[p] || '…') + (online.active && online.me === p && online.players !== 4 ? ' ' + t('online.you') : ''));
       var tw = state.options.capturesToWin;
       $('caps' + p).innerHTML = tw > 20 ? '' : pips(state.captures[p], tw) + '<span>' + state.captures[p] + '/' + tw + '</span>';   // gomoku: sin capturas
     });
-    updateSide(); renderClocks(); updateVideoButtons(); updateResultBtn(); musicScene();
-    var am = tut.active ? 'classic' : (online.active || online.spectator) ? online.mode : gameMode, mb = $('modeBar'), ff = !tut.active && !!state.ffa;
+    updateSide(); renderClocks(); updateVideoButtons(); updateResultBtn(); musicScene(); if (lab.active) labUi();
+    var am = tut.active || lab.active ? 'classic' : (online.active || online.spectator) ? online.mode : gameMode, mb = $('modeBar'), ff = !tut.active && !lab.active && !!state.ffa;
     mb.hidden = am === 'classic' && !ff && !daily.active;
     if (!mb.hidden) mb.textContent = daily.active ? dailyBar() : (ff ? t('four.ffa') + (am !== 'classic' ? ' · ' + t('mode.' + am) : '') + ' · ' + t('four.hintFfaShort') : t('mode.' + am) + ' · ' + t('mode.hint.' + am));
     var sb = $('specBar'); sb.hidden = !online.spectator;
@@ -8288,10 +8547,11 @@ window.NEON_BREAK = {
     if (!isOver() && !$('status').dataset.toast) $('status').textContent = turnText();
     // El botón Confirmar queda fijo mientras dura la partida (así el tablero no salta); gris cuando no se puede usar
     var cbtn = $('btnConfirm'), usable = !!(pending && canPlayNow() && !(drag && drag.lifted));
-    cbtn.hidden = !(cfg.confirm === 'button' && (tut.active ? usable : !isOver() && !online.spectator));
+    cbtn.hidden = !(cfg.confirm === 'button' && !lab.active && (tut.active ? usable : !isOver() && !online.spectator));
     cbtn.disabled = !usable;
   }
   function setStatus(msg, isToast) {
+    if (lab.active) { if (msg && isToast && !/^[A-Z]\d{1,2}$/.test(msg)) labNote(msg); return; }
     if (tut.active) { tutToast(msg, isToast); return; }          // en el tutorial los avisos van a la tarjeta
     var el = $('status'); clearTimeout(toastTimer);
     if (!msg) { delete el.dataset.toast; if (state && !isOver()) el.textContent = turnText(); else if (!state) el.textContent = ''; return; }
@@ -8306,7 +8566,7 @@ window.NEON_BREAK = {
     var m = window.PenteMusic; if (!m || !m.setTrack) return;
     clearTimeout(musicT);                                       // se decide recién cuando se asienta la pantalla (abrir una sección pasa por un estado intermedio)
     musicT = setTimeout(function () {
-      m.setTrack(state && !isOver() && !tut.active && !document.body.classList.contains('in-screen') ? 'battle-' + themeId : 'lounge');
+      m.setTrack(state && !isOver() && !tut.active && !lab.active && !document.body.classList.contains('in-screen') ? 'battle-' + themeId : 'lounge');
     }, 120);
   }
   var musicT = 0;
@@ -8345,7 +8605,7 @@ window.NEON_BREAK = {
   function updateResultBtn() { $('btnResult').hidden = !(state && isOver() && endSeen && !$('endOverlay').classList.contains('open') && !document.body.classList.contains('in-screen')); }
   // Suma la partida terminada a las estadísticas (una sola vez por partida; el tutorial y mirar online no cuentan)
   function recordResult() {
-    if (recorded || tut.active || !state || !isOver() || online.spectator) return;
+    if (recorded || tut.active || lab.active || !state || !isOver() || online.spectator) return;
     recorded = true;
     if (state.players === 4 && !online.active) { profile = PP.recordType(profile, xpModeKey(), 'played'); saveProfile(); scheduleSync(1500); return; }      // 2 vs 2 en un aparato: se cuenta como jugada (no hay un "yo")
     var w = online.active ? (online.over ? online.over.winner : state.winner) : localOver ? localOver.winner : state.winner;
@@ -8849,7 +9109,7 @@ window.NEON_BREAK = {
   function setLanguage(code) {
     if (!window.I18n.STRINGS[code]) return;
     window.I18n.setLang(code); try { localStorage.setItem(LANG_KEY, code); } catch (e) {}
-    applyI18n(); buildThemePicker(); buildLangList(); syncAiUi(); syncLocalMode(); tutLang();
+    applyI18n(); buildThemePicker(); buildLangList(); syncAiUi(); syncLocalMode(); tutLang(); labLang();
     updateOnlineButtons(); updateRematchUi(); setStatus(''); renderMoves(); render();
     var r = $('roomsList'); if (r && rooms.open) requestRooms();
   }
@@ -8898,7 +9158,7 @@ window.NEON_BREAK = {
     if (m && m.t === 'looking') { onLooking(m); return; }
     if (m && m.t === 'tinvite') { onTInvite(m); return; }
     if (!m || m.t !== 'invite' || !m.code || !m.from) return;
-    if (online.active || daily.active || tut.active) { if (inv.net) inv.net.send({ t: 'inviteNo', code: m.code, name: myName(), reason: 'busy' }); return; }
+    if (online.active || daily.active || tut.active || lab.active) { if (inv.net) inv.net.send({ t: 'inviteNo', code: m.code, name: myName(), reason: 'busy' }); return; }
     inv.cur = m;
     $('invTitle').innerHTML = (m.from.avatar ? avInline(m.from.avatar, 28) + ' ' : '') + (flagText(m.from.country) ? '<span class="flag">' + flagText(m.from.country) + '</span>' : '') + esc(t('inv.title', { name: m.from.name }));
     $('invText').textContent = invRules(m.opts) + (m.watch ? ' · ' + t('inv.watch') : '');
@@ -8928,7 +9188,7 @@ window.NEON_BREAK = {
   function seekHide() { clearTimeout(seekT); $('seekToast').hidden = true; seekCur = null; }
   function onLooking(m) {
     if (!m || !m.code || !m.from || !cfg.seekAlerts) return;
-    if (online.active || daily.active || tut.active) return;
+    if (online.active || daily.active || tut.active || lab.active) return;
     seekCur = m;
     var txt = t('seek.toast', { name: m.from.name, rules: invRules(m.opts) });
     $('seekTxt').textContent = txt; $('seekToast').hidden = false; clearTimeout(seekT); seekT = setTimeout(seekHide, 30000);
@@ -9956,13 +10216,14 @@ window.NEON_BREAK = {
   }
   function tutStart() { if (state && !isOver()) ask(t('confirm.leaveForTut'), t('dlg.tutorial'), tutBegin); else tutBegin(); }
   function tutBegin() {
-    aiStop(); if (online.net) leaveOnline(false);
+    labStop(); aiStop(); if (online.net) leaveOnline(false);
     videoDiscard(); endSeen = recorded = false; localOver = null; clk = null;
     tut.active = true; document.body.classList.add('in-tut'); closeAll();
     $('tutCard').hidden = false;
     tutLoad(0);
   }
   function tutStop() {
+    labStop();
     if (!tut.active) return;
     tut.active = false; tut.token++; tutClearTimers(); tut.marks = []; tut.awaiting = false;
     document.body.classList.remove('in-tut'); $('tutCard').hidden = true;
@@ -10029,6 +10290,7 @@ window.NEON_BREAK = {
   }
   // Marcas sobre el tablero: verde punteado con punto = "mirá acá"; rojo con cruz = peligro. Distintas en forma, no solo en color.
   function drawMarks() {
+    if (lab.active) { labDrawMarks(); return; }
     if (!tut.active || !tut.marks.length) return;
     var c = metrics.cell, pulse = cfg.anim ? 0.5 + 0.5 * Math.sin(performance.now() / 260) : 0.5;
     tut.marks.forEach(function (m) {
@@ -10057,6 +10319,195 @@ window.NEON_BREAK = {
       syncAiUi(); syncLocalMode(); open('localOverlay'); return;
     }
     tutLoad(tut.i + 1);
+  });
+
+  /* ---------- Tablero de práctica ----------
+   * Tablero vacío, sin rival: fichas de cada color, goma, lápiz (anillos y flechas que no tocan las fichas), atrás/adelante y
+   * pegar las jugadas que copia "Copiar jugadas" para repasar la partida paso a paso. Cada cambio es un paso del historial
+   * (lab.hist = [{ s: estado, marks: [...] }]); atrás/adelante solo cambian de paso. La lógica pura está en src/lab.js. */
+  var L = window.PenteLab, LAB_COL = '#f5a623', labNoteT = 0;
+  function labCur() { return lab.hist[lab.i]; }
+  function labNote(msg) { var el = $('labNote'); el.textContent = msg || ''; clearTimeout(labNoteT); if (msg) labNoteT = setTimeout(function () { el.textContent = ''; }, 4500); }
+  function labPlayStop() { if (lab.timer) { clearInterval(lab.timer); lab.timer = 0; } }
+  function labGo(i) {                                        // ir a un paso del historial
+    lab.i = Math.max(0, Math.min(lab.hist.length - 1, i)); state = labCur().s;
+    if (lab.alt && (lab.tool === '1' || lab.tool === '2')) lab.tool = state.current === 2 ? '2' : '1';
+    pending = hover = drag = settle = null; lab.down = null; render();
+  }
+  function labStepFx(prev) {                                  // al avanzar sobre una jugada con capturas: efecto y sonido
+    var m = state.moves[state.moves.length - 1];
+    if (!m || state.moves.length <= prev) return;
+    spawnFx(m.captured || [], m.player === 1 ? 2 : 1); moveFeedback(m.captured || [], false);
+  }
+  function labStep(d) {
+    var prev = state.moves.length, ni = lab.i + d;
+    if (ni < 0 || ni > lab.hist.length - 1) { labPlayStop(); return; }
+    labGo(ni); if (d > 0) labStepFx(prev); else sfx('pick');
+  }
+  function labPush(s, marks) { lab.hist = lab.hist.slice(0, lab.i + 1); lab.hist.push({ s: s, marks: marks }); labGo(lab.hist.length - 1); }
+  function labPlace(x, y) {
+    var color = lab.tool === '2' ? 2 : 1, r = L.place(state, x, y, color, lab.cap);
+    if (!r.ok) { labNote(t('lab.occupied')); sfx('error'); return; }
+    labPush(r.state, labCur().marks); spawnFx(r.captured, color === 1 ? 2 : 1); moveFeedback(r.captured, false);
+  }
+  function labErase(x, y) {
+    var r = L.erase(state, x, y);
+    if (r.ok) { labPush(r.state, labCur().marks); sfx('pick'); return; }
+    var mk = labCur().marks, keep = mk.filter(function (m) { return !((m.x === x && m.y === y) || (m.k === 'a' && m.x2 === x && m.y2 === y)); });
+    if (keep.length !== mk.length) { labPush(state, keep); sfx('pick'); }
+  }
+  function labPen(a, b) {
+    var mk = labCur().marks, same = a.x === b.x && a.y === b.y;
+    var keep = mk.filter(function (m) { return same ? !(m.k === 'r' && m.x === a.x && m.y === a.y) : !(m.k === 'a' && m.x === a.x && m.y === a.y && m.x2 === b.x && m.y2 === b.y); });
+    if (keep.length === mk.length) keep.push(same ? { k: 'r', x: a.x, y: a.y } : { k: 'a', x: a.x, y: a.y, x2: b.x, y2: b.y });
+    labPush(state, keep); sfx('pick');
+  }
+  function labDown(e) {
+    if (lab.down) return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    var c = cellFromEvent(e); if (!c) return;
+    e.preventDefault(); labPlayStop();
+    lab.down = { id: e.pointerId, from: c, to: c }; lab.hover = c;
+    try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+    render();
+  }
+  function labMove(e) {
+    var c = cellFromEvent(e);
+    if (lab.down) { if (lab.down.id !== e.pointerId) return; if (c && (c.x !== lab.down.to.x || c.y !== lab.down.to.y)) { lab.down.to = c; lab.hover = c; render(); } return; }
+    if (e.pointerType === 'touch') return;
+    if ((c && lab.hover && c.x === lab.hover.x && c.y === lab.hover.y) || (!c && !lab.hover)) return;
+    lab.hover = c; render();
+  }
+  function labUp(e, cancelled) {
+    var d = lab.down; if (!d || d.id !== e.pointerId) return;
+    lab.down = null; try { canvas.releasePointerCapture(d.id); } catch (err) {}
+    if (e.pointerType === 'touch') lab.hover = null;
+    if (cancelled) { render(); return; }
+    var to = cellFromEvent(e) || d.to;
+    if (lab.tool === 'pen') labPen(d.from, to);
+    else if (lab.tool === 'erase') labErase(to.x, to.y);
+    else labPlace(to.x, to.y);
+    render();
+  }
+  function labDrawArrow(x1, y1, x2, y2, alpha) {
+    var c = metrics.cell, ax = px(x1), ay = px(y1), bx = px(x2), by = px(y2), dx = bx - ax, dy = by - ay, len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len;
+    var sx = ax + ux * c * 0.3, sy = ay + uy * c * 0.3, ex = bx - ux * c * 0.34, ey = by - uy * c * 0.34, hw = c * 0.3, w = Math.max(3, c * 0.1);
+    [['rgba(0,0,0,.45)', 3], [LAB_COL, 0]].forEach(function (p) {
+      ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = p[0]; ctx.fillStyle = p[0]; ctx.lineWidth = w + p[1]; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex - ux * hw * 0.5, ey - uy * hw * 0.5); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(bx - ux * c * 0.12, by - uy * c * 0.12); ctx.lineTo(ex - uy * hw * 0.62, ey + ux * hw * 0.62); ctx.lineTo(ex + uy * hw * 0.62, ey - ux * hw * 0.62); ctx.closePath(); ctx.fill(); if (p[1]) ctx.stroke();
+      ctx.restore();
+    });
+  }
+  function labDrawRing(x, y, alpha) {
+    var c = metrics.cell;
+    [['rgba(0,0,0,.45)', 3], [LAB_COL, 0]].forEach(function (p) {
+      ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = p[0]; ctx.lineWidth = Math.max(3, c * 0.1) + p[1];
+      ctx.beginPath(); ctx.arc(px(x), px(y), c * 0.5, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+    });
+  }
+  function labDrawMarks() {
+    if (!state || !lab.hist.length) return;
+    labCur().marks.forEach(function (m) { if (m.k === 'r') labDrawRing(m.x, m.y, 0.95); else labDrawArrow(m.x, m.y, m.x2, m.y2, 0.95); });
+    var h = lab.down ? lab.down.to : lab.hover; if (!h) return;
+    var c = metrics.cell, v = P.get(state, h.x, h.y);
+    if (lab.tool === 'pen') {
+      if (lab.down && (lab.down.from.x !== h.x || lab.down.from.y !== h.y)) labDrawArrow(lab.down.from.x, lab.down.from.y, h.x, h.y, 0.6);
+      else labDrawRing(lab.down ? lab.down.from.x : h.x, lab.down ? lab.down.from.y : h.y, 0.5);
+    } else if (lab.tool === 'erase') {
+      if (v !== P.EMPTY) { var q = c * 0.22; ctx.save(); ctx.strokeStyle = '#e5604f'; ctx.lineWidth = Math.max(3, c * 0.11); ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(px(h.x) - q, px(h.y) - q); ctx.lineTo(px(h.x) + q, px(h.y) + q); ctx.moveTo(px(h.x) + q, px(h.y) - q); ctx.lineTo(px(h.x) - q, px(h.y) + q); ctx.stroke(); ctx.restore(); }
+    } else if (v === P.EMPTY) drawStone(h.x, h.y, lab.tool === '2' ? 2 : 1, 0.5, false);
+  }
+  function labTrayDraw() {                                    // las fichas de la bandeja se dibujan con el tema actual
+    var key = [theme().id, cfg.gem1, cfg.gem2, cfg.stoneSize].join('|'); if (key === lab.trayKey) return;
+    lab.trayKey = key;
+    document.querySelectorAll('.lab-tool[data-tool="1"] canvas, .lab-tool[data-tool="2"] canvas').forEach(function (cv) {
+      var save = { ctx: ctx, cell: metrics.cell, off: metrics.off };
+      try { ctx = cv.getContext('2d'); ctx.clearRect(0, 0, cv.width, cv.height); metrics.cell = cv.width * 0.44 / stoneK(); drawStonePx(cv.width / 2, cv.height / 2, +cv.parentNode.dataset.tool, 1, false, 1, 0, 3, 0); }
+      catch (err) {} finally { ctx = save.ctx; metrics.cell = save.cell; metrics.off = save.off; }
+    });
+  }
+  function labUi() {
+    document.querySelectorAll('.lab-tool').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.tool === lab.tool)); });
+    var last = lab.hist.length - 1;
+    $('labBack').disabled = lab.i <= 0; $('labFwd').disabled = lab.i >= last; $('labPlay').disabled = last <= 0;
+    $('labPlay').textContent = lab.timer ? '❚❚' : '▶▶'; $('labPlay').setAttribute('aria-label', t(lab.timer ? 'lab.pause' : 'lab.play')); $('labPlay').title = t(lab.timer ? 'lab.pause' : 'lab.play');
+    $('labPos').textContent = t('lab.pos', { i: lab.i, n: last });
+    $('labCap').checked = lab.cap; $('labAlt').checked = lab.alt;
+    labTrayDraw();
+  }
+  function labSyncSelects() {
+    var sz = $('labSize'); if (!sz.querySelector('option[value="' + lab.size + '"]')) { var o = document.createElement('option'); o.value = lab.size; o.textContent = lab.size + ' × ' + lab.size; sz.appendChild(o); }
+    sz.value = String(lab.size); $('labVar').value = lab.variant;
+  }
+  function labFresh(size, variant) {
+    labPlayStop(); lab.size = size; lab.variant = variant; labSyncSelects();
+    lab.hist = [{ s: L.blank(size, variant), marks: [] }]; lab.i = 0; labNote('');
+    labGo(0);
+  }
+  function labNames() { names[1] = t('lab.p1'); names[2] = t('lab.p2'); }
+  function labStart() { if (state && !lab.active && !tut.active && !isOver()) ask(t('lab.leaveAsk'), t('lab.leaveYes'), labBegin); else labBegin(); }
+  function labBegin() {
+    tutStop(); aiStop(); if (online.net) leaveOnline(false);
+    videoDiscard(); endSeen = recorded = false; localOver = null; clk = null;
+    lab.active = true; document.body.classList.add('in-lab'); closeAll();
+    $('labPanel').hidden = false; $('labPasteBox').hidden = true; $('labErr').textContent = '';
+    labNames(); lab.tool = '1'; lab.trayKey = '';
+    labFresh(lab.size, lab.variant);
+    kbd = { x: centerIdx(), y: centerIdx() };
+    renderClocks(); render();
+  }
+  function labStop() {
+    if (!lab.active) return;
+    lab.active = false; labPlayStop(); lab.down = lab.hover = null; lab.hist = [];
+    document.body.classList.remove('in-lab'); $('labPanel').hidden = true;
+    clk = null; localOver = null; state = null; names[1] = names[2] = '';
+    hover = pending = drag = settle = null; fx.length = 0;
+    $('status').textContent = ''; renderClocks(); render();
+  }
+  function labLang() { if (!lab.active) return; labNames(); lab.trayKey = ''; render(); }
+  function labLoad() {
+    var g = L.parseGame($('labTxt').value), err = $('labErr');
+    if (!g.ok) { err.textContent = g.error === 'BAD_COORD' ? t('lab.errCoord', { token: g.token }) : t('lab.errEmpty'); return; }
+    var r = L.replay(g); err.textContent = '';
+    labPlayStop(); lab.size = g.size; lab.variant = g.variant; labSyncSelects();
+    lab.hist = r.states.map(function (s) { return { s: s, marks: [] }; });
+    $('labPasteBox').hidden = true; $('labTxt').value = '';
+    labGo(0);
+    labNote(r.failedAt ? t('lab.failed', { n: r.failedAt, coord: r.coord }) : t('lab.loaded', { n: lab.hist.length - 1 }));
+  }
+  function labConfirmFresh(size, variant) {
+    if (lab.hist.length <= 1) { labFresh(size, variant); return; }
+    labSyncSelects();                                         // el selector vuelve a lo de antes hasta que confirme
+    ask(t('lab.resetAsk'), t('lab.resetYes'), function () { labFresh(size, variant); });
+  }
+  $('btnLab').addEventListener('click', labStart);
+  $('labExit').addEventListener('click', function () { labStop(); open('playOverlay'); });
+  $('labTray').addEventListener('click', function (e) { var b = e.target.closest('.lab-tool'); if (!b) return; lab.tool = b.dataset.tool; render(); });
+  $('labBack').addEventListener('click', function () { labPlayStop(); labStep(-1); });
+  $('labFwd').addEventListener('click', function () { labPlayStop(); labStep(1); });
+  $('labPlay').addEventListener('click', function () {
+    if (lab.timer) { labPlayStop(); render(); return; }
+    if (lab.i >= lab.hist.length - 1) labGo(0);
+    lab.timer = setInterval(function () { labStep(1); if (lab.i >= lab.hist.length - 1) { labPlayStop(); render(); } }, 850);
+    render();
+  });
+  $('labCap').addEventListener('change', function () { lab.cap = this.checked; });
+  $('labAlt').addEventListener('change', function () { lab.alt = this.checked; if (lab.alt && (lab.tool === '1' || lab.tool === '2')) lab.tool = state.current === 2 ? '2' : '1'; render(); });
+  $('labSize').addEventListener('change', function () { labConfirmFresh(+this.value, lab.variant); });
+  $('labVar').addEventListener('change', function () { labConfirmFresh(lab.size, this.value); });
+  $('labPasteBtn').addEventListener('click', function () { var b = $('labPasteBox'); b.hidden = !b.hidden; if (!b.hidden) $('labTxt').focus(); });
+  $('labPasteCancel').addEventListener('click', function () { $('labPasteBox').hidden = true; $('labErr').textContent = ''; });
+  $('labLoad').addEventListener('click', labLoad);
+  $('labClearMarks').addEventListener('click', function () { if (labCur().marks.length) labPush(state, []); });
+  $('labReset').addEventListener('click', function () {
+    if (lab.hist.length <= 1) return;
+    ask(t('lab.resetAsk'), t('lab.resetYes'), function () { labFresh(lab.size, lab.variant); });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!lab.active || e.target.closest('input, textarea, select') || document.querySelector('.overlay.open')) return;
+    if (e.key === 'ArrowLeft') { e.preventDefault(); labPlayStop(); labStep(-1); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); labPlayStop(); labStep(1); }
   });
 
   /* ---------- Configuración ---------- */
@@ -10455,7 +10906,7 @@ window.NEON_BREAK = {
     if (!m.go || tno.inGame === m.go.code) return;
     if (online.active && online.code === m.go.code && !online.spectator) { tno.inGame = m.go.code; closeAll(); return; }      // salió al menú sin cerrar la partida: se vuelve a la misma sala
     if (online.active && online.spectator && online.tourney) leaveOnline(false);                                                // estaba mirando otra partida del torneo: ahora le toca jugar
-    if (online.active || daily.active || tut.active) { tnoNote(t('tno.inGame'), false); return; }
+    if (online.active || daily.active || tut.active || lab.active) { tnoNote(t('tno.inGame'), false); return; }
     tno.inGame = m.go.code; closeAll(); $('btnSpectateOffer').hidden = true;
     startOnline({ t: 'rejoin', code: m.go.code, token: m.go.token }); online.tourney = true;
   }
@@ -10608,7 +11059,7 @@ window.NEON_BREAK = {
   $('tnoTabs').addEventListener('click', function (e) { var b = e.target.closest('button[data-t]'); if (b) { tno.tab = b.dataset.t; tnoRender(); } });
   $('tnoBody').addEventListener('click', function (e) {
     var bw = e.target.closest('button[data-watch]');
-    if (bw && tno.snap) { if (online.active || daily.active || tut.active) { tnoNote(t('tno.inGame'), false); return; } closeAll(); online.specT = { tcode: tno.code, ttoken: tno.token }; startOnline({ t: 'spectate', code: bw.dataset.watch, tcode: tno.code, ttoken: tno.token }); online.tourney = true; return; }
+    if (bw && tno.snap) { if (online.active || daily.active || tut.active || lab.active) { tnoNote(t('tno.inGame'), false); return; } closeAll(); online.specT = { tcode: tno.code, ttoken: tno.token }; startOnline({ t: 'spectate', code: bw.dataset.watch, tcode: tno.code, ttoken: tno.token }); online.tourney = true; return; }
     var btn = e.target.closest('button[data-act]'); if (!btn || !tno.snap) return;
     var id = btn.closest('.tn-duel').dataset.id, d = null, S = tno.snap.S;
     S.rounds.forEach(function (r) { r.duels.forEach(function (x) { if (x.id === id) d = x; }); }); if (!d) return;
@@ -10625,7 +11076,7 @@ window.NEON_BREAK = {
   /* invitación recibida por la conexión de presencia */
   function onTInvite(m) {
     if (!m.code || !m.from) return;
-    if (online.active || daily.active || tut.active || (tno.code && tno.token)) return;
+    if (online.active || daily.active || tut.active || lab.active || (tno.code && tno.token)) return;
     inv.cur = { t: 'tinvite', code: m.code };
     $('invTitle').innerHTML = (m.from.avatar ? avInline(m.from.avatar, 28) + ' ' : '') + (flagText(m.from.country) ? '<span class="flag">' + flagText(m.from.country) + '</span>' : '') + esc(t('tno.invTitle', { name: m.from.name }));
     $('invText').textContent = t('tno.invText', { tn: m.name, format: tnFmt(m.cfg && m.cfg.format || 'swiss_cut'), rules: invRules(m.game) });
