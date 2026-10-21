@@ -859,6 +859,27 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
 }
 .lab-note { text-align: center; font-size: 13px; font-weight: 700; color: var(--accent); }
 .lab-note:empty { display: none; }
+
+/* Chat: los botones de personas no heredan el estilo de la "chip" del menú (flotaba hacia arriba y pisaba "Ocultar chat") */
+.people { margin-top: 2px; }
+.people .chip { display: inline-block; margin: 0; padding: 2px 10px; min-height: 30px; border-radius: 15px; border: 1px solid var(--line); background: var(--bg); font-size: 13px; font-weight: 600; color: var(--text); }
+.people .chip[aria-pressed="true"] { border-color: var(--danger); color: var(--muted); text-decoration: line-through; }
+.chatlog .msg { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 5px; }
+.chat-av { display: inline-flex; align-self: center; flex: none; }
+.chat-av .av-inline { width: 20px; height: 20px; vertical-align: middle; }
+
+/* Temporizador compartido: una burbuja en el medio de los dos jugadores */
+.hud { position: relative; }
+.turnclock { position: absolute; left: 50%; top: 50%; width: 64px; height: 64px; margin: -32px 0 0 -32px; z-index: 4; display: grid; place-items: center; border-radius: 50%; background: var(--panel-2); border: 3px solid var(--line); color: var(--text); font-weight: 800; font-size: 19px; font-variant-numeric: tabular-nums; box-shadow: 0 4px 14px rgba(0,0,0,.45); pointer-events: none; transition: border-color .25s, color .25s, box-shadow .25s; }
+.turnclock[hidden] { display: none; }
+.turnclock.idle { color: var(--muted); }
+.turnclock.hot { color: var(--tc); border-color: var(--tc); box-shadow: 0 0 calc(6px + 22px * var(--u, 0)) var(--tc), 0 4px 14px rgba(0,0,0,.45); }
+.turnclock.hot #tcNum { text-shadow: 0 0 calc(10px * var(--u, 0)) var(--tc); }
+.turnclock.beat { animation: tcBeat var(--beat, .9s) ease-in-out infinite; }
+@keyframes tcBeat { 0% { transform: scale(1); } 14% { transform: scale(1.2); } 28% { transform: scale(1); } 42% { transform: scale(1.13); } 70% { transform: scale(1); } 100% { transform: scale(1); } }
+@media (min-width: 1100px) and (min-height: 560px) { .turnclock { width: 60px; height: 60px; margin: -30px 0 0 -30px; font-size: 18px; } }
+.hud:has(.turnclock:not([hidden])) #player1 { padding-right: 38px; }
+.hud:has(.turnclock:not([hidden])) #player2 { padding-left: 38px; }
 </style>
 </head>
 <body>
@@ -874,6 +895,7 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
       <div class="clock" id="clock2" hidden><span class="cturn"></span><span class="ctot"></span></div>
       <div class="caps" id="caps2" data-i18n-aria="a11y.captures"></div>
     </div>
+    <div class="turnclock" id="turnClock" hidden role="timer"><span id="tcNum"></span></div>
     <div class="player" id="player3" hidden>
       <div class="row"><span class="stone-ico s3"></span><span class="name" id="pname3"></span></div>
       <div class="clock" id="clock3" hidden><span class="cturn"></span><span class="ctot"></span></div>
@@ -3478,9 +3500,10 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
       'a11y.close': 'Cerrar',
       'a11y.roomCode': 'Código de sala',
       'menu.timer': 'Reloj',
-      'menu.timerHint': '10 minutos por jugador para toda la partida y 1 minuto por jugada. Si se acaba cualquiera de los dos, perdés.',
+      'menu.timerHint': '10 minutos por jugador para toda la partida y 1 minuto por jugada (el temporizador del medio). Si se acaba cualquiera de los dos, perdés.',
       'end.winTime': '{loser} se quedó sin tiempo. Ganó {name}.',
-      'clock.title': 'Tiempo total que le queda (y lo que queda de esta jugada)',
+      'clock.title': 'Tiempo total que le queda',
+      'clock.shared': 'Tiempo de la jugada: {time}',
       'end.winForfeit': '{loser} se desconectó. Ganó {name}.',
       'err.ROOM_NOT_FOUND': 'No existe esa sala. Revisá el código.',
       'err.ROOM_FULL': 'La sala está llena: ya tiene dos jugadores.',
@@ -3794,9 +3817,10 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
       'end.viewBoard': 'View the board',
       'end.result': 'Result and rematch',
       'menu.timer': 'Clock',
-      'menu.timerHint': '10 minutes per player for the whole game and 1 minute per move. If either one runs out, you lose.',
+      'menu.timerHint': '10 minutes per player for the whole game and 1 minute per move (the timer in the middle). If either one runs out, you lose.',
       'end.winTime': '{loser} ran out of time. {name} wins.',
-      'clock.title': 'Total time left (and what\'s left of this move)',
+      'clock.title': 'Total time left',
+      'clock.shared': 'Move time: {time}',
       'end.winForfeit': '{loser} disconnected. {name} wins.',
       'err.ROOM_NOT_FOUND': 'That room doesn\'t exist. Check the code.',
       'err.ROOM_FULL': 'The room is full: it already has two players.',
@@ -4019,7 +4043,7 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
     'tut.exact.other': 'Poné la ficha marcada para verlo.',
 
     'tut.panel.title': 'El panel de arriba',
-    'tut.panel.text': 'Los 5 puntitos de cada jugador son los pares capturados: con 5 ganás. Reloj: el número grande es el tiempo de ESTA jugada (1 min) y el chico, lo que le queda en total (10 min). Si cualquiera llega a 0, pierde. Se puede apagar al empezar la partida.',
+    'tut.panel.text': 'Los 5 puntitos de cada jugador son los pares capturados: con 5 ganás. Reloj: el temporizador del medio es el tiempo de ESTA jugada (1 min): con 10 segundos se pone rojo y con 5 late. El de cada tarjeta es lo que le queda en total (10 min). Si cualquiera llega a 0, pierde. Se puede apagar al empezar la partida.',
 
     'tut.final.title': '¡Listo!',
     'tut.final.text': 'Ya sabés lo esencial: cinco en línea, capturar pares, defenderte y no dejar tres abiertos. Ahora, a practicar: probá contra la máquina en nivel Fácil.'
@@ -4114,7 +4138,7 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
     'tut.exact.other': 'Place the marked stone to see it.',
 
     'tut.panel.title': 'The top panel',
-    'tut.panel.text': 'The 5 dots of each player are captured pairs: with 5 you win. Clock: the big number is the time for THIS move (1 min) and the small one is what they have left in total (10 min). If either hits 0, that player loses. It can be turned off when starting a game.',
+    'tut.panel.text': 'The 5 dots of each player are captured pairs: with 5 you win. Clock: the timer in the middle is the time for THIS move (1 min): at 10 seconds it turns red and at 5 it beats. The one on each card is what they have left in total (10 min). If either hits 0, that player loses. It can be turned off when starting a game.',
 
     'tut.final.title': 'All set!',
     'tut.final.text': 'You know the essentials: five in a row, capturing pairs, defending and not allowing open threes. Now practice: try the machine on Easy level.'
@@ -6698,7 +6722,7 @@ window.NEON_BREAK = {
   var fx = [];            // fichas capturadas que se están desvaneciendo / rompiendo
   var rooms = { open: false, timer: 0 };
   var online = { bots: {}, mode: 'classic', ffa: false,
-    spectator: false, specN: 0, lastCode: '', isPublic: false, cid: '',
+    spectator: false, specN: 0, lastCode: '', isPublic: false, cid: '', avatars: {}, pids: {},
     active: false, net: null, url: '', conn: 'closed', code: '', token: '', me: 0, intent: null, rejoining: false, mine: false,
     over: null, connected: { 1: true, 2: true, 3: true, 4: true }, rematch: { 1: false, 2: false, 3: false, 4: false }, seat: 0, players: 2,
     rivalLeftAt: 0, claimTimer: null, awaiting: false, awaitTimer: null
@@ -6776,17 +6800,34 @@ window.NEON_BREAK = {
   function clockFreeze() { if (!clk || clk.frozen) return; var l = clockLive(); Object.keys(clk.rem).forEach(function (k) { clk.rem[k] = l[k]; }); clk.frozen = true; }
   function fmtClock(ms) { var s = Math.ceil(ms / 1000), m = Math.floor(s / 60); s = s % 60; return m + ':' + (s < 10 ? '0' : '') + s; }
   function renderClocks() {
-    var l = (state && clk) ? clockLive() : null;
+    var l = (state && clk) ? clockLive() : null, shared = !!(l && !clk.blitz && clk.turnMs && state.players !== 4);   // 2 jugadores con reloj normal: el minuto de la jugada va en el medio
     [1, 2, 3, 4].forEach(function (p) {
       var el = $('clock' + p); if (!el) return;
       el.hidden = !l || clk.rem[p] === undefined; if (el.hidden) return;
       var active = !clk.frozen && !clk.wait && !isOver() && state.current === p && !botTurn();
-      el.querySelector('.ctot').textContent = fmtClock(l[p]);
-      el.querySelector('.cturn').textContent = active && clk.turnMs ? fmtClock(l.turn) : '';
-      el.classList.toggle('low', active && (l.turn <= 10000 || l[p] <= 30000));
+      el.querySelector('.ctot').textContent = fmtClock(l[p]);                              // tiempo total de cada uno
+      el.querySelector('.cturn').textContent = !shared && active && clk.turnMs ? fmtClock(l.turn) : '';   // el de la jugada: en el medio si son 2; en la tarjeta del que juega si son 4
+      el.classList.toggle('low', active && ((!shared && l.turn <= 10000) || l[p] <= 30000));
       el.classList.toggle('blitz', !!clk.blitz);
       el.title = t(clk.blitz ? 'mode.blitzClock' : 'clock.title');
     });
+    renderTurnClock(shared ? l : null);
+  }
+  /* Temporizador compartido (en el medio, entre los dos jugadores): el minuto de la jugada del que tiene el turno. Cada uno conserva además su tiempo total (10 min) en su tarjeta.
+   * Con 10 s o menos se pone rojo y cada segundo más; con 5 s o menos late como un corazón. */
+  function renderTurnClock(l) {
+    var el = $('turnClock'); if (!el) return;
+    if (!l || isOver() || (tut.active && !clk)) { el.hidden = true; return; }
+    var running = !clk.frozen && !clk.wait && !botTurn(), ms = running ? l.turn : clk.turnMs;
+    el.hidden = false; el.classList.toggle('idle', !running);
+    $('tcNum').textContent = fmtClock(ms);
+    var u = running && ms <= 10000 ? 1 - ms / 10000 : 0, hot = running && ms <= 10000;
+    el.classList.toggle('hot', hot);
+    if (hot) { el.style.setProperty('--tc', 'rgb(255,' + Math.round(120 - 100 * u) + ',' + Math.round(100 - 80 * u) + ')'); el.style.setProperty('--u', u.toFixed(2)); } else { el.style.removeProperty('--tc'); el.style.removeProperty('--u'); }
+    var beat = running && ms <= 5000 && cfg.anim;
+    el.classList.toggle('beat', beat);
+    if (beat) el.style.setProperty('--beat', (0.45 + 0.45 * ms / 5000).toFixed(2) + 's'); else el.style.removeProperty('--beat');
+    el.setAttribute('aria-label', t('clock.shared', { time: fmtClock(ms) }));
   }
   function clockTick() {
     if (!clk || !state) return;
@@ -8412,7 +8453,8 @@ window.NEON_BREAK = {
       el.classList.toggle('active', !isOver() && state.current === p);
       el.classList.toggle('offline', online.active && seatsOf(p).some(function (x) { return !online.connected[x]; }));
       var mine = !tut.active && !lab.active && ((ai.active && p === ai.human) || (online.active && !online.spectator && p === online.me));
-      $('pname' + p).innerHTML = (mine ? avInline(profile.avatar, 24) + ' ' : '') + esc((names[p] || '…') + (online.active && online.me === p && online.players !== 4 ? ' ' + t('online.you') : ''));
+      var pav = tut.active || lab.active ? '' : mine ? profile.avatar : ((online.active || online.spectator) && online.players !== 4 && online.avatars ? online.avatars[p] : '');
+      $('pname' + p).innerHTML = (pav ? avInline(pav, 24) + ' ' : '') + esc((names[p] || '…') + (online.active && online.me === p && online.players !== 4 ? ' ' + t('online.you') : ''));
       var tw = state.options.capturesToWin;
       $('caps' + p).innerHTML = tw > 20 ? '' : pips(state.captures[p], tw) + '<span>' + state.captures[p] + '/' + tw + '</span>';   // gomoku: sin capturas
     });
@@ -8578,7 +8620,7 @@ window.NEON_BREAK = {
         if (online.active) { setStatus(''); updateHud(); }
       },
       onOpen: function () {
-        if (online.token && online.code) { online.rejoining = true; online.net.send({ t: 'rejoin', code: online.code, token: online.token }); }
+        if (online.token && online.code) { online.rejoining = true; online.net.send({ t: 'rejoin', code: online.code, token: online.token, avatar: profile.avatar }); }
         else if (online.spectator && online.code) { online.rejoining = true; online.net.send({ t: 'spectate', code: online.code, tcode: online.specT ? online.specT.tcode : undefined, ttoken: online.specT ? online.specT.ttoken || undefined : undefined, name: (online.intent && online.intent.name) || myName() }); }   // se cortó la conexión: vuelve a mirar (con su nombre)
         else if (online.intent) online.net.send(online.intent);
         else if (rooms.open) { requestRooms(); lobbyJoin(); }
@@ -8592,6 +8634,7 @@ window.NEON_BREAK = {
     var url = serverUrl();
     if (!url) { onlineMsg(t('online.noServer')); return; }
     intent.name = myName(); if (intent.t === 'create' || intent.t === 'join') intent.dev = devId();
+    if (intent.t === 'create' || intent.t === 'join' || intent.t === 'rejoin') intent.avatar = profile.avatar;
     online.intent = intent; online.token = ''; online.code = '';
     onlineMsg(t('online.connecting'));
     var go = function () { if (online.intent !== intent) return; if (!online.net) ensureNet(url); else if (online.net.isOpen()) online.net.send(intent); };
@@ -8606,7 +8649,7 @@ window.NEON_BREAK = {
     }
     clearTimeout(online.awaitTimer); clearClaim();
     online.net = null; online.active = false; online.conn = 'closed'; online.code = ''; online.token = ''; online.me = 0;
-    online.spectator = false; online.specN = 0; online.cid = ''; chatReset(); stopRooms(); fx.length = 0; $('btnSpectateOffer').hidden = true;
+    online.spectator = false; online.specN = 0; online.cid = ''; online.avatars = {}; online.pids = {}; chatReset(); stopRooms(); fx.length = 0; $('btnSpectateOffer').hidden = true;
     online.intent = null; online.specT = null; online.invite = null; online.seek = false; online.rejoining = false; online.mine = false; online.tourney = false; online.over = null; online.awaiting = false; online.rivalLeftAt = 0;
     online.connected = { 1: true, 2: true, 3: true, 4: true }; online.rematch = { 1: false, 2: false, 3: false, 4: false }; online.seat = 0; online.players = 2; online.bots = {}; online.mode = 'classic'; online.ffa = false; seatNames = {};
     clearSession(); updateOnlineButtons(); updateRematchUi();
@@ -8678,6 +8721,8 @@ window.NEON_BREAK = {
     online.players = (m.opts && m.opts.players === 4) ? 4 : 2; online.bots = m.bots || {}; online.ffa = !!(m.opts && m.opts.ffa);
     online.mode = m.opts && m.opts.bullet ? 'bullet' : m.opts && m.opts.blitz ? 'blitz' : (m.opts && m.opts.variant) || 'classic';
     online.rematch = m.rematch || { 1: false, 2: false }; online.awaiting = false;
+    online.avatars = m.avatars || {}; online.pids = m.pids || {};
+    if (!online.spectator && m.you && online.pids[m.you]) online.cid = online.pids[m.you];         // mi identidad en el chat no cambia aunque la revancha me cambie de asiento
     seatNames = {}; for (var si = 1; si <= nSeats(); si++) seatNames[si] = (m.names && m.names[si]) || '';
     names[1] = teamName(1) || t('player.1'); names[2] = teamName(2);
     if (online.ffa) { names[3] = teamName(3); names[4] = teamName(4); }
@@ -8877,9 +8922,13 @@ window.NEON_BREAK = {
   function chatAdd(m, silent) {
     if (!cfg.chat || !m || typeof m.text !== 'string') return;
     chat.people[m.id] = { name: m.name, seat: m.seat };
-    chat.msgs.push({ id: m.id, name: String(m.name || ''), seat: m.seat, text: m.text });
+    chat.msgs.push({ id: m.id, name: String(m.name || ''), seat: m.seat, text: m.text, av: typeof m.av === 'string' ? m.av : '' });
     if (chat.msgs.length > 120) chat.msgs.shift();
     if (!silent && m.id !== online.cid && !chat.muted[m.id] && !chatVisible()) side.unread++;
+  }
+  function chatSeatOf(id, fallback) {                         // en qué asiento está hoy la persona que escribió (los asientos rotan en la revancha)
+    for (var q = 1; q <= 4; q++) if (online.pids && online.pids[q] === id) return q;
+    return fallback;
   }
   function chatIncoming(m) { chatAdd(m, false); renderChat(); updateSide(); }
   function chatNote(txt) { chat.msgs.push({ note: txt }); renderChat(); }
@@ -8891,15 +8940,17 @@ window.NEON_BREAK = {
       var d = document.createElement('div');
       if (m.note) { d.className = 'note'; d.textContent = m.note; log.appendChild(d); return; }
       if (chat.muted[m.id]) return;
-      d.className = 'msg'; var who = document.createElement('b'); who.className = 's' + m.seat;
-      who.textContent = m.id === online.cid ? t('chat.you') : m.name + (m.seat === 0 ? ' (' + t('chat.spec') + ')' : '');
+      var seatNow = chatSeatOf(m.id, m.seat);
+      d.className = 'msg'; var who = document.createElement('b'); who.className = 's' + seatNow;
+      who.textContent = m.id === online.cid ? t('chat.you') : m.name + (seatNow === 0 ? ' (' + t('chat.spec') + ')' : '');
+      if (m.av) { var ai = document.createElement('span'); ai.className = 'chat-av'; ai.innerHTML = avInline(m.av, 20); d.appendChild(ai); }
       d.appendChild(who); d.appendChild(document.createTextNode(m.text)); log.appendChild(d); shown++;
     });
     if (!shown && !chat.msgs.some(function (m) { return m.note; })) { var e = document.createElement('div'); e.className = 'note'; e.textContent = t('chat.empty'); log.appendChild(e); }
     if (box) log.scrollTop = log.scrollHeight;
     // personas: jugadores (siempre) + espectadores que escribieron; se puede silenciar a cualquiera menos a uno mismo
     var pp = $('chatPeople'); pp.innerHTML = '';
-    var ids = {}; for (var sj = 1; sj <= nSeats(); sj++) if (seatNames[sj]) ids['p' + sj] = { name: seatNames[sj], seat: sj };
+    var ids = {}; for (var sj = 1; sj <= nSeats(); sj++) if (seatNames[sj]) ids[(online.pids && online.pids[sj]) || 'p' + sj] = { name: seatNames[sj], seat: sj };
     for (var k in chat.people) ids[k] = chat.people[k];
     Object.keys(ids).forEach(function (id) {
       if (id === online.cid) return;
