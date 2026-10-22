@@ -2801,6 +2801,7 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
  *   rr         todos contra todos. Garantiza n-1 duelos.
  *   swiss      sistema suizo: R rondas, cada ronda enfrenta gente con rendimiento parecido y nadie repite rival.
  *   swiss_cut  suizo + los mejores 2/4/8/16 juegan una eliminatoria final.
+ *   rr_cut     todos contra todos + los mejores 2/4/8/16 juegan una eliminatoria final.
  *
  * "Mínimo de duelos": se garantiza por construcción (suizo/todos contra todos) y se comprueba ANTES de empezar.
  * Un descanso ("bye", cuando la cantidad es impar) NO cuenta como duelo: por eso con cantidad impar el suizo juega una ronda extra.
@@ -2813,10 +2814,10 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  var FORMATS = ['elim', 'rr', 'swiss', 'swiss_cut'];
+  var FORMATS = ['elim', 'rr', 'swiss', 'swiss_cut', 'rr_cut'];
   var BEST_OF = [1, 3, 5, 7];
   var MAX_PLAYERS = 64, NAME_MAX = 20, BYE = '__bye';
-  var FORMAT_NAME = { elim: 'Eliminación directa', rr: 'Todos contra todos', swiss: 'Suizo', swiss_cut: 'Suizo + eliminatoria final' };
+  var FORMAT_NAME = { elim: 'Eliminación directa', rr: 'Todos contra todos', swiss: 'Suizo', swiss_cut: 'Suizo + eliminatoria final', rr_cut: 'Todos contra todos + eliminatoria final' };
 
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
   function isPow2(x) { return x >= 1 && (x & (x - 1)) === 0; }
@@ -2867,6 +2868,7 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
     var f = c.format, R, K;
     if (f === 'elim') { K = ceilLog2(n); return { rounds: K, duels: n - 1, min: 1, max: K }; }
     if (f === 'rr') { var m = evenUp(n); return { rounds: m - 1, duels: n * (n - 1) / 2, min: n - 1, max: n - 1 }; }
+    if (f === 'rr_cut') { var m2 = evenUp(n); K = ceilLog2(c.cut); return { rounds: m2 - 1 + K, duels: n * (n - 1) / 2 + c.cut - 1, min: n - 1, max: n - 1 + K, rrRounds: m2 - 1, cutRounds: K }; }
     R = swissRounds(n, c.minDuels);
     var sw = { rounds: R, duels: R * Math.floor(n / 2), min: n % 2 ? R - 1 : R, max: R };
     if (f === 'swiss') return sw;
@@ -2888,11 +2890,11 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
 
     if (c.minDuels > n - 1) err('minDuels', 'Con ' + n + ' jugadores nadie puede enfrentar a más de ' + (n - 1) + ' rivales distintos: el mínimo no puede ser ' + c.minDuels + '.');
     else if (c.format === 'elim' && c.minDuels > 1) err('minDuels', 'La eliminación directa solo garantiza 1 duelo: quien pierde la primera vez queda afuera.');
-    else if (c.format === 'rr' && c.minDuels > n - 1) err('minDuels', 'Todos contra todos da ' + (n - 1) + ' duelos a cada jugador.');
+    else if ((c.format === 'rr' || c.format === 'rr_cut') && c.minDuels > n - 1) err('minDuels', 'Todos contra todos da ' + (n - 1) + ' duelos a cada jugador.');
     else if ((c.format === 'swiss' || c.format === 'swiss_cut') && !swissFeasible(n, swissRounds(n, c.minDuels))) {
       err('minDuels', 'Con ' + n + ' jugadores el suizo garantiza como máximo ' + swissMaxMin(n) + ' duelo' + (swissMaxMin(n) === 1 ? '' : 's') + ' (para más conviene todos contra todos).');
     }
-    if (c.format === 'swiss_cut') {
+    if (c.format === 'swiss_cut' || c.format === 'rr_cut') {
       if (!isPow2(c.cut) || c.cut < 2) err('cut', 'Los que pasan a la eliminatoria tienen que ser 2, 4, 8 o 16.');
       else if (c.cut >= n) err('cut', 'Tienen que pasar menos jugadores que los que participan (' + n + ').');
     }
@@ -2918,6 +2920,7 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
     }
     var want = Math.max(1, c.minDuels), cutDef = Math.max(2, Math.min(floorPow2(Math.max(2, Math.floor(n / 2))), 8));
     if (want <= n - 1) add('Todos contra todos (cada uno juega ' + (n - 1) + ' duelos)', { format: 'rr', minDuels: Math.min(want, n - 1) });
+    if (want <= n - 1 && n >= 3) add('Todos contra todos (' + (n - 1) + ' duelos) y eliminatoria final con los mejores ' + cutDef, { format: 'rr_cut', minDuels: Math.min(want, n - 1), cut: cutDef });
     add('Suizo con ' + want + ' duelos garantizados', { format: 'swiss', minDuels: want });
     add('Suizo (' + want + ' duelos) y eliminatoria final con los mejores ' + cutDef, { format: 'swiss_cut', minDuels: want, cut: cutDef });
     var mx = swissMaxMin(n);
@@ -2941,7 +2944,7 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
     if (!v.ok) return { ok: false, title: v.cfg.name, lines: [], promises: [], errors: v.errors, suggestions: v.suggestions };
     var c = v.cfg, p = v.plan, need = (c.bestOf + 1) / 2, lines = [], promises = [];
     lines.push('Jugadores: ' + v.n);
-    lines.push('Formato: ' + FORMAT_NAME[c.format] + (c.format === 'swiss' ? ' (' + p.rounds + ' rondas)' : c.format === 'swiss_cut' ? ' (' + p.swissRounds + ' rondas + top ' + c.cut + ')' : ''));
+    lines.push('Formato: ' + FORMAT_NAME[c.format] + (c.format === 'swiss' ? ' (' + p.rounds + ' rondas)' : c.format === 'swiss_cut' ? ' (' + p.swissRounds + ' rondas + top ' + c.cut + ')' : c.format === 'rr_cut' ? ' (' + p.rrRounds + ' fechas + top ' + c.cut + ')' : ''));
     lines.push('Duelo: ' + (c.bestOf === 1 ? 'una sola partida' : 'mejor de ' + c.bestOf + ' (gana quien llegue a ' + need + ' partidas)'));
     lines.push('Puntos: ' + c.points.win + ' por duelo ganado, ' + c.points.loss + ' por perdido');
     lines.push('En total: ' + p.duels + ' duelos en ' + p.rounds + ' rondas');
@@ -3079,8 +3082,8 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
     if (np.error) throw new Error(np.error);
     var v = validate(cfg, np.players);
     if (!v.ok) { var e = new Error(v.errors[0].msg); e.validation = v; throw e; }
-    var S = { v: 1, cfg: v.cfg, plan: v.plan, players: np.players, rounds: [], status: 'running', phase: v.cfg.format === 'elim' ? 'elim' : v.cfg.format === 'rr' ? 'rr' : 'swiss', champion: null, withdrawn: [], duelSeq: 0, phasePrefix: 'S', log: [] };
-    if (v.cfg.format === 'rr') rrRounds(S);
+    var S = { v: 1, cfg: v.cfg, plan: v.plan, players: np.players, rounds: [], status: 'running', phase: v.cfg.format === 'elim' ? 'elim' : (v.cfg.format === 'rr' || v.cfg.format === 'rr_cut') ? 'rr' : 'swiss', champion: null, withdrawn: [], duelSeq: 0, phasePrefix: 'S', log: [] };
+    if (v.cfg.format === 'rr' || v.cfg.format === 'rr_cut') rrRounds(S);
     else if (v.cfg.format === 'elim') buildElim(S, S.players.map(function (p) { return p.id; }));
     else swissRound(S);
     autoWalkover(S); advance(S);
@@ -3189,6 +3192,19 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
         if (S.rounds.every(allDone)) finish(S);
         return;
       }
+      if (f === 'rr_cut') {                                     // todos contra todos: cuando terminan todas las fechas, los mejores pasan a la eliminatoria
+        if (S.phase === 'rr') {
+          if (!S.rounds.every(allDone)) return;
+          var tb = standings(S, { phase: 'rr' }).filter(function (x) { return S.withdrawn.indexOf(x.id) < 0; });
+          var ct = Math.min(S.cfg.cut, floorPow2(tb.length));
+          if (ct < 2) { finish(S); return; }
+          S.phase = 'elim'; S.phasePrefix = 'E';
+          buildElim(S, tb.slice(0, ct).map(function (x) { return x.id; }));
+          autoWalkover(S); continue;
+        }
+        if (S.rounds.every(allDone)) finish(S);
+        return;
+      }
       // suizo / suizo + corte
       if (S.phase === 'swiss') {
         if (!allDone(last)) return;
@@ -3218,7 +3234,7 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
    *   1) puntos  2) duelos ganados  3) diferencia de partidas  4) partidas ganadas
    *   5) resultado entre los empatados (duelos ganados solo entre ellos)  6) orden de siembra. */
   function standings(state, opts) {
-    var S = state, phase = (opts && opts.phase) || (S.cfg.format === 'elim' ? 'elim' : S.cfg.format === 'rr' ? 'rr' : 'swiss');
+    var S = state, phase = (opts && opts.phase) || (S.cfg.format === 'elim' ? 'elim' : (S.cfg.format === 'rr' || S.cfg.format === 'rr_cut') ? 'rr' : 'swiss');
     var rows = {}, h2h = {};
     S.players.forEach(function (p) { rows[p.id] = emptyRow(p); });
     S.rounds.forEach(function (r) { if (r.phase !== phase) return; r.duels.forEach(function (d) {
@@ -3252,8 +3268,8 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
   /* Posición final de todos. Con eliminatoria manda hasta dónde llegó cada uno; el resto va por la tabla previa. */
   function ranking(state) {
     var S = state, f = S.cfg.format;
-    var base = f === 'elim' ? S.players.map(emptyRow) : standings(S, { phase: f === 'rr' ? 'rr' : 'swiss' });
-    if (f === 'elim' || f === 'swiss_cut') {
+    var base = f === 'elim' ? S.players.map(emptyRow) : standings(S, { phase: (f === 'rr' || f === 'rr_cut') ? 'rr' : 'swiss' });
+    if (f === 'elim' || f === 'swiss_cut' || f === 'rr_cut') {
       var elimRounds = S.rounds.filter(function (r) { return r.phase === 'elim'; }), K = elimRounds.length, reach = {}, inElim = {};
       elimRounds.forEach(function (r, k) { r.duels.forEach(function (d) {
         [d.a, d.b].forEach(function (p) { if (p) { inElim[p] = 1; reach[p] = Math.max(reach[p] || 0, k + 1); } });
@@ -5229,7 +5245,8 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
     "tn.f.elim": "Eliminación directa",
     "tn.f.rr": "Todos contra todos",
     "tn.f.swiss": "Suizo",
-    "tn.f.swiss_cut": "Suizo + eliminatoria final"
+    "tn.f.swiss_cut": "Suizo + eliminatoria final",
+    "tn.f.rr_cut": "Todos contra todos + eliminatoria final"
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -5308,7 +5325,8 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
     "tn.f.elim": "Single elimination",
     "tn.f.rr": "Round robin",
     "tn.f.swiss": "Swiss",
-    "tn.f.swiss_cut": "Swiss + final bracket"
+    "tn.f.swiss_cut": "Swiss + final bracket",
+    "tn.f.rr_cut": "Round robin + final bracket"
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -11473,6 +11491,8 @@ window.NEON_BREAK = {
   function tnPut(S) { for (var i = 0; i < tn.list.length; i++) if (tn.list[i].meta.id === S.meta.id) { tn.list[i] = S; tnSave(); return; } tn.list.unshift(S); tnSave(); }
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function tnFmt(f) { return t('tn.f.' + f); }
+  function tnHasCut(f) { return f === 'swiss_cut' || f === 'rr_cut'; }            // formatos con eliminatoria final
+  function tnIsRR(f) { return f === 'rr' || f === 'rr_cut'; }                      // formatos con fase de todos contra todos
   function tnBestLabel(b) { return b === 1 ? t('tn.bo1') : t('tn.bo', { n: b }); }
   function tnName(S, id) { return id ? PT.nameOf(S, id) : ''; }
 
@@ -11514,8 +11534,8 @@ window.NEON_BREAK = {
   function tnoNewNoteRender() { $('tnoNewNote').textContent = t('tno.newNote', { rules: invRules({ variant: modeVariant(settings.mode), blitz: settings.mode === 'blitz', bullet: settings.mode === 'bullet', size: settings.size }) }); }
   document.querySelectorAll('#tnoGameBox .seg-opt').forEach(function (b) { b.addEventListener('click', function () { setTimeout(tnoNewNoteRender, 0); }); });
   function tnRenderCheck() {
-    if (tn.online) { $('tnCutBox').hidden = $('tnFormat').value !== 'swiss_cut'; $('tnStart').disabled = false; return; }
-    $('tnCutBox').hidden = $('tnFormat').value !== 'swiss_cut';
+    if (tn.online) { $('tnCutBox').hidden = !tnHasCut($('tnFormat').value); $('tnStart').disabled = false; return; }
+    $('tnCutBox').hidden = !tnHasCut($('tnFormat').value);
     var pl = tnPlayers(), box = $('tnCheck'); box.innerHTML = ''; $('tnCount').textContent = t('tn.count', { n: pl.length });
     var lower = pl.map(function (x) { return x.toLowerCase(); });
     if (lower.some(function (x, i) { return lower.indexOf(x) !== i; })) { box.appendChild(el('div', 'tn-err', t('tn.dupe'))); $('tnStart').disabled = true; return; }
@@ -11597,11 +11617,11 @@ window.NEON_BREAK = {
       var br = el('div', 'tn-bracket');
       el2.forEach(function (r) { var col = el('div', 'tn-col'); col.appendChild(el('h4', '', r.name)); var inner = el('div', 'tn-colin'); r.duels.forEach(function (d) { inner.appendChild(tnDuelEl(S, d, o)); }); col.appendChild(inner); br.appendChild(col); });
       f.appendChild(br);
-    } else if (S.cfg.format === 'swiss_cut') f.appendChild(el('p', 'hint', t('tn.cutWait')));
+    } else if (tnHasCut(S.cfg.format)) f.appendChild(el('p', 'hint', t('tn.cutWait')));
     return f;
   }
   function tnTable(S) {
-    var f = document.createDocumentFragment(), phase = S.cfg.format === 'elim' ? 'elim' : S.cfg.format === 'rr' ? 'rr' : 'swiss';
+    var f = document.createDocumentFragment(), phase = S.cfg.format === 'elim' ? 'elim' : tnIsRR(S.cfg.format) ? 'rr' : 'swiss';
     var rows = S.cfg.format === 'elim' ? PT.ranking(S) : PT.standings(S, { phase: phase });
     var wrap = el('div', 'tn-tw'), tb = el('table'), head = el('tr');
     ['tn.hPos', 'tn.hName', 'tn.hDuels', 'tn.hW', 'tn.hL', 'tn.hGW', 'tn.hGL', 'tn.hDiff', 'tn.hPts'].forEach(function (k) { head.appendChild(el('th', '', t(k))); }); tb.appendChild(head);
@@ -11610,7 +11630,7 @@ window.NEON_BREAK = {
       [r.pos, r.name + (S.withdrawn.indexOf(r.id) >= 0 ? ' (' + t('tn.retired') + ')' : ''), r.duels, r.dw, r.dl, r.gw, r.gl, (r.diff > 0 ? '+' : '') + r.diff, r.pts].forEach(function (v) { tr.appendChild(el('td', '', String(v))); }); tb.appendChild(tr);
     });
     wrap.appendChild(tb); f.appendChild(wrap); f.appendChild(el('p', 'hint', t('tn.tiebreak')));
-    if (S.cfg.format === 'swiss_cut' && S.phase === 'elim') {
+    if (tnHasCut(S.cfg.format) && S.phase === 'elim') {
       f.appendChild(el('h3', 'tn-h', t('tn.finalPos')));
       var t2 = el('table'); PT.ranking(S).forEach(function (r) { var tr = el('tr'); tr.appendChild(el('td', '', String(r.pos))); tr.appendChild(el('td', '', r.name)); t2.appendChild(tr); }); var w2 = el('div', 'tn-tw'); w2.appendChild(t2); f.appendChild(w2);
     }
@@ -11644,9 +11664,9 @@ window.NEON_BREAK = {
   });
   /* ---- Tabla de posiciones como imagen (PNG) para compartir ---- */
   var TN_TIERS = ['#FFC000', '#BFBFBF', '#C55A11', '#7F7F7F'];      // de a 8 puestos: oro, plata, bronce…
-  function tnPngRows(S) { return S.cfg.format === 'elim' ? PT.ranking(S) : PT.standings(S, { phase: S.cfg.format === 'rr' ? 'rr' : 'swiss' }); }
+  function tnPngRows(S) { return S.cfg.format === 'elim' ? PT.ranking(S) : PT.standings(S, { phase: tnIsRR(S.cfg.format) ? 'rr' : 'swiss' }); }
   function tnRoundsDone(S) {
-    var ph = S.cfg.format === 'rr' ? 'rr' : S.cfg.format === 'elim' ? 'elim' : 'swiss', n = 0;
+    var ph = tnIsRR(S.cfg.format) ? 'rr' : S.cfg.format === 'elim' ? 'elim' : 'swiss', n = 0;
     S.rounds.forEach(function (r) { if (r.phase === ph && r.duels.length && r.duels.every(function (d) { return d.status === 'done'; })) n++; });
     return n;
   }
