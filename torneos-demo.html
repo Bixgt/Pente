@@ -548,8 +548,23 @@ tr.champ td { color: var(--accent); font-weight: 700; } tr.out td { color: var(-
       var withElim = base.filter(function (r) { return inElim[r.id]; }), rest = base.filter(function (r) { return !inElim[r.id]; });
       withElim.sort(function (a, b) { return (reach[b.id] || 0) - (reach[a.id] || 0) || seedPos[a.id] - seedPos[b.id]; });
       base = withElim.concat(rest);
+      base.forEach(function (r) { r.reach = inElim[r.id] ? (reach[r.id] || 0) : 0; });          // hasta qué ronda de la eliminatoria llegó (0 = no jugó la eliminatoria)
     }
     return base.map(function (r, i) { var o = Object.assign({}, r); o.pos = i + 1; return o; });
+  }
+  /* Podio: { gold:[ids], silver:[ids], bronze:[ids] } (null si el torneo no terminó). Con eliminatoria no hay partido por el tercer puesto:
+   * los dos que perdieron la semifinal comparten el bronce. En tabla (suizo / todos contra todos) manda la tabla con sus desempates. */
+  function podium(state) {
+    if (!state || state.status !== 'finished') return null;
+    var r = ranking(state), out = { gold: [], silver: [], bronze: [] };
+    if (!r.length) return out;
+    out.gold = [r[0].id]; if (r.length > 1) out.silver = [r[1].id];
+    if (r.length > 2) {
+      var third = r[2];
+      if (third.reach > 0 && r[1].reach > third.reach && r[0].reach > third.reach) out.bronze = r.filter(function (x) { return x.reach === third.reach; }).map(function (x) { return x.id; });
+      else out.bronze = [third.id];
+    }
+    return out;
   }
 
   /* Quién abre la partida número k (0, 1, 2…) de un duelo: se alterna. */
@@ -561,7 +576,7 @@ tr.champ td { color: var(--accent); font-weight: 700; } tr.out td { color: var(-
   return {
     FORMATS: FORMATS, BEST_OF: BEST_OF, MAX_PLAYERS: MAX_PLAYERS, FORMAT_NAME: FORMAT_NAME,
     validate: validate, preview: preview, create: create, recordGames: recordGames, forfeit: forfeit, withdraw: withdraw, undo: undo,
-    standings: standings, ranking: ranking, pending: pending, opener: opener, nameOf: nameOf, shuffle: shuffle,
+    standings: standings, ranking: ranking, podium: podium, pending: pending, opener: opener, nameOf: nameOf, shuffle: shuffle,
     swissMaxMin: swissMaxMin
   };
 });
