@@ -858,6 +858,13 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
   body.in-lab .lab-paste .lab-hint { display: block; }
   body.in-lab #board { width: min(100%, max(260px, calc(100vh - 430px)), 900px); }
 }
+.lab-eval { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.lab-eval .btn[aria-pressed="true"] { border-color: #3ddc84; }
+.lab-eval-box { display: flex; align-items: center; gap: 10px; }
+.lab-eval-bar { flex: 1; height: 18px; border-radius: 9px; background: #17171c; border: 1px solid var(--line); overflow: hidden; position: relative; }
+.lab-eval-bar::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: rgba(128,128,128,.55); }
+.lab-eval-bar i { display: block; height: 100%; width: 50%; background: #f2f2f2; transition: width .35s ease; }
+.lab-eval-txt { min-width: 92px; text-align: right; font-size: 13px; font-weight: 700; }
 .lab-coach { display: flex; flex-direction: column; gap: 8px; }
 .lab-coach-out:empty { display: none; }
 .lab-coach-out { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 9px 11px; font-size: 13.5px; line-height: 1.35; }
@@ -947,6 +954,10 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
         <button type="button" class="btn" id="labBack" data-i18n-aria="lab.back" data-i18n-title="lab.back">◀</button>
         <button type="button" class="btn" id="labPlay" data-i18n-aria="lab.play" data-i18n-title="lab.play">▶▶</button>
         <button type="button" class="btn" id="labFwd" data-i18n-aria="lab.fwd" data-i18n-title="lab.fwd">▶</button>
+      </div>
+      <div class="lab-eval">
+        <button type="button" class="btn" id="labEvalBtn" aria-pressed="false" data-i18n="lab.eval"></button>
+        <div class="lab-eval-box" id="labEvalBox" hidden><div class="lab-eval-bar" id="labEvalBar"><i id="labEvalFill"></i></div><div class="lab-eval-txt" id="labEvalTxt" role="status" aria-live="polite"></div></div>
       </div>
       <div class="lab-coach">
         <button type="button" class="btn primary" id="labCoach" data-i18n="lab.coach"></button>
@@ -5667,6 +5678,15 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
   'use strict';
   Object.assign(root.I18n.STRINGS.es, {
     "lab.coach": "💡 ¿Qué juego?",
+    "lab.eval": "📊 Barra de evaluación",
+    "lab.evalThinking": "Calculando…",
+    "lab.evalEq": "Parejo",
+    "lab.evalAdv": "{who} +{n}",
+    "lab.evalMate": "{who} gana en {n}",
+    "lab.evalWinNow": "{who} gana",
+    "lab.evalOver": "Terminó: ganó {who}",
+    "lab.evalNA": "No disponible acá",
+    "lab.evalTip": "Clara = ventaja del jugador 1; oscura = del jugador 2. Es la opinión de Goody: +1,0 es una ventaja chica pero real; no es un porcentaje de victoria.",
     "lab.coachThinking": "Pensando…",
     "lab.coachFor": "Para {who}",
     "lab.coachBest": "Mejor jugada: {coord}",
@@ -5739,6 +5759,15 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
   'use strict';
   Object.assign(root.I18n.STRINGS.en, {
     "lab.coach": "💡 What should I play?",
+    "lab.eval": "📊 Evaluation bar",
+    "lab.evalThinking": "Calculating…",
+    "lab.evalEq": "Even",
+    "lab.evalAdv": "{who} +{n}",
+    "lab.evalMate": "{who} wins in {n}",
+    "lab.evalWinNow": "{who} wins",
+    "lab.evalOver": "Over: {who} won",
+    "lab.evalNA": "Not available here",
+    "lab.evalTip": "Light = player 1 ahead; dark = player 2 ahead. This is Goody's opinion: +1.0 is a small but real edge; it is not a win percentage.",
     "lab.coachThinking": "Thinking…",
     "lab.coachFor": "For {who}",
     "lab.coachBest": "Best move: {coord}",
@@ -5910,7 +5939,7 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
   'use strict';
 
   function connect(url, h) {
-    var ws = null, closed = false, attempt = 0, everOpen = false, retryTimer = null, hbTimer = null;
+    var ws = null, closed = false, attempt = 0, everOpen = false, retryTimer = null, hbTimer = null, wdTimer = null, lastRx = 0, hiddenAt = 0, probeT = null;
 
     function setState(s) { if (h.onState) h.onState(s); }
 
@@ -5922,17 +5951,18 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
       ws = sock;
       sock.onopen = function () {
         if (ws !== sock) return;
-        attempt = 0; everOpen = true; setState('open'); startHeartbeat();
+        attempt = 0; everOpen = true; lastRx = Date.now(); setState('open'); startHeartbeat();
         if (h.onOpen) h.onOpen();
       };
       sock.onmessage = function (e) {
         if (ws !== sock) return;
+        lastRx = Date.now();
         var m; try { m = JSON.parse(e.data); } catch (x) { return; }
         if (h.onMessage) h.onMessage(m);
       };
       sock.onclose = function () {
         if (ws !== sock) return;
-        ws = null; stopHeartbeat();
+        ws = null; stopHeartbeat(); clearTimeout(probeT);
         if (closed) setState('closed'); else schedule();
       };
       sock.onerror = function () { /* el cierre dispara el reintento */ };
@@ -5948,22 +5978,36 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
     }
 
     // Latido: mantiene viva la conexión a través de proxies y evita que el servidor gratuito se duerma en plena partida.
-    function startHeartbeat() { stopHeartbeat(); hbTimer = setInterval(function () { send({ t: 'ping' }); }, 20000); }
-    function stopHeartbeat() { clearInterval(hbTimer); hbTimer = null; }
+    // Conexión "muerta": el celular durmió o cambió de red y el socket sigue figurando abierto, pero ya no llega nada (ni los pong del servidor).
+    // Si pasan 45 s sin recibir nada, o al volver a la app el servidor no contesta en 4 s, se descarta y se reconecta (el juego vuelve a entrar solo con su rejoin).
+    function startHeartbeat() { stopHeartbeat(); hbTimer = setInterval(function () { send({ t: 'ping' }); }, 20000); wdTimer = setInterval(function () { if (isOpen() && Date.now() - lastRx > 45000) reopen(); }, 5000); }
+    function stopHeartbeat() { clearInterval(hbTimer); hbTimer = null; clearInterval(wdTimer); wdTimer = null; }
+    function reopen() {
+      if (closed) return;
+      var s = ws; ws = null; stopHeartbeat(); clearTimeout(probeT);
+      if (s) { try { s.close(); } catch (e) {} }
+      attempt = 0; open();
+    }
+    function probe() {
+      if (!isOpen()) return;
+      var t0 = Date.now(); send({ t: 'ping' }); clearTimeout(probeT);
+      probeT = setTimeout(function () { if (isOpen() && lastRx < t0) reopen(); }, 4000);
+    }
 
     function isOpen() { return !!ws && ws.readyState === 1; }
     function send(obj) { if (!isOpen()) return false; try { ws.send(JSON.stringify(obj)); return true; } catch (e) { return false; } }
 
     // Al volver a la pestaña o recuperar internet, reintenta ya en vez de esperar el temporizador.
     function kick() { if (!closed && !isOpen() && !(ws && ws.readyState === 0)) { attempt = 0; open(); } }
-    function onVisible() { if (!document.hidden) kick(); }
+    function onVisible() { if (document.hidden) { hiddenAt = Date.now(); return; } kick(); if (hiddenAt && Date.now() - hiddenAt > 8000) probe(); hiddenAt = 0; }
+    function onOnline() { kick(); probe(); }
     document.addEventListener('visibilitychange', onVisible);
-    window.addEventListener('online', kick);
+    window.addEventListener('online', onOnline);
 
     function close() {
       closed = true; clearTimeout(retryTimer); stopHeartbeat();
       document.removeEventListener('visibilitychange', onVisible);
-      window.removeEventListener('online', kick);
+      window.removeEventListener('online', onOnline); clearTimeout(probeT);
       var s = ws; ws = null;
       if (s) { try { s.close(); } catch (e) {} }
       setState('closed');
@@ -9360,6 +9404,7 @@ window.NEON_BREAK = {
         if (online.active) { setStatus(''); updateHud(); }
       },
       onOpen: function () {
+        online.quiet = false;
         if (online.token && online.code) { online.rejoining = true; online.net.send({ t: 'rejoin', code: online.code, token: online.token, avatar: profile.avatar }); }
         else if (online.spectator && online.code) { online.rejoining = true; online.net.send({ t: 'spectate', code: online.code, tcode: online.specT ? online.specT.tcode : undefined, ttoken: online.specT ? online.specT.ttoken || undefined : undefined, name: (online.intent && online.intent.name) || myName() }); }   // se cortó la conexión: vuelve a mirar (con su nombre)
         else if (online.intent) online.net.send(online.intent);
@@ -9430,7 +9475,9 @@ window.NEON_BREAK = {
       case 'vis': online.isPublic = !!m.public; visUi(); setStatus(t(m.public ? 'vis.nowPublic' : 'vis.nowPrivate'), true); break;
       case 'chat': chatIncoming(m); break;
       case 'chatlog': chat.msgs = []; chat.people = {}; (m.msgs || []).forEach(function (x) { chatAdd(x, true); }); renderChat(); break;
-      case 'sync': applySync(m); break;
+      case 'sync':
+        if (online.quiet && online.active && state && m.moves && m.moves.length === state.moves.length && !m.over && !online.over) { online.quiet = false; if (m.clock) clockFromServer(m.clock); break; }       // consulta silenciosa: no había nada nuevo, no se toca la pantalla
+        online.quiet = false; applySync(m); break;
       case 'move': applyRemoteMove(m); break;
       case 'out': applyOut(m); break;
       case 'presence': online.connected = m.connected; trackRival(0); updateHud(); break;
@@ -9553,6 +9600,13 @@ window.NEON_BREAK = {
     open('waitOverlay');
   }
 
+  /* Si espero la jugada del rival y hace rato que no llega nada, le pido al servidor la posición (sin tocar la pantalla si no cambió nada):
+   * así una jugada perdida por un corte de red aparece sola, sin tener que cerrar la app. */
+  setInterval(function () {
+    if (!online.active || online.spectator || !state || isOver() || !onlineFull() || !online.net || !online.net.isOpen() || document.hidden) return;
+    if (turnSeat() === online.seat) return;
+    online.quiet = true; online.net.send({ t: 'resync' });
+  }, 15000);
   function onNetError(m) {
     online.awaiting = false;
     var txt = t(m.code === 'ILLEGAL' ? 'err.' + m.detail : 'err.' + m.code);
@@ -10997,7 +11051,7 @@ window.NEON_BREAK = {
   function labGo(i) {                                        // ir a un paso del historial
     lab.i = Math.max(0, Math.min(lab.hist.length - 1, i)); state = labCur().s;
     if (lab.alt && (lab.tool === '1' || lab.tool === '2')) lab.tool = state.current === 2 ? '2' : '1';
-    pending = hover = drag = settle = null; lab.down = null; lab.coach = null; labCoachShow(); render();
+    pending = hover = drag = settle = null; lab.down = null; lab.coach = null; labCoachShow(); render(); labEvalSoon();
   }
   function labStepFx(prev) {                                  // al avanzar sobre una jugada con capturas: efecto y sonido
     var m = state.moves[state.moves.length - 1];
@@ -11178,6 +11232,38 @@ window.NEON_BREAK = {
     $('status').textContent = ''; renderClocks(); render();
   }
   function labLang() { if (!lab.active) return; labNames(); lab.trayKey = ''; labCoachShow(); render(); }
+  /* Barra de evaluación: Goody mira la posición (1 s, en el Worker) y la barra muestra quién va mejor. Clara = jugador 1, oscura = jugador 2.
+   * La cifra es el puntaje del motor en "fichas" (+1,0 ≈ ventaja chica pero real); si ve una victoria forzada muestra «gana en N». Se actualiza sola al mover o pasar de paso. */
+  var EVAL_MS = 1000, EVAL_SCALE = 1800;
+  lab.evalOn = false; try { lab.evalOn = localStorage.getItem('pente.labEval') === '1'; } catch (e) {}
+  function labEvalSync() { var b = $('labEvalBtn'); if (!b) return; b.setAttribute('aria-pressed', String(!!lab.evalOn)); $('labEvalBox').hidden = !lab.evalOn; $('labEvalBar').title = t('lab.evalTip'); }
+  function labEvalShow(frac, txt) { $('labEvalFill').style.width = Math.round(Math.max(2, Math.min(98, frac * 100)) * 10) / 10 + '%'; $('labEvalTxt').textContent = txt; }
+  function labEvalSoon() {
+    clearTimeout(lab.evalT); lab.evalTok = (lab.evalTok || 0) + 1;
+    if (!lab.active || !lab.evalOn || !state) return;
+    var tok = lab.evalTok, st = state, who1 = t('lab.p1'), who2 = t('lab.p2');
+    if (st.status === 'won') { var ww = st.winner === 2 ? 2 : 1; labEvalShow(ww === 1 ? 1 : 0, t('lab.evalOver', { who: ww === 1 ? who1 : who2 })); return; }
+    if (st.status !== 'playing') { labEvalShow(0.5, t('lab.evalEq')); return; }
+    $('labEvalTxt').textContent = t('lab.evalThinking');
+    lab.evalT = setTimeout(function () {
+      var s = window.PenteCoach.turnState(st, st.current);
+      masterAsk(s, { timeMs: EVAL_MS }, function (r) {
+        if (tok !== lab.evalTok || !lab.active || !lab.evalOn) return;
+        if (!r) { labEvalShow(0.5, t('lab.evalNA')); return; }
+        var W = window.PenteMaster.WIN, v = r.score, cur = st.current, v1 = cur === 1 ? v : -v, ahead = v1 >= 0 ? 1 : 2, who = ahead === 1 ? who1 : who2, mate = Math.abs(v) >= W - 1000;
+        var frac = mate ? (v1 > 0 ? 1 : 0) : 0.5 + 0.5 * Math.tanh(v1 / EVAL_SCALE);
+        if (mate) {
+          var plies = W - Math.abs(v), n = Math.floor(plies / 2) + 1;
+          labEvalShow(frac, r.why === 'vcf' || r.why === 'win' || plies > 60 ? t('lab.evalWinNow', { who: who }) : t('lab.evalMate', { who: who, n: n }));
+        } else {
+          var a = Math.abs(v1) / 1000; labEvalShow(frac, a < 0.15 ? t('lab.evalEq') : t('lab.evalAdv', { who: who, n: a.toFixed(1).replace('.', LANG_DEC()) }));
+        }
+      });
+    }, 350);
+  }
+  function LANG_DEC() { return (document.documentElement.lang || 'es').slice(0, 2) === 'en' ? '.' : ','; }
+  $('labEvalBtn').addEventListener('click', function () { lab.evalOn = !lab.evalOn; try { localStorage.setItem('pente.labEval', lab.evalOn ? '1' : '0'); } catch (e) {} labEvalSync(); labEvalSoon(); });
+  labEvalSync();
   $('labCoach').addEventListener('click', labCoach);
   function labLoad() {
     var g = L.parseGame($('labTxt').value), err = $('labErr');
