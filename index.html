@@ -9378,7 +9378,11 @@ window.NEON_BREAK = {
     online.intent = intent; online.token = ''; online.code = '';
     onlineMsg(t('online.connecting'));
     var go = function () { if (online.intent !== intent) return; if (!online.net) ensureNet(url); else if (online.net.isOpen()) online.net.send(intent); };
-    if (Auth && Auth.user && intent.t !== 'spectate') Auth.accessToken().then(function (tk) { if (tk) intent.jwt = tk; go(); }); else go();
+    if (Auth && Auth.user && intent.t !== 'spectate') {                                      // si el token tarda o falla, se entra igual (antes quedaba colgado para siempre)
+      var gone = false, once = function () { if (gone) return; gone = true; go(); };
+      setTimeout(once, 4000);
+      Auth.accessToken().then(function (tk) { if (tk) intent.jwt = tk; once(); }, once);
+    } else go();
   }
 
   function leaveOnline(resign) {
@@ -9404,7 +9408,7 @@ window.NEON_BREAK = {
         online.active = true; online.code = m.code; online.seat = m.you; online.me = m.you ? teamOfSeat(m.you) : 0; online.spectator = !!m.spectator; online.cid = m.spectator ? m.id : 'p' + m.you;
         if (chat.code !== m.code) { chatReset(); chat.code = m.code; }          // si solo se reconectó, se conservan los silenciados
         if (!m.spectator) { if (online.intent && online.intent.t === 'create') online.mine = true; else if (online.intent && online.intent.t === 'join') online.mine = false; online.token = m.token; saveSession(); }       // los espectadores no tienen lugar que recuperar
-        online.intent = null; online.rejoining = false; onlineMsg(''); updateOnlineButtons();
+        clearTimeout(tno.goTimer); online.intent = null; online.rejoining = false; onlineMsg(''); updateOnlineButtons();
         if (online.invite && !m.spectator && m.you === 1) inviteSend(m.code);
         if (online.seek && !m.spectator && m.you === 1) seekSend();
         break;
@@ -9562,6 +9566,7 @@ window.NEON_BREAK = {
     }
     if (online.active) { setStatus(txt, true); return; }
     var intent = online.intent; online.intent = null; onlineMsg(txt);
+    if (intent && intent.t === 'rejoin' && online.tourney) { tno.inGame = ''; leaveOnline(false); open('tnoOverlay'); tnoNote(txt, true); return; }         // no pudo entrar a su partida de torneo: vuelve al torneo y se puede reintentar
     if (rooms.open) { roomsMsg(txt); requestRooms(); }
     // sala llena al unirse con código: se ofrece mirarla
     if (m.code === 'ROOM_FULL' && intent && intent.t === 'join') { online.lastCode = intent.code; $('btnSpectateOffer').hidden = false; }
@@ -11560,7 +11565,7 @@ window.NEON_BREAK = {
   /* ---------- Torneos online ----------
    * El torneo vive en el servidor (server/tourneys.js). Este navegador mantiene una conexión propia ({t:'tcreate'|'tjoin'|'trejoin'}) y recibe
    * 'tsnap' (foto completa). Cuando los dos de un duelo tocan "Jugar", el servidor arma la sala y manda tsnap.go: se entra con un rejoin normal. */
-  var TNO_KEY = 'pente.tno', tno = { net: null, code: '', token: '', pid: '', org: false, view: false, chat: [], snap: null, tab: 'fx', intent: null, conn: '', inGame: '', friendsAt: 0 };
+  var TNO_KEY = 'pente.tno', tno = { goTimer: 0, net: null, code: '', token: '', pid: '', org: false, view: false, chat: [], snap: null, tab: 'fx', intent: null, conn: '', inGame: '', friendsAt: 0 };
   function tnoSaveSess() { try { if (tno.code && tno.token) localStorage.setItem(TNO_KEY, JSON.stringify({ code: tno.code, token: tno.token })); else localStorage.removeItem(TNO_KEY); } catch (e) {} }
   function tnoLoadSess() { try { var x = JSON.parse(localStorage.getItem(TNO_KEY) || 'null'); if (x && /^[A-Z0-9]{5}$/.test(x.code) && /^[0-9a-f]{32}$/.test(x.token)) { tno.code = x.code; tno.token = x.token; } } catch (e) {} }
   function tnoNote(txt, bad) { var n = $('tnoMsg'); n.textContent = txt || ''; n.classList.toggle('err', !!bad); var l = $('tnoListMsg'); if (l) { l.textContent = txt || ''; l.classList.toggle('err', !!bad); } }
@@ -11614,9 +11619,17 @@ window.NEON_BREAK = {
     if (!m.go || tno.inGame === m.go.code) return;
     if (online.active && online.code === m.go.code && !online.spectator) { tno.inGame = m.go.code; closeAll(); return; }      // salió al menú sin cerrar la partida: se vuelve a la misma sala
     if (online.active && online.spectator && online.tourney) leaveOnline(false);                                                // estaba mirando otra partida del torneo: ahora le toca jugar
-    if (online.active || daily.active || tut.active || lab.active) { tnoNote(t('tno.inGame'), false); return; }
-    tno.inGame = m.go.code; closeAll(); $('btnSpectateOffer').hidden = true;
-    startOnline({ t: 'rejoin', code: m.go.code, token: m.go.token }); online.tourney = true;
+    if (online.active && !(online.spectator ? false : state && !isOver())) leaveOnline(false);                                  // una sala vieja o terminada que quedó colgada no puede bloquear la partida del torneo
+    if (tut.active) tutStop(); if (lab.active) labStop();
+    if (online.active || daily.active) { tnoNote(t('tno.inGame'), false); return; }
+    var code = m.go.code; tno.inGame = code; closeAll(); $('btnSpectateOffer').hidden = true;
+    startOnline({ t: 'rejoin', code: code, token: m.go.token }); online.tourney = true;
+    clearTimeout(tno.goTimer);
+    tno.goTimer = setTimeout(function () {                                  // si en 10 s no entró (red, servidor dormido): se libera para que el próximo aviso o el botón reintenten
+      if (online.active && online.code === code) return;
+      tno.inGame = ''; online.intent = null; if (online.net && !online.active) leaveOnline(false);
+      open('tnoOverlay'); tnoNote(t('tno.err.other'), true);
+    }, 10000);
   }
   function tnoOpen() { tnoRender(); open('tnoOverlay'); tnoLoadFriends(); if (tno.token && tno.code && tno.net && tno.net.isOpen()) tno.net.send({ t: 'trejoin', code: tno.code, token: tno.token }); }      // pide la foto al día por si se perdió algo
   function tnoRules(g) { return invRules(g); }
