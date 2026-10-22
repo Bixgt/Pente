@@ -386,6 +386,8 @@ input.locked { opacity: .75; cursor: not-allowed; }
 .tn-h { font-size: 15px; margin: 14px 0 6px; } .tn-line { font-size: 14px; } .tn-ok { color: var(--ok, #6fcf8e); font-size: 14px; margin: 3px 0; } .tn-err { color: var(--danger, #e5604f); margin: 4px 0; } .tn-warn { color: var(--accent); font-size: 13px; margin: 4px 0; }
 .tn-tabs { display: flex; gap: 6px; margin: 12px 0; } .tn-tabs button { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; font-weight: 600; min-height: 40px; }
 .tn-tabs button[aria-pressed=true] { background: var(--accent); color: #1a1405; border-color: var(--accent); }
+.tno-admin { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 4px 0 10px; }
+.tn-edit { margin-top: 6px; align-self: flex-start; }
 .tn-podium { display: flex; align-items: flex-end; justify-content: center; gap: 8px; margin: 10px 0 6px; }
 .tn-podium .pod { flex: 1 1 0; max-width: 150px; display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 0; }
 .tn-podium .pod-medal { font-size: 30px; line-height: 1; }
@@ -3161,6 +3163,15 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
     if (last.t === 'games' && last.games.length > 1) log.push({ t: 'games', id: last.id, games: last.games.slice(0, -1) });
     return replay(state, log);
   }
+  /* Corregir un resultado: reabre ese duelo. Se rearma el torneo con todo lo anterior y se pierde lo que dependía de ese resultado (los cruces y resultados posteriores);
+   * los retiros hechos después se conservan. Un duelo resuelto solo por un retiro (sin resultado cargado) no se puede reabrir: hay que deshacer el retiro. */
+  function rewind(state, duelId) {
+    var log = (state.log || []), cut = -1, i;
+    for (i = 0; i < log.length; i++) if ((log[i].t === 'games' || log[i].t === 'forfeit') && log[i].id === duelId) { cut = i; break; }
+    if (cut < 0) throw new Error('Ese duelo no tiene un resultado cargado que se pueda corregir.');
+    var later = log.slice(cut + 1).filter(function (e) { return e.t === 'withdraw'; });
+    return replay(state, log.slice(0, cut).concat(later));
+  }
   function autoWalkover(S) {
     var changed = true;
     while (changed) {
@@ -3308,7 +3319,7 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
 
   return {
     FORMATS: FORMATS, BEST_OF: BEST_OF, MAX_PLAYERS: MAX_PLAYERS, FORMAT_NAME: FORMAT_NAME,
-    validate: validate, preview: preview, create: create, recordGames: recordGames, forfeit: forfeit, withdraw: withdraw, undo: undo,
+    validate: validate, preview: preview, create: create, recordGames: recordGames, forfeit: forfeit, withdraw: withdraw, undo: undo, rewind: rewind,
     standings: standings, ranking: ranking, podium: podium, pending: pending, opener: opener, nameOf: nameOf, shuffle: shuffle,
     swissMaxMin: swissMaxMin
   };
@@ -5630,6 +5641,18 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
     'tno.noDuel': 'Por ahora no tenés ningún duelo para jugar. Mirá el fixture: cuando se arme tu próximo cruce, aparece acá.',
     'tno.withdrawn': 'Estás retirado del torneo.',
     'tno.inGame': 'Tu partida está en juego.',
+    'tno.undo': '↩ Deshacer la última acción',
+    'tno.undoConfirm': 'Se deshace la última acción cargada (un resultado, una victoria a mano o un retiro). Las partidas en juego se cancelan.',
+    'tno.undoYes': 'Deshacer',
+    'tno.adminHint': 'Organizador: en cada cruce podés cargar el resultado, dar la victoria o corregirlo.',
+    'tn.edit': '✏️ Corregir',
+    'tn.editConfirm': 'Se reabre este duelo y se borra todo lo que dependía de su resultado (los cruces y resultados de las rondas que vinieron después). ¿Seguro?',
+    'tn.editYes': 'Corregir',
+    'tno.cancelGame': 'Cancelar partida en curso',
+    'tno.cancelConfirm': 'Se cierra la partida que están jugando y el duelo queda pendiente (con las partidas que ya tenía). Los dos vuelven al torneo.',
+    'tno.cancelYes': 'Cancelar partida',
+    'tno.gameClosed': 'El organizador cerró esa partida.',
+    'tno.err.TN_NOTHING': 'No hay nada para deshacer.',
     'tno.backToGame': 'Volver a la partida',
     'tno.live2': 'En juego',
     'tno.draw': 'La partida terminó en empate: se vuelve a jugar.',
@@ -5732,6 +5755,18 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
     'tno.noDuel': 'You have no duel to play right now. Check the fixture: your next pairing will show up here.',
     'tno.withdrawn': 'You have withdrawn from the tournament.',
     'tno.inGame': 'Your game is in progress.',
+    'tno.undo': '↩ Undo last action',
+    'tno.undoConfirm': 'Undoes the last recorded action (a result, a win by hand or a withdrawal). Games in progress are cancelled.',
+    'tno.undoYes': 'Undo',
+    'tno.adminHint': 'Organizer: on each match you can enter the result, give the win or correct it.',
+    'tn.edit': '✏️ Correct',
+    'tn.editConfirm': 'This match is reopened and everything that depended on its result is erased (the pairings and results of later rounds). Sure?',
+    'tn.editYes': 'Correct',
+    'tno.cancelGame': 'Cancel game in progress',
+    'tno.cancelConfirm': 'The game being played is closed and the match stays pending (with the games it already had). Both go back to the tournament.',
+    'tno.cancelYes': 'Cancel game',
+    'tno.gameClosed': 'The organizer closed that game.',
+    'tno.err.TN_NOTHING': 'Nothing to undo.',
     'tno.backToGame': 'Back to the game',
     'tno.live2': 'Playing',
     'tno.draw': 'The game ended in a draw: it will be played again.',
@@ -9553,7 +9588,8 @@ window.NEON_BREAK = {
         break;
       case 'roomClosed': {
         var waitOpen = $('waitOverlay').classList.contains('open');
-        clearTimeout(online.closeTimer); leaveOnline(false);
+        clearTimeout(online.closeTimer); var toTn = m.why === 'tourney' && !!tno.code; leaveOnline(false);
+        if (toTn) { tno.inGame = ''; tnoConnect(); tnoOpen(); tnoNote(t('tno.gameClosed'), false); break; }
         onlineMsg(t(m.why === 'replaced' ? 'online.roomReplaced' : m.why === 'gone' ? 'online.roomGone' : m.why === 'private' ? 'online.roomPrivate' : 'online.roomClosed')); renderHeld();
         if (waitOpen) open('playOverlay');
         break;
@@ -11585,7 +11621,10 @@ window.NEON_BREAK = {
     if (d.bye) { var r0 = el('div', 'tn-p w'); r0.appendChild(el('b', '', tnName(S, d.a))); r0.appendChild(el('span', '', t('tn.bye'))); box.appendChild(r0); box.classList.add('done'); return box; }
     box.appendChild(side(d.a, d.score.a, d.winner === d.a)); box.appendChild(side(d.b, d.score.b, d.winner === d.b));
     var need = (S.cfg.bestOf + 1) / 2;
-    if (d.status === 'done') box.appendChild(el('div', 'tn-meta', d.walkover ? t('tn.walkover') : (d.games.length === 1 ? t('tn.game1', { b: S.cfg.bestOf }) : t('tn.games', { b: S.cfg.bestOf, n: d.games.length }))));
+    if (d.status === 'done') {
+      box.appendChild(el('div', 'tn-meta', d.walkover ? t('tn.walkover') : (d.games.length === 1 ? t('tn.game1', { b: S.cfg.bestOf }) : t('tn.games', { b: S.cfg.bestOf, n: d.games.length }))));
+      if (!o || o.org) { var be = el('button', 'btn small ghost tn-edit', t('tn.edit')); be.type = 'button'; be.dataset.act = 'edit'; box.appendChild(be); }          // el organizador puede corregir un resultado
+    }
     else if (d.a && d.b) {
       box.appendChild(el('div', 'tn-meta', t('tn.opens', { n: d.games.length + 1, name: tnName(S, PT.opener(d, d.games.length)) }) + (S.cfg.bestOf > 1 ? ' · ' + t('tn.need', { n: need }) : '') + (o && o.playing && o.playing.indexOf(d.id) >= 0 ? ' · ▶ ' + t('tno.live2') : '')));
       if (o && (d.a === o.pid || d.b === o.pid)) box.classList.add('mine');
@@ -11593,12 +11632,13 @@ window.NEON_BREAK = {
       if (o && !o.org) return box;
       var acts = el('div', 'tn-acts');
       // un toque con el resultado final (arriba – abajo): no hace falta marcar quién ganó cada partida
-      if (!o) {
+      if (!o || o.org) {
         acts.appendChild(el('div', 'tn-meta', t('tn.result')));
         var chips = el('div', 'tn-chips');
         tnResults(S, d).forEach(function (r) { var b = el('button', 'btn small', r[0] + ' – ' + r[1]); b.type = 'button'; b.dataset.act = 'r'; b.dataset.sa = r[0]; b.dataset.sb = r[1]; chips.appendChild(b); });
         acts.appendChild(chips);
       }
+      if (o && o.org && o.playing && o.playing.indexOf(d.id) >= 0) { var bcg = el('button', 'btn small ghost', t('tno.cancelGame')); bcg.type = 'button'; bcg.dataset.act = 'cancel'; acts.appendChild(bcg); }
       var wo = el('div', 'tn-chips');
       [['wa', d.a], ['wb', d.b]].forEach(function (x) { var b = el('button', 'btn small ghost', t('tn.wo', { name: tnName(S, x[1]) })); b.type = 'button'; b.dataset.act = x[0]; wo.appendChild(b); });
       acts.appendChild(wo);
@@ -11659,6 +11699,7 @@ window.NEON_BREAK = {
     var id = btn.closest('.tn-duel').dataset.id, act = btn.dataset.act, S = tnGet(), d = null;
     S.rounds.forEach(function (r) { r.duels.forEach(function (x) { if (x.id === id) d = x; }); });
     if (act === 'r') { var games = tnGamesFor(d, +btn.dataset.sa, +btn.dataset.sb); return tnApply(function (st) { return PT.recordGames(st, id, games); }); }
+    if (act === 'edit') return ask(t('tn.editConfirm'), t('tn.editYes'), function () { tnApply(function (st) { return PT.rewind(st, id); }); });
     var w = act === 'wa' ? d.a : d.b;
     ask(t('tn.woConfirm', { name: tnName(S, w), other: tnName(S, w === d.a ? d.b : d.a) }), t('tn.woYes'), function () { tnApply(function (st) { return PT.forfeit(st, id, w); }); });
   });
@@ -11928,7 +11969,9 @@ window.NEON_BREAK = {
     // fixture / tabla
     if (!isOpen && S) {
       Array.prototype.forEach.call($('tnoTabs').children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.t === tno.tab)); });
-      var body = $('tnoBody'); body.innerHTML = ''; body.appendChild(tno.tab === 'fx' ? tnFixture(S, { pid: pid, org: org, playing: m.playing, watch: m.watch || {} }) : tnTable(S));
+      var body = $('tnoBody'); body.innerHTML = '';
+      if (org && tno.tab === 'fx') { var ab = el('div', 'tno-admin'); var bu = el('button', 'btn small', t('tno.undo')); bu.type = 'button'; bu.addEventListener('click', function () { ask(t('tno.undoConfirm'), t('tno.undoYes'), function () { tnoSend({ t: 'tundo' }); }); }); ab.appendChild(bu); ab.appendChild(el('span', 'hint', t('tno.adminHint'))); body.appendChild(ab); }
+      body.appendChild(tno.tab === 'fx' ? tnFixture(S, { pid: pid, org: org, playing: m.playing, watch: m.watch || {} }) : tnTable(S));
     }
     tnoRenderChat();
   }
@@ -11980,7 +12023,11 @@ window.NEON_BREAK = {
     var btn = e.target.closest('button[data-act]'); if (!btn || !tno.snap) return;
     var id = btn.closest('.tn-duel').dataset.id, d = null, S = tno.snap.S;
     S.rounds.forEach(function (r) { r.duels.forEach(function (x) { if (x.id === id) d = x; }); }); if (!d) return;
-    var w = btn.dataset.act === 'wa' ? d.a : d.b;
+    var act = btn.dataset.act;
+    if (act === 'r') { tnoSend({ t: 'tresult', duel: id, games: tnGamesFor(d, +btn.dataset.sa, +btn.dataset.sb) }); return; }
+    if (act === 'edit') { ask(t('tn.editConfirm'), t('tn.editYes'), function () { tnoSend({ t: 'trewind', duel: id }); }); return; }
+    if (act === 'cancel') { ask(t('tno.cancelConfirm'), t('tno.cancelYes'), function () { tnoSend({ t: 'tcancel', duel: id }); }); return; }
+    var w = act === 'wa' ? d.a : d.b;
     ask(t('tn.woConfirm', { name: tnName(S, w), other: tnName(S, w === d.a ? d.b : d.a) }), t('tn.woYes'), function () { tnoSend({ t: 'tforfeit', duel: id, winner: w }); });
   });
   $('tnoBack').addEventListener('click', function () { tnRenderList(); tnoRenderLive(); open('tnOverlay'); });
