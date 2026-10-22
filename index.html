@@ -330,6 +330,7 @@ body.in-tut .status, body.in-tut #btnMenu, body.in-tut #btnRestart, body.in-tut 
 .dlg-btns { display: flex; gap: 10px; }
 .dlg-btns .btn { flex: 1 1 0; min-width: 0; }
 .seg.seg4 { display: grid; grid-template-columns: 1fr 1fr; }
+.seg.seg4 .seg-wide { grid-column: 1 / -1; }
 html[data-theme="papel"] .modal.dlg p { font-size: 1.15em; }
 
 /* ---------- Color de las piedras (tablero Tradicional) ---------- */
@@ -1243,7 +1244,7 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
       <button type="button" class="acc-head" aria-expanded="false" aria-controls="accLocalBody"><span data-i18n="acc.opts"></span><span class="acc-sum" id="accLocalSum"></span><span class="acc-chev" aria-hidden="true"></span></button>
       <div class="acc-body" id="accLocalBody" hidden>
     <div class="field" data-mode="ai"><span class="lbl" data-i18n="ai.level"></span>
-      <div class="seg seg4" id="aiLevel" role="group"><button type="button" class="seg-opt" data-val="beginner" data-i18n="ai.beginner"></button><button type="button" class="seg-opt" data-val="easy" data-i18n="ai.easy"></button><button type="button" class="seg-opt" data-val="medium" data-i18n="ai.medium"></button><button type="button" class="seg-opt" data-val="hard" data-i18n="ai.hard"></button></div>
+      <div class="seg seg4" id="aiLevel" role="group"><button type="button" class="seg-opt" data-val="beginner" data-i18n="ai.beginner"></button><button type="button" class="seg-opt" data-val="easy" data-i18n="ai.easy"></button><button type="button" class="seg-opt" data-val="medium" data-i18n="ai.medium"></button><button type="button" class="seg-opt" data-val="hard" data-i18n="ai.hard"></button><button type="button" class="seg-opt seg-wide" data-val="goody" data-i18n="ai.goody"></button></div>
       <p class="hint" id="aiLevelHint"></p></div>
     <div class="field" data-mode="ai"><span class="lbl" data-i18n="ai.side"></span>
       <div class="seg" id="aiSide" role="group"><button type="button" class="seg-opt" data-val="first" data-i18n="ai.sideFirst"></button><button type="button" class="seg-opt" data-val="second" data-i18n="ai.sideSecond"></button><button type="button" class="seg-opt" data-val="random" data-i18n="ai.sideRandom"></button></div></div>
@@ -2573,7 +2574,7 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
 /*
  * PERFIL — datos y reglas del perfil de jugador. Sin DOM ni red: se prueba en Node.
  * Forma: { v:1, name:'', avatar:'p01', stats:{ <modo>:{p,w,l,d} } }
- * Modos: ai_beginner · ai_easy · ai_medium · ai_hard (en pantalla: Fácil · Normal · Difícil · Muy difícil) · local · online. En "local" solo se cuentan partidas jugadas (son dos personas en el mismo aparato).
+ * Modos: ai_beginner · ai_easy · ai_medium · ai_hard · ai_goody (en pantalla: Fácil · Normal · Difícil · Muy difícil · Goody) · local · online. En "local" solo se cuentan partidas jugadas (son dos personas en el mismo aparato).
  * OJO: las estadísticas de máquina y local las informa el navegador, así que no sirven para un ranking; las online las va a verificar el servidor.
  */
 (function (root, factory) {
@@ -2582,7 +2583,7 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
 })(typeof self !== 'undefined' ? self : this, function (XP) {
   'use strict';
 
-  var MODES = ['ai_beginner', 'ai_easy', 'ai_medium', 'ai_hard', 'local', 'online'];
+  var MODES = ['ai_beginner', 'ai_easy', 'ai_medium', 'ai_hard', 'ai_goody', 'local', 'online'];
   var GTYPES = ['classic', 'triples', 'gomoku', 'blitz', 'bullet', 'four', 'ffa', 'daily'];   // tipos de juego (stats.gm): modo de reglas, 2 vs 2, todos contra todos y desafío diario
   var NAME_MAX = 20, CAP = 1000000, DEFAULT_AV = 'p01';       // avatar por defecto: personaje blanco y feliz
 
@@ -3664,10 +3665,12 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
       'ai.easy': 'Normal',
       'ai.medium': 'Difícil',
       'ai.hard': 'Muy difícil',
+      'ai.goody': 'Goody',
       'ai.hint.beginner': 'Para aprender: se despista bastante y a veces deja pasar jugadas obvias, pero ya no regala las líneas.',
       'ai.hint.easy': 'Se distrae y se equivoca seguido, pero tapa lo obvio. Para entrar en calor.',
       'ai.hint.medium': 'Mira dos jugadas adelante: tapa lo obvio y no regala capturas.',
-      'ai.hint.hard': 'Piensa hasta 4 jugadas adelante (hasta ~1 segundo). Un rival decente, no invencible.',
+      'ai.hint.hard': 'Mira hasta 4 jugadas adelante: ve amenazas dobles, arma capturas y cuida sus pares. Rápido y exigente.',
+      'ai.hint.goody': 'Goody: piensa varias jugadas adelante (hasta ~3 segundos), ve las victorias por cuatros seguidos y cuida sus pares. Es la misma que te aconseja en Practicar. Muy fuerte, pero no es invencible.',
       'ai.side': 'Quién empieza',
       'ai.sideFirst': 'Yo',
       'ai.sideSecond': 'La máquina',
@@ -3678,6 +3681,7 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
       'ai.name.easy': 'Máquina (normal)',
       'ai.name.medium': 'Máquina (difícil)',
       'ai.name.hard': 'Máquina (muy difícil)',
+      'ai.name.goody': 'Goody',
       'dlg.ok': 'Aceptar',
       'dlg.cancel': 'Cancelar',
       'dlg.restart': 'Reiniciar',
@@ -3981,10 +3985,12 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
       'ai.easy': 'Normal',
       'ai.medium': 'Hard',
       'ai.hard': 'Very hard',
+      'ai.goody': 'Goody',
       'ai.hint.beginner': 'For learning: it gets distracted and sometimes lets obvious moves pass, but it won\'t hand you lines for free.',
       'ai.hint.easy': 'It gets distracted and often slips, but blocks the obvious. A warm-up.',
       'ai.hint.medium': 'Looks two moves ahead: blocks the obvious and doesn\'t give away captures.',
-      'ai.hint.hard': 'Thinks up to 4 moves ahead (up to ~1 second). A decent rival, not an unbeatable one.',
+      'ai.hint.hard': 'Looks up to 4 moves ahead: sees double threats, sets up captures and protects its pairs. Quick and demanding.',
+      'ai.hint.goody': 'Goody: looks several moves ahead (up to ~3 seconds), spots wins by consecutive fours and protects its pairs. It is the same one that advises you in Practice. Very strong, but not unbeatable.',
       'ai.side': 'Who starts',
       'ai.sideFirst': 'Me',
       'ai.sideSecond': 'The machine',
@@ -3995,6 +4001,7 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
       'ai.name.easy': 'Machine (normal)',
       'ai.name.medium': 'Machine (hard)',
       'ai.name.hard': 'Machine (very hard)',
+      'ai.name.goody': 'Goody',
       'dlg.ok': 'OK',
       'dlg.cancel': 'Cancel',
       'dlg.restart': 'Restart',
@@ -4230,6 +4237,7 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
     'prof.mode.ai_easy': 'Máquina · Normal',
     'prof.mode.ai_medium': 'Máquina · Difícil',
     'prof.mode.ai_hard': 'Máquina · Muy difícil',
+    'prof.mode.ai_goody': 'Máquina · Goody',
     'prof.mode.local': 'Local (2 personas)',
     'prof.mode.online': 'Online',
     'prof.byType': 'Por tipo de juego',
@@ -4265,6 +4273,7 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
     'prof.mode.ai_easy': 'Machine · Normal',
     'prof.mode.ai_medium': 'Machine · Hard',
     'prof.mode.ai_hard': 'Machine · Very hard',
+    'prof.mode.ai_goody': 'Machine · Goody',
     'prof.mode.local': 'Local (2 people)',
     'prof.mode.online': 'Online',
     'prof.byType': 'By game type',
@@ -5646,7 +5655,7 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
     "lab.coachLost": "Esta posición ya no se puede salvar; esta es la que más resiste.",
     "lab.coachOver": "La partida ya terminó: no hay qué jugar.",
     "lab.coachNone": "No encontré jugadas.",
-    "lab.coachNote": "Es la opinión de la IA (mira hasta 4 jugadas): sirve para entrenar, no es una verdad absoluta.",
+    "lab.coachNote": "Es la opinión de Goody (mira varias jugadas, unos 3 segundos): sirve para entrenar, no es una verdad absoluta.",
     "lab.tag.win": "Gana la partida",
     "lab.tag.blockWin": "Tapa su victoria",
     "lab.tag.capture": "Captura {n} fichas",
@@ -5718,7 +5727,7 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
     "lab.coachLost": "This position can no longer be saved; this is the most resilient move.",
     "lab.coachOver": "The game is over: nothing to play.",
     "lab.coachNone": "No moves found.",
-    "lab.coachNote": "This is the AI's opinion (it looks up to 4 moves ahead): good for training, not absolute truth.",
+    "lab.coachNote": "This is Goody's opinion (it looks several moves ahead, about 3 seconds): good for training, not absolute truth.",
     "lab.tag.win": "Wins the game",
     "lab.tag.blockWin": "Stops their win",
     "lab.tag.capture": "Captures {n} stones",
@@ -6791,14 +6800,441 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
 });
 </script>
 <script>
+/* IA "Maestro" de Pente. Lógica pura, sin DOM ni red: funciona en el navegador (window.PenteMaster) y en Node (require).
+ *
+ *   PenteMaster.chooseMove(state, { timeMs, maxDepth }) -> { x, y, depth, nodes, score, why } | null
+ *   PenteMaster.supported(state)  -> true si puede jugar este estado (2 jugadores; con o sin "cinco exacto"); si no, se usa la IA "difícil".
+ *
+ * Cómo piensa (en cristiano):
+ *  - Tablero propio con borde, que se juega y se deshace sobre el mismo arreglo (sin copiar el estado en cada jugada: mucho más rápido).
+ *  - Cada casilla se puntúa mirando todas las "ventanas" de 5 casillas que la tocan (cuántas fichas propias, cuántas del rival), más capturas.
+ *  - Busca con alfa-beta y profundización iterativa, con memoria de posiciones ya vistas y orden de jugadas aprendido.
+ *  - Si el rival amenaza ganar en la próxima, solo mira las jugadas que lo evitan (tapar o capturar).
+ *  - Antes de pensar mira "victorias por cuatros seguidos" (VCF): si tiene una, la juega; y descarta las jugadas tras las cuales el rival tiene una. */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./core/pente.js'));
+  else root.PenteMaster = factory(root.PenteCore);
+})(typeof self !== 'undefined' ? self : this, function (P) {
+  'use strict';
+
+  var WIN = 1000000, PAD = 4, MAXP = 72, MAXC = 400, TTBITS = 18, TTSIZE = 1 << TTBITS, TTMASK = TTSIZE - 1;
+  var TM = [0, 1, 9, 80, 700], TO = [0, 1, 8, 75, 900];        // valor de una ventana según cuántas fichas tiene (propia / del rival, ya contando la que se va a poner)
+  var WT = [0, 1, 7, 55, 450];                                  // evaluación estática
+
+  // ---- números al azar fijos (Zobrist) ----
+  var Z1 = new Int32Array(3 * 1024), Z2 = new Int32Array(3 * 1024), ZC1 = new Int32Array(3 * 80), ZC2 = new Int32Array(3 * 80), ZS1 = 0, ZS2 = 0;
+  (function () {
+    var s = 123456789;
+    function rnd() { s = (s + 0x6D2B79F5) | 0; var t = Math.imul(s ^ (s >>> 15), 1 | s); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return (t ^ (t >>> 14)) | 0; }
+    for (var i = 0; i < Z1.length; i++) { Z1[i] = rnd(); Z2[i] = rnd(); }
+    for (i = 0; i < ZC1.length; i++) { ZC1[i] = rnd(); ZC2[i] = rnd(); }
+    ZS1 = rnd(); ZS2 = rnd();
+  })();
+  // ---- memoria de posiciones (se reutiliza entre jugadas) ----
+  var tKey = new Int32Array(TTSIZE), tScore = new Int32Array(TTSIZE), tDepth = new Int8Array(TTSIZE), tFlag = new Int8Array(TTSIZE), tMove = new Int16Array(TTSIZE);
+
+  function supported(s) { return !!s && s.status === 'playing' && !s.ffa && (s.players || 2) === 2 && s.size <= 19 && s.size >= 5; }
+
+  function Engine(s) {
+    var n = s.size, W = n + 2 * PAD, N = W * W, WL = s.options.lineToWin || 5;
+    var vr = P.VARIANT_RULES[s.options.variant] || P.VARIANT_RULES.classic, sizes = vr.sizes.slice(), ptsOf = [0, 0, 0, 0, 0, 0];
+    sizes.forEach(function (z) { ptsOf[z] = vr.pts[z]; });
+    var exact = !!s.options.exactFive, toWin = s.options.capturesToWin, tourney = !!s.options.tournamentRule && n % 2 === 1, cen = (n - 1) / 2, cenIdx = (cen + PAD) * W + cen + PAD;
+    var B = new Int8Array(N).fill(3), near = new Uint8Array(N), caps = [0, 0, 0];
+    var D8 = [1, -1, W, -W, W + 1, -W - 1, W - 1, -W + 1], AX = [1, W, W + 1, 1 - W];
+    var h1 = 0, h2 = 0, baseMoves = s.moves.length;
+    // pila de jugadas hechas
+    var sp = 0, uIdx = new Int16Array(MAXP * 2), uMe = new Int8Array(MAXP * 2), uPts = new Int8Array(MAXP * 2), uCapN = new Int8Array(MAXP * 2), uH1 = new Int32Array(MAXP * 2), uH2 = new Int32Array(MAXP * 2);
+    var uBox = new Int16Array(MAXP * 2 * 4), capStack = new Int16Array(MAXP * 2 * 12), capTop = 0;
+    var bx0 = 99, bx1 = -1, by0 = 99, by1 = -1;
+    // por nivel: jugadas candidatas
+    var cIdx = new Int16Array(MAXP * MAXC), cQ = new Float64Array(MAXP * MAXC), cFour = new Uint8Array(MAXP * MAXC), cCap = new Uint8Array(MAXP * MAXC), cn = new Int16Array(MAXP);
+    var G_win = false, G_owin = false, G_owCount = 0, G_capMoves = 0;
+    var killer = new Int16Array(MAXP * 2), hist = new Int32Array(N * 3);
+    var nodes = 0, aborted = false, deadline = 0, vv = new Int8Array(2 * WL + 1);
+
+    function setup() {
+      var x, y, i, j;
+      for (y = 0; y < n; y++) for (x = 0; x < n; x++) {
+        var v = s.board[y * n + x], idx = (y + PAD) * W + x + PAD; B[idx] = v;
+        if (v) { stoneAdd(idx, v); }
+      }
+      caps[1] = s.captures[1] || 0; caps[2] = s.captures[2] || 0;
+      h1 ^= ZC1[1 * 80 + caps[1]] ^ ZC1[2 * 80 + caps[2]]; h2 ^= ZC2[1 * 80 + caps[1]] ^ ZC2[2 * 80 + caps[2]];
+    }
+    function nearAdd(idx, dv) { for (var j = -2; j <= 2; j++) { var r = idx + j * W; near[r - 2] += dv; near[r - 1] += dv; near[r] += dv; near[r + 1] += dv; near[r + 2] += dv; } }
+    function stoneAdd(idx, c) {
+      h1 ^= Z1[c * 1024 + idx]; h2 ^= Z2[c * 1024 + idx]; nearAdd(idx, 1);
+      var y = (idx / W) | 0, x = idx - y * W; if (x < bx0) bx0 = x; if (x > bx1) bx1 = x; if (y < by0) by0 = y; if (y > by1) by1 = y;
+    }
+
+    // puntos que capturaría "me" poniendo en idx (sin ejecutar)
+    function capPts(idx, me) {
+      var o = 3 - me, p = 0;
+      for (var k = 0; k < 8; k++) {
+        var d = D8[k];
+        for (var m = 0; m < sizes.length; m++) {
+          var sz = sizes[m];
+          if (B[idx + (sz + 1) * d] !== me) continue;
+          var ok = true; for (var j = 1; j <= sz; j++) if (B[idx + j * d] !== o) { ok = false; break; }
+          if (ok) p += ptsOf[sz];
+        }
+      }
+      return p;
+    }
+    function make(idx, me) {
+      var o = 3 - me, base = capTop, pts = 0, k, m, j, sz, d;
+      for (k = 0; k < 8; k++) {
+        d = D8[k];
+        for (m = 0; m < sizes.length; m++) {
+          sz = sizes[m];
+          if (B[idx + (sz + 1) * d] !== me) continue;
+          var ok = true; for (j = 1; j <= sz; j++) if (B[idx + j * d] !== o) { ok = false; break; }
+          if (!ok) continue;
+          for (j = 1; j <= sz; j++) capStack[capTop++] = idx + j * d;
+          pts += ptsOf[sz];
+        }
+      }
+      uIdx[sp] = idx; uMe[sp] = me; uPts[sp] = pts; uCapN[sp] = capTop - base; uH1[sp] = h1; uH2[sp] = h2;
+      uBox[sp * 4] = bx0; uBox[sp * 4 + 1] = bx1; uBox[sp * 4 + 2] = by0; uBox[sp * 4 + 3] = by1;
+      sp++;
+      for (var i = base; i < capTop; i++) { var c = capStack[i]; B[c] = 0; h1 ^= Z1[o * 1024 + c]; h2 ^= Z2[o * 1024 + c]; nearAdd(c, -1); }
+      B[idx] = me; stoneAdd(idx, me);
+      if (pts) { h1 ^= ZC1[me * 80 + caps[me]] ^ ZC1[me * 80 + caps[me] + pts]; h2 ^= ZC2[me * 80 + caps[me]] ^ ZC2[me * 80 + caps[me] + pts]; caps[me] += pts; }
+    }
+    function unmake() {
+      sp--; var idx = uIdx[sp], me = uMe[sp], o = 3 - me, pts = uPts[sp], cnt = uCapN[sp];
+      if (pts) caps[me] -= pts;
+      B[idx] = 0; nearAdd(idx, -1);
+      for (var i = 0; i < cnt; i++) { var c = capStack[--capTop]; B[c] = o; nearAdd(c, 1); }
+      h1 = uH1[sp]; h2 = uH2[sp]; bx0 = uBox[sp * 4]; bx1 = uBox[sp * 4 + 1]; by0 = uBox[sp * 4 + 2]; by1 = uBox[sp * 4 + 3];
+    }
+    function lineWin(idx, me) {
+      for (var a = 0; a < 4; a++) {
+        var d = AX[a], L = 1, t;
+        for (t = 1; t < WL; t++) { if (B[idx + t * d] !== me) break; L++; }
+        for (t = 1; t < WL; t++) { if (B[idx - t * d] !== me) break; L++; }
+        if (L >= WL) return true;
+      }
+      return false;
+    }
+    function runLen(idx, d, c) { var L = 1, t; for (t = 1; t < 9; t++) { if (B[idx + t * d] !== c) break; L++; } for (t = 1; t < 9; t++) { if (B[idx - t * d] !== c) break; L++; } return L; }
+    function exactThrough(idx, me) { for (var a = 0; a < 4; a++) if (runLen(idx, AX[a], me) === WL) return true; return false; }
+    function exactAny(c) {                                // "cinco exacto": ¿hay en el tablero una racha de exactamente WL fichas de c?
+      var a, x, y, i, d, idx;
+      for (a = 0; a < 4; a++) { d = AX[a]; for (y = by0; y <= by1; y++) for (x = bx0; x <= bx1; x++) { idx = y * W + x; if (B[idx] !== c || B[idx - d] === c) continue; for (i = 1; B[idx + i * d] === c; i++); if (i === WL) return true; } }
+      return false;
+    }
+    /* 0 = todavía nadie; si no, quién gana con la jugada que acaba de hacer "me" (en "cinco exacto" una captura puede dejarle la línea al rival, igual que en las reglas) */
+    function won(idx, me) {
+      if (caps[me] >= toWin) return me;
+      if (!exact) return lineWin(idx, me) ? me : 0;
+      if (exactThrough(idx, me)) return me;
+      if (sp > 0 && uPts[sp - 1] > 0 && uIdx[sp - 1] === idx) { if (exactAny(me)) return me; if (exactAny(3 - me)) return 3 - me; }
+      return 0;
+    }
+
+    // nota de una casilla para "me": q (orden), gana ya, el rival ganaría ahí, cuántos cuatros arma
+    var r_q = 0, r_win = false, r_owin = false, r_four = 0, r_pm = 0;
+    function evalCell(idx, me) {
+      var o = 3 - me, q = 0, win = false, owin = false, four = 0, a, s0, i, t, c1, c2, bad, v;
+      for (a = 0; a < 4; a++) {
+        var d = AX[a];
+        for (t = -(WL - 1); t <= WL - 1; t++) vv[t + WL - 1] = B[idx + t * d];
+        for (s0 = -(WL - 1); s0 <= 0; s0++) {
+          c1 = 0; c2 = 0; bad = false;
+          for (i = 0; i < WL; i++) {
+            if (i + s0 === 0) continue;
+            v = vv[s0 + i + WL - 1];
+            if (v === 3) { bad = true; break; }
+            if (v === me) c1++; else if (v === o) c2++;
+          }
+          if (bad) continue;
+          if (c2 === 0) { q += TM[Math.min(c1 + 1, 4)]; if (c1 === WL - 1) { if (!exact || runLen(idx, d, me) === WL) win = true; } else if (c1 === WL - 2) four++; }
+          if (c1 === 0) { q += TO[Math.min(c2 + 1, 4)]; if (c2 === WL - 1) { if (!exact || runLen(idx, d, o) === WL) owin = true; } }
+        }
+      }
+      var pm = capPts(idx, me), po = capPts(idx, o);
+      if (pm) { q += 1900 * pm + (caps[me] + pm >= toWin ? 90000 : caps[me] >= toWin - 2 ? 1500 : 0); if (caps[me] + pm >= toWin) win = true; }
+      if (po) { q += 1100 * po + (caps[o] + po >= toWin ? 80000 : 0); if (caps[o] + po >= toWin) owin = true; }
+      var dy = (idx / W | 0) - PAD - cen, dx = idx % W - PAD - cen; q -= (Math.abs(dx) + Math.abs(dy)) * 0.3;
+      r_q = q; r_win = win; r_owin = owin; r_four = four; r_pm = pm;
+    }
+
+    /* Jugadas candidatas de "me" en el nivel ply, ordenadas de mejor a peor nota. Deja: G_win (puede ganar ya: la primera es esa), G_owin / G_owCount (el rival ganaría en la próxima:
+     * entonces solo quedan tapar o capturar). Devuelve cuántas. */
+    function gen(me, ply) {
+      var base = ply * MAXC, c = 0, mc = baseMoves + sp, x, y, idx, lo, hi, yy0, yy1, xx0, xx1;
+      G_win = false; G_owin = false; G_owCount = 0; G_capMoves = 0;
+      if (bx1 < 0) { cn[ply] = 0; return 0; }
+      yy0 = Math.max(PAD, by0 - 2); yy1 = Math.min(PAD + n - 1, by1 + 2); xx0 = Math.max(PAD, bx0 - 2); xx1 = Math.min(PAD + n - 1, bx1 + 2);
+      for (y = yy0; y <= yy1; y++) for (x = xx0; x <= xx1; x++) {
+        idx = y * W + x;
+        if (B[idx] !== 0 || near[idx] === 0) continue;
+        if (tourney && mc === 2 && Math.max(Math.abs(x - PAD - cen), Math.abs(y - PAD - cen)) < 3) continue;
+        evalCell(idx, me);
+        if (r_win) { G_win = true; cIdx[base] = idx; cQ[base] = 1e9; cn[ply] = 1; return 1; }
+        if (r_owin) { G_owin = true; G_owCount++; }
+        cIdx[base + c] = idx; cQ[base + c] = r_q + (r_owin ? 5e6 : 0); cFour[base + c] = r_four > 0 || (r_pm > 0 && caps[me] + r_pm >= toWin - 1) ? 1 : 0; cCap[base + c] = r_pm > 0 ? 1 : 0; if (r_pm > 0) G_capMoves++;
+        c++;
+      }
+      if (tourney && mc === 2) {                            // 3.ª jugada con regla de torneo: lo legal más cerca del centro (a 3 o 4 casillas), no solo "cerca de fichas"
+        for (y = PAD + cen - 4; y <= PAD + cen + 4; y++) for (x = PAD + cen - 4; x <= PAD + cen + 4; x++) {
+          idx = y * W + x;
+          if (B[idx] !== 0 || Math.max(Math.abs(x - PAD - cen), Math.abs(y - PAD - cen)) < 3) continue;
+          if (y >= yy0 && y <= yy1 && x >= xx0 && x <= xx1 && near[idx] !== 0) continue;        // ya está en la lista
+          evalCell(idx, me);
+          cIdx[base + c] = idx; cQ[base + c] = r_q; cFour[base + c] = 0; cCap[base + c] = 0; c++;
+        }
+      }
+      if (G_owin) {                                         // solo tapar o capturar
+        var k = 0;
+        for (var i = 0; i < c; i++) if (cQ[base + i] >= 5e6 || cCap[base + i]) { cIdx[base + k] = cIdx[base + i]; cQ[base + k] = cQ[base + i]; cFour[base + k] = cFour[base + i]; cCap[base + k] = cCap[base + i]; k++; }
+        c = k;
+      }
+      // orden: mejor nota primero (inserción)
+      for (var a = 1; a < c; a++) {
+        var qi = cQ[base + a], ii = cIdx[base + a], fi = cFour[base + a], ci = cCap[base + a], b = a - 1;
+        while (b >= 0 && cQ[base + b] < qi) { cQ[base + b + 1] = cQ[base + b]; cIdx[base + b + 1] = cIdx[base + b]; cFour[base + b + 1] = cFour[base + b]; cCap[base + b + 1] = cCap[base + b]; b--; }
+        cQ[base + b + 1] = qi; cIdx[base + b + 1] = ii; cFour[base + b + 1] = fi; cCap[base + b + 1] = ci;
+      }
+      cn[ply] = c; return c;
+    }
+
+    // evaluación estática desde "me": ventanas de WL casillas + capturas + pares vulnerables
+    var L_win = false, L_oppFour = false, qN = 0, qCells = new Int16Array(8);
+    function exactGap(idx, d, c) { for (var i = 0; i < WL; i++) if (B[idx + i * d] === 0) return runLen(idx + i * d, d, c) === WL; return false; }    // la ventana tiene un hueco: ¿al llenarlo queda exactamente WL?
+    function evalLeaf(me) {
+      L_win = false; L_oppFour = false; qN = 0;
+      var o = 3 - me, sc = 0, a, x, y, i, c1, c2, bad, v, d, idx, yy0 = Math.max(PAD, by0 - WL + 1), yy1 = Math.min(PAD + n - 1, by1 + WL - 1), xx0 = Math.max(PAD, bx0 - WL + 1), xx1 = Math.min(PAD + n - 1, bx1 + WL - 1);
+      for (a = 0; a < 4; a++) {
+        d = AX[a];
+        for (y = yy0 - (a === 3 ? 0 : 0); y <= yy1; y++) for (x = xx0; x <= xx1; x++) {
+          idx = y * W + x; c1 = 0; c2 = 0; bad = false;
+          for (i = 0; i < WL; i++) { v = B[idx + i * d]; if (v === 3) { bad = true; break; } if (v === me) c1++; else if (v === o) c2++; }
+          if (bad) continue;
+          if (c2 === 0) { if (c1) { sc += WT[Math.min(c1, 4)]; if (c1 === WL - 1 && (!exact || exactGap(idx, d, me))) L_win = true; } } else if (c1 === 0) { sc -= WT[Math.min(c2, 4)] * 1.05; if (c2 === WL - 1 && (!exact || exactGap(idx, d, o))) L_oppFour = true; }
+        }
+      }
+      // capturas y pares en peligro
+      var cm = caps[me], co = caps[o];
+      sc += 900 * (cm - co) + (cm >= toWin - 1 ? 3000 : 0) - (co >= toWin - 1 ? 3300 : 0);
+      if (sizes.length) {
+        var vz = sizes[0], vul = 0;
+        for (y = yy0; y <= yy1; y++) for (x = xx0; x <= xx1; x++) {
+          idx = y * W + x; v = B[idx]; if (v !== 1 && v !== 2) continue;
+          for (a = 0; a < 4; a++) {
+            d = AX[a]; if (B[idx - d] === v) continue;
+            var L = 1; while (B[idx + L * d] === v) L++;
+            if (L !== vz) continue;
+            var bef = B[idx - d], aft = B[idx + L * d], ov = 3 - v;
+            if ((bef === 0 && aft === ov) || (bef === ov && aft === 0)) {
+              vul += v === me ? -1 : 1;
+              if (v === o && qN < 8) qCells[qN++] = bef === 0 ? idx - d : idx + L * d;           // un par del rival que puedo capturar ahora
+            }
+          }
+        }
+        sc += vul * 800;
+      }
+      return sc;
+    }
+
+    // ---- victoria por cuatros seguidos (VCF) ----
+    var vcfMove = -1;
+    function vcf(att, d, vp, top) {
+      var count = gen(att, vp), base = vp * MAXC;
+      if (G_win) { if (top) vcfMove = cIdx[base]; return true; }
+      if (d <= 0 || G_owin || !count) return false;
+      var tried = 0;
+      for (var i = 0; i < count && tried < 10; i++) {
+        if (!cFour[base + i]) continue;
+        tried++;
+        var idx = cIdx[base + i]; make(idx, att);
+        var ok = defendAll(att, d - 1, vp + 1);
+        unmake();
+        if (ok) { if (top) vcfMove = idx; return true; }
+        if (aborted) return false;
+        if ((++nodes & 1023) === 0 && Date.now() > deadline) { aborted = true; return false; }
+      }
+      return false;
+    }
+    function defendAll(att, d, vp) {
+      var o = 3 - att, count = gen(o, vp), base = vp * MAXC;
+      if (G_win) return false;                              // el que defiende gana primero
+      if (!G_owin) return false;                            // la jugada de ataque no dejó amenaza: no era forzante
+      if (G_owCount >= 2 && !G_capMoves) return true;       // dos cuatros y nada que capturar: no lo puede parar
+      if (!count) return true;
+      var list = [], i;
+      for (i = 0; i < count; i++) list.push(cIdx[base + i]);
+      for (i = 0; i < list.length; i++) {
+        make(list[i], o);
+        var wn = won(list[i], o);
+        if (wn === o) { unmake(); return false; }
+        var r = wn === att ? true : vcf(att, d, vp + 1, false);
+        unmake();
+        if (!r) return false;
+        if (aborted) return false;
+      }
+      return true;
+    }
+
+    // ---- capturas al final de la búsqueda: no se corta con una captura a medias ----
+    function qs(me, alpha, beta, ply, qd, standing, cells, nc) {
+      if (standing >= beta || qd <= 0) return standing;
+      var best = standing, i, list = [];
+      if (standing > alpha) alpha = standing;
+      for (i = 0; i < nc; i++) if (B[cells[i]] === 0) list.push(cells[i]);
+      for (i = 0; i < list.length; i++) {
+        var mv = list[i], v;
+        make(mv, me);
+        var wn = won(mv, me);
+        if (wn) v = wn === me ? WIN - ply : -(WIN - ply);
+        else {
+          var lv = evalLeaf(3 - me), win2 = L_win, f4 = L_oppFour, n2 = qN, c2 = [], k; for (k = 0; k < n2; k++) c2.push(qCells[k]);
+          if (win2) v = -(WIN - ply - 1);
+          else if (f4) v = -negamax(1, -beta, -alpha, ply + 1, 3 - me);
+          else v = -qs(3 - me, -beta, -alpha, ply + 1, qd - 1, lv, c2, n2);
+        }
+        unmake();
+        if (aborted) return 0;
+        if (v > best) best = v;
+        if (best > alpha) alpha = best;
+        if (alpha >= beta) break;
+      }
+      return best;
+    }
+
+    // ---- búsqueda ----
+    function negamax(d, alpha, beta, ply, me) {
+      if (aborted) return 0;
+      if ((++nodes & 1023) === 0 && Date.now() > deadline) { aborted = true; return 0; }
+      var key = (h2 ^ (me === 2 ? ZS2 : 0)), slot = ((h1 ^ (me === 2 ? ZS1 : 0)) & TTMASK), ttMove = 0, a0 = alpha;
+      if (tKey[slot] === key && tDepth[slot] >= 0) {
+        ttMove = tMove[slot];
+        if (tDepth[slot] >= d) {
+          var ts = tScore[slot]; if (ts > WIN - 1000) ts -= ply; else if (ts < -WIN + 1000) ts += ply;
+          var fl = tFlag[slot];
+          if (fl === 0) return ts; if (fl === 1 && ts >= beta) return ts; if (fl === 2 && ts <= alpha) return ts;
+        }
+      }
+      if (d <= 0) {                                         // hoja: sin generar jugadas salvo que haya algo urgente
+        var lv = evalLeaf(me);
+        if (L_win) return WIN - ply;
+        if ((!L_oppFour && !(sizes.length && (caps[me] >= toWin - 1 || caps[3 - me] >= toWin - 1))) || ply >= MAXP - 12) {
+          if (qN > 0 && ply < MAXP - 16) { var cc = [], kk; for (kk = 0; kk < qN; kk++) cc.push(qCells[kk]); return qs(me, alpha, beta, ply, 3, lv, cc, cc.length); }
+          return lv;
+        }
+        d = 1;                                              // el rival amenaza ganar: se sigue un poco más (solo tapar)
+      }
+      var count = gen(me, ply), base = ply * MAXC;
+      if (G_win) return WIN - ply;
+      if (!count) return 0;
+      if (G_owin && G_owCount >= 2 && !G_capMoves) return -WIN + ply + 1;
+      var w = G_owin ? count : d >= 6 ? 14 : d >= 4 ? 12 : d >= 2 ? 10 : 8; if (w > count) w = count;
+      // jugada de la memoria primero, después las "asesinas"
+      var ord = [], i, k;
+      for (i = 0; i < w; i++) ord.push(cIdx[base + i]);
+      var pri = [ttMove, killer[ply * 2], killer[ply * 2 + 1]];
+      for (k = 2; k >= 0; k--) { var m = pri[k]; if (!m) continue; var at = ord.indexOf(m); if (at > 0) { ord.splice(at, 1); ord.unshift(m); } else if (at < 0 && k === 0 && B[m] === 0 && count > w) ord.unshift(m); }
+      var best = -Infinity, bestMove = 0;
+      for (i = 0; i < ord.length; i++) {
+        var mv = ord[i], v;
+        var isCap = B[mv] === 0 && capPts(mv, me) > 0;
+        make(mv, me);
+        var wn = won(mv, me);
+        if (wn) v = wn === me ? WIN - ply : -(WIN - ply);
+        else if (i >= 4 && d >= 3 && !G_owin && !isCap) {                       // jugadas tardías: primero más corto; si sorprende, completo
+          v = -negamax(d - 2, -beta, -alpha, ply + 1, 3 - me);
+          if (v > alpha && !aborted) v = -negamax(d - 1, -beta, -alpha, ply + 1, 3 - me);
+        }
+        else v = -negamax(d - 1, -beta, -alpha, ply + 1, 3 - me);
+        unmake();
+        if (aborted) return 0;
+        if (v > best) { best = v; bestMove = mv; }
+        if (best > alpha) alpha = best;
+        if (alpha >= beta) { if (!cCap[0] || true) { if (killer[ply * 2] !== mv) { killer[ply * 2 + 1] = killer[ply * 2]; killer[ply * 2] = mv; } } break; }
+      }
+      var flag = best <= a0 ? 2 : best >= beta ? 1 : 0, sv = best;
+      if (sv > WIN - 1000) sv += ply; else if (sv < -WIN + 1000) sv -= ply;
+      tKey[slot] = key; tScore[slot] = sv; tDepth[slot] = Math.min(d, 100); tFlag[slot] = flag; tMove[slot] = bestMove;
+      return best;
+    }
+
+    function choose(me, timeMs, maxDepth, rank) {
+      var t0 = Date.now(); deadline = t0 + timeMs; aborted = false; nodes = 0;
+      tKey.fill(0); tDepth.fill(-1);
+      if (bx1 < 0) { var cx = cenIdx; return { idx: cx, depth: 0, nodes: 0, score: 0, why: 'center', ranked: [{ idx: cx, v: 0 }] }; }
+      var count = gen(me, 0), base = 0;
+      if (!count) return null;
+      if (G_win) return { idx: cIdx[0], depth: 0, nodes: 1, score: WIN, why: 'win', ranked: [{ idx: cIdx[0], v: WIN }] };
+      var cand = []; for (var i = 0; i < Math.min(count, G_owin ? count : 16); i++) cand.push({ idx: cIdx[i], q: cQ[i], v: -Infinity });
+      if (cand.length === 1) return { idx: cand[0].idx, depth: 0, nodes: 1, score: 0, why: 'only', ranked: [{ idx: cand[0].idx, v: 0 }] };
+      // ¿tengo una victoria por cuatros seguidos?
+      if (!G_owin) {
+        vcfMove = -1; var ok = vcf(me, 12, 40, true);
+        if (ok && vcfMove >= 0) return { idx: vcfMove, depth: 0, nodes: nodes, score: WIN - 40, why: 'vcf', ranked: [{ idx: vcfMove, v: WIN - 40 }] };
+        aborted = false;
+        // jugadas tras las cuales el rival tiene una victoria por cuatros seguidos: se descartan (si queda alguna)
+        var safe = [];
+        for (i = 0; i < cand.length && Date.now() < t0 + timeMs * 0.35; i++) {
+          make(cand[i].idx, me);
+          var lost = !won(cand[i].idx, me) && vcf(3 - me, 10, 44, false);
+          unmake(); aborted = false;
+          if (!lost) safe.push(cand[i]); 
+        }
+        if (safe.length && safe.length < cand.length) cand = safe;
+      }
+      var bestC = cand[0], doneDepth = 0, bestScore = 0, snap = [{ idx: cand[0].idx, v: 0 }], MARGIN = 350;
+      for (var depth = 1; depth <= maxDepth; depth++) {
+        var alpha = -Infinity, curBest = null, curV = -Infinity, abortedHere = false;
+        for (i = 0; i < cand.length; i++) {
+          var c = cand[i], v;
+          make(c.idx, me);
+          var wn = won(c.idx, me);
+          if (wn) v = wn === me ? WIN : -WIN;
+          else v = -negamax(depth - 1, -Infinity, -alpha + (rank ? MARGIN : 0), 1, 3 - me);          // con ranking, las que quedan a menos de MARGIN de la mejor salen con su valor exacto
+          unmake();
+          if (aborted) { abortedHere = true; break; }
+          c.v = v;
+          if (v > curV) { curV = v; curBest = c; }
+          if (curV > alpha) alpha = curV;
+        }
+        if (abortedHere) break;
+        bestC = curBest; doneDepth = depth; bestScore = curV;
+        if (rank) snap = cand.filter(function (q) { return q.v > -Infinity; }).map(function (q) { return { idx: q.idx, v: q.v }; }).sort(function (p, q) { return q.v - p.v; });
+        cand.sort(function (p, q) { return q.v - p.v; });                 // la mejor primero en la próxima vuelta
+        if (curV >= WIN - 100 || curV <= -WIN + 100) break;
+        if (Date.now() - t0 > timeMs * 0.55) break;                          // no alcanza para otra capa
+      }
+      return { idx: bestC.idx, depth: doneDepth, nodes: nodes, score: bestScore, why: 'search', ranked: rank ? snap : undefined };
+    }
+    setup();
+    return { choose: choose, B: B, make: make, unmake: unmake, caps: caps, W: W, won: won, gen: gen, evalLeaf: evalLeaf, hash: function () { return [h1, h2]; }, sp: function () { return sp; } };
+  }
+
+  function chooseMove(state, opts) {
+    opts = opts || {};
+    if (!supported(state)) return null;
+    var e = Engine(state), r = e.choose(state.current, opts.timeMs || 2500, opts.maxDepth || 14, !!opts.rank);
+    if (!r) return null;
+    var n = state.size, W = n + 8, y = ((r.idx / W) | 0) - 4, x = r.idx - (y + 4) * W - 4;
+    var out = { x: x, y: y, depth: r.depth, nodes: r.nodes, score: r.score, why: r.why };
+    if (opts.rank && r.ranked) out.ranked = r.ranked.map(function (q) { var yy = ((q.idx / W) | 0) - 4; return { x: q.idx - (yy + 4) * W - 4, y: yy, v: q.v }; });
+    return out;
+  }
+
+  return { chooseMove: chooseMove, supported: supported, _Engine: Engine, WIN: WIN };
+});
+</script>
+<script>
 /* PENTE · Entrenador. Lógica pura, sin DOM: dice cuál es la mejor jugada en una posición y por qué.
  *   PenteCoach.advise(state, color, { timeMs }) -> { color, best:{x,y,coord,tags:[{k,n?}]}, alts:[{x,y,coord,tags}], verdict:'win'|'lost'|'' } | null
- * Usa la misma IA que el rival ("difícil": mira hasta 4 jugadas), así que es una opinión muy buena pero no una verdad absoluta.
+ * Usa el motor Goody (el mismo del nivel Goody; si no puede con la posición, la IA "difícil"), así que es una opinión muy buena pero no una verdad absoluta.
  * Las razones (tags) se calculan mirando la jugada puesta: gana, tapa una victoria, captura, arma un cuatro o un tres abierto, tapa los del rival. */
 (function (root, factory) {
-  if (typeof module === 'object' && module.exports) module.exports = factory(require('./core/pente.js'), require('./ai.js'));
-  else root.PenteCoach = factory(root.PenteCore, root.PenteAI);
-})(typeof self !== 'undefined' ? self : this, function (P, AI) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./core/pente.js'), require('./ai.js'), require('./ai-master.js'));
+  else root.PenteCoach = factory(root.PenteCore, root.PenteAI, root.PenteMaster);
+})(typeof self !== 'undefined' ? self : this, function (P, AI, MST) {
   'use strict';
   var AXES = [[1, 0], [0, 1], [1, 1], [1, -1]];
 
@@ -6836,18 +7272,28 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
     return { x: e.x, y: e.y, coord: P.coordName(e.x, e.y), tags: tags };
   }
 
+  /* Arma el consejo a partir del ranking [{x,y,v}] (mejor primero) que devolvió el motor; `win` es el valor de "victoria" de ese motor. */
+  function fromRanked(s, color, ranked, win) {
+    if (!ranked || !ranked.length) return null;
+    var r = { ranked: ranked };
+    var top = r.ranked[0], mate = win - 80, lost = top.v <= -mate;
+    var alts = r.ranked.slice(1).filter(function (e) { return !lost && top.v < mate && e.v >= top.v - 350; }).slice(0, 2);       // solo las que de verdad están cerca de la mejor
+    return { color: color, best: describe(s, top, color), alts: alts.map(function (e) { return describe(s, e, color); }), verdict: top.v >= mate ? 'win' : top.v <= -mate ? 'lost' : '' };
+  }
+  /* Versión sin Worker: usa el motor Goody (src/ai-master.js) y, si no puede con esta posición, la IA "difícil". */
   function advise(state, color, opts) {
     opts = opts || {};
     if (!state || state.status === 'won' || state.status === 'draw') return null;
     color = color === 2 ? 2 : 1;
-    var s = withTurn(state, color);
-    var r = AI.chooseMove(s, { level: 'hard', timeMs: opts.timeMs || 1500, rank: true, vary: opts.vary === undefined ? 350 : opts.vary, rng: function () { return 0.5; } });
-    if (!r || !r.ranked || !r.ranked.length) return null;
-    var top = r.ranked[0], mate = AI.WIN - 80, lost = top.v <= -mate;
-    var alts = r.ranked.slice(1).filter(function (e) { return !lost && top.v < mate && e.v >= top.v - 350; }).slice(0, 2);       // solo las que de verdad están cerca de la mejor
-    return { color: color, best: describe(s, top, color), alts: alts.map(function (e) { return describe(s, e, color); }), verdict: top.v >= mate ? 'win' : top.v <= -mate ? 'lost' : '' };
+    var s = withTurn(state, color), r;
+    if (MST && MST.supported(s)) {
+      r = MST.chooseMove(s, { timeMs: opts.timeMs || 2500, rank: true });
+      if (r && r.ranked && r.ranked.length) return fromRanked(s, color, r.ranked, MST.WIN);
+    }
+    r = AI.chooseMove(s, { level: 'hard', timeMs: opts.timeMs || 1500, rank: true, vary: opts.vary === undefined ? 350 : opts.vary, rng: function () { return 0.5; } });
+    return r && r.ranked ? fromRanked(s, color, r.ranked, AI.WIN) : null;
   }
-  return { advise: advise, tagsFor: tagsFor };
+  return { advise: advise, fromRanked: fromRanked, turnState: withTurn, tagsFor: tagsFor };
 });
 </script>
 <script>
@@ -6949,7 +7395,7 @@ window.NEON_BREAK = {
   function centerIdx() { return (boardN() - 1) / 2; }
   function sfx(name) { if (window.PenteSound) window.PenteSound.play(name); }
   function buzz(ms) { if (window.PenteSound) window.PenteSound.buzz(ms); }
-  var LEVELS_OK = ['beginner', 'easy', 'medium', 'hard'];
+  var LEVELS_OK = ['beginner', 'easy', 'medium', 'hard', 'goody'];
   var ai = { active: false, level: 'medium', human: 1, bot: 2, timer: 0, token: 0, thinking: false, four: false, botSeats: {} };   // rival offline
   var replayBusy = false; // true mientras se dibuja un cuadro del video (render no toca la pantalla real)
   var fx = [];            // fichas capturadas que se están desvaneciendo / rompiendo
@@ -7084,13 +7530,13 @@ window.NEON_BREAK = {
     }
     clockFreeze(); drag = settle = null; pending = hover = null;
     localOver = { winner: loser === 1 ? 2 : 1, reason: 'timeout' };
-    if (ai.active) { ai.token++; clearTimeout(ai.timer); ai.thinking = false; }
+    if (ai.active) { ai.token++; clearTimeout(ai.timer); ai.thinking = false; masterStop(); }
     setStatus(''); render(); sfx(ai.active && loser === ai.human ? 'lose' : 'win'); setTimeout(showEnd, 450);
   }
   setInterval(clockTick, 200);
 
   /* ---------- Partida ---------- */
-  function aiStop() { if (daily.active) { daily.active = false; updateOnlineButtons(); } ai.active = false; ai.four = false; ai.botSeats = {}; ai.token++; clearTimeout(ai.timer); ai.thinking = false; }
+  function aiStop() { masterStop(); if (daily.active) { daily.active = false; updateOnlineButtons(); } ai.active = false; ai.four = false; ai.botSeats = {}; ai.token++; clearTimeout(ai.timer); ai.thinking = false; }
   function startGame() {
     tutStop(); aiStop(); videoDiscard(); endSeen = recorded = false;
     if (online.net) leaveOnline(false);
@@ -7181,7 +7627,7 @@ window.NEON_BREAK = {
   }
   // Turno de la máquina: un respiro para que se vea que "piensa", y recién ahí calcula (en el dispositivo, sin red).
   // Cuánto "piensa" la máquina antes de poner la ficha (ms, mínimo y máximo por nivel; los más fuertes juegan más rápido). Se puede apagar en Ajustes → Partida.
-  var BOT_THINK = { beginner: [1000, 2000], easy: [900, 1800], medium: [600, 1200], hard: [250, 600] };
+  var BOT_THINK = { beginner: [1000, 2000], easy: [900, 1800], medium: [600, 1200], hard: [250, 600], goody: [250, 600] };
   function botThinkMs() {
     if (!cfg.botDelay) return 450;
     var r = BOT_THINK[ai.level] || BOT_THINK.medium; return r[0] + Math.random() * (r[1] - r[0]);
@@ -7193,14 +7639,49 @@ window.NEON_BREAK = {
     var tok = ai.token, st = state, target = botThinkMs();
     ai.timer = setTimeout(function () {
       if (tok !== ai.token || st !== state) return;
-      var t0 = Date.now(), mv = window.PenteAI.chooseMove(state, { level: ai.level });
-      var wait = Math.max(0, target - (Date.now() - t0));
-      ai.timer = setTimeout(function () {
+      var t0 = Date.now();
+      aiThink(st, ai.level, function (mv) {
         if (tok !== ai.token || st !== state) return;
-        ai.thinking = false;
-        if (mv) tryMove(mv.x, mv.y, true);
-      }, wait);
+        var wait = Math.max(0, target - (Date.now() - t0));
+        ai.timer = setTimeout(function () {
+          if (tok !== ai.token || st !== state) return;
+          ai.thinking = false;
+          if (mv) tryMove(mv.x, mv.y, true);
+        }, wait);
+      });
     }, 80);
+  }
+  /* "Goody" juega con el motor de src/ai-master.js en un proceso aparte (Web Worker), para que la pantalla no se trabe mientras piensa. El entrenador de Practicar usa el mismo motor.
+   * Si no se puede (4 jugadores, navegador sin Worker o falla) cae a la IA "difícil" de siempre. */
+  var MASTER_MS = 2500, COACH_MS = 3000, masterW = null, masterReq = 0;
+  function masterWorker() {
+    if (masterW) return masterW;
+    try {
+      var core = '', mst = '', i, sc = document.scripts;
+      for (i = 0; i < sc.length; i++) { var tx = sc[i].textContent || ''; var head = tx.slice(0, 160); if (head.indexOf('PENTE CORE') >= 0) core = tx; else if (head.indexOf('IA "Maestro"') >= 0) mst = tx; }
+      if (!core || !mst || !window.Worker || !window.Blob || !window.URL) return null;
+      var code = core + '\n' + mst + '\nself.onmessage=function(e){var d=e.data,r=null;try{r=self.PenteMaster.chooseMove(d.state,{timeMs:d.timeMs,rank:!!d.rank});}catch(err){}self.postMessage({id:d.id,r:r});};';
+      masterW = new Worker(URL.createObjectURL(new Blob([code], { type: 'text/javascript' })));
+    } catch (e) { masterW = null; }
+    return masterW;
+  }
+  function masterStop() { if (masterW) { try { masterW.terminate(); } catch (e) {} masterW = null; } masterReq++; }
+  /* Le pregunta al motor Goody (en el Worker; sin Worker, en esta misma pantalla) y llama a cb(resultado) o cb(null) si no pudo. */
+  function masterAsk(st, opts, cb) {
+    if (!window.PenteMaster || !window.PenteMaster.supported(st)) { cb(null); return; }
+    var w = masterWorker();
+    if (!w) { var r = null; try { r = window.PenteMaster.chooseMove(st, opts); } catch (e) {} cb(r); return; }
+    var id = ++masterReq, done = false;
+    function fin(r) { if (done) return; done = true; clearTimeout(guard); w.removeEventListener('message', onmsg); cb(r); }
+    function onmsg(e) { if (e.data && e.data.id === id) fin(e.data.r || null); }
+    var guard = setTimeout(function () { masterStop(); fin(null); }, opts.timeMs + 4000);                  // si el Worker no contesta: se usa lo de siempre
+    w.addEventListener('message', onmsg);
+    w.postMessage({ id: id, state: st, timeMs: opts.timeMs, rank: !!opts.rank });
+  }
+  function aiThink(st, level, cb) {
+    function old() { var mv = null; try { mv = window.PenteAI.chooseMove(st, { level: level === 'goody' ? 'hard' : level }); } catch (e) {} cb(mv); }
+    if (level !== 'goody') { old(); return; }
+    masterAsk(st, { timeMs: MASTER_MS }, function (r) { if (r) cb({ x: r.x, y: r.y }); else old(); });
   }
 
   /* ---------- Desafío diario ----------
@@ -7683,7 +8164,7 @@ window.NEON_BREAK = {
   function canPause() { return !!state && !online.active && !tut.active && !lab.active && !isOver() && !document.body.classList.contains('in-screen') && !$('dlgOverlay').classList.contains('open') && !$('endOverlay').classList.contains('open'); }
   function pauseGame() {
     if (!canPause() || paused()) return;
-    if (ai.active) { ai.token++; clearTimeout(ai.timer); ai.thinking = false; }       // la máquina deja de pensar hasta que vuelvas
+    if (ai.active) { ai.token++; clearTimeout(ai.timer); ai.thinking = false; masterStop(); }       // la máquina deja de pensar hasta que vuelvas
     drag = settle = null; pending = hover = null;
     open('pauseOverlay'); render();
   }
@@ -8798,7 +9279,7 @@ window.NEON_BREAK = {
   }
   function rematch() {
     videoDiscard(); endSeen = recorded = false;
-    if (ai.active) { ai.token++; clearTimeout(ai.timer); ai.thinking = false; }
+    if (ai.active) { ai.token++; clearTimeout(ai.timer); ai.thinking = false; masterStop(); }
     state = P.createGame(coreOpts({ size: state ? state.size : settings.size, players: state && state.players === 4 ? 4 : 2, ffa: !!(state && state.ffa) }));   // la revancha conserva el modo de la partida
     hover = pending = drag = settle = null; fx.length = 0; kbd = { x: centerIdx(), y: centerIdx() }; clockFresh(); closeAll(); setStatus(''); render();
     if (ai.active) aiMaybeMove();
@@ -9531,7 +10012,7 @@ window.NEON_BREAK = {
     })(q);
     var anyBot = !!(loc4.bots[2] || loc4.bots[3] || loc4.bots[4]);
     $('l4LevelBox').hidden = !anyBot;
-    document.querySelectorAll('#l4Level .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.val === aiPref.level)); });
+    document.querySelectorAll('#l4Level .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.val === (aiPref.level === 'goody' ? 'hard' : aiPref.level))); });         // en 4 jugadores no hay Goody: juega la "muy difícil"
   }
   document.querySelectorAll('#localPlayers .seg-opt').forEach(function (b) { b.addEventListener('click', function () { localPlayers = [2, 4, 5].indexOf(Number(b.dataset.pl)) >= 0 ? Number(b.dataset.pl) : 2; try { localStorage.setItem('pente.localPlayers', String(localPlayers)); } catch (e) {} syncLocalMode(); }); });
   document.querySelectorAll('#l4Level .seg-opt').forEach(function (b) { b.addEventListener('click', function () { aiPref.level = b.dataset.val; saveAiPref(); buildLoc4(); }); });
@@ -10579,12 +11060,19 @@ window.NEON_BREAK = {
     if (!lab.active || !state || lab.coachBusy || !window.PenteCoach) return;
     var out = $('labCoachOut'), btn = $('labCoach'), color = lab.tool === '2' ? 2 : lab.tool === '1' ? 1 : state.current, step = lab.i, st = state;
     lab.coach = null; out.textContent = t('lab.coachThinking'); lab.coachBusy = true; btn.disabled = true; render();
-    setTimeout(function () {                                   // el cálculo traba un instante: primero se pinta "Pensando…"
-      var r = null; try { r = window.PenteCoach.advise(st, color, { timeMs: 1500 }); } catch (e) { r = null; }
+    function done(r) {
       lab.coachBusy = false; btn.disabled = false;
       if (!lab.active || step !== lab.i || st !== state) return;
       if (!r) { out.textContent = t(st.status === 'playing' ? 'lab.coachNone' : 'lab.coachOver'); return; }
       lab.coach = { i: step, r: r }; labCoachShow(); sfx('pick'); render();
+    }
+    setTimeout(function () {                                   // primero se pinta "Pensando…"; el cálculo lo hace Goody en el Worker
+      var s = window.PenteCoach.turnState(st, color);
+      masterAsk(s, { timeMs: COACH_MS, rank: true }, function (m) {
+        var r = null;
+        try { r = m && m.ranked ? window.PenteCoach.fromRanked(s, color, m.ranked, window.PenteMaster.WIN) : window.PenteCoach.advise(st, color, { timeMs: 1500 }); } catch (e) { r = null; }
+        done(r);
+      });
     }, 40);
   }
   function labDrawCoach() {
