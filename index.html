@@ -943,6 +943,72 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
 @media (min-width: 1100px) and (min-height: 560px) { .turnclock { width: 60px; height: 60px; margin: -30px 0 0 -30px; font-size: 18px; } }
 .hud:has(.turnclock:not([hidden])) #player1 { padding-right: 38px; }
 .hud:has(.turnclock:not([hidden])) #player2 { padding-left: 38px; }
+
+/* ---------- Personalización (pantalla): menú lateral, tarjetas con ícono y estilos del mismo tamaño en todos los temas ---------- */
+#customizeOverlay .cz-wrap { display: grid; grid-template-columns: minmax(0, 1fr); width: min(100%, 1120px); margin: 0 auto; }
+#customizeOverlay .cz-main { width: 100%; margin: 0; padding-top: 0; }
+.overlay.screen:not(#menuOverlay) #customizeOverlay .screen-body, #customizeOverlay .screen-body { padding-top: 8px; }
+#customizeOverlay .cz-h { display: flex; align-items: center; gap: 12px; font-size: 34px; margin: 0 0 4px; }
+#customizeOverlay .cz-hi { flex: none; color: var(--accent); }
+#customizeOverlay p.sub { margin: 0 0 14px; }
+#customizeOverlay .cz-panel { display: flex; flex-direction: column; gap: 14px; }
+#customizeOverlay .cz-card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 14px 14px 16px; }
+#customizeOverlay .cz-t { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; font-size: 20px; font-weight: 600; }
+#customizeOverlay .cz-t svg { flex: none; color: var(--accent); }
+/* menú lateral (escritorio) / fila de chips (celular) */
+#customizeOverlay .cz-nav { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 12px; scrollbar-width: none; }
+#customizeOverlay .cz-nav::-webkit-scrollbar { display: none; }
+#customizeOverlay .cz-nav-b { flex: none; display: flex; align-items: center; gap: 8px; min-height: 42px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--muted); font-weight: 600; font-size: 14px; white-space: nowrap; }
+#customizeOverlay .cz-nav-b svg { flex: none; width: 20px; height: 20px; }
+#customizeOverlay .cz-nav-b.on { color: var(--text); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 20%, var(--panel)); }
+#customizeOverlay .cz-nav-b.on svg { color: var(--accent); }
+/* estilos del tablero: todos del mismo tamaño */
+#customizeOverlay .themes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+#customizeOverlay .theme-opt { flex: none; width: 100%; min-width: 0; height: 100%; padding: 6px 6px 8px; gap: 6px; border-radius: 14px; font-size: 13px; justify-content: flex-start; }
+#customizeOverlay .theme-opt > span:last-child { display: block; width: 100%; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+#customizeOverlay .theme-opt .swatch { display: flex; align-items: center; justify-content: center; gap: 2px; height: 56px; flex: none; border-radius: 9px; }
+#customizeOverlay .theme-opt .swatch i, #customizeOverlay .theme-opt .swatch .real { position: static; flex: none; left: auto; top: auto; width: 26px; height: 26px; }
+#customizeOverlay .theme-opt .swatch img.shell { width: 30px; height: 30px; }
+#customizeOverlay .theme-opt .swatch img.neon { width: 46px; height: 46px; margin: 0 -9px; }
+#customizeOverlay .theme-opt .swatch canvas.scrib { width: 30px; height: 30px; }
+#customizeOverlay .theme-opt[aria-pressed="true"] { border-width: 2px; box-shadow: 0 0 0 1px var(--accent), 0 0 14px color-mix(in srgb, var(--accent) 45%, transparent); }
+/* botones de tamaño / efecto: iguales */
+#customizeOverlay .seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+#customizeOverlay .seg-opt { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 8px 6px; font-size: 15px; white-space: nowrap; }
+#customizeOverlay .seg-opt .cz-si { flex: none; color: var(--accent); }
+#customizeOverlay .seg-opt[aria-pressed="true"] { box-shadow: 0 0 0 1px var(--accent) inset; background: color-mix(in srgb, var(--accent) 16%, var(--panel)); }
+/* filas de opciones con ícono */
+#customizeOverlay .cz-rows { margin-top: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--bg); overflow: hidden; }
+#customizeOverlay .cz-row { margin: 0; padding: 12px 12px; align-items: center; gap: 12px; }
+#customizeOverlay .cz-row + .cz-row { border-top: 1px solid var(--line); }
+#customizeOverlay .cz-row > svg { flex: none; color: var(--accent); }
+#customizeOverlay .cz-row > span { min-width: 0; }
+#customizeOverlay .cz-row small { font-size: 13px; line-height: 1.3; }
+#customizeOverlay .cz-info { margin-top: 10px; }
+@media (max-width: 520px) {
+  #customizeOverlay .cz-h { font-size: 28px; }
+  #customizeOverlay .theme-opt { font-size: 11.5px; padding: 5px 3px 7px; }
+  #customizeOverlay .theme-opt .swatch { height: 46px; }
+  #customizeOverlay .seg-opt { flex-direction: column; gap: 4px; font-size: 13px; min-height: 58px; }
+  #customizeOverlay .cz-row > svg { width: 28px; height: 28px; }
+}
+@media (min-width: 900px) {
+  #customizeOverlay .cz-wrap { grid-template-columns: 250px minmax(0, 1fr); gap: 36px; align-items: start; padding-top: 56px; }
+  #customizeOverlay .cz-nav { flex-direction: column; overflow: visible; padding: 74px 0 0; gap: 6px; }
+  #customizeOverlay .cz-nav-b { width: 100%; min-height: 56px; border-radius: 14px; padding: 8px 16px; gap: 14px; font-size: 18px; background: transparent; border-color: transparent; }
+  #customizeOverlay .cz-nav-b svg { width: 28px; height: 28px; }
+  #customizeOverlay .cz-nav-b:not(.on):hover { background: var(--panel); }
+  #customizeOverlay .cz-nav-b.on { border-color: color-mix(in srgb, var(--accent) 55%, transparent); }
+  #customizeOverlay .themes { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+  #customizeOverlay .theme-opt { font-size: 14px; }
+  #customizeOverlay .theme-opt .swatch { height: 64px; }
+  #customizeOverlay .cz-main { padding-top: 0; }
+  #customizeOverlay .cz-h { font-size: 40px; }
+}
+/* Halloween: solo ahí, tarjetas con filo violeta y brillo naranja */
+html[data-theme="halloween"] #customizeOverlay .cz-card { border-color: #4a2f78; background: linear-gradient(180deg, rgba(36,18,62,.92), rgba(20,10,36,.94)); box-shadow: 0 0 0 1px rgba(255,138,42,.07) inset, 0 6px 22px rgba(0,0,0,.45); }
+html[data-theme="halloween"] #customizeOverlay .cz-h { font-family: inherit; text-shadow: 0 0 18px rgba(160,90,255,.55); }
+@media (max-width: 400px) { #customizeOverlay .theme-opt { font-size: 10.5px; padding-left: 2px; padding-right: 2px; } #customizeOverlay .theme-opt > span:last-child { letter-spacing: -.01em; text-overflow: clip; } }
 </style>
 </head>
 <body>
@@ -1342,26 +1408,51 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
 
 <!-- Personalización (aspecto del juego) -->
 <div class="overlay screen" id="customizeOverlay">
-  <div class="screen-body settings">
-    <h2 data-i18n="cz.title"></h2>
-    <p class="sub" data-i18n="cz.sub"></p>
-    <section class="cz-panel" id="tab-graphics">
-      <div class="field"><span class="lbl" data-i18n="cfg.theme"></span><div class="themes" id="themePicker" role="group"></div></div>
-      <div class="field" id="gemField" hidden><span class="lbl" data-i18n="cfg.gems"></span>
-        <div class="gem-row"><span class="gem-who" data-i18n="player.1"></span><div class="gem-picker" id="gemPicker1" role="group"></div></div>
-        <div class="gem-row"><span class="gem-who" data-i18n="player.2"></span><div class="gem-picker" id="gemPicker2" role="group"></div></div>
-        <p class="hint" data-i18n="cfg.gemsHint"></p></div>
-      <div class="field"><span class="lbl" data-i18n="cfg.stoneSize"></span>
-        <div class="seg" data-cfg="stoneSize" role="group"><button type="button" class="seg-opt" data-val="small" data-i18n="cfg.size.small"></button><button type="button" class="seg-opt" data-val="normal" data-i18n="cfg.size.normal"></button><button type="button" class="seg-opt" data-val="large" data-i18n="cfg.size.large"></button></div></div>
-      <label class="check"><input type="checkbox" data-cfg="coords"><span><span data-i18n="cfg.coords"></span><small data-i18n="cfg.coordsHint"></small></span></label>
-      <label class="check"><input type="checkbox" data-cfg="lastMove"><span><span data-i18n="cfg.lastMove"></span></span></label>
-      <label class="check"><input type="checkbox" data-cfg="menuBg"><span><span data-i18n="cfg.menuBg"></span><small data-i18n="cfg.menuBgHint"></small></span></label>
-      <label class="check"><input type="checkbox" data-cfg="anim"><span><span data-i18n="cfg.anim"></span><small data-i18n="cfg.animHint"></small></span></label>
-      <div class="field"><span class="lbl" data-i18n="cfg.captureFx"></span>
-        <div class="seg" data-cfg="captureFx" role="group"><button type="button" class="seg-opt" data-val="shatter" data-i18n="cfg.fx.shatter"></button><button type="button" class="seg-opt" data-val="fade" data-i18n="cfg.fx.fade"></button><button type="button" class="seg-opt" data-val="none" data-i18n="cfg.fx.none"></button></div>
-        <p class="hint" data-i18n="cfg.captureFxHint"></p></div>
-    </section>
-    <div class="btns"><button class="btn primary" id="btnCustomizeBack" data-i18n="menu.back"></button></div>
+  <div class="cz-wrap">
+    <nav class="cz-nav" aria-label="Secciones">
+      <button type="button" class="cz-nav-b on" aria-current="page"><svg class="cz-ic" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.2 0 1.7-.9 1.7-1.7 0-.5-.3-.9-.5-1.3-.3-.5-.1-1.2.8-1.2H16.5a4.5 4.5 0 0 0 4.5-4.5C21 6.9 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.1" fill="currentColor"/><circle cx="10.5" cy="7" r="1.1" fill="currentColor"/><circle cx="15" cy="7.5" r="1.1" fill="currentColor"/></svg><span data-i18n="cz.title"></span></button>
+      <button type="button" class="cz-nav-b" id="czGoCfg"><svg class="cz-ic" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span data-i18n="cfg.title"></span></button>
+      <button type="button" class="cz-nav-b" id="czGoRules"><svg class="cz-ic" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5.5C4.5 4 8 4 12 6c4-2 7.5-2 10-.5V19c-2.5-1.5-6-1.5-10 .5-4-2-7.5-2-10-.5z"/><path d="M12 6v13.5"/></svg><span data-i18n="menu.rules"></span></button>
+      <button type="button" class="cz-nav-b" id="czGoHelp"><svg class="cz-ic" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.2a3 3 0 1 1 4.3 2.7c-.9.5-1.5 1.1-1.5 2.1"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg><span data-i18n="menu.tutorial"></span></button>
+    </nav>
+    <div class="screen-body settings cz-main">
+      <h2 class="cz-h"><svg class="cz-hi" viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.2 0 1.7-.9 1.7-1.7 0-.5-.3-.9-.5-1.3-.3-.5-.1-1.2.8-1.2H16.5a4.5 4.5 0 0 0 4.5-4.5C21 6.9 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.1" fill="currentColor"/><circle cx="10.5" cy="7" r="1.1" fill="currentColor"/><circle cx="15" cy="7.5" r="1.1" fill="currentColor"/></svg><span data-i18n="cz.title"></span></h2>
+      <p class="sub" data-i18n="cz.sub"></p>
+      <section class="cz-panel" id="tab-graphics">
+        <div class="cz-card">
+          <h3 class="cz-t"><svg class="cz-ic" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><path d="M3.5 9.2h17M3.5 14.8h17M9.2 3.5v17M14.8 3.5v17"/></svg><span data-i18n="cfg.theme"></span></h3>
+          <div class="themes" id="themePicker" role="group"></div>
+          <div class="field" id="gemField" hidden><span class="lbl" data-i18n="cfg.gems"></span>
+            <div class="gem-row"><span class="gem-who" data-i18n="player.1"></span><div class="gem-picker" id="gemPicker1" role="group"></div></div>
+            <div class="gem-row"><span class="gem-who" data-i18n="player.2"></span><div class="gem-picker" id="gemPicker2" role="group"></div></div>
+            <p class="hint" data-i18n="cfg.gemsHint"></p></div>
+        </div>
+        <div class="cz-card">
+          <h3 class="cz-t"><svg class="cz-ic" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="12" r="4.5"/><circle cx="16.5" cy="12" r="4.5" fill="currentColor" fill-opacity=".25"/></svg><span data-i18n="cfg.stoneSize"></span></h3>
+          <div class="seg" data-cfg="stoneSize" role="group">
+            <button type="button" class="seg-opt" data-val="small"><svg class="cz-si" viewBox="0 0 28 20" width="28" height="20" aria-hidden="true"><circle cx="9" cy="10" r="4.5" fill="currentColor" opacity=".8"/><circle cx="19" cy="10" r="4.5" fill="currentColor" opacity=".45"/></svg><span data-i18n="cfg.size.small"></span></button>
+            <button type="button" class="seg-opt" data-val="normal"><svg class="cz-si" viewBox="0 0 28 20" width="28" height="20" aria-hidden="true"><circle cx="8.5" cy="10" r="6.5" fill="currentColor" opacity=".8"/><circle cx="19.5" cy="10" r="6.5" fill="currentColor" opacity=".45"/></svg><span data-i18n="cfg.size.normal"></span></button>
+            <button type="button" class="seg-opt" data-val="large"><svg class="cz-si" viewBox="0 0 28 20" width="28" height="20" aria-hidden="true"><circle cx="8" cy="10" r="8" fill="currentColor" opacity=".8"/><circle cx="20" cy="10" r="8" fill="currentColor" opacity=".45"/></svg><span data-i18n="cfg.size.large"></span></button>
+          </div>
+          <div class="cz-rows">
+            <label class="check cz-row"><input type="checkbox" data-cfg="coords"><svg class="cz-ic" viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="3"/><text x="12" y="15.2" font-size="8.5" text-anchor="middle" fill="currentColor" stroke="none" font-weight="700" font-family="sans-serif">A1</text></svg><span><span data-i18n="cfg.coords"></span><small data-i18n="cfg.coordsHint"></small></span></label>
+            <label class="check cz-row"><input type="checkbox" data-cfg="lastMove"><svg class="cz-ic" viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l14 7.5-6.2 1.8L10.5 19z"/></svg><span><span data-i18n="cfg.lastMove"></span></span></label>
+            <label class="check cz-row"><input type="checkbox" data-cfg="menuBg"><svg class="cz-ic" viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><path d="M3.5 9.2h17M3.5 14.8h17M9.2 3.5v17M14.8 3.5v17"/></svg><span><span data-i18n="cfg.menuBg"></span><small data-i18n="cfg.menuBgHint"></small></span></label>
+            <label class="check cz-row"><input type="checkbox" data-cfg="anim"><svg class="cz-ic" viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 16v4M17 18h4"/></svg><span><span data-i18n="cfg.anim"></span><small data-i18n="cfg.animHint"></small></span></label>
+          </div>
+        </div>
+        <div class="cz-card">
+          <h3 class="cz-t"><svg class="cz-ic" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l1.6-2.5h6.8L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.6"/></svg><span data-i18n="cfg.captureFx"></span></h3>
+          <div class="seg" data-cfg="captureFx" role="group">
+            <button type="button" class="seg-opt" data-val="shatter"><svg class="cz-si" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5v5M12 16.5v5M2.5 12h5M16.5 12h5M5.3 5.3l3.5 3.5M15.2 15.2l3.5 3.5M18.7 5.3l-3.5 3.5M8.8 15.2l-3.5 3.5"/></svg><span data-i18n="cfg.fx.shatter"></span></button>
+            <button type="button" class="seg-opt" data-val="fade"><svg class="cz-si" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5" stroke-dasharray="2.2 3"/><circle cx="12" cy="12" r="3.5" fill="currentColor" fill-opacity=".35"/></svg><span data-i18n="cfg.fx.fade"></span></button>
+            <button type="button" class="seg-opt" data-val="none"><svg class="cz-si" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></svg><span data-i18n="cfg.fx.none"></span></button>
+          </div>
+          <p class="hint cz-info" data-i18n="cfg.captureFxHint"></p>
+        </div>
+      </section>
+      <div class="btns"><button class="btn primary" id="btnCustomizeBack" data-i18n="menu.back"></button></div>
+    </div>
   </div>
 </div>
 
@@ -6684,7 +6775,8 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
     try {
       ctx = new AC();
       master = ctx.createGain(); master.connect(ctx.destination); applyVolume();
-      ctx.onstatechange = function () { stats.state = ctx && ctx.state; };                   // al enchufar/desenchufar auriculares el celular lo pasa a «suspended» o «interrupted»
+      ctx.onstatechange = function () { stats.state = ctx && ctx.state; };
+      try { ctx.addEventListener('sinkchange', function () { setTimeout(rebuild, 300); }); } catch (e2) {}                   // al enchufar/desenchufar auriculares el celular lo pasa a «suspended» o «interrupted»
     } catch (e) { ctx = null; }
     if (ctx) Object.keys(SAMPLE_GAIN).forEach(loadSample);              // las muestras se decodifican de entrada, no en la primera jugada
     return ctx;
@@ -6696,6 +6788,7 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
   /* Auriculares: al cambiar la salida de audio (enchufar un cable, conectar Bluetooth) algunos navegadores dejan el contexto de audio en
    * «suspended»/«interrupted» o conectado a la salida vieja y no suena nada. Se reanuda en cada toque y, si cambió el dispositivo de salida,
    * se arma un contexto nuevo (la música se vuelve a conectar sola). */
+  function rerouteDefault() { try { if (ctx && ctx.setSinkId) ctx.setSinkId('').catch(function () {}); } catch (e) {} }   // Chrome: vuelve a la salida predeterminada actual (los auriculares recién enchufados)
   var rebuildAt = 0;
   function rebuild() {
     if (!ctx || Date.now() - rebuildAt < 1500) return; rebuildAt = Date.now();
@@ -6709,8 +6802,14 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
     document.addEventListener('visibilitychange', function () { if (!document.hidden && ctx && ctx.state !== 'running') { try { ctx.resume(); } catch (e) {} } });
     try {
       var md = navigator.mediaDevices, dt = 0;
-      if (md && md.addEventListener) md.addEventListener('devicechange', function () { clearTimeout(dt); dt = setTimeout(rebuild, 600); });
+      if (md && md.addEventListener) md.addEventListener('devicechange', function () { clearTimeout(dt); dt = setTimeout(function () { rerouteDefault(); rebuild(); }, 600); });
     } catch (e) {}
+    /* Compu: si el contexto «corre» pero el reloj de audio no avanza (quedó pegado a una salida que ya no existe), se rearma. */
+    var lastT = -1, stuck = 0;
+    setInterval(function () {
+      if (!ctx || document.hidden || ctx.state !== 'running') { stuck = 0; lastT = -1; return; }
+      if (ctx.currentTime === lastT) { if (++stuck >= 2) { stuck = 0; lastT = -1; rebuild(); } } else { stuck = 0; lastT = ctx.currentTime; }
+    }, 2000);
   }
 
   // Un tono: frecuencia que baja/sube, con volumen que arranca fuerte y se apaga.
@@ -12115,6 +12214,9 @@ window.NEON_BREAK = {
   $('btnCustomize').addEventListener('click', function () { openCustomize('menuOverlay'); });
   $('btnToCustom').addEventListener('click', function () { openCustomize('settingsOverlay'); });
   $('btnCustomizeBack').addEventListener('click', function () { open(czFrom); });
+  $('czGoCfg').addEventListener('click', function () { openCfg(false); });
+  $('czGoRules').addEventListener('click', function () { open('rulesOverlay'); });
+  $('czGoHelp').addEventListener('click', function () { tutStart(); });
   $('btnSettingsBack').addEventListener('click', function () { if (cfgFromGame) { cfgFromGame = false; closeAll(); aiMaybeMove(); if (state && isOver()) updateResultBtn(); } else open('menuOverlay'); });
   $('btnCfgReset').addEventListener('click', function () {
     ask(t('cfg.resetConfirm'), t('dlg.reset'), function () {
