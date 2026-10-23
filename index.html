@@ -6044,6 +6044,9 @@ window.GALAXY_IMG = 'data:image/webp;base64,UklGRipUAgBXRUJQVlA4IB5UAgAQygedASpM
     'tno.call': '¡{name} ya está listo para jugar! Tocá Jugar en el torneo.',
     'tno.callGo': 'Ir al torneo',
     'tno.rival': 'Tu rival',
+    'tno.fmt.title': 'Formato del torneo',
+    'tno.fmt.note': 'Todavía no se jugó ninguna partida: al guardar se rearma el cuadro con los mismos participantes.',
+    'tno.cfgChanged': 'El organizador cambió el formato: {fmt}, cada duelo al mejor de {b}, mínimo {n} duelos.',
     'tno.rules': 'Reglas de las partidas',
     'tno.rule.tourn': 'regla de torneo',
     'tno.rule.exact': 'cinco exactas',
@@ -6169,6 +6172,9 @@ window.GALAXY_IMG = 'data:image/webp;base64,UklGRipUAgBXRUJQVlA4IB5UAgAQygedASpM
     'tno.call': '{name} is ready to play! Tap Play in the tournament.',
     'tno.callGo': 'Go to tournament',
     'tno.rival': 'Your opponent',
+    'tno.fmt.title': 'Tournament format',
+    'tno.fmt.note': 'No game has been played yet: saving rebuilds the bracket with the same participants.',
+    'tno.cfgChanged': 'The organizer changed the format: {fmt}, each duel best of {b}, minimum {n} duels.',
     'tno.rules': 'Game rules',
     'tno.rule.tourn': 'tournament rule',
     'tno.rule.exact': 'exact five',
@@ -12387,6 +12393,7 @@ window.NEON_BREAK = {
       case 'tview': { tno.code = m.code; tno.token = ''; tno.view = true; tno.intent = null; if (!$('tnoOverlay').classList.contains('open') && !online.active) tnoOpen(); break; }
       case 'tchat': if (m.m && !tno.chat.some(function (x) { return x.n === m.m.n; })) { tno.chat.push(m.m); if (tno.chat.length > 60) tno.chat.shift(); tnoRenderChat(); } break;
       case 'tcall': tnoCall(m); break;
+      case 'tcfg': tnoCall({ text: t('tno.cfgChanged', { fmt: tnFmt(m.cfg.format), b: m.cfg.bestOf, n: m.cfg.minDuels }) }); break;
       case 'tgame': tnoCall({ text: t('tno.rulesChanged', { rules: tnoRules(m.game) }) }); break;
       case 'tsnap': tno.snap = m; tno.chat = m.chat || []; tnoRender(); tnoRenderChat(); tnoCheckGo(m); tnoRenderLive(); break;
       case 'terror': {
@@ -12497,24 +12504,38 @@ window.NEON_BREAK = {
     var box = $('tnoRulesBox'); if (!box) return;
     var live = m.status === 'open' || m.status === 'running'; box.hidden = !m.game;
     if (!m.game) return;
-    var key = JSON.stringify(m.game) + '|' + org + '|' + live + '|' + t('tno.rules');
+    var key = JSON.stringify(m.game) + JSON.stringify(m.cfg) + (m.S ? m.S.rounds.reduce(function (a, r) { return a + r.duels.reduce(function (b, d) { return b + ((d.games && d.games.length) || 0); }, 0); }, 0) + '/' + m.S.rounds.length : '') + (m.playing || []).length + '|' + org + '|' + live + '|' + t('tno.rules');
     if (box.dataset.k === key) return;                                                                 // sin cambios: no se pisa lo que el organizador esté editando
     box.dataset.k = key; var wasOpen = box.open; box.innerHTML = '';
     var g = m.game, mode = g.bullet ? 'bullet' : g.blitz ? 'blitz' : g.variant || 'classic';
     box.appendChild(el('summary', '', t('tno.rules') + ' · ' + tnoRules(g) + (g.variant === 'gomoku' ? '' : (g.tournamentRule ? ' · ' + t('tno.rule.tourn') : '') + (g.exactFive ? ' · ' + t('tno.rule.exact') : ''))));
     if (!(org && live)) { box.open = false; return; }
+    var fm = null;                                                                                         // formato: antes de empezar, o ya empezado pero sin partidas jugadas
+    var noGames = m.status === 'running' && m.S && !(m.playing && m.playing.length) && m.S.rounds.every(function (r) { return r.duels.every(function (d) { return d.bye || !(d.games && d.games.length); }); });
+    if (m.status === 'open' || noGames) fm = { f: el('select'), b: el('select'), n: el('input'), c: el('select') };
     var form = el('div', 'tno-rules-form'), sel = el('select'), size = el('select'), tr = el('input'), ex = el('input'), tm = el('input');
     ['classic', 'pairs3', 'triples', 'gomoku', 'blitz', 'bullet'].forEach(function (k) { var o = el('option', '', t('mode.' + k)); o.value = k; if (k === mode) o.selected = true; sel.appendChild(o); });
     [13, 19].forEach(function (n) { var o = el('option', '', n + '×' + n); o.value = n; if ((g.size || 13) === n) o.selected = true; size.appendChild(o); });
     function row(lbl, ctrl, isCheck) { var l = el('label', isCheck ? 'check' : 'field'); if (isCheck) { l.appendChild(ctrl); l.appendChild(el('span', '', lbl)); } else { l.appendChild(el('span', '', lbl)); l.appendChild(ctrl); } form.appendChild(l); }
     tr.type = ex.type = tm.type = 'checkbox'; tr.checked = !!g.tournamentRule; ex.checked = !!g.exactFive; tm.checked = g.timer !== false;
     row(t('tno.rule.mode'), sel); row(t('tno.rule.size'), size); row(t('menu.tournamentRule'), tr, true); row(t('menu.exactFive'), ex, true); row(t('menu.timer'), tm, true);
+    if (fm) {
+      PT.FORMATS.forEach(function (k) { var o = el('option', '', tnFmt(k)); o.value = k; if (k === m.cfg.format) o.selected = true; fm.f.appendChild(o); });
+      PT.BEST_OF.forEach(function (k) { var o = el('option', '', tnBestLabel(k)); o.value = k; if (k === m.cfg.bestOf) o.selected = true; fm.b.appendChild(o); });
+      [2, 4, 8, 16].forEach(function (k) { var o = el('option', '', String(k)); o.value = k; if (k === m.cfg.cut) o.selected = true; fm.c.appendChild(o); });
+      fm.n.type = 'number'; fm.n.min = 1; fm.n.max = 63; fm.n.value = m.cfg.minDuels; fm.n.inputMode = 'numeric';
+      var head = el('div', 'tno-rules-form'), lab = function (txt, ctl) { var l = el('label', 'field'); l.appendChild(el('span', '', txt)); l.appendChild(ctl); return l; };
+      head.appendChild(el('h4', 'tn-h', t('tno.fmt.title'))); head.appendChild(lab(t('tn.format'), fm.f)); head.appendChild(lab(t('tn.bestOf'), fm.b)); head.appendChild(lab(t('tn.min'), fm.n));
+      var cl = lab(t('tn.cut'), fm.c); head.appendChild(cl); var upd = function () { cl.hidden = fm.f.value.indexOf('cut') < 0; }; fm.f.addEventListener('change', upd); upd();
+      head.appendChild(el('h4', 'tn-h', t('tno.rules'))); box.appendChild(head);
+    }
     var sv = el('button', 'btn primary', t('tno.rules.save')); sv.type = 'button';
     sv.addEventListener('click', function () {
+      if (fm) { var nc = { format: fm.f.value, bestOf: +fm.b.value, minDuels: +fm.n.value, cut: +fm.c.value }; if (nc.format !== m.cfg.format || nc.bestOf !== m.cfg.bestOf || nc.minDuels !== m.cfg.minDuels || (nc.format.indexOf('cut') >= 0 && nc.cut !== m.cfg.cut)) tnoSend({ t: 'tcfg', cfg: nc }); }
       var k = sel.value; tnoSend({ t: 'tgame', game: { variant: (k === 'blitz' || k === 'bullet') ? 'classic' : k, blitz: k === 'blitz', bullet: k === 'bullet', tournamentRule: tr.checked, exactFive: ex.checked, size: +size.value, timer: tm.checked } });
       box.open = false; sfx('place');
     });
-    form.appendChild(sv); if (m.status === 'running') form.appendChild(el('p', 'hint', t('tno.rules.note'))); box.appendChild(form); box.open = wasOpen;
+    form.appendChild(sv); if (m.status === 'running') form.appendChild(el('p', 'hint', t(fm ? 'tno.fmt.note' : 'tno.rules.note'))); box.appendChild(form); box.open = wasOpen;
   }
   function tnoRender() {
     if (!$('tnoOverlay').classList.contains('open')) return;
