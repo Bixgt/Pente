@@ -753,6 +753,14 @@ html[data-theme="papel"] #menuBg { opacity: .9; }
 #menuSea { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
 #menuSea[hidden] { display: none; }
 #menuSea.glow { mix-blend-mode: screen; }
+/* Reglas del torneo (editables por el organizador) */
+.tno-rules { margin: 8px 0; padding: 8px 12px; border: 1px solid var(--line, #444); border-radius: 12px; background: var(--panel, transparent); }
+.tno-rules[hidden] { display: none; }
+.tno-rules summary { cursor: pointer; font-weight: 600; font-size: .92rem; }
+.tno-rules-form { display: grid; gap: 8px; margin-top: 10px; }
+.tno-rules-form .field { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.tno-rules-form select { padding: 6px 8px; border-radius: 8px; background: var(--panel-2, #222); color: inherit; border: 1px solid var(--line, #444); }
+.tno-rules-form .check { display: flex; align-items: center; gap: 8px; }
 /* Aviso de torneo: el rival ya tocó «Jugar» */
 .tno-call { position: fixed; z-index: 90; left: 50%; top: max(10px, env(safe-area-inset-top)); transform: translateX(-50%); width: min(94vw, 460px); display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 14px; background: var(--panel, #222); border: 2px solid var(--accent, #ff9a2e); box-shadow: 0 10px 30px rgba(0,0,0,.5); color: var(--text, #fff); font-weight: 600; animation: tnoCallIn .35s ease-out; }
 .tno-call[hidden] { display: none; }
@@ -1164,6 +1172,7 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
     <h2 id="tnoTitle"></h2>
     <p class="hint" id="tnoInfo"></p>
     <div class="tno-code" id="tnoCodeBox"><span class="lbl" data-i18n="tno.code"></span><b id="tnoCode"></b><button type="button" class="btn small" id="tnoCopy" data-i18n="tno.copy"></button><button type="button" class="btn small" id="tnoLink" data-i18n="tno.copyLink"></button></div>
+    <details id="tnoRulesBox" class="tno-rules" hidden></details>
     <div id="tnoChamp"></div>
     <div id="tnoMe" class="tno-me"></div>
     <div id="tnoLobby">
@@ -6035,6 +6044,14 @@ window.GALAXY_IMG = 'data:image/webp;base64,UklGRipUAgBXRUJQVlA4IB5UAgAQygedASpM
     'tno.call': '¡{name} ya está listo para jugar! Tocá Jugar en el torneo.',
     'tno.callGo': 'Ir al torneo',
     'tno.rival': 'Tu rival',
+    'tno.rules': 'Reglas de las partidas',
+    'tno.rule.tourn': 'regla de torneo',
+    'tno.rule.exact': 'cinco exactas',
+    'tno.rule.mode': 'Modo',
+    'tno.rule.size': 'Tablero',
+    'tno.rules.save': 'Guardar reglas',
+    'tno.rules.note': 'Rigen para las partidas que todavía no empezaron; las que están en juego siguen como arrancaron.',
+    'tno.rulesChanged': 'El organizador cambió las reglas: {rules}.',
     'tno.rivalReady': '{name} ya está listo para jugar.',
     'tno.cancel': 'Cancelar',
     'tno.opensYou': 'La abrís vos (movés primero).',
@@ -6152,6 +6169,14 @@ window.GALAXY_IMG = 'data:image/webp;base64,UklGRipUAgBXRUJQVlA4IB5UAgAQygedASpM
     'tno.call': '{name} is ready to play! Tap Play in the tournament.',
     'tno.callGo': 'Go to tournament',
     'tno.rival': 'Your opponent',
+    'tno.rules': 'Game rules',
+    'tno.rule.tourn': 'tournament rule',
+    'tno.rule.exact': 'exact five',
+    'tno.rule.mode': 'Mode',
+    'tno.rule.size': 'Board',
+    'tno.rules.save': 'Save rules',
+    'tno.rules.note': 'They apply to games that have not started yet; games in progress keep their rules.',
+    'tno.rulesChanged': 'The organizer changed the rules: {rules}.',
     'tno.rivalReady': '{name} is ready to play.',
     'tno.cancel': 'Cancel',
     'tno.opensYou': 'You open it (you move first).',
@@ -12344,7 +12369,7 @@ window.NEON_BREAK = {
   /* El rival tocó «Jugar»: aviso en cualquier pantalla (banner + sonido + vibración + notificación si la pestaña está oculta). */
   var tnoCallTimer = 0;
   function tnoCall(m) {
-    var name = String(m.from || '').slice(0, 24) || t('tno.rival'), msg = t('tno.call', { name: name });
+    var name = String(m.from || '').slice(0, 24) || t('tno.rival'), msg = m.text || t('tno.call', { name: name });
     sfx('levelup'); buzz([40, 60, 40]);
     try { if (document.hidden && window.Notification && Notification.permission === 'granted') new Notification('Pente', { body: msg, tag: 'pente-tcall' }); } catch (e) { /* sin notificaciones */ }
     if ($('tnoOverlay').classList.contains('open')) return;                  // con el torneo abierto ya se ve la tarjeta «está listo»
@@ -12362,6 +12387,7 @@ window.NEON_BREAK = {
       case 'tview': { tno.code = m.code; tno.token = ''; tno.view = true; tno.intent = null; if (!$('tnoOverlay').classList.contains('open') && !online.active) tnoOpen(); break; }
       case 'tchat': if (m.m && !tno.chat.some(function (x) { return x.n === m.m.n; })) { tno.chat.push(m.m); if (tno.chat.length > 60) tno.chat.shift(); tnoRenderChat(); } break;
       case 'tcall': tnoCall(m); break;
+      case 'tgame': tnoCall({ text: t('tno.rulesChanged', { rules: tnoRules(m.game) }) }); break;
       case 'tsnap': tno.snap = m; tno.chat = m.chat || []; tnoRender(); tnoRenderChat(); tnoCheckGo(m); tnoRenderLive(); break;
       case 'terror': {
         if ((m.code === 'BAD_TOKEN' || m.code === 'TN_NOT_FOUND') && (tno.snap || tno.token)) { tnoReset(); tnoNote(t(m.code === 'TN_NOT_FOUND' ? 'tno.closed.gone' : 'tno.err.BAD_TOKEN'), true); if ($('tnoOverlay').classList.contains('open')) { tnRenderList(); tnoRenderLive(); open('tnOverlay'); } break; }
@@ -12466,6 +12492,30 @@ window.NEON_BREAK = {
     [col('silver', '🥈', p.silver, 2), col('gold', '🥇', p.gold, 1), col('bronze', '🥉', p.bronze, 3)].forEach(function (c) { if (c) box.appendChild(c); });
     return box;
   }
+  /* Reglas de las partidas: todos las ven; el organizador las puede cambiar con el torneo creado (antes o durante). */
+  function tnoRenderRules(m, org) {
+    var box = $('tnoRulesBox'); if (!box) return;
+    var live = m.status === 'open' || m.status === 'running'; box.hidden = !m.game;
+    if (!m.game) return;
+    var key = JSON.stringify(m.game) + '|' + org + '|' + live + '|' + t('tno.rules');
+    if (box.dataset.k === key) return;                                                                 // sin cambios: no se pisa lo que el organizador esté editando
+    box.dataset.k = key; var wasOpen = box.open; box.innerHTML = '';
+    var g = m.game, mode = g.bullet ? 'bullet' : g.blitz ? 'blitz' : g.variant || 'classic';
+    box.appendChild(el('summary', '', t('tno.rules') + ' · ' + tnoRules(g) + (g.variant === 'gomoku' ? '' : (g.tournamentRule ? ' · ' + t('tno.rule.tourn') : '') + (g.exactFive ? ' · ' + t('tno.rule.exact') : ''))));
+    if (!(org && live)) { box.open = false; return; }
+    var form = el('div', 'tno-rules-form'), sel = el('select'), size = el('select'), tr = el('input'), ex = el('input'), tm = el('input');
+    ['classic', 'pairs3', 'triples', 'gomoku', 'blitz', 'bullet'].forEach(function (k) { var o = el('option', '', t('mode.' + k)); o.value = k; if (k === mode) o.selected = true; sel.appendChild(o); });
+    [13, 19].forEach(function (n) { var o = el('option', '', n + '×' + n); o.value = n; if ((g.size || 13) === n) o.selected = true; size.appendChild(o); });
+    function row(lbl, ctrl, isCheck) { var l = el('label', isCheck ? 'check' : 'field'); if (isCheck) { l.appendChild(ctrl); l.appendChild(el('span', '', lbl)); } else { l.appendChild(el('span', '', lbl)); l.appendChild(ctrl); } form.appendChild(l); }
+    tr.type = ex.type = tm.type = 'checkbox'; tr.checked = !!g.tournamentRule; ex.checked = !!g.exactFive; tm.checked = g.timer !== false;
+    row(t('tno.rule.mode'), sel); row(t('tno.rule.size'), size); row(t('menu.tournamentRule'), tr, true); row(t('menu.exactFive'), ex, true); row(t('menu.timer'), tm, true);
+    var sv = el('button', 'btn primary', t('tno.rules.save')); sv.type = 'button';
+    sv.addEventListener('click', function () {
+      var k = sel.value; tnoSend({ t: 'tgame', game: { variant: (k === 'blitz' || k === 'bullet') ? 'classic' : k, blitz: k === 'blitz', bullet: k === 'bullet', tournamentRule: tr.checked, exactFive: ex.checked, size: +size.value, timer: tm.checked } });
+      box.open = false; sfx('place');
+    });
+    form.appendChild(sv); if (m.status === 'running') form.appendChild(el('p', 'hint', t('tno.rules.note'))); box.appendChild(form); box.open = wasOpen;
+  }
   function tnoRender() {
     if (!$('tnoOverlay').classList.contains('open')) return;
     var m = tno.snap, lobby = $('tnoLobby'), run = $('tnoRun'), me = $('tnoMe');
@@ -12474,6 +12524,7 @@ window.NEON_BREAK = {
     var org = !!(m.you && m.you.org), S = m.S, pid = m.you && m.you.pid, isOpen = m.status === 'open';
     $('tnoTitle').textContent = m.name;
     $('tnoInfo').textContent = t('tno.info', { format: tnFmt(m.cfg.format), b: m.cfg.bestOf, n: m.players.length }) + (tno.conn === 'reconnecting' ? ' · ' + t('tno.reconnecting') : '');
+    tnoRenderRules(m, org);
     $('tnoLeave').hidden = false; $('tnoLeave').textContent = t(org ? 'tno.close' : tno.view ? 'tno.exitView' : 'tno.leave'); $('tnoLeave').classList.toggle('danger', true);
     lobby.hidden = !isOpen; run.hidden = isOpen;
     $('tnoChamp').innerHTML = ''; if (m.status === 'finished' && S) $('tnoChamp').appendChild(tnPodiumEl(S));
