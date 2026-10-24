@@ -1215,7 +1215,7 @@ html[data-theme="glow"] #menuBg { opacity: 1; -webkit-mask-image: none; mask-ima
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v114</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v115</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -1915,7 +1915,7 @@ html[data-theme="glow"] #menuBg { opacity: 1; -webkit-mask-image: none; mask-ima
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 114;</script>
+<script>window.PENTE_VERSION = 115;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -2661,14 +2661,14 @@ window.GALAXY_GAME = {
 (function (root) {
   'use strict';
   var C = { bg: '#070B1D', violet: '#151139', cyan: '#00E5FF', fucsia: '#FF2CBF', accent: '#9A73FF' };
-  var st = { stones: [], sparks: [], crosses: [], w: 0, h: 0, dpr: 1 }, fx = null, raf = 0, on = false, lastT = 0;
+  var st = { stones: [], sparks: [], crosses: [], runners: [], w: 0, h: 0, dpr: 1, cell: 48, ox: 0, oy: 0, br: null, narrow: false }, fx = null, raf = 0, on = false, lastT = 0, prevTs = 0;
   function rng(seed) { var a = seed >>> 0; return function () { a = (a + 0x6D2B79F5) >>> 0; var t = a; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
   function rgba(hex, a) { var n = parseInt(hex.slice(1), 16); return 'rgba(' + (n >> 16) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + a + ')'; }
   function glow(g, x, y, r, col, a) { var q = g.createRadialGradient(x, y, 0, x, y, r); q.addColorStop(0, rgba(col, a)); q.addColorStop(1, rgba(col, 0)); g.fillStyle = q; g.fillRect(x - r, y - r, r * 2, r * 2); }
 
   function draw(g, w, h, br, cell, ox, oy) {
     var R = rng(2026), inBody = function (x, y, p) { return x > br.left - p && x < br.right + p && y > br.top - p && y < br.bottom + p; };
-    st.stones = []; st.sparks = []; st.crosses = []; st.w = w; st.h = h;
+    st.stones = []; st.sparks = []; st.crosses = []; st.runners = []; st.w = w; st.h = h; st.cell = cell; st.ox = ox; st.oy = oy; st.br = br; st.narrow = w < 640;
     // 1. fondo con profundidad: azul noche → violeta profundo
     var bg = g.createLinearGradient(0, 0, w * 0.35, h); bg.addColorStop(0, C.bg); bg.addColorStop(0.55, '#0c0d2b'); bg.addColorStop(1, C.violet);
     g.fillStyle = bg; g.fillRect(0, 0, w, h);
@@ -2720,7 +2720,7 @@ window.GALAXY_GAME = {
     for (var gy = gyMin; gy <= gyMax; gy++) for (var gx = gxMin; gx <= gxMax; gx++) {
       var r = R(), sxp = ox + gx * cell + .5, syp = oy + gy * cell + .5;
       if (sxp < 4 || syp < 4 || sxp > w - 4 || syp > h - 4 || inBody(sxp, syp, cell * 0.5)) continue;
-      if (r < 0.045) { var col = n++ % 2 ? C.cyan : C.fucsia; st.stones.push({ x: sxp, y: syp, col: col, ph: R() * 6.28, per: 4.5 + R() * 4 }); }
+      if (r < 0.028) { var col = n++ % 2 ? C.cyan : C.fucsia; st.stones.push({ x: sxp, y: syp, col: col, ph: R() * 6.28, per: 4.5 + R() * 4 }); }
       else if (r < 0.075) st.crosses.push({ x: sxp, y: syp, ph: R() * 6.28 });
     }
     st.crosses.forEach(function (c) {
@@ -2745,29 +2745,107 @@ window.GALAXY_GAME = {
     }
   }
 
-  /* Capa animada: solo el resplandor de las fichas, de los cruces y de las partículas. ~12 cuadros por segundo, apagada con "Animaciones" desactivado. */
+  /* Fichas neón que corren por las líneas de la grilla dejando una estela de luz (estilo "moto de luz"): doblan solas de a ratos y cuando les hacés clic. */
+  var DIRS = [[1, 0], [0, 1], [-1, 0], [0, -1]];
+  function blocked(x, y) {                                          // ¿esta intersección es una pared? (fuera de pantalla, o detrás del centro en pantallas grandes)
+    if (x < 4 || y < 4 || x > st.w - 4 || y > st.h - 4) return true;
+    if (st.narrow || !st.br) return false;
+    var b = st.br, p = 6; return x > b.left - p && x < b.right + p && y > b.top - p && y < b.bottom + p;
+  }
+  function spawnRunners() {
+    st.runners = []; var R = rng(77), c = st.cell, cand = [], gx, gy;
+    for (gy = -Math.ceil(st.oy / c); gy <= Math.ceil((st.h - st.oy) / c); gy++) for (gx = -Math.ceil(st.ox / c); gx <= Math.ceil((st.w - st.ox) / c); gx++) {
+      var x = st.ox + gx * c + .5, y = st.oy + gy * c + .5; if (!blocked(x, y)) cand.push([x, y]);
+    }
+    if (!cand.length) return;
+    var n = Math.min(st.narrow ? 3 : 4, cand.length);
+    for (var k = 0; k < n; k++) {
+      var pt = cand[(R() * cand.length) | 0], d = (R() * 4) | 0;
+      st.runners.push({ x: pt[0], y: pt[1], d: d, left: st.cell, col: k % 2 ? C.cyan : C.fucsia, pts: [{ x: pt[0], y: pt[1] }], flash: 0, spd: 70 + R() * 40, want: 0 });
+    }
+  }
+  function canGo(r, d) { var nx = r.x + DIRS[d][0] * st.cell, ny = r.y + DIRS[d][1] * st.cell; return !blocked(nx, ny); }
+  function arrive(r) {                                              // llegó a una intersección: ¿sigue derecho o dobla?
+    var opts = [], turnChance = r.want ? 1 : 0.2, side = [(r.d + 1) % 4, (r.d + 3) % 4], dir = r.d;
+    if (r.want) { var pref = r.want; r.want = 0; if (canGo(r, pref)) dir = pref; else if (canGo(r, side[0])) dir = side[0]; else if (canGo(r, side[1])) dir = side[1]; }
+    else if (Math.random() < turnChance) { side.forEach(function (d) { if (canGo(r, d)) opts.push(d); }); if (opts.length) dir = opts[(Math.random() * opts.length) | 0]; }
+    if (!canGo(r, dir)) {                                           // pared: probar los costados y, si no hay salida, dar la vuelta
+      var alt = [side[0], side[1]].filter(function (d) { return canGo(r, d); });
+      dir = alt.length ? alt[(Math.random() * alt.length) | 0] : (r.d + 2) % 4;
+    }
+    if (dir !== r.d) { r.pts.unshift({ x: r.x, y: r.y }); r.d = dir; }
+    r.left = st.cell;
+  }
+  function stepRunners(dt) {
+    st.runners.forEach(function (r) {
+      var dist = r.spd * dt;
+      while (dist > 0) {
+        var m = Math.min(dist, r.left); r.x += DIRS[r.d][0] * m; r.y += DIRS[r.d][1] * m; r.left -= m; dist -= m;
+        if (r.left <= 1e-6) { r.x = Math.round((r.x - st.ox - .5) / st.cell) * st.cell + st.ox + .5; r.y = Math.round((r.y - st.oy - .5) / st.cell) * st.cell + st.oy + .5; arrive(r); }
+      }
+      r.pts[0] = { x: r.pts[0].x, y: r.pts[0].y };
+      if (r.flash > 0) r.flash = Math.max(0, r.flash - dt);
+      var keep = st.cell * 7, acc = 0, i, last = { x: r.x, y: r.y };            // se recorta lo que ya quedó más lejos que la estela
+      for (i = 0; i < r.pts.length; i++) { acc += Math.abs(r.pts[i].x - last.x) + Math.abs(r.pts[i].y - last.y); last = r.pts[i]; if (acc > keep) { r.pts.length = i + 1; break; } }
+    });
+  }
+  function drawRunner(g, r) {
+    var Lt = st.cell * 6.5, path = [{ x: r.x, y: r.y }].concat(r.pts), acc = 0, i;
+    g.lineCap = 'round'; g.lineJoin = 'round';
+    for (i = 0; i < path.length - 1 && acc < Lt; i++) {
+      var a = path[i], b = path[i + 1], len = Math.abs(a.x - b.x) + Math.abs(a.y - b.y); if (!len) continue;
+      var k0 = 1 - acc / Lt, k1 = Math.max(0, 1 - (acc + len) / Lt), q = g.createLinearGradient(a.x, a.y, b.x, b.y);
+      q.addColorStop(0, rgba(r.col, 0.95 * k0)); q.addColorStop(1, rgba(r.col, 0.95 * k1));
+      g.strokeStyle = q; g.lineWidth = 2.2; g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke();
+      var q2 = g.createLinearGradient(a.x, a.y, b.x, b.y); q2.addColorStop(0, rgba(r.col, 0.28 * k0)); q2.addColorStop(1, rgba(r.col, 0.28 * k1));
+      g.strokeStyle = q2; g.lineWidth = 7; g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke();
+      acc += len;
+    }
+    var sr = st.cell * 0.3, fl = 1 + r.flash * 1.4;
+    glow(g, r.x, r.y, sr * 2.8 * fl, r.col, 0.5);
+    g.globalCompositeOperation = 'source-over';
+    g.fillStyle = '#04071a'; g.beginPath(); g.arc(r.x, r.y, sr * 0.8, 0, 6.2832); g.fill();
+    g.strokeStyle = rgba(r.col, 1); g.lineWidth = 2.2; g.beginPath(); g.arc(r.x, r.y, sr, 0, 6.2832); g.stroke();
+    g.strokeStyle = rgba(r.col, 0.65); g.lineWidth = 1.1; g.beginPath(); g.arc(r.x, r.y, sr * 0.7, 0, 6.2832); g.stroke();
+    g.globalCompositeOperation = 'screen';
+  }
+  /* Capa animada: resplandor de fichas/cruces/partículas + las fichas que corren. ~30 cuadros por segundo; apagada con "Animaciones" desactivado. */
   function tick(ts) {
     raf = 0; if (!on || !fx) return;
-    if (ts - lastT >= 80) {
-      lastT = ts; var g = fx.getContext('2d'), tt = ts / 1000;
+    if (ts - lastT >= 33) {
+      var dt = Math.min(0.08, prevTs ? (ts - prevTs) / 1000 : 0.033); prevTs = ts; lastT = ts;
+      var g = fx.getContext('2d'), tt = ts / 1000;
+      stepRunners(dt);
       g.setTransform(st.dpr, 0, 0, st.dpr, 0, 0); g.clearRect(0, 0, st.w, st.h); g.globalCompositeOperation = 'screen';
       st.stones.forEach(function (s) { var k = 0.5 + 0.5 * Math.sin(tt * 6.2832 / s.per + s.ph); glow(g, s.x, s.y, 30, s.col, 0.1 + 0.3 * k); });
       st.crosses.forEach(function (c) { var k = 0.5 + 0.5 * Math.sin(tt * 6.2832 / 6 + c.ph); glow(g, c.x, c.y, 16, C.fucsia, 0.1 + 0.4 * k); });
       st.sparks.forEach(function (s) { var k = Math.pow(0.5 + 0.5 * Math.sin(tt * 6.2832 / s.per + s.ph), 3); if (k > 0.05) { g.fillStyle = rgba(s.col, 0.75 * k); g.beginPath(); g.arc(s.x, s.y, s.r + 0.9, 0, 6.2832); g.fill(); } });
+      st.runners.forEach(function (r) { drawRunner(g, r); });
       g.globalCompositeOperation = 'source-over';
     }
     raf = requestAnimationFrame(tick);
   }
+  /* Clic en el fondo (no en un botón): la ficha más cercana dobla hacia ese lado en la próxima intersección. */
+  function onDown(e) {
+    if (!on || !st.runners.length) return;
+    var tg = e.target; if (!tg || !tg.closest || !tg.closest('#menuOverlay') || tg.closest('button, a, input, select, textarea, label, summary, [role=button], #gxShip, #gxShipHit, #menuTip')) return;
+    var best = null, bd = 1e9; st.runners.forEach(function (r) { var d = Math.hypot(r.x - e.clientX, r.y - e.clientY); if (d < bd) { bd = d; best = r; } });
+    if (!best) return;
+    var side = [(best.d + 1) % 4, (best.d + 3) % 4], nx = best.x + DIRS[best.d][0] * best.left, ny = best.y + DIRS[best.d][1] * best.left;      // hacia dónde estará en la próxima intersección
+    var pick = side.reduce(function (a, d) { var da = Math.hypot(nx + DIRS[a][0] * st.cell - e.clientX, ny + DIRS[a][1] * st.cell - e.clientY), dd = Math.hypot(nx + DIRS[d][0] * st.cell - e.clientX, ny + DIRS[d][1] * st.cell - e.clientY); return dd < da ? d : a; }, side[0]);
+    best.want = pick; best.flash = 0.5;
+  }
+  document.addEventListener('pointerdown', onDown, true);
   function ensure() {
     if (fx) return true; var base = document.getElementById('menuBg'); if (!base || !base.parentNode) return false;
     fx = document.createElement('canvas'); fx.id = 'menuFx'; fx.setAttribute('aria-hidden', 'true'); base.parentNode.insertBefore(fx, base.nextSibling); return true;
   }
   function fit(dpr) { st.dpr = dpr; if (fx) { fx.width = Math.round(st.w * dpr); fx.height = Math.round(st.h * dpr); } }
   function sync(want) {
-    on = !!want && st.stones.length + st.sparks.length > 0; if (on && !ensure()) on = false;
+    on = !!want && st.stones.length + st.sparks.length + st.crosses.length > 0; if (on && !ensure()) on = false;
     if (!on) { if (raf) { cancelAnimationFrame(raf); raf = 0; } if (fx) { fx.hidden = true; } return; }
     var base = document.getElementById('menuBg'); if (base) fit(Math.min(2, window.devicePixelRatio || 1));
-    fx.hidden = false; if (!raf) raf = requestAnimationFrame(tick);
+    fx.hidden = false; if (!st.runners.length) spawnRunners(); prevTs = 0; if (!raf) raf = requestAnimationFrame(tick);
   }
   function hide() { if (fx) fx.hidden = true; if (raf) { cancelAnimationFrame(raf); raf = 0; } on = false; }
   document.addEventListener('visibilitychange', function () { if (document.hidden) { if (raf) { cancelAnimationFrame(raf); raf = 0; } } else if (on && !raf) raf = requestAnimationFrame(tick); });
