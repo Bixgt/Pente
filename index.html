@@ -783,6 +783,15 @@ html[data-theme="playa"] #menuOverlay .xpmini .xp-lv { color: #3a2812; }
 html[data-theme="playa"] #menuOverlay .xpbar i { background: #2fb0bf; }
 html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
 
+/* Menú en Jardín: fondo con el arte de Ro (enredaderas, rosas, piedras), título crema y botones verdes translúcidos */
+html[data-theme="jardin"] #menuBg { opacity: 1; -webkit-mask-image: none; mask-image: none; }
+html[data-theme="jardin"] #menuOverlay .brand h1 { font-weight: 900; background: linear-gradient(180deg, #fffdf2 20%, #eadfc2 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; -webkit-text-stroke: 2px rgba(255,250,232,.9); filter: drop-shadow(0 4px 0 rgba(120,100,60,.55)) drop-shadow(0 8px 14px rgba(0,0,0,.45)); }
+html[data-theme="jardin"] #menuOverlay .brand .sub { color: #d6f5b0; font-weight: 600; text-shadow: 0 1px 6px rgba(0,0,0,.6); }
+html[data-theme="jardin"] #menuOverlay .brand .ver { color: #b8d9a0; text-shadow: 0 1px 4px rgba(0,0,0,.6); }
+html[data-theme="jardin"] #menuOverlay .btns .btn:not(.primary) { background: rgba(14,48,28,.78); border: 1.5px solid #3f7a4a; box-shadow: 0 3px 10px rgba(0,0,0,.35); color: #e8f5dc; }
+html[data-theme="jardin"] #menuOverlay .menu-top .btn, html[data-theme="jardin"] #menuOverlay .menu-top .icon-btn { background: rgba(14,48,28,.8); border-color: #4c9a58; }
+html[data-theme="jardin"] #menuOverlay .chip, html[data-theme="jardin"] #menuOverlay .xpmini { background: rgba(14,48,28,.75); border-radius: 999px; padding: 6px 12px; text-shadow: 0 1px 4px rgba(0,0,0,.5); }
+
 /* Chat privado */
 .dm-wrap { display: flex; flex-direction: column; }
 .dm-notice { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; margin: 0 0 10px; }
@@ -1224,7 +1233,7 @@ html[data-theme="glow"] #board { box-shadow: 0 0 0 2px rgba(30,140,255,.9), 0 0 
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v119</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v120</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -1926,7 +1935,7 @@ html[data-theme="glow"] #board { box-shadow: 0 0 0 2px rgba(30,140,255,.9), 0 0 
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 119;</script>
+<script>window.PENTE_VERSION = 120;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -7531,7 +7540,7 @@ window.GALAXY_GAME = {
       css: { '--bg': '#0f1b12', '--panel': '#182a1c', '--panel-2': '#213826', '--line': '#3d6a45', '--accent-ink': '#06150a', '--accent': '#9be564', '--s1a': '#ff5a5a', '--s1b': '#b00d1d', '--s2a': '#fffbe8', '--s2b': '#d8cfa8', '--s3a': '#fff0a0', '--s3b': '#e0a010', '--s4a': '#ffc4d0', '--s4b': '#e0708a',
              '--board-shadow': '0 10px 30px rgba(0,0,0,.45)' },
       // art: el fondo es la imagen GARDEN_IMG (marco de madera, piedras y enredaderas); la grilla se dibuja encima dentro de span (fracciones del lado). labelStroke: letras con contorno para leerse sobre las hojas
-      board: { deco: 'garden', art: { img: 'GARDEN_IMG', span: [0.115, 0.885] }, labelPos: 0.77, groove: 'earth', labelStroke: 'rgba(20,45,10,.9)', bg: ['#79bd4a', '#4f9a35'], line: 'rgba(40,24,8,.8)', lineGlow: null, star: 'rgba(40,24,8,.92)', label: '#ffffff', labelHi: '#ffe66b' },
+      board: { deco: 'garden', menuArt: 'jardin', art: { img: 'GARDEN_IMG', span: [0.115, 0.885] }, labelPos: 0.77, groove: 'earth', labelStroke: 'rgba(20,45,10,.9)', bg: ['#79bd4a', '#4f9a35'], line: 'rgba(40,24,8,.8)', lineGlow: null, star: 'rgba(40,24,8,.92)', label: '#ffffff', labelHi: '#ffe66b' },
       stones: // cada jugador es de UNA sola especie: J1 rosas rojas, J2 jazmines blancos (en 4 jugadores: rosas amarillas y jazmines azules)
       { 1: { a: '#ff5a5a', b: '#b00d1d', glow: null, motif: 'fl:red_rose' }, 2: { a: '#fffbe8', b: '#d8cfa8', glow: null, motif: 'fl:white_jasmine' }, 3: { a: '#fff0a0', b: '#e0a010', glow: null, motif: 'fl:yellow_rose' }, 4: { a: '#a8c8ff', b: '#1747b0', glow: null, motif: 'fl:blue_jasmine' } },
       last: { ring: '#ffffff', dot: { 1: '#ffffff', 2: '#2a2a2a', 3: '#2a2a2a', 4: '#2a2a2a' } },
@@ -9721,7 +9730,7 @@ window.NEON_BREAK = {
   var hwImg = null;
   var menuImgs = {};
   function menuArtImg(kind) {                                               // fondos de menú hechos con arte de Ro (Halloween y Galaxia)
-    if (menuImgs[kind]) return menuImgs[kind]; var src = kind === 'halloween' ? window.HALLOWEEN_MENU : kind === 'galaxia' ? window.GALAXY_MENU : null; if (!src) return null;
+    if (menuImgs[kind]) return menuImgs[kind]; var src = kind === 'halloween' ? window.HALLOWEEN_MENU : kind === 'galaxia' ? window.GALAXY_MENU : kind === 'jardin' ? 'garden-menu.webp' : null; if (!src) return null;
     var im = menuImgs[kind] = new Image(); im.onload = function () { renderMenuBg(); }; im.src = src; return im;
   }
   function seaWanted() { var b = theme().board; return !!(b.waves) && !document.hidden && cfg.menuBg && $('menuOverlay').classList.contains('open'); }
@@ -9770,7 +9779,7 @@ window.NEON_BREAK = {
     var dpr = Math.min(2, window.devicePixelRatio || 1), cell = Math.max(38, Math.min(56, Math.round(Math.min(w, h) / 9)));
     cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
     var save = { ctx: ctx, cell: metrics.cell, off: metrics.off }, g = cv.getContext('2d'), th = theme();
-    if (th.board.menuArt === 'halloween' || th.board.menuArt === 'galaxia') {   // Halloween y Galaxia: el fondo es el arte de Ro, recortado tipo «cover»
+    if (th.board.menuArt === 'halloween' || th.board.menuArt === 'galaxia' || th.board.menuArt === 'jardin') {   // Halloween y Galaxia: el fondo es el arte de Ro, recortado tipo «cover»
       var mi = menuArtImg(th.board.menuArt); if (mi && mi.complete && mi.naturalWidth) { var sc0 = Math.max(w / mi.naturalWidth, h / mi.naturalHeight), dw = mi.naturalWidth * sc0, dh = mi.naturalHeight * sc0; g.setTransform(dpr, 0, 0, dpr, 0, 0); g.drawImage(mi, (w - dw) / 2, (h - dh) / 2, dw, dh); }
       return;
     }
