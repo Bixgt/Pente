@@ -1025,6 +1025,11 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
 #gxShipHit { position: fixed; left: 0; top: 0; border: 0; padding: 0; background: transparent; border-radius: 50%; z-index: 7; cursor: grab; touch-action: none; -webkit-tap-highlight-color: transparent; }
 #gxShip[hidden], #gxShipHit[hidden] { display: none; }
 #menuOverlay.gx-playing > :not(#gxShip):not(#menuBg) { opacity: 0; pointer-events: none; }
+
+/* Tableros bloqueados por nivel */
+.theme-opt.locked .swatch > i, .theme-opt.locked .swatch > .real { filter: grayscale(1); opacity: .45; }
+.theme-opt.locked > span:last-child { opacity: .6; }
+.theme-opt .lk { position: absolute; inset: 0; display: grid; place-items: center; font-style: normal; font-weight: 700; font-size: 12px; color: #fff; background: rgba(0,0,0,.55); border-radius: inherit; z-index: 2; text-shadow: 0 1px 2px #000; }
 </style>
 </head>
 <body>
@@ -1174,7 +1179,7 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v108</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v109</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -1852,7 +1857,7 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 108;</script>
+<script>window.PENTE_VERSION = 109;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -3139,6 +3144,7 @@ window.GALAXY_GAME = {
   var MAX_LEVEL = 60, MIN_MOVES = 10, CASUAL_CAP = 50, CAP = 10000000;
   var TITLE_AT = [1, 4, 8, 13, 19, 26, 34, 43];                       // nivel desde el que rige cada título (xp.title.1 ... xp.title.8)
   var GEM_LEVEL = { oro: 6, neon: 9, coral: 12, obsidiana: 16, galaxia: 22 };                    // las 9 piedras de siempre son libres
+  var BOARD_LEVEL = { glow: 2, papel: 4, playa: 7, jardin: 10, halloween: 13, galaxia: 17 };       // tableros: Simple y Tradicional son libres
   // Personalizar avatar: nivel desde el que se puede elegir cada pieza (lo que no figura es libre desde el nivel 1)
   var PART_LEVEL = {
     face: { enfadado: 3, sorprendido: 6, pensando: 10, seguro: 15 },
@@ -3178,14 +3184,18 @@ window.GALAXY_GAME = {
   function unlocksAt(level) {                                         // premios que se destraban justo en ese nivel
     var out = [];
     Object.keys(GEM_LEVEL).forEach(function (id) { if (GEM_LEVEL[id] === level) out.push({ type: 'gem', id: id }); });
+    Object.keys(BOARD_LEVEL).forEach(function (id) { if (BOARD_LEVEL[id] === level) out.push({ type: 'board', id: id }); });
     return out;
   }
   function nextUnlock(level) {                                        // el próximo premio por destrabar (para mostrarlo en el perfil)
     var best = null;
     Object.keys(PART_LEVEL).forEach(function (k) { Object.keys(PART_LEVEL[k]).forEach(function (id) { var lv = PART_LEVEL[k][id]; if (lv > level && (!best || lv < best.level)) best = { type: 'part', kind: k, id: id, level: lv }; }); });
     Object.keys(GEM_LEVEL).forEach(function (id) { var lv = GEM_LEVEL[id]; if (lv > level && (!best || lv < best.level)) best = { type: 'gem', id: id, level: lv }; });
+    Object.keys(BOARD_LEVEL).forEach(function (id) { var lv = BOARD_LEVEL[id]; if (lv > level && (!best || lv < best.level)) best = { type: 'board', id: id, level: lv }; });
     return best;
   }
+  function boardLevel(id) { return BOARD_LEVEL[id] || 1; }
+  function boardOk(id, level) { return level >= boardLevel(id); }
   function partLevel(kind, id) { return (PART_LEVEL[kind] && PART_LEVEL[kind][id]) || 1; }
   function partOk(kind, id, level) { return level >= partLevel(kind, id); }
   function partsAt(level) {                                          // piezas de personaje que se destraban justo en ese nivel
@@ -3238,7 +3248,7 @@ window.GALAXY_GAME = {
   }
   function onlineGain(win, day) { return (20 + (win ? 20 : 0)) * eventMult(day); }
 
-  return { ONLINE_DAILY_CAP: ONLINE_DAILY_CAP, dailyGain: dailyGain, onlineGain: onlineGain, MAX_LEVEL: MAX_LEVEL, MIN_MOVES: MIN_MOVES, CASUAL_CAP: CASUAL_CAP, GEM_LEVEL: GEM_LEVEL, need: need, cumulative: cumulative, levelOf: levelOf, titleIndex: titleIndex,
+  return { ONLINE_DAILY_CAP: ONLINE_DAILY_CAP, dailyGain: dailyGain, onlineGain: onlineGain, MAX_LEVEL: MAX_LEVEL, MIN_MOVES: MIN_MOVES, CASUAL_CAP: CASUAL_CAP, GEM_LEVEL: GEM_LEVEL, BOARD_LEVEL: BOARD_LEVEL, boardLevel: boardLevel, boardOk: boardOk, need: need, cumulative: cumulative, levelOf: levelOf, titleIndex: titleIndex,
     clean: clean, merge: merge, unlocksAt: unlocksAt, nextUnlock: nextUnlock, PART_LEVEL: PART_LEVEL, partLevel: partLevel, partOk: partOk, partsAt: partsAt, gemOk: gemOk, award: award, eventMult: eventMult };
 });
 </script>
@@ -9177,7 +9187,7 @@ window.NEON_BREAK = {
     r.capped = !r.gained && (ev.k === 'ai' || ev.k === 'local') && (ev.moves || 0) >= XP.MIN_MOVES && r.xp.cas >= XP.CASUAL_CAP;
     r.state = state;
     if (JSON.stringify(r.xp) !== JSON.stringify(before)) { profile.stats = Object.assign({}, profile.stats, { xp: r.xp }); saveProfile(); scheduleSync(2500); }
-    if (r.ups) buildGemPickers();
+    if (r.ups) { buildGemPickers(); buildThemePicker(); }
     return r;
   }
   // Nivel VERIFICADO (lo da el servidor) como globito: el que ven los demás
@@ -9208,7 +9218,7 @@ window.NEON_BREAK = {
   function lvChip(xp) { var l = XP.levelOf(xp || 0).level, c = document.createElement('span'); c.className = 'lvchip'; c.textContent = t('xp.lvShort', { n: l }); c.title = xpTitle(l); return c; }
   function xpTitle(level) { return t('xp.title.' + XP.titleIndex(level)); }
   function unlockText(list) {
-    return list.map(function (u) { return u.type === 'part' ? t('av.' + u.kind + '.' + u.id) : u.type === 'parts' ? t('av.newParts', { n: u.n }) : t('gem.' + u.id); }).join(' · ');
+    return list.map(function (u) { return u.type === 'part' ? t('av.' + u.kind + '.' + u.id) : u.type === 'parts' ? t('av.newParts', { n: u.n }) : u.type === 'board' ? t('theme.' + u.id) : t('gem.' + u.id); }).join(' · ');
   }
   function partLabel(k) {
     if (k.indexOf('first:mode:') === 0) { var m = k.slice(11); return t('xp.part.mode', { mode: m === 'ffa' ? t('four.ffa') : m === 'four' ? t('four.p4') : t('mode.' + m) }); }
@@ -10321,7 +10331,7 @@ window.NEON_BREAK = {
 
   /* ---------- Temas ---------- */
   var themeId = (function () {
-    try { var v = localStorage.getItem('pente.theme'); if (v && window.Themes.byId[v]) return v; } catch (e) {}
+    try { var v = localStorage.getItem('pente.theme'); if (v && window.Themes.byId[v] && XP.boardOk(v, myLevel().level)) return v; } catch (e) {}
     return window.Themes.defaultId;
   })();
   function theme() { return window.Themes.byId[themeId]; }
@@ -10343,6 +10353,7 @@ window.NEON_BREAK = {
   }
   function setTheme(id) {
     if (!window.Themes.byId[id]) return;
+    if (!XP.boardOk(id, myLevel().level)) id = window.Themes.defaultId;        // tablero todavía bloqueado por nivel
     themeId = id; applyThemeCss();
     try { localStorage.setItem('pente.theme', id); } catch (e) {}
     document.querySelectorAll('.theme-opt').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.id === id ? 'true' : 'false'); });
@@ -10373,7 +10384,12 @@ window.NEON_BREAK = {
       [1, 2].forEach(function (p) { sw.appendChild(swatchStone(th, p)); });
       var lb = document.createElement('span'); lb.textContent = t('theme.' + th.id);
       b.appendChild(sw); b.appendChild(lb);
-      b.addEventListener('click', function () { setTheme(th.id); markPrefs(); });
+      var blv = XP.boardLevel(th.id), blk = !XP.boardOk(th.id, myLevel().level);
+      if (blk) {
+        b.classList.add('locked'); b.setAttribute('aria-disabled', 'true'); b.title = t('xp.unlockAt', { n: blv });
+        var lk = document.createElement('em'); lk.className = 'lk'; lk.textContent = '🔒 ' + t('xp.lvShort', { n: blv }); sw.appendChild(lk);
+      }
+      b.addEventListener('click', function () { if (blk) { sfx('error'); buzz([30]); return; } setTheme(th.id); markPrefs(); });
       box.appendChild(b);
     });
     setTheme(themeId);
