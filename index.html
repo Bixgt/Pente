@@ -728,7 +728,7 @@ body.in-tut .btn.gamecfg { display: none; }
 
 /* Menú del tema Papel: hoja blanca (gris casi blanco) con letras negras, así las fichas del fondo se ven más */
 html[data-theme="papel"] #menuOverlay { --bg: #f7f6f2; --panel: #ffffff; --panel-2: #efeee9; --text: #111114; --muted: #55576a; --line: #a9a79e; --accent: #8d9bff; --accent-ink: #0b0f33; color: var(--text); }
-html[data-theme="papel"] #menuBg { opacity: .9; }
+html[data-theme="papel"] #menuBg { opacity: 1; }
 
 /* Amigos: buscador entre amigos y acciones plegables en pantallas angostas */
 .fr-filter { width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; color: var(--text); font: inherit; margin: 4px 0 6px; }
@@ -1092,8 +1092,19 @@ html[data-theme="glow"] #board { box-shadow: 0 0 0 2px rgba(30,140,255,.9), 0 0 
 .tn-tab[open] > summary::after { transform: rotate(180deg); }
 .tn-tab.past > summary { opacity: .8; }
 .tn-tab[open] { padding-bottom: 6px; }
-.tno-share[hidden] { display: none; }
-.tno-share .btns { display: flex; gap: 8px; flex-wrap: wrap; } .tno-share .btns .btn { flex: 1 1 140px; min-height: 48px; }
+.tno-invcfg { display: grid; gap: 8px; margin: 6px 0 10px; } .tno-invcfg[hidden] { display: none; } .tno-invcfg .check { display: flex; align-items: center; gap: 10px; min-height: 40px; }
+
+/* Menú Papel: botones y marcos como dibujados a lapicera sobre papel (la tipografía no cambia) */
+html[data-theme="papel"] #menuOverlay .btns .btn:not(.primary), html[data-theme="papel"] #menuOverlay .menu-top .btn, html[data-theme="papel"] #menuOverlay .menu-top .icon-btn, html[data-theme="papel"] #menuOverlay .chip { background: rgba(250,244,230,.92); border: 2.5px solid #1b2150; border-radius: 15px 12px 14px 12px / 12px 15px 12px 14px; box-shadow: 1px 2px 0 rgba(27,33,80,.35), 0 3px 8px rgba(60,45,20,.18); color: #11142e; }
+html[data-theme="papel"] #menuOverlay .btns .btn:not(.primary):hover { background: rgba(255,250,238,.98); }
+html[data-theme="papel"] #menuOverlay .btns .btn.primary { background: repeating-linear-gradient(112deg, #8a97ff 0 3px, #6b79f2 3px 5px, #94a0ff 5px 8px); border: 2.5px solid #1b2150; border-radius: 15px 12px 14px 12px / 12px 15px 12px 14px; color: #0a0e30; box-shadow: 1px 2px 0 rgba(27,33,80,.4), 0 3px 8px rgba(30,40,120,.25); }
+html[data-theme="papel"] #menuOverlay .chip { color: #2330a8; border-color: #1b2150; }
+html[data-theme="papel"] #menuOverlay .xpbar { background: rgba(250,244,230,.9); border: 2px solid #1b2150; border-radius: 999px; }
+html[data-theme="papel"] #menuOverlay .xpbar i { background: repeating-linear-gradient(112deg, #6b79f2 0 3px, #8a97ff 3px 6px); }
+html[data-theme="papel"] #menuOverlay .xpmini { color: #11142e; }
+html[data-theme="papel"] #menuOverlay .brand h1 { position: relative; display: inline-block; }
+html[data-theme="papel"] #menuOverlay .brand h1::after { content: ''; position: absolute; left: 0; right: 0; bottom: 2%; height: 14px; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 16' preserveAspectRatio='none'><path d='M3 12 C60 4 120 13 190 7 S270 4 297 9' fill='none' stroke='%232632b8' stroke-width='3' stroke-linecap='round'/><path d='M20 14 C90 8 160 14 240 9' fill='none' stroke='%234b59e0' stroke-width='2' stroke-linecap='round'/></svg>") center / 100% 100% no-repeat; pointer-events: none; }
+html[data-theme="papel"] #menuOverlay .brand h1::before { content: ''; position: absolute; right: -9%; top: -6%; width: 14%; height: 30%; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><path d='M4 30 L12 6 M16 36 L36 20 M24 28 L40 18' fill='none' stroke='%231b2150' stroke-width='3' stroke-linecap='round'/></svg>") center / contain no-repeat; pointer-events: none; }
 </style>
 </head>
 <body>
@@ -1244,7 +1255,7 @@ html[data-theme="glow"] #board { box-shadow: 0 0 0 2px rgba(30,140,255,.9), 0 0 
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v122</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v123</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -1308,6 +1319,7 @@ html[data-theme="glow"] #board { box-shadow: 0 0 0 2px rgba(30,140,255,.9), 0 0 
       <p class="hint modeHint"></p></div>
     <div class="field"><span class="lbl" data-i18n="menu.size"></span><div class="seg sizePicker" role="group"><div class="size-col"><button type="button" class="seg-opt" data-size="13" data-i18n="menu.size13"></button><small class="size-sub" data-i18n="size.sub13"></small></div><div class="size-col"><button type="button" class="seg-opt" data-size="19" data-i18n="menu.size19"></button><small class="size-sub" data-i18n="size.sub19"></small></div></div></div>
     </div>
+    <div id="tnoInvNew" class="tno-invcfg"><label class="check"><input type="checkbox" id="tnInvAll"><span data-i18n="tno.invAll"></span></label><label class="check"><input type="checkbox" id="tnInvOnly"><span data-i18n="tno.invOnly"></span></label><p class="hint" data-i18n="tno.invOnlyHint"></p></div>
     <p class="hint" id="tnoNewNote" hidden></p>
     <div class="field" id="tnPlayersBox"><label class="lbl" for="tnPlayers" data-i18n="tn.players"></label><textarea id="tnPlayers" rows="7" autocomplete="off" spellcheck="false"></textarea>
       <div class="tn-row"><span class="hint" id="tnCount"></span><button type="button" class="btn small" id="tnShuffle" data-i18n="tn.shuffle"></button></div></div>
@@ -1330,8 +1342,9 @@ html[data-theme="glow"] #board { box-shadow: 0 0 0 2px rgba(30,140,255,.9), 0 0 
     <div id="tnoMe" class="tno-me"></div>
     <div id="tnoLobby">
       <h3 class="tn-h" id="tnoPlayersH"></h3><div id="tnoPlayers"></div>
-      <div id="tnoShare" class="tno-share" hidden><h3 class="tn-h" data-i18n="tno.shareH"></h3><div class="btns"><button type="button" class="btn primary" id="tnoShareBtn" data-i18n="tno.shareBtn"></button><button type="button" class="btn" id="tnoWaBtn">WhatsApp</button></div></div>
-      <div id="tnoInviteBox"><h3 class="tn-h" data-i18n="tno.invite"></h3><div id="tnoFriends"></div></div>
+      <div id="tnoInviteBox"><h3 class="tn-h" data-i18n="tno.invite"></h3>
+        <div id="tnoInvCfg" class="tno-invcfg" hidden><label class="check"><input type="checkbox" id="tnoInvAll"><span data-i18n="tno.invAll"></span></label><label class="check"><input type="checkbox" id="tnoInvOnly"><span data-i18n="tno.invOnly"></span></label></div>
+        <div id="tnoFriends"></div></div>
       <div id="tnoCheck" aria-live="polite"></div>
       <div class="btns"><button class="btn primary" id="tnoStart" data-i18n="tno.start"></button></div>
       <p class="hint" id="tnoStartHint" data-i18n="tno.startHint"></p>
@@ -1948,7 +1961,7 @@ html[data-theme="glow"] #board { box-shadow: 0 0 0 2px rgba(30,140,255,.9), 0 0 
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 122;</script>
+<script>window.PENTE_VERSION = 123;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -3517,7 +3530,10 @@ window.GALAXY_GAME = {
     return best;
   }
   function boardLevel(id) { return BOARD_LEVEL[id] || 1; }
-  function boardOk(id, level) { return level >= boardLevel(id); }
+  /* Tableros que se abren en una fecha (hora de Argentina, UTC-3), además del nivel. Halloween: desde el 31/10/2026 a las 00:00. */
+  var DATE_LOCK = { halloween: Date.UTC(2026, 9, 31, 3, 0, 0) };
+  function boardOpensAt(id) { return DATE_LOCK[id] || 0; }
+  function boardOk(id, level, now) { return level >= boardLevel(id) && (now == null ? Date.now() : now) >= boardOpensAt(id); }
   function partLevel(kind, id) { return (PART_LEVEL[kind] && PART_LEVEL[kind][id]) || 1; }
   function partOk(kind, id, level) { return level >= partLevel(kind, id); }
   function partsAt(level) {                                          // piezas de personaje que se destraban justo en ese nivel
@@ -3570,7 +3586,7 @@ window.GALAXY_GAME = {
   }
   function onlineGain(win, day) { return (20 + (win ? 20 : 0)) * eventMult(day); }
 
-  return { ONLINE_DAILY_CAP: ONLINE_DAILY_CAP, dailyGain: dailyGain, onlineGain: onlineGain, MAX_LEVEL: MAX_LEVEL, MIN_MOVES: MIN_MOVES, CASUAL_CAP: CASUAL_CAP, GEM_LEVEL: GEM_LEVEL, BOARD_LEVEL: BOARD_LEVEL, applyLevels: applyLevels, cleanLevels: cleanLevels, levelsConfig: levelsConfig, defaultLevels: defaultLevels, boardLevel: boardLevel, boardOk: boardOk, need: need, cumulative: cumulative, levelOf: levelOf, titleIndex: titleIndex,
+  return { ONLINE_DAILY_CAP: ONLINE_DAILY_CAP, dailyGain: dailyGain, onlineGain: onlineGain, MAX_LEVEL: MAX_LEVEL, MIN_MOVES: MIN_MOVES, CASUAL_CAP: CASUAL_CAP, GEM_LEVEL: GEM_LEVEL, BOARD_LEVEL: BOARD_LEVEL, boardOpensAt: boardOpensAt, DATE_LOCK: DATE_LOCK, applyLevels: applyLevels, cleanLevels: cleanLevels, levelsConfig: levelsConfig, defaultLevels: defaultLevels, boardLevel: boardLevel, boardOk: boardOk, need: need, cumulative: cumulative, levelOf: levelOf, titleIndex: titleIndex,
     clean: clean, merge: merge, unlocksAt: unlocksAt, nextUnlock: nextUnlock, PART_LEVEL: PART_LEVEL, partLevel: partLevel, partOk: partOk, partsAt: partsAt, gemOk: gemOk, award: award, eventMult: eventMult };
 });
 </script>
@@ -6045,6 +6061,9 @@ window.GALAXY_GAME = {
     "play.onlineSub": "Con código, salas públicas o amigos",
     "play.tutorialSub": "Las reglas en un par de minutos",
     "xp.lvShort": "Nv {n}",
+    "xp.opensOn": "Se abre el {d}",
+    "hw.opened": "🎃 ¡Se abrió el tablero de Halloween! Ya podés jugar con calabazas y calaveras.",
+    "hw.use": "Usarlo ahora",
     "xp.level": "Nivel {n}",
     "xp.title.1": "Primera ficha",
     "xp.title.2": "Come pares",
@@ -6308,6 +6327,9 @@ window.GALAXY_GAME = {
     "play.onlineSub": "With a code, public rooms or friends",
     "play.tutorialSub": "The rules in a couple of minutes",
     "xp.lvShort": "Lv {n}",
+    "xp.opensOn": "Opens {d}",
+    "hw.opened": "🎃 The Halloween board is open! You can now play with pumpkins and skulls.",
+    "hw.use": "Use it now",
     "xp.level": "Level {n}",
     "xp.title.1": "First stone",
     "xp.title.2": "Pair eater",
@@ -7082,8 +7104,11 @@ window.GALAXY_GAME = {
     'tno.code': 'Código',
     'tno.copy': 'Copiar código',
     'tno.copyLink': 'Copiar link',
-    'tno.shareH': 'Invitar gente al torneo',
-    'tno.shareBtn': 'Compartir invitación',
+    'tno.invAll': 'Los participantes también pueden invitar amigos',
+    'tno.invOnly': 'Solo por invitación (sin código)',
+    'tno.invOnlyHint': 'Con «solo por invitación» nadie entra con código ni link: únicamente los amigos que invites desde acá (necesitan cuenta).',
+    'tno.invite.offlineOnly': '{name} no está conectado ahora: invitalo de nuevo cuando entre al juego.',
+    'tno.err.TN_INVITE_ONLY': 'Este torneo es solo por invitación.',
     'tno.copied': 'Copiado',
     'tno.shareText': 'Sumate a mi torneo de Pente «{name}»: {url}',
     'tno.info': '{format} · mejor de {b} · {n} participantes',
@@ -7212,8 +7237,11 @@ window.GALAXY_GAME = {
     'tno.code': 'Code',
     'tno.copy': 'Copy code',
     'tno.copyLink': 'Copy link',
-    'tno.shareH': 'Invite people to the tournament',
-    'tno.shareBtn': 'Share invitation',
+    'tno.invAll': 'Participants can also invite friends',
+    'tno.invOnly': 'Invitation only (no code)',
+    'tno.invOnlyHint': 'With “invitation only” nobody joins with a code or link: only the friends you invite from here (they need an account).',
+    'tno.invite.offlineOnly': '{name} is not online right now: invite them again when they open the game.',
+    'tno.err.TN_INVITE_ONLY': 'This tournament is invitation only.',
     'tno.copied': 'Copied',
     'tno.shareText': 'Join my Pente tournament "{name}": {url}',
     'tno.info': '{format} · best of {b} · {n} participants',
@@ -9795,6 +9823,54 @@ window.NEON_BREAK = {
     if (window.HwSpider) window.HwSpider.sync(art === 'halloween' && want); if (window.GxShip) window.GxShip.sync(art === 'galaxia' && want); if (window.PenteNeon && !(art === 'neon' && want)) window.PenteNeon.hide();
   }
   document.addEventListener('visibilitychange', hwSpiderSync);
+  /* Fondo del menú del tema Papel: hoja arrugada + cuadrícula azul + agujeros y margen rojo a la izquierda + garabatos de lapicera. Todo con semilla fija: siempre igual. */
+  function paperMenuBg(g, w, h, cell) {
+    var S = Math.max(w, h), rnd = rng(77), boxes = [].slice.call(document.querySelectorAll('#menuOverlay .btns, #menuOverlay .brand, #menuOverlay .menu-top button, #menuOverlay .chip, #menuOverlay .xpmini')).map(function (e) { return e.getBoundingClientRect(); });
+    g.save();
+    g.drawImage(paperFor(1024), 0, 0, 1024, 1024, 0, 0, S, S);
+    g.globalCompositeOperation = 'multiply'; g.fillStyle = 'rgba(236,222,190,.62)'; g.fillRect(0, 0, w, h); g.globalCompositeOperation = 'source-over';
+    var gc = Math.max(24, Math.round(cell * 0.62)), ink = 'rgba(30,40,176,.98)';
+    g.strokeStyle = 'rgba(86,118,190,.34)'; g.lineWidth = 1; g.beginPath();                    // cuadrícula azul de cuaderno
+    for (var x = 0; x <= w; x += gc) { g.moveTo(x + .5, 0); g.lineTo(x + .5, h); }
+    for (var y = 0; y <= h; y += gc) { g.moveTo(0, y + .5); g.lineTo(w, y + .5); }
+    g.stroke();
+    var mg = Math.round(Math.max(44, Math.min(w * 0.05, 84)));                               // margen rojo
+    g.strokeStyle = 'rgba(214,52,56,.85)'; g.lineWidth = 2; g.beginPath(); g.moveTo(mg + .5, 0); g.lineTo(mg + .5, h); g.stroke();
+    var hr = Math.max(9, Math.min(17, w * 0.009)), step = Math.max(hr * 4.2, h / 14);       // agujeros de la encuadernación
+    for (var hy = step * 0.6; hy < h; hy += step) {
+      var cx = Math.max(10, mg * 0.28), gr = g.createRadialGradient(cx - hr * .2, hy - hr * .2, hr * .1, cx, hy, hr);
+      gr.addColorStop(0, '#1b1109'); gr.addColorStop(.72, '#2e1d10'); gr.addColorStop(1, '#8a6a46');
+      g.fillStyle = 'rgba(70,50,30,.28)'; g.beginPath(); g.arc(cx + 1.5, hy + 2, hr + 3, 0, 6.283); g.fill();
+      g.fillStyle = gr; g.beginPath(); g.arc(cx, hy, hr, 0, 6.283); g.fill();
+    }
+    var ed = g.createLinearGradient(0, 0, mg * 0.5, 0); ed.addColorStop(0, 'rgba(60,40,20,.22)'); ed.addColorStop(1, 'rgba(60,40,20,0)'); g.fillStyle = ed; g.fillRect(0, 0, mg * 0.5, h);
+    var cs = g.createRadialGradient(w * 0.93, h * 0.82, 0, w * 0.93, h * 0.82, Math.min(w, h) * 0.22);      // mancha de café
+    cs.addColorStop(0, 'rgba(150,100,50,0)'); cs.addColorStop(.62, 'rgba(150,100,50,.10)'); cs.addColorStop(.82, 'rgba(120,76,34,.30)'); cs.addColorStop(1, 'rgba(120,76,34,0)');
+    g.fillStyle = cs; g.fillRect(w * 0.6, h * 0.5, w * 0.4, h * 0.5);
+    var fc = Math.min(w, h) * 0.075;                                                          // esquina doblada arriba a la derecha
+    g.fillStyle = 'rgba(40,30,20,.16)'; g.beginPath(); g.moveTo(w - fc * 1.05, 0); g.lineTo(w, fc * 1.05); g.lineTo(w, 0); g.fill();
+    var fg = g.createLinearGradient(w - fc, 0, w, fc); fg.addColorStop(0, '#faf3e2'); fg.addColorStop(1, '#d9c9a6'); g.fillStyle = fg; g.beginPath(); g.moveTo(w - fc, 0); g.lineTo(w, fc); g.lineTo(w - fc * 0.1, fc * 0.1); g.closePath(); g.fill();
+    // garabatos: lapicera azul con temblor
+    function wob(pts, wid, col, closed) { g.strokeStyle = col || ink; g.lineWidth = (wid || 2) * 1.25; g.lineCap = 'round'; g.lineJoin = 'round'; g.beginPath(); pts.forEach(function (q, i) { var jx = (rnd() - .5) * 1.4, jy = (rnd() - .5) * 1.4; if (i) g.lineTo(q[0] + jx, q[1] + jy); else g.moveTo(q[0] + jx, q[1] + jy); }); if (closed) g.closePath(); g.stroke(); }
+    function free(px, py, r) { return !boxes.some(function (b) { return px + r > b.left - 14 && px - r < b.right + 14 && py + r > b.top - 14 && py - r < b.bottom + 14; }); }
+    var u = Math.max(14, Math.min(w, h) * 0.03), P = function (fx, fy) { return [w * fx, h * fy]; };
+    function star4(c, r) { var k = r * .28; wob([[c[0], c[1] - r], [c[0] + k, c[1] - k], [c[0] + r, c[1]], [c[0] + k, c[1] + k], [c[0], c[1] + r], [c[0] - k, c[1] + k], [c[0] - r, c[1]], [c[0] - k, c[1] - k]], 1.8, null, true); }
+    function star5(c, r) { var pts = [], i; for (i = 0; i < 10; i++) { var a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * .42 : r; pts.push([c[0] + Math.cos(a) * rr, c[1] + Math.sin(a) * rr]); } wob(pts, 1.8, null, true); }
+    function hatch(c, rw, rh, ang, col) { g.save(); g.translate(c[0], c[1]); g.rotate(ang); g.strokeStyle = col; g.lineWidth = 1.5; g.lineCap = 'round'; g.beginPath(); for (var t = -rw; t <= rw; t += 6) { g.moveTo(t, -rh * (0.7 + rnd() * .3)); g.lineTo(t + 8, rh * (0.7 + rnd() * .3)); } g.stroke(); g.restore(); }
+    var items = [
+      [0.455, 0.095, 2.4, function (c) { var s = u; wob([[c[0] - s, c[1] + s * .7], [c[0] - s * 1.1, c[1] - s * .5], [c[0] - s * .5, c[1] + s * .1], [c[0], c[1] - s * .9], [c[0] + s * .5, c[1] + s * .1], [c[0] + s * 1.1, c[1] - s * .5], [c[0] + s, c[1] + s * .7]], 1.8, null, true); wob([[c[0] - s, c[1] + s * 1.0], [c[0] + s, c[1] + s * 1.0]], 1.8); }],
+      [0.80, 0.10, 4.5, function (c) { var s = u * 1.5; g.strokeStyle = ink; g.lineWidth = 1.8; g.setLineDash([7, 7]); g.beginPath(); g.moveTo(c[0] - s * 3.6, c[1] + s * .9); g.bezierCurveTo(c[0] - s * 2.6, c[1] - s * .6, c[0] - s * 1.6, c[1] + s * 1.2, c[0] - s * .9, c[1] + s * .1); g.stroke(); g.setLineDash([]); g.fillStyle = 'rgba(250,246,236,.9)'; g.beginPath(); g.moveTo(c[0] - s, c[1] + s * .2); g.lineTo(c[0] + s * 1.5, c[1] - s * .8); g.lineTo(c[0] + s * .3, c[1] + s * .9); g.lineTo(c[0] - s * .1, c[1] + s * .3); g.closePath(); g.fill(); wob([[c[0] - s, c[1] + s * .2], [c[0] + s * 1.5, c[1] - s * .8], [c[0] + s * .3, c[1] + s * .9], [c[0] - s * .1, c[1] + s * .3], [c[0] - s, c[1] + s * .2]], 1.6, 'rgba(60,70,150,.8)'); wob([[c[0] - s * .1, c[1] + s * .3], [c[0] + s * 1.5, c[1] - s * .8]], 1.4, 'rgba(60,70,150,.8)'); }],
+      [0.075, 0.30, 1.4, function (c) { star5(c, u * .9); }], [0.31, 0.33, 1.2, function (c) { star4(c, u * .55); }], [0.19, 0.53, 1.6, function (c) { star5(c, u * 1.1); }],
+      [0.105, 0.95, 1.6, function (c) { star5(c, u * 1.1); }], [0.135, 0.915, 1.2, function (c) { star4(c, u * .6); }], [0.70, 0.935, 1.6, function (c) { star5(c, u * 1.3); }],
+      [0.958, 0.45, 2.2, function (c) { var r = u * 1.5; g.strokeStyle = ink; g.lineWidth = 2; g.beginPath(); g.arc(c[0], c[1], r, 0, 6.283); g.stroke(); g.beginPath(); g.arc(c[0], c[1] + r * .1, r * .55, .2, Math.PI - .2); g.stroke(); wob([[c[0] - r * .35, c[1] - r * .3], [c[0] - r * .35, c[1] - r * .1]], 2.4); wob([[c[0] + r * .35, c[1] - r * .3], [c[0] + r * .35, c[1] - r * .1]], 2.4); }],
+      [0.965, 0.21, 2.2, function (c) { var s = u * 1.5; wob([[c[0] - s * .35, c[1] - s], [c[0] - s * .35, c[1] + s]], 1.8); wob([[c[0] + s * .35, c[1] - s], [c[0] + s * .35, c[1] + s]], 1.8); wob([[c[0] - s, c[1] - s * .35], [c[0] + s, c[1] - s * .35]], 1.8); wob([[c[0] - s, c[1] + s * .35], [c[0] + s, c[1] + s * .35]], 1.8); wob([[c[0] - s * .9, c[1] - s * .9], [c[0] - s * .5, c[1] - s * .5]], 1.6); wob([[c[0] + s * .5, c[1] + s * .5], [c[0] + s * .9, c[1] + s * .9]], 1.6); g.beginPath(); g.arc(c[0], c[1], s * .22, 0, 6.283); g.stroke(); }],
+      [0.855, 0.945, 2.0, function (c) { var r = u * 1.1, i; for (i = 0; i < 5; i++) { var a = i * 1.2566; g.strokeStyle = ink; g.lineWidth = 1.8; g.beginPath(); g.ellipse(c[0] + Math.cos(a) * r * .9, c[1] + Math.sin(a) * r * .9, r * .62, r * .42, a, 0, 6.283); g.stroke(); } g.beginPath(); g.arc(c[0], c[1], r * .35, 0, 6.283); g.stroke(); }],
+      [0.955, 0.745, 1.4, function (c) { wob([[c[0], c[1] - u * 1.3], [c[0] + 2, c[1] + u * .2]], 3); g.fillStyle = ink; g.beginPath(); g.arc(c[0] + 2, c[1] + u * .9, 2.6, 0, 6.283); g.fill(); wob([[c[0] + u * 1.0, c[1] - u * .5], [c[0] + u * 1.4, c[1] + u * .5]], 2.4); }],
+      [0.07, 0.07, 3, function (c) { hatch(c, u * 3, u * 1.2, -0.5, 'rgba(50,60,180,.55)'); }], [0.085, 0.74, 3, function (c) { hatch(c, u * 3, u * 1.4, -0.9, 'rgba(50,60,180,.5)'); }], [0.915, 0.985, 3.4, function (c) { hatch(c, u * 4, u * 1.4, -0.6, 'rgba(50,60,180,.55)'); }]
+    ];
+    items.forEach(function (it) { var c = P(it[0], it[1]); if (c[0] > mg + 8 && free(c[0], c[1], u * it[2])) it[3](c); });
+    g.restore();
+  }
   function renderMenuBg() {
     var cv = $('menuBg'); if (!cv) return; hwSpiderSync();
     cv.hidden = !cfg.menuBg; if (!cfg.menuBg) return;
@@ -9818,6 +9894,8 @@ window.NEON_BREAK = {
     if (th.board.sand) {                                           // Playa: el fondo es el tablero de arena con sus canaletas (no una grilla común)
       var sc = Math.max(w, h) / 820; g.drawImage(sandFor(1024), 102, 102, 820, 820, 0, 0, 820 * sc, 820 * sc);       // solo el centro de la arena: sin el marco del tablero
       g.globalAlpha = 0.55; carveGrid(g, w, h, cell, ox % cell, oy % cell); g.globalAlpha = 1;
+    } else if (th.id === 'papel') {                                 // Papel: hoja de cuaderno arrugada con agujeros, margen rojo y garabatos (dibujados por código)
+      paperMenuBg(g, w, h, cell);
     } else {
       g.strokeStyle = line; g.lineWidth = 1.2; g.beginPath();
       for (var x = ox % cell; x <= w; x += cell) { g.moveTo(x + .5, 0); g.lineTo(x + .5, h); }
@@ -9886,6 +9964,20 @@ window.NEON_BREAK = {
   })();
   /* Niveles de desbloqueo que decide el administrador (Supabase app_config): se guardan en el aparato para arrancar ya con ellos y se actualizan al abrir. */
   try { XP.applyLevels(JSON.parse(localStorage.getItem('pente.lvcfg') || 'null')); } catch (e) {}
+  /* Un tablero está disponible si tenés el nivel y ya pasó su fecha de apertura (en el modo «todo desbloqueado» también se salta la fecha). */
+  function boardAllowed(id) { return XP.boardOk(id, myLevel().level, UNLOCK_ALL ? Infinity : Date.now()); }
+  function fmtOpen(ms) { var d = new Date(ms - 3 * 3600e3); return d.getUTCDate() + '/' + (d.getUTCMonth() + 1); }
+  /* Cartel del día que se abre el tablero de Halloween (31/10, hora argentina): una sola vez, desde el menú. */
+  function hwNotice() {
+    try {
+      if (UNLOCK_ALL || localStorage.getItem('pente.hwNotice') === '1' || Date.now() < XP.boardOpensAt('halloween')) return;
+      if (!$('menuOverlay').classList.contains('open') || $('dlgOverlay').classList.contains('open') || document.hidden) return;
+      if (myLevel().level < XP.boardLevel('halloween')) return;
+      localStorage.setItem('pente.hwNotice', '1');
+      ask(t('hw.opened'), t('hw.use'), function () { themeUserPicked = true; setTheme('halloween'); markPrefs(); });
+    } catch (e) {}
+  }
+  setInterval(hwNotice, 30000); setTimeout(hwNotice, 2500); document.addEventListener('visibilitychange', function () { if (!document.hidden) setTimeout(hwNotice, 600); });
   function myLevel() { return XP.levelOf(UNLOCK_ALL ? XP.cumulative(XP.MAX_LEVEL) : myXp().t); }
   function xpModeKey() { if (!state) return 'classic'; if (state.ffa) return 'ffa'; if (state.players === 4) return 'four'; return (online.active ? online.mode : gameMode) || 'classic'; }
   function grantXp(ev) {
@@ -11135,9 +11227,9 @@ window.NEON_BREAK = {
   /* ---------- Temas ---------- */
   var themeId = (function () {
     if (cfg.randomBoard) {                                       // «tablero al azar al entrar»: uno de los que ya tenés desbloqueados (no pisa el que guardaste)
-      try { var lvl = myLevel().level, ok = Object.keys(window.Themes.byId).filter(function (k) { return XP.boardOk(k, lvl); }); if (ok.length) return ok[Math.floor(Math.random() * ok.length)]; } catch (e) {}
+      try { var lvl = myLevel().level, ok = Object.keys(window.Themes.byId).filter(function (k) { return boardAllowed(k); }); if (ok.length) return ok[Math.floor(Math.random() * ok.length)]; } catch (e) {}
     }
-    try { var v = localStorage.getItem('pente.theme'); if (v && window.Themes.byId[v] && XP.boardOk(v, myLevel().level)) return v; } catch (e) {}
+    try { var v = localStorage.getItem('pente.theme'); if (v && window.Themes.byId[v] && boardAllowed(v)) return v; } catch (e) {}
     return window.Themes.defaultId;
   })();
   function theme() { return window.Themes.byId[themeId]; }
@@ -11160,7 +11252,7 @@ window.NEON_BREAK = {
   var themeUserPicked = false;                                        // con «tablero al azar» el que sale sorteado no pisa el que guardaste, salvo que elijas uno vos
   function setTheme(id) {
     if (!window.Themes.byId[id]) return;
-    if (!XP.boardOk(id, myLevel().level)) id = window.Themes.defaultId;        // tablero todavía bloqueado por nivel
+    if (!boardAllowed(id)) id = window.Themes.defaultId;        // tablero todavía bloqueado por nivel
     themeId = id; applyThemeCss();
     if (!cfg.randomBoard || themeUserPicked) { try { localStorage.setItem('pente.theme', id); } catch (e) {} }
     document.querySelectorAll('.theme-opt').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.id === id ? 'true' : 'false'); });
@@ -11191,10 +11283,10 @@ window.NEON_BREAK = {
       [1, 2].forEach(function (p) { sw.appendChild(swatchStone(th, p)); });
       var lb = document.createElement('span'); lb.textContent = t('theme.' + th.id);
       b.appendChild(sw); b.appendChild(lb);
-      var blv = XP.boardLevel(th.id), blk = !XP.boardOk(th.id, myLevel().level);
+      var blv = XP.boardLevel(th.id), blk = !boardAllowed(th.id), byDate = blk && !UNLOCK_ALL && Date.now() < XP.boardOpensAt(th.id);
       if (blk) {
         b.classList.add('locked'); b.setAttribute('aria-disabled', 'true'); b.title = t('xp.unlockAt', { n: blv });
-        var lk = document.createElement('em'); lk.className = 'lk'; lk.textContent = '🔒 ' + t('xp.lvShort', { n: blv }); sw.appendChild(lk);
+        var lk = document.createElement('em'); lk.className = 'lk'; lk.textContent = '🔒 ' + (byDate ? t('xp.opensOn', { d: fmtOpen(XP.boardOpensAt(th.id)) }) : t('xp.lvShort', { n: blv })); sw.appendChild(lk);
       }
       b.addEventListener('click', function () { if (blk) { sfx('error'); buzz([30]); return; } themeUserPicked = true; setTheme(th.id); markPrefs(); });
       box.appendChild(b);
@@ -12764,7 +12856,7 @@ window.NEON_BREAK = {
   var SB = window.PENTE_SUPABASE || {};
   var Auth = window.PenteAuth && SB.url && SB.key ? window.PenteAuth.create({ url: SB.url, key: SB.key, storage: window.localStorage }) : null;
   function levelsChanged() {                                      // después de cambiar los niveles de desbloqueo: se redibuja lo que depende de ellos
-    if (!XP.boardOk(themeId, myLevel().level)) setTheme(window.Themes.defaultId);
+    if (!boardAllowed(themeId)) setTheme(window.Themes.defaultId);
     buildThemePicker(); buildGemPickers(); renderProfXp(); renderXpMini(); if ($('customOverlay').classList.contains('open')) renderCust(); render();
   }
   function fetchLevels() {
@@ -13499,7 +13591,7 @@ window.NEON_BREAK = {
     PT.BEST_OF.forEach(function (n) { var o = el('option', '', tnBestLabel(n)); o.value = n; b.appendChild(o); }); b.value = cur;
   }
   function tnOpenNew(onl) {
-    tn.online = !!onl; $('tnPlayersBox').hidden = tn.online; $('tnCheck').hidden = tn.online; $('tnoGameBox').hidden = !tn.online; syncMode(); syncSizePicker();
+    tn.online = !!onl; $('tnPlayersBox').hidden = tn.online; $('tnCheck').hidden = tn.online; $('tnoGameBox').hidden = !tn.online; $('tnoInvNew').hidden = !tn.online; syncMode(); syncSizePicker();
     $('tnStart').textContent = t(tn.online ? 'tno.create' : 'tn.start'); document.querySelector('#tnNewOverlay h2').textContent = t(tn.online ? 'tno.newTitle' : 'tn.new');
     tnBuildSelects(); $('tnName').value = ''; $('tnName').placeholder = t('tn.name'); $('tnFormat').value = 'swiss_cut'; $('tnBest').value = '3'; $('tnMin').value = '2'; $('tnCut').value = '4';
     var base = []; for (var i = 1; i <= 8; i++) base.push(t('tn.sample', { n: i }));
@@ -13801,7 +13893,7 @@ window.NEON_BREAK = {
       }
       case 'tinviteRes': {
         var nm = tno.inviting && tno.inviting[m.to] || ''; if (tno.inviting) delete tno.inviting[m.to];
-        tnoNote(m.ok ? t('tno.inviteSent', { name: nm }) : t('tno.invite.' + (m.reason === 'offline' || m.reason === 'already' || m.reason === 'rate' ? m.reason : 'error'), { name: nm }), !m.ok); break;
+        tnoNote(m.ok ? t('tno.inviteSent', { name: nm }) : t('tno.invite.' + (m.reason === 'offline' && tno.snap && tno.snap.inv && tno.snap.inv.only ? 'offlineOnly' : m.reason === 'offline' || m.reason === 'already' || m.reason === 'rate' ? m.reason : 'error'), { name: nm }), !m.ok); break;
       }
     }
   }
@@ -13839,7 +13931,7 @@ window.NEON_BREAK = {
     var cfgv = tnCfg(), g = { variant: modeVariant(settings.mode), blitz: settings.mode === 'blitz', bullet: settings.mode === 'bullet', tournamentRule: settings.tournamentRule, exactFive: settings.exactFive, size: settings.size, timer: settings.timer };
     if (tno.view) tnoReset();
     if (tno.code && tno.token) { tnoNote(t('tno.err.ALREADY_IN_TOURNEY'), true); tnRenderList(); tnoRenderLive(); open('tnOverlay'); return; }
-    tno.snap = null; tno.intent = { t: 'tcreate', name: cfgv.name, cfg: cfgv, game: g, pname: myName(), dev: devId() }; tno.code = tno.token = '';
+    tno.snap = null; tno.intent = { t: 'tcreate', inv: { all: $('tnInvAll').checked, only: $('tnInvOnly').checked }, name: cfgv.name, cfg: cfgv, game: g, pname: myName(), dev: devId() }; tno.code = tno.token = '';
     tnoNote('', false); if (!tnoConnect()) { open('tnOverlay'); return; } tnoOpen();
     if (tno.net.isOpen()) tnoWithJwt(JSON.parse(JSON.stringify(tno.intent)), function (o) { tno.net.send(o); });
   }
@@ -13872,13 +13964,8 @@ window.NEON_BREAK = {
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, done); else done();
   }
   $('tnoCopy').addEventListener('click', function () { tnoCopy(tno.code); });
-  function tnoShareText() { return t('tno.shareText', { name: tno.snap ? tno.snap.name : '', url: tnoLink() }); }
-  $('tnoShareBtn').addEventListener('click', function () {                                 // celu: menú de compartir del sistema (WhatsApp, Telegram, etc.)
-    var text = tnoShareText();
-    if (navigator.share) { navigator.share({ title: 'Pente', text: text }).catch(function () {}); return; }
-    tnoCopy(text);
-  });
-  $('tnoWaBtn').addEventListener('click', function () { window.open('https://wa.me/?text=' + encodeURIComponent(tnoShareText()), '_blank', 'noopener'); });
+  function tnoInvSend() { tnoSend({ t: 'tinvcfg', all: $('tnoInvAll').checked, only: $('tnoInvOnly').checked }); }
+  $('tnoInvAll').addEventListener('change', tnoInvSend); $('tnoInvOnly').addEventListener('change', tnoInvSend);
   $('tnoLink').addEventListener('click', function () {
     var text = t('tno.shareText', { name: tno.snap ? tno.snap.name : '', url: tnoLink() });
     if (navigator.share) { navigator.share({ text: text }).catch(function () {}); return; }
@@ -13958,11 +14045,13 @@ window.NEON_BREAK = {
       pb.appendChild(row);
     });
     // invitar amigos y preview (solo organizador, antes de empezar)
-    $('tnoShare').hidden = !isOpen;
-    $('tnoInviteBox').hidden = !(isOpen && org); $('tnoStart').hidden = !(isOpen && org); $('tnoStartHint').hidden = !(isOpen && org);
+    var inv = m.inv || {}, canInv = isOpen && (org || inv.all);
+    $('tnoCodeBox').hidden = !tno.code || !!inv.only;                                         // solo por invitación: no hay código para compartir
+    $('tnoInviteBox').hidden = !canInv; $('tnoStart').hidden = !(isOpen && org); $('tnoStartHint').hidden = !(isOpen && org);
     var fb = $('tnoFriends'); fb.innerHTML = '';
-    if (isOpen && org) {
-      if (!socialOk()) fb.appendChild(el('p', 'hint', t(Auth && Auth.user ? 'fr.needName' : 'fr.needLogin') + ' ' + t('tno.inviteOr')));      // dice cuál es el motivo: sin sesión, o sin nombre elegido
+    var ic = $('tnoInvCfg'); ic.hidden = !(isOpen && org); if (isOpen && org) { $('tnoInvAll').checked = !!inv.all; $('tnoInvOnly').checked = !!inv.only; }
+    if (canInv) {
+      if (!socialOk()) fb.appendChild(el('p', 'hint', t(Auth && Auth.user ? 'fr.needName' : 'fr.needLogin') + (inv.only ? '' : ' ' + t('tno.inviteOr'))));      // dice cuál es el motivo: sin sesión, o sin nombre elegido
       else if (!social.ov) { fb.appendChild(el('p', 'hint', t('tno.loadingFriends'))); tnoLoadFriends(); }
       else {
         var fr = ((social.ov && social.ov.list) || []).filter(function (x) { return x.status === 'accepted'; });
@@ -14066,7 +14155,7 @@ window.NEON_BREAK = {
   tnoLoadSess();
 
   applyI18n(); buildThemePicker(); syncSizePicker(); syncOpts(); syncMode(); syncVis(); resize(); open('menuOverlay'); initOnline(); updateSide();
-  window.__pente = { get daily() { return daily; }, cmtRender: cmtRender, renderBoard: renderBoard, stoneImg: stoneImg, adminOpen: admOpen, get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, startAI: startAI, get ai() { return ai; }, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; }, get tut() { return tut; }, get profile() { return profile; }, get auth() { return Auth; }, get sync() { return sync; }, setChatW: setChatW, syncProfile: syncProfile, get tn() { return tn; }, get tno() { return tno; } };  // utilidad para pruebas manuales
+  window.__pente = { tnoRender: tnoRender, get daily() { return daily; }, cmtRender: cmtRender, renderBoard: renderBoard, stoneImg: stoneImg, adminOpen: admOpen, get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, startAI: startAI, get ai() { return ai; }, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; }, get tut() { return tut; }, get profile() { return profile; }, get auth() { return Auth; }, get sync() { return sync; }, setChatW: setChatW, syncProfile: syncProfile, get tn() { return tn; }, get tno() { return tno; } };  // utilidad para pruebas manuales
 })();
 </script>
 <script>
