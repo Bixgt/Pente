@@ -1030,6 +1030,13 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
 .theme-opt.locked .swatch > i, .theme-opt.locked .swatch > .real { filter: grayscale(1); opacity: .45; }
 .theme-opt.locked > span:last-child { opacity: .6; }
 .theme-opt .lk { position: absolute; inset: 0; display: grid; place-items: center; font-style: normal; font-weight: 700; font-size: 12px; color: #fff; background: rgba(0,0,0,.55); border-radius: inherit; z-index: 2; text-shadow: 0 1px 2px #000; }
+
+/* Casilla para escribir la jugada */
+.coord-form { display: flex; gap: 8px; align-items: center; }
+.coord-form[hidden] { display: none; }
+.coord-form input { width: 92px; min-height: 44px; padding: 8px 12px; font: inherit; font-size: 16px; text-align: center; text-transform: lowercase; color: var(--text); background: var(--bg); border: 2px solid var(--line); border-radius: 12px; }
+.coord-form input:focus { outline: none; border-color: var(--accent); }
+.coord-form input:disabled { opacity: .5; }
 </style>
 </head>
 <body>
@@ -1161,6 +1168,7 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
     <button class="btn" id="btnRestart" data-i18n="hud.restart"></button>
     <button class="btn" id="btnClaim" hidden data-i18n="online.claim"></button>
     <button class="btn primary" id="btnResult" hidden data-i18n="end.result"></button>
+    <form id="coordForm" class="coord-form" hidden autocomplete="off"><input id="coordIn" type="text" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="4" enterkeyhint="go" data-i18n-ph="coord.ph" data-i18n-aria="coord.aria"><button type="submit" class="btn" data-i18n="coord.go"></button></form>
     <button class="btn primary" id="btnConfirm" hidden data-i18n="hud.confirm"></button>
   </div>
   <div class="actions sidebar-row"><button class="btn" id="btnSide"><span id="btnSideLbl"></span><b class="badge" id="sideBadge" hidden></b></button></div>
@@ -1179,7 +1187,7 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v110</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v111</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -1461,6 +1469,7 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
           </div>
           <div class="cz-rows">
             <label class="check cz-row"><input type="checkbox" data-cfg="coords"><svg class="cz-ic" viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="3"/><text x="12" y="15.2" font-size="8.5" text-anchor="middle" fill="currentColor" stroke="none" font-weight="700" font-family="sans-serif">A1</text></svg><span><span data-i18n="cfg.coords"></span><small data-i18n="cfg.coordsHint"></small></span></label>
+            <label class="check cz-row"><input type="checkbox" data-cfg="coordInput"><svg class="cz-ic" viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg><span><span data-i18n="cfg.coordInput"></span><small data-i18n="cfg.coordInputHint"></small></span></label>
             <label class="check cz-row"><input type="checkbox" data-cfg="lastMove"><svg class="cz-ic" viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l14 7.5-6.2 1.8L10.5 19z"/></svg><span><span data-i18n="cfg.lastMove"></span></span></label>
             <label class="check cz-row"><input type="checkbox" data-cfg="menuBg"><svg class="cz-ic" viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><path d="M3.5 9.2h17M3.5 14.8h17M9.2 3.5v17M14.8 3.5v17"/></svg><span><span data-i18n="cfg.menuBg"></span><small data-i18n="cfg.menuBgHint"></small></span></label>
             <label class="check cz-row"><input type="checkbox" data-cfg="anim"><svg class="cz-ic" viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 16v4M17 18h4"/></svg><span><span data-i18n="cfg.anim"></span><small data-i18n="cfg.animHint"></small></span></label>
@@ -1857,7 +1866,7 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 110;</script>
+<script>window.PENTE_VERSION = 111;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -4381,6 +4390,8 @@ window.GALAXY_GAME = {
       'hud.captures': 'Pares capturados',
       'hud.restart': 'Reiniciar',
       'hud.confirm': 'Confirmar',
+      'coord.ph': 'ej: e7', 'coord.aria': 'Escribir la jugada', 'coord.go': 'Jugar', 'coord.bad': 'No entendí esa casilla. Probá con e7 o 7e (la letra I no existe).',
+      'cfg.coordInput': 'Escribir la jugada', 'cfg.coordInputHint': 'Aparece una casilla debajo del tablero para tipear dónde va la ficha (e7 o 7e). Respeta tu forma de confirmar.',
       'hud.dragHint': 'Soltala donde quieras y tocá Confirmar.',
       'hud.dragHintDouble': 'Tocá la ficha otra vez para jugarla.',
       'hud.tapHintDouble': 'Tocá la ficha otra vez para confirmar.',
@@ -4712,6 +4723,8 @@ window.GALAXY_GAME = {
       'hud.captures': 'Captured pairs',
       'hud.restart': 'Restart',
       'hud.confirm': 'Confirm',
+      'coord.ph': 'e.g. e7', 'coord.aria': 'Type your move', 'coord.go': 'Play', 'coord.bad': "Couldn't read that square. Try e7 or 7e (there is no letter I).",
+      'cfg.coordInput': 'Type your move', 'cfg.coordInputHint': 'Shows a box under the board to type where the stone goes (e7 or 7e). Follows your confirm setting.',
       'hud.dragHint': 'Drop it wherever you like and press Confirm.',
       'hud.dragHintDouble': 'Tap the stone again to play it.',
       'hud.tapHintDouble': 'Tap the stone again to confirm.',
@@ -8459,7 +8472,7 @@ window.NEON_BREAK = {
 
   /* Configuración del dispositivo (pantalla "Configuración"): se guarda en localStorage y se aplica al instante. */
   var coarse = matchMedia('(pointer: coarse)').matches, reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var CFG_DEFAULTS = { confirm: 'button', lift: 'mid', guides: true, coords: true, lastMove: true, anim: true, stoneSize: 'normal', zone: true, captureFx: 'shatter', chat: true, botDelay: true, loupe: false, gem1: 'azul', gem2: 'verde', gx1: 'oro', gx2: 'azul', menuBg: true, seekAlerts: true };
+  var CFG_DEFAULTS = { confirm: 'button', lift: 'mid', guides: true, coords: true, lastMove: true, anim: true, stoneSize: 'normal', zone: true, captureFx: 'shatter', chat: true, botDelay: true, loupe: false, gem1: 'azul', gem2: 'verde', gx1: 'oro', gx2: 'azul', menuBg: true, seekAlerts: true, coordInput: false };
   var CFG_ALLOWED = { confirm: ['button', 'double', 'none'], lift: ['low', 'mid', 'high'], stoneSize: ['small', 'normal', 'large'], captureFx: ['shatter', 'fade', 'none'], gem1: window.Themes.gems.map(function (g) { return g.id; }), gem2: window.Themes.gems.map(function (g) { return g.id; }), gx1: window.Themes.gxColors.map(function (g) { return g.id; }), gx2: window.Themes.gxColors.map(function (g) { return g.id; }) };
   function cleanCfg(raw) {
     var c = {}, k;
@@ -10423,6 +10436,25 @@ window.NEON_BREAK = {
     var cbtn = $('btnConfirm'), usable = !!(pending && canPlayNow() && !(drag && drag.lifted));
     cbtn.hidden = !(cfg.confirm === 'button' && !lab.active && (tut.active ? usable : !isOver() && !online.spectator));
     cbtn.disabled = !usable;
+    var cf = $('coordForm'); if (cf) { cf.hidden = !(cfg.coordInput && !lab.active && !tut.active && !isOver() && !online.spectator); $('coordIn').disabled = !canPlayNow(); }
+  }
+  /* Escribir la jugada ("e7" o "7e"): hace lo mismo que tocar esa casilla (con confirmación si la tenés activada). Enter vacío confirma la casilla elegida. */
+  function parseTyped(str) {
+    var s = String(str || '').replace(/\s+/g, ''), m = /^([a-z])(\d{1,2})$/i.exec(s), n = /^(\d{1,2})([a-z])$/i.exec(s);
+    var coord = m ? m[1] + m[2] : n ? n[2] + n[1] : '';
+    return coord ? P.parseCoord(coord, boardN()) : null;           // ojo: en Pente no existe la letra I
+  }
+  function submitTyped() {
+    var inp = $('coordIn'), txt = inp.value.trim();
+    if (!canPlayNow()) return;
+    if (!txt) { if (pending && cfg.confirm !== 'none') tryMove(pending.x, pending.y); return; }
+    var c = parseTyped(txt);
+    if (!c) { setStatus(t('coord.bad'), true); sfx('error'); return; }
+    var bad = P.validateMove(state, c.x, c.y);
+    if (bad) { setStatus(t('err.' + bad), true); sfx('error'); return; }
+    inp.value = ''; kbd = c;
+    if (cfg.confirm === 'none' || (pending && pending.x === c.x && pending.y === c.y)) { tryMove(c.x, c.y); return; }
+    pending = c; hover = c; setStatus(coordLabel(c), true); sfx('pick'); render();
   }
   function setStatus(msg, isToast) {
     if (lab.active) { if (msg && isToast && !/^[A-Z]\d{1,2}$/.test(msg)) labNote(msg); return; }
@@ -11545,6 +11577,7 @@ window.NEON_BREAK = {
   $('btnSpectateOffer').addEventListener('click', function () { $('btnSpectateOffer').hidden = true; startOnline({ t: 'spectate', code: online.lastCode }); });
   $('btnLocal').addEventListener('click', function () { syncLocalMode(); accSummaries(); open('localOverlay'); });
   $('btnLocalBack').addEventListener('click', function () { open('playOverlay'); });
+  $('coordForm').addEventListener('submit', function (e) { e.preventDefault(); submitTyped(); });
   $('btnConfirm').addEventListener('click', function () { if (pending && !isOver()) tryMove(pending.x, pending.y); });
   // Sonido: los navegadores solo dejan activarlo después de un toque o clic del usuario
   ['pointerdown', 'touchend', 'click', 'keydown'].forEach(function (ev) { document.addEventListener(ev, function () { if (window.PenteSound) window.PenteSound.unlock(); if (window.PenteMusic) window.PenteMusic.kick(); }, true); });
