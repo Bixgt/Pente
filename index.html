@@ -1037,6 +1037,13 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
 .coord-form input { width: 92px; min-height: 44px; padding: 8px 12px; font: inherit; font-size: 16px; text-align: center; text-transform: lowercase; color: var(--text); background: var(--bg); border: 2px solid var(--line); border-radius: 12px; }
 .coord-form input:focus { outline: none; border-color: var(--accent); }
 .coord-form input:disabled { opacity: .5; }
+
+/* Administrador */
+.adm-sec { margin: 10px 0; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 4px 12px; }
+.adm-sec > summary { cursor: pointer; padding: 10px 0; font-weight: 700; }
+.adm-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0; border-top: 1px solid var(--line); }
+.adm-row input { width: 76px; min-height: 40px; padding: 6px 10px; text-align: center; font: inherit; font-size: 16px; color: var(--text); background: var(--bg); border: 2px solid var(--line); border-radius: 10px; }
+.adm-row input:focus { outline: none; border-color: var(--accent); }
 </style>
 </head>
 <body>
@@ -1187,7 +1194,7 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v111</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v112</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -1745,6 +1752,16 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
 </div>
 
 <!-- Perfil -->
+<div class="overlay screen" id="adminOverlay">
+  <div class="screen-body">
+    <h2 data-i18n="adm.title"></h2>
+    <p class="sub" data-i18n="adm.sub"></p>
+    <label class="check"><input type="checkbox" id="admAll"><span><span data-i18n="adm.all"></span><small data-i18n="adm.allHint"></small></span></label>
+    <div id="admBody"></div>
+    <p class="hint" id="admMsg" role="status"></p>
+    <div class="btns"><button class="btn primary" id="btnAdmSave" data-i18n="adm.save"></button><button class="btn" id="btnAdmReset" data-i18n="adm.reset"></button><button class="btn" id="btnAdmBack" data-i18n="menu.back"></button></div>
+  </div>
+</div>
 <div class="overlay screen" id="profileOverlay">
   <div class="screen-body">
     <h2 data-i18n="prof.title"></h2>
@@ -1763,7 +1780,7 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
       <p class="hint" id="pxNext"></p><p class="hint" id="pxEvent"></p><p class="hint" data-i18n="xp.how"></p>
     </div>
     <p class="hint" id="profNote"></p>
-    <div class="btns"><button type="button" class="btn" id="btnProfStats" data-i18n="prof.stats"></button></div>
+    <div class="btns"><button type="button" class="btn" id="btnProfStats" data-i18n="prof.stats"></button><button type="button" class="btn" id="btnAdmin" hidden data-i18n="adm.btn"></button></div>
     <div class="field acct" id="acctBox" hidden>
       <span class="lbl" data-i18n="auth.title"></span>
       <div id="acctOut">
@@ -1866,7 +1883,7 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 111;</script>
+<script>window.PENTE_VERSION = 112;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -3163,6 +3180,32 @@ window.GALAXY_GAME = {
   };
   var FIRSTS = { tutorial: 50, daily: 25 };                          // premio por única vez; 'mode:<modo>' vale 20
 
+  /* Niveles configurables desde el menú de administrador (se guardan en Supabase, tabla app_config, clave 'levels'):
+   * { boards: { id: nivel }, gems: { id: nivel }, parts: { tipo: { id: nivel } } }. Nivel 1 = libre. Lo que no figura queda con el valor de fábrica. */
+  var DEFAULTS = JSON.parse(JSON.stringify({ boards: BOARD_LEVEL, gems: GEM_LEVEL, parts: PART_LEVEL }));
+  function lvNum(v) { v = Math.floor(Number(v)); return isFinite(v) && v >= 1 ? Math.min(v, MAX_LEVEL) : 0; }
+  function levelsConfig() { return JSON.parse(JSON.stringify({ boards: BOARD_LEVEL, gems: GEM_LEVEL, parts: PART_LEVEL })); }
+  function defaultLevels() { return JSON.parse(JSON.stringify(DEFAULTS)); }
+  function cleanLevels(cfg) {
+    cfg = cfg && typeof cfg === 'object' ? cfg : {}; var o = { boards: {}, gems: {}, parts: {} };
+    ['boards', 'gems'].forEach(function (k) { var src = cfg[k] && typeof cfg[k] === 'object' ? cfg[k] : {}; Object.keys(src).slice(0, 60).forEach(function (id) { var v = lvNum(src[id]); if (/^[a-z0-9]{1,16}$/i.test(id) && v) o[k][id] = v; }); });
+    var ps = cfg.parts && typeof cfg.parts === 'object' ? cfg.parts : {};
+    Object.keys(ps).slice(0, 8).forEach(function (kd) { if (!/^[a-zA-Z]{1,12}$/.test(kd) || !ps[kd] || typeof ps[kd] !== 'object') return; o.parts[kd] = {}; Object.keys(ps[kd]).slice(0, 60).forEach(function (id) { var v = lvNum(ps[kd][id]); if (/^[a-zA-Z0-9]{1,16}$/.test(id) && v) o.parts[kd][id] = v; }); });
+    return o;
+  }
+  function reset(target, def, over) {                                  // vuelve a los valores de fábrica y encima pone lo configurado (cambia el objeto en el lugar: el resto del código lo comparte)
+    Object.keys(target).forEach(function (k) { delete target[k]; });
+    Object.keys(def).forEach(function (k) { target[k] = def[k]; });
+    Object.keys(over || {}).forEach(function (k) { target[k] = over[k]; });
+  }
+  function applyLevels(cfg) {
+    var c = cleanLevels(cfg);
+    reset(BOARD_LEVEL, DEFAULTS.boards, c.boards); reset(GEM_LEVEL, DEFAULTS.gems, c.gems);
+    Object.keys(DEFAULTS.parts).forEach(function (k) { reset(PART_LEVEL[k], DEFAULTS.parts[k], c.parts[k]); });
+    Object.keys(c.parts).forEach(function (k) { if (!PART_LEVEL[k]) PART_LEVEL[k] = {}, reset(PART_LEVEL[k], {}, c.parts[k]); });
+    return levelsConfig();
+  }
+
   function num(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? Math.min(v, CAP) : 0; }
   function need(level) { return 90 + 10 * level; }                    // XP para pasar del nivel `level` al siguiente (100, 110, 120...)
   function cumulative(level) { var s = 0; for (var l = 1; l < level; l++) s += need(l); return s; }   // XP total con la que se llega a ese nivel
@@ -3257,7 +3300,7 @@ window.GALAXY_GAME = {
   }
   function onlineGain(win, day) { return (20 + (win ? 20 : 0)) * eventMult(day); }
 
-  return { ONLINE_DAILY_CAP: ONLINE_DAILY_CAP, dailyGain: dailyGain, onlineGain: onlineGain, MAX_LEVEL: MAX_LEVEL, MIN_MOVES: MIN_MOVES, CASUAL_CAP: CASUAL_CAP, GEM_LEVEL: GEM_LEVEL, BOARD_LEVEL: BOARD_LEVEL, boardLevel: boardLevel, boardOk: boardOk, need: need, cumulative: cumulative, levelOf: levelOf, titleIndex: titleIndex,
+  return { ONLINE_DAILY_CAP: ONLINE_DAILY_CAP, dailyGain: dailyGain, onlineGain: onlineGain, MAX_LEVEL: MAX_LEVEL, MIN_MOVES: MIN_MOVES, CASUAL_CAP: CASUAL_CAP, GEM_LEVEL: GEM_LEVEL, BOARD_LEVEL: BOARD_LEVEL, applyLevels: applyLevels, cleanLevels: cleanLevels, levelsConfig: levelsConfig, defaultLevels: defaultLevels, boardLevel: boardLevel, boardOk: boardOk, need: need, cumulative: cumulative, levelOf: levelOf, titleIndex: titleIndex,
     clean: clean, merge: merge, unlocksAt: unlocksAt, nextUnlock: nextUnlock, PART_LEVEL: PART_LEVEL, partLevel: partLevel, partOk: partOk, partsAt: partsAt, gemOk: gemOk, award: award, eventMult: eventMult };
 });
 </script>
@@ -4284,6 +4327,10 @@ window.GALAXY_GAME = {
         });
       },
       accessToken: function () { return session ? token().catch(function () { return ''; }) : Promise.resolve(''); },     // para que el servidor de salas verifique quién sos
+      /* Configuración global (supabase/config.sql): la lee cualquiera; solo la cuenta administradora la escribe (lo comprueba la base, no el navegador) */
+      getConfig: function (key) { return raw('GET', '/rest/v1/app_config?select=value&key=eq.' + encodeURIComponent(key)).then(function (r) { return Array.isArray(r) && r[0] && r[0].value && typeof r[0].value === 'object' ? r[0].value : null; }); },
+      isAdmin: function () { return authed('POST', '/rest/v1/rpc/is_pente_admin', {}).then(function (r) { return r === true; }); },
+      setConfig: function (key, value) { return authed('POST', '/rest/v1/rpc/admin_set_config', { k: String(key), v: value }).then(function (r) { return r === true; }); },
       friendsOverview: function () { return authed('POST', '/rest/v1/rpc/friends_overview', {}); },
       friendRequest: function (name) { return authed('POST', '/rest/v1/rpc/friend_request', { p: String(name == null ? '' : name) }).then(function (r) { return typeof r === 'string' ? r : ''; }); },
       friendRespond: function (id, accept) { return authed('POST', '/rest/v1/rpc/friend_respond', { p: String(id || ''), accept: !!accept }).then(function (r) { return typeof r === 'string' ? r : ''; }); },
@@ -4390,6 +4437,10 @@ window.GALAXY_GAME = {
       'hud.captures': 'Pares capturados',
       'hud.restart': 'Reiniciar',
       'hud.confirm': 'Confirmar',
+      'adm.btn': 'Administrador', 'adm.title': 'Administrador', 'adm.sub': 'Elegí desde qué nivel se destraba cada cosa (1 = libre desde el principio). Vale para todos los jugadores.',
+      'adm.all': 'Ver todo desbloqueado en este aparato', 'adm.allHint': 'Solo para probar: no cambia el nivel real ni lo que ven los demás.',
+      'adm.boards': 'Tableros', 'adm.gems': 'Piedras de vidrio', 'adm.parts': 'Personaje', 'adm.save': 'Guardar para todos', 'adm.reset': 'Valores de fábrica', 'adm.saving': 'Guardando…', 'adm.saved': 'Listo: ya vale para todos (los demás lo ven al abrir el juego).',
+      'adm.noAuth': 'Tenés que haber entrado con la cuenta administradora.', 'adm.fail': 'No se pudo guardar. ¿Corriste supabase/config.sql en Supabase?', 'adm.resetDone': 'Valores de fábrica cargados. Tocá "Guardar para todos" para aplicarlos.',
       'coord.ph': 'ej: e7', 'coord.aria': 'Escribir la jugada', 'coord.go': 'Jugar', 'coord.bad': 'No entendí esa casilla. Probá con e7 o 7e (la letra I no existe).',
       'cfg.coordInput': 'Escribir la jugada', 'cfg.coordInputHint': 'Aparece una casilla debajo del tablero para tipear dónde va la ficha (e7 o 7e). Respeta tu forma de confirmar.',
       'hud.dragHint': 'Soltala donde quieras y tocá Confirmar.',
@@ -4723,6 +4774,10 @@ window.GALAXY_GAME = {
       'hud.captures': 'Captured pairs',
       'hud.restart': 'Restart',
       'hud.confirm': 'Confirm',
+      'adm.btn': 'Admin', 'adm.title': 'Admin', 'adm.sub': 'Choose the level that unlocks each item (1 = free from the start). Applies to every player.',
+      'adm.all': 'Show everything unlocked on this device', 'adm.allHint': 'Testing only: does not change the real level or what others see.',
+      'adm.boards': 'Boards', 'adm.gems': 'Glass stones', 'adm.parts': 'Character', 'adm.save': 'Save for everyone', 'adm.reset': 'Factory values', 'adm.saving': 'Saving…', 'adm.saved': 'Done: it applies to everyone (others see it when they open the game).',
+      'adm.noAuth': 'You must be signed in with the admin account.', 'adm.fail': 'Could not save. Did you run supabase/config.sql in Supabase?', 'adm.resetDone': 'Factory values loaded. Tap "Save for everyone" to apply them.',
       'coord.ph': 'e.g. e7', 'coord.aria': 'Type your move', 'coord.go': 'Play', 'coord.bad': "Couldn't read that square. Try e7 or 7e (there is no letter I).",
       'cfg.coordInput': 'Type your move', 'cfg.coordInputHint': 'Shows a box under the board to type where the stone goes (e7 or 7e). Follows your confirm setting.',
       'hud.dragHint': 'Drop it wherever you like and press Confirm.',
@@ -9193,6 +9248,8 @@ window.NEON_BREAK = {
     var q = qs('unlock'), k = 'pente.unlockAll';
     try { if (q === '1') localStorage.setItem(k, '1'); else if (q === '0') localStorage.removeItem(k); return localStorage.getItem(k) === '1'; } catch (e) { return q === '1'; }
   })();
+  /* Niveles de desbloqueo que decide el administrador (Supabase app_config): se guardan en el aparato para arrancar ya con ellos y se actualizan al abrir. */
+  try { XP.applyLevels(JSON.parse(localStorage.getItem('pente.lvcfg') || 'null')); } catch (e) {}
   function myLevel() { return XP.levelOf(UNLOCK_ALL ? XP.cumulative(XP.MAX_LEVEL) : myXp().t); }
   function xpModeKey() { if (!state) return 'classic'; if (state.ffa) return 'ffa'; if (state.players === 4) return 'four'; return (online.active ? online.mode : gameMode) || 'classic'; }
   function grantXp(ev) {
@@ -11726,7 +11783,50 @@ window.NEON_BREAK = {
     $('nameHint').textContent = logged ? (profile.nameSet ? t('name.locked') : t('name.pick')) : '';
     $('nameHint').hidden = !logged;
     renderProfXp(); renderCountry();
+    var ab = $('btnAdmin'); ab.hidden = true;
+    if (logged && profile.nameSet && /^bixgt$/i.test(profile.name || '')) Auth.isAdmin().then(function (ok) { ab.hidden = !ok; }, function () {});   // el botón es solo comodidad: quien decide si podés guardar es la base de datos
   }
+  /* ---------- Administrador: niveles de desbloqueo ---------- */
+  var adm = { draft: null };
+  function admRows(box, titleKey, items, group) {
+    var det = el('details', 'adm-sec'); if (group !== 'parts') det.open = true;
+    det.appendChild(el('summary', '', t(titleKey)));
+    items.forEach(function (it) {
+      var row = el('label', 'adm-row'); row.appendChild(el('span', '', it.label));
+      var inp = el('input'); inp.type = 'number'; inp.min = 1; inp.max = XP.MAX_LEVEL; inp.inputMode = 'numeric'; inp.value = it.value; inp.setAttribute('aria-label', it.label);
+      inp.addEventListener('input', function () { var v = Math.floor(Number(inp.value)); it.set(isFinite(v) && v >= 1 ? Math.min(v, XP.MAX_LEVEL) : 1); $('admMsg').textContent = ''; });
+      row.appendChild(inp); det.appendChild(row);
+    });
+    box.appendChild(det);
+  }
+  function admRender() {
+    var box = $('admBody'); box.innerHTML = ''; var d = adm.draft;
+    admRows(box, 'adm.boards', window.Themes.list.map(function (th) { return { label: t('theme.' + th.id), value: d.boards[th.id] || 1, set: function (v) { d.boards[th.id] = v; } }; }), 'boards');
+    admRows(box, 'adm.gems', window.Themes.gems.map(function (g) { return { label: t('gem.' + g.id), value: d.gems[g.id] || 1, set: function (v) { d.gems[g.id] = v; } }; }), 'gems');
+    AVK.forEach(function (k) {
+      d.parts[k] = d.parts[k] || {};
+      admRows(box, 'av.tab.' + k, avList(k).map(function (id) { return { label: t('av.' + k + '.' + id), value: d.parts[k][id] || 1, set: function (v) { d.parts[k][id] = v; } }; }), 'parts');
+    });
+  }
+  function admOpen() {
+    var cur = XP.levelsConfig(); adm.draft = { boards: {}, gems: {}, parts: {} };
+    window.Themes.list.forEach(function (th) { adm.draft.boards[th.id] = cur.boards[th.id] || 1; });
+    window.Themes.gems.forEach(function (g) { adm.draft.gems[g.id] = cur.gems[g.id] || 1; });
+    AVK.forEach(function (k) { adm.draft.parts[k] = {}; avList(k).forEach(function (id) { adm.draft.parts[k][id] = (cur.parts[k] && cur.parts[k][id]) || 1; }); });
+    $('admAll').checked = UNLOCK_ALL; $('admMsg').textContent = ''; admRender(); open('adminOverlay');
+  }
+  $('btnAdmin').addEventListener('click', admOpen);
+  $('btnAdmBack').addEventListener('click', function () { open('profileOverlay'); renderProfile(); });
+  $('admAll').addEventListener('change', function () { UNLOCK_ALL = $('admAll').checked; try { if (UNLOCK_ALL) localStorage.setItem('pente.unlockAll', '1'); else localStorage.removeItem('pente.unlockAll'); } catch (e) {} levelsChanged(); });
+  $('btnAdmReset').addEventListener('click', function () { adm.draft = XP.defaultLevels(); ['boards', 'gems'].forEach(function (k) { adm.draft[k] = adm.draft[k] || {}; }); window.Themes.list.forEach(function (th) { adm.draft.boards[th.id] = adm.draft.boards[th.id] || 1; }); window.Themes.gems.forEach(function (g) { adm.draft.gems[g.id] = adm.draft.gems[g.id] || 1; }); AVK.forEach(function (k) { var base = adm.draft.parts[k] || {}; adm.draft.parts[k] = {}; avList(k).forEach(function (id) { adm.draft.parts[k][id] = base[id] || 1; }); }); admRender(); $('admMsg').textContent = t('adm.resetDone'); });
+  $('btnAdmSave').addEventListener('click', function () {
+    if (!Auth || !Auth.user) { $('admMsg').textContent = t('adm.noAuth'); return; }
+    var clean = XP.cleanLevels(adm.draft); $('admMsg').textContent = t('adm.saving');
+    Auth.setConfig('levels', clean).then(function () {
+      try { localStorage.setItem('pente.lvcfg', JSON.stringify(clean)); } catch (e) {}
+      XP.applyLevels(clean); levelsChanged(); $('admMsg').textContent = t('adm.saved');
+    }, function (e) { $('admMsg').textContent = (e && e.code === 'auth' ? t('adm.noAuth') + ' ' : '') + t('adm.fail'); });
+  });
   var statsFrom = 'menuOverlay';
   function renderStats() {
     fillStats($('profStats'), ownStats()); fillGm($('profGm'), PP.cleanStats(ownStats())); fillCharts($('profCharts'), PP.cleanStats(ownStats()));
@@ -11923,6 +12023,19 @@ window.NEON_BREAK = {
    * Las reglas de mezcla están en PenteProfile.merge (con tests): los contadores se suman entre aparatos, nombre y preferencias gana lo último tocado. */
   var SB = window.PENTE_SUPABASE || {};
   var Auth = window.PenteAuth && SB.url && SB.key ? window.PenteAuth.create({ url: SB.url, key: SB.key, storage: window.localStorage }) : null;
+  function levelsChanged() {                                      // después de cambiar los niveles de desbloqueo: se redibuja lo que depende de ellos
+    if (!XP.boardOk(themeId, myLevel().level)) setTheme(window.Themes.defaultId);
+    buildThemePicker(); buildGemPickers(); renderProfXp(); renderXpMini(); if ($('customOverlay').classList.contains('open')) renderCust(); render();
+  }
+  function fetchLevels() {
+    if (!Auth) return;
+    Auth.getConfig('levels').then(function (v) {
+      if (!v) return;
+      try { localStorage.setItem('pente.lvcfg', JSON.stringify(XP.cleanLevels(v))); } catch (e) {}
+      XP.applyLevels(v); levelsChanged();
+    }, function () {});
+  }
+  setTimeout(fetchLevels, 300);
   var acct = { step: 'out', mode: storeGet('pente.loginMode') === 'pw' ? 'pw' : 'mail', email: '', cd: 0, cdTimer: 0, busy: false }, sync = { busy: false, dirty: false, timer: 0, state: 'idle', at: 0, err: '', promise: null };
   var applyingRemote = false;
   function curPrefs() { var p = { theme: themeId, lang: window.I18n.getLang(), cfg: cfg }; if (myCountry) p.country = myCountry; return p; }
@@ -13192,7 +13305,7 @@ window.NEON_BREAK = {
   tnoLoadSess();
 
   applyI18n(); buildThemePicker(); syncSizePicker(); syncOpts(); syncMode(); syncVis(); resize(); open('menuOverlay'); initOnline(); updateSide();
-  window.__pente = { get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, startAI: startAI, get ai() { return ai; }, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; }, get tut() { return tut; }, get profile() { return profile; }, get auth() { return Auth; }, get sync() { return sync; }, setChatW: setChatW, syncProfile: syncProfile, get tn() { return tn; }, get tno() { return tno; } };  // utilidad para pruebas manuales
+  window.__pente = { adminOpen: admOpen, get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, startAI: startAI, get ai() { return ai; }, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; }, get tut() { return tut; }, get profile() { return profile; }, get auth() { return Auth; }, get sync() { return sync; }, setChatW: setChatW, syncProfile: syncProfile, get tn() { return tn; }, get tno() { return tno; } };  // utilidad para pruebas manuales
 })();
 </script>
 <script>
