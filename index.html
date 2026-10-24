@@ -1058,6 +1058,9 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
 
 /* Neón: fondo arcade / cyberpunk del menú (neon-menu.js) */
 html[data-theme="glow"] #menuBg { opacity: 1; -webkit-mask-image: none; mask-image: none; }
+/* Tablero Neón en partida: fondo con circuitos en los bordes y marco que brilla (el filete y los corchetes se dibujan en el canvas) */
+html[data-theme="glow"] body { background: #050818 url("neon-bg.webp") center / cover no-repeat fixed; }
+html[data-theme="glow"] #board { box-shadow: 0 0 0 2px rgba(30,140,255,.9), 0 0 16px 2px rgba(30,140,255,.75), 0 0 54px rgba(255,44,191,.28), 0 0 90px rgba(0,229,255,.18); border-radius: 14px; }
 #menuFx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
 #menuFx[hidden] { display: none; }
 
@@ -1221,7 +1224,7 @@ html[data-theme="glow"] #menuBg { opacity: 1; -webkit-mask-image: none; mask-ima
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v118</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v119</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -1923,7 +1926,7 @@ html[data-theme="glow"] #menuBg { opacity: 1; -webkit-mask-image: none; mask-ima
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 118;</script>
+<script>window.PENTE_VERSION = 119;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -7483,7 +7486,7 @@ window.GALAXY_GAME = {
       id: 'glow',
       css: { '--bg': '#070a18', '--panel': '#0f1538', '--panel-2': '#19225a', '--line': '#3a4cc0', '--accent-ink': '#02121a', '--accent': '#7cf0ff', '--s1a': '#ffd0ec', '--s1b': '#e0147a', '--s2a': '#eaffff', '--s2b': '#17bfe0', '--s3a': '#e6ffd0', '--s3b': '#35c03a', '--s4a': '#fff2c0', '--s4b': '#f0a000',
              '--board-shadow': '0 0 42px rgba(70,120,255,.38)' },
-      board: { menuArt: 'neon', bg: ['#060a18', '#131a3a'], line: 'rgba(110,150,255,.55)', lineGlow: 'rgba(80,130,255,.9)', star: 'rgba(170,200,255,.95)', label: 'rgba(150,185,255,.78)', labelHi: '#ffffff' },
+      board: { menuArt: 'neon', frame: 'neon', bg: ['#060a18', '#131a3a'], line: 'rgba(110,150,255,.55)', lineGlow: 'rgba(80,130,255,.9)', star: 'rgba(170,200,255,.95)', label: 'rgba(150,185,255,.78)', labelHi: '#ffffff' },
       stones: { 1: { a: '#ffd0ec', b: '#e0147a', glow: '#ff2d95', neon: 'pink' }, 2: { a: '#eaffff', b: '#17bfe0', glow: '#27e8ff', neon: 'cyan' }, 3: { a: '#e6ffd0', b: '#35c03a', glow: '#5dff5d', neon: 'green' }, 4: { a: '#fff2c0', b: '#f0a000', glow: '#ffc233', neon: 'amber' } },
       last: { ring: '#ffffff', dot: { 1: '#ffffff', 2: '#062030', 3: '#062030', 4: '#062030' } },
       zone: { fill: 'rgba(255,255,255,.07)', stroke: 'rgba(160,190,255,.55)' },
@@ -10850,6 +10853,18 @@ window.NEON_BREAK = {
       var bg = ctx.createLinearGradient(0, 0, W, W);
       bg.addColorStop(0, th.board.bg[0]); bg.addColorStop(1, th.board.bg[1]);
       ctx.fillStyle = bg; ctx.fillRect(0, 0, W, W);
+    }
+    if (th.board.frame === 'neon') {                    // marco neón: filete azul eléctrico + corchetes en las 4 esquinas (como en el diseño de Ro)
+      var fi = Math.round(W * 0.012), cl = Math.round(W * 0.07), lwF = Math.max(2, Math.round(W * 0.004));
+      ctx.save(); ctx.lineCap = 'square'; ctx.lineJoin = 'miter';
+      ctx.strokeStyle = 'rgba(30,140,255,.55)'; ctx.lineWidth = lwF; ctx.shadowColor = '#1e8cff'; ctx.shadowBlur = W * 0.012;
+      ctx.strokeRect(fi, fi, W - 2 * fi, W - 2 * fi);
+      ctx.strokeStyle = '#27e8ff'; ctx.lineWidth = lwF * 1.6; ctx.shadowColor = '#27e8ff'; ctx.shadowBlur = W * 0.02;
+      ctx.beginPath();
+      [[fi, fi, 1, 1], [W - fi, fi, -1, 1], [fi, W - fi, 1, -1], [W - fi, W - fi, -1, -1]].forEach(function (c) {
+        ctx.moveTo(c[0] + c[2] * cl, c[1]); ctx.lineTo(c[0], c[1]); ctx.lineTo(c[0], c[1] + c[3] * cl);
+      });
+      ctx.stroke(); ctx.restore();
     }
     // líneas (con resplandor si el tema lo pide). Grosor ENTERO y posición alineada al píxel: todas las líneas quedan iguales y nítidas
     // (con medios píxeles unas se veían más gruesas o borrosas que otras). El borde exterior es un poco más marcado.
