@@ -1044,6 +1044,27 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
 .adm-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0; border-top: 1px solid var(--line); }
 .adm-row input { width: 76px; min-height: 40px; padding: 6px 10px; text-align: center; font: inherit; font-size: 16px; color: var(--text); background: var(--bg); border: 2px solid var(--line); border-radius: 10px; }
 .adm-row input:focus { outline: none; border-color: var(--accent); }
+
+/* Logros */
+.ach-n { margin-left: auto; margin-right: 6px; font-size: 13px; opacity: .7; font-variant-numeric: tabular-nums; }
+.ach-h { margin: 18px 0 8px; font-size: 15px; letter-spacing: .02em; opacity: .85; }
+.ach-card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; margin: 8px 0; }
+.ach-card:not(.has) .ach-top { opacity: .6; }
+.ach-card.full { border-color: var(--accent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent); }
+.ach-top { display: flex; gap: 12px; align-items: center; }
+.ach-medal { font-size: 26px; line-height: 1; flex: none; }
+.ach-tx { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ach-tx b { font-size: 15px; } .ach-tx small { opacity: .75; line-height: 1.3; }
+.ach-bar { margin: 10px 0 4px; height: 8px; } .ach-bar i { display: block; height: 100%; }
+.ach-prog { font-size: 12px; opacity: .75; }
+.ach-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.ach-chip { font-size: 11.5px; padding: 3px 9px; border-radius: 99px; border: 1px solid var(--line); opacity: .6; }
+.ach-chip.on { opacity: 1; border-color: var(--accent); }
+
+/* Neón: fondo arcade / cyberpunk del menú (neon-menu.js) */
+html[data-theme="glow"] #menuBg { opacity: 1; -webkit-mask-image: none; mask-image: none; }
+#menuFx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+#menuFx[hidden] { display: none; }
 </style>
 </head>
 <body>
@@ -1194,7 +1215,7 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v112</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v114</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -1203,6 +1224,7 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
       <button class="btn" id="btnTourn"><svg class="mi" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8v6a4 4 0 0 1-8 0z"/><path d="M8 6H4v2a4 4 0 0 0 4 4"/><path d="M16 6h4v2a4 4 0 0 1-4 4"/><path d="M12 14v4"/><path d="M8 20h8"/></svg><span class="ml" data-i18n="tn.menu"></span><svg class="mc" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="btn" id="btnFriends"><svg class="mi" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14a4 4 0 0 1 4 4v2"/></svg><span class="ml" data-i18n="fr.btn"></span><b class="badge" id="frBadge" hidden></b><svg class="mc" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="btn" id="btnStats"><svg class="mi" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20V12"/><path d="M12 20V5"/><path d="M19 20v-9"/></svg><span class="ml" data-i18n="prof.stats"></span><svg class="mc" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="btn" id="btnAch"><svg class="mi" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="5.5"/><path d="M8.5 13.5L7 21l5-2.5 5 2.5-1.5-7.5"/></svg><span class="ml" data-i18n="ach.title"></span><span class="ach-n" id="achMenuN"></span><svg class="mc" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="btn" id="btnCustomize"><svg class="mi" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 3l3 3-9 9-3-3z"/><path d="M9 12c-2.5 0-4 1.6-4 4 0 1.5-.8 2.6-2 3 3.5 1 8 .5 8-3.5"/></svg><span class="ml" data-i18n="cz.title"></span><svg class="mc" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="btn" id="btnRules"><svg class="mi" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5.5C5 4.5 8 4.5 12 6.5c4-2 7-2 9-1v13c-2-1-5-1-9 1-4-2-7-2-9-1z"/><path d="M12 6.5V19.5"/></svg><span class="ml" data-i18n="menu.rules"></span><svg class="mc" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="btn" id="btnInstall" hidden><svg class="mi" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg><span class="ml" data-i18n="inst.btn"></span><svg class="mc" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
@@ -1752,6 +1774,16 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
 </div>
 
 <!-- Perfil -->
+<div class="overlay screen" id="achOverlay">
+  <div class="screen-body">
+    <h2 data-i18n="ach.title"></h2>
+    <p class="sub" id="achSub"></p>
+    <div class="xpbar"><i id="achFill"></i></div>
+    <div id="achBody"></div>
+    <p class="hint" data-i18n="ach.note"></p>
+    <div class="btns"><button class="btn primary" id="btnAchBack" data-i18n="menu.back"></button></div>
+  </div>
+</div>
 <div class="overlay screen" id="adminOverlay">
   <div class="screen-body">
     <h2 data-i18n="adm.title"></h2>
@@ -1883,7 +1915,7 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 112;</script>
+<script>window.PENTE_VERSION = 114;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -2624,6 +2656,125 @@ window.GALAXY_GAME = {
 })(typeof self !== 'undefined' ? self : this);
 </script>
 <script>
+/* Fondo del menú del tablero Neón: arcade / cyberpunk elegante. El centro (detrás de PENTE y los botones) queda limpio; el espectáculo está en las esquinas y los costados.
+ * draw() pinta la capa fija en el canvas #menuBg; sync(true) enciende una capa aparte (#menuFx) con destellos y fichas que respiran MUY despacio. */
+(function (root) {
+  'use strict';
+  var C = { bg: '#070B1D', violet: '#151139', cyan: '#00E5FF', fucsia: '#FF2CBF', accent: '#9A73FF' };
+  var st = { stones: [], sparks: [], crosses: [], w: 0, h: 0, dpr: 1 }, fx = null, raf = 0, on = false, lastT = 0;
+  function rng(seed) { var a = seed >>> 0; return function () { a = (a + 0x6D2B79F5) >>> 0; var t = a; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function rgba(hex, a) { var n = parseInt(hex.slice(1), 16); return 'rgba(' + (n >> 16) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + a + ')'; }
+  function glow(g, x, y, r, col, a) { var q = g.createRadialGradient(x, y, 0, x, y, r); q.addColorStop(0, rgba(col, a)); q.addColorStop(1, rgba(col, 0)); g.fillStyle = q; g.fillRect(x - r, y - r, r * 2, r * 2); }
+
+  function draw(g, w, h, br, cell, ox, oy) {
+    var R = rng(2026), inBody = function (x, y, p) { return x > br.left - p && x < br.right + p && y > br.top - p && y < br.bottom + p; };
+    st.stones = []; st.sparks = []; st.crosses = []; st.w = w; st.h = h;
+    // 1. fondo con profundidad: azul noche → violeta profundo
+    var bg = g.createLinearGradient(0, 0, w * 0.35, h); bg.addColorStop(0, C.bg); bg.addColorStop(0.55, '#0c0d2b'); bg.addColorStop(1, C.violet);
+    g.fillStyle = bg; g.fillRect(0, 0, w, h);
+    // 2. cuadrícula: azul eléctrico tenue
+    g.strokeStyle = 'rgba(40,110,255,.17)'; g.lineWidth = 1; g.beginPath();
+    var x, y; for (x = ox % cell; x <= w; x += cell) { g.moveTo(x + .5, 0); g.lineTo(x + .5, h); }
+    for (y = oy % cell; y <= h; y += cell) { g.moveTo(0, y + .5); g.lineTo(w, y + .5); }
+    g.stroke();
+    // zona limpia detrás de PENTE y los botones: un velo suave que apaga la grilla en el centro
+    var cx = (br.left + br.right) / 2, cy = (br.top + br.bottom) / 2, rx = Math.max(160, (br.right - br.left) * 0.62), ry = Math.max(220, (br.bottom - br.top) * 0.62);
+    g.save(); g.translate(cx, cy); g.scale(1, ry / rx);
+    var veil = g.createRadialGradient(0, 0, rx * 0.35, 0, 0, rx); veil.addColorStop(0, 'rgba(8,10,30,.78)'); veil.addColorStop(1, 'rgba(8,10,30,0)');
+    g.fillStyle = veil; g.fillRect(-rx, -rx * (ry / rx) * 1.6, rx * 2, rx * 2 * 1.6 * (ry / rx) + 1); g.restore();
+    // 3. luces ambientales en las esquinas
+    g.globalCompositeOperation = 'screen';
+    var big = Math.max(w, h);
+    glow(g, 0, 0, big * 0.55, C.cyan, 0.2); glow(g, w, h, big * 0.6, C.fucsia, 0.2); glow(g, w, 0, big * 0.42, C.accent, 0.14); glow(g, 0, h, big * 0.42, C.cyan, 0.1);
+    // estelas de luz: líneas diagonales que nacen en las esquinas y se apagan
+    function streak(x0, y0, ang, len, col, a, wd) {
+      var x1 = x0 + Math.cos(ang) * len, y1 = y0 + Math.sin(ang) * len, q = g.createLinearGradient(x0, y0, x1, y1);
+      q.addColorStop(0, rgba(col, a)); q.addColorStop(1, rgba(col, 0)); g.strokeStyle = q; g.lineWidth = wd; g.lineCap = 'round'; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke();
+    }
+    var L = big * 0.5;
+    streak(-10, h * 0.1, 0.5, L * 0.7, C.cyan, 0.55, 1.6); streak(-10, h * 0.16, 0.52, L * 0.5, C.cyan, 0.3, 1); streak(w * 0.18, -10, 1.2, L * 0.5, C.accent, 0.35, 1.2);
+    streak(w + 10, h * 0.9, Math.PI + 0.5, L * 0.7, C.fucsia, 0.55, 1.6); streak(w + 10, h * 0.84, Math.PI + 0.52, L * 0.5, C.fucsia, 0.3, 1); streak(w * 0.82, h + 10, -1.2 + Math.PI, L * 0.5, C.fucsia, 0.3, 1.2);
+    g.globalCompositeOperation = 'source-over';
+    // 4. detalles tecnológicos pegados a los bordes: circuitos con líneas interrumpidas y nodos
+    var band = Math.max(18, Math.min(64, Math.min(br.left - 14, w - br.right - 14)));
+    function circuit(sx, sy, dir, steps, col) {                    // dir: 0 → derecha, 1 ↓, 2 ← , 3 ↑ ; cada tramo termina en un giro de 45°/90°
+      var px = sx, py = sy, d = dir, dash = R() < 0.5; g.strokeStyle = rgba(col, 0.42); g.lineWidth = 1.1; g.setLineDash(dash ? [7, 5] : []); g.beginPath(); g.moveTo(px, py);
+      for (var i = 0; i < steps; i++) {
+        var seg = 16 + R() * 34, dx = [1, 0, -1, 0][d] * seg, dy = [0, 1, 0, -1][d] * seg;
+        if (inBody(px + dx, py + dy, 8) || px + dx < 2 || py + dy < 2 || px + dx > w - 2 || py + dy > h - 2) break;
+        px += dx; py += dy; g.lineTo(px, py);
+        if (R() < 0.6) { var k = R() < 0.5 ? 1 : 3; d = (d + k) % 4; }
+      }
+      g.stroke(); g.setLineDash([]);
+      g.fillStyle = rgba(col, 0.9); g.beginPath(); g.arc(px, py, 2.2, 0, 6.2832); g.fill(); g.strokeStyle = rgba(col, 0.5); g.beginPath(); g.arc(sx, sy, 3.4, 0, 6.2832); g.stroke();
+    }
+    var cols = [C.cyan, C.accent, C.fucsia], ci = 0, i;
+    for (i = 0; i < 9; i++) {                                      // a lo largo de los 4 bordes
+      var e = i % 4, t = R();
+      var sx = e === 0 ? t * w : e === 1 ? w - 6 - R() * band * 0.6 : e === 2 ? t * w : 6 + R() * band * 0.6, sy = e === 0 ? 6 + R() * 26 : e === 1 ? t * h : e === 2 ? h - 6 - R() * 26 : t * h;
+      if (inBody(sx, sy, 6)) continue;
+      circuit(sx, sy, e === 0 ? 0 : e === 1 ? 1 : e === 2 ? 2 : 3, 3 + (R() * 4 | 0), cols[ci++ % 3]);
+    }
+    // 5. cruces iluminados en fucsia (algunas intersecciones) y fichas neón de doble aro
+    var gxMin = -Math.ceil(ox / cell), gxMax = Math.ceil((w - ox) / cell), gyMin = -Math.ceil(oy / cell), gyMax = Math.ceil((h - oy) / cell), n = 0;
+    for (var gy = gyMin; gy <= gyMax; gy++) for (var gx = gxMin; gx <= gxMax; gx++) {
+      var r = R(), sxp = ox + gx * cell + .5, syp = oy + gy * cell + .5;
+      if (sxp < 4 || syp < 4 || sxp > w - 4 || syp > h - 4 || inBody(sxp, syp, cell * 0.5)) continue;
+      if (r < 0.045) { var col = n++ % 2 ? C.cyan : C.fucsia; st.stones.push({ x: sxp, y: syp, col: col, ph: R() * 6.28, per: 4.5 + R() * 4 }); }
+      else if (r < 0.075) st.crosses.push({ x: sxp, y: syp, ph: R() * 6.28 });
+    }
+    st.crosses.forEach(function (c) {
+      g.globalCompositeOperation = 'screen'; glow(g, c.x, c.y, 15, C.fucsia, 0.5); g.globalCompositeOperation = 'source-over';
+      g.strokeStyle = rgba(C.fucsia, 0.8); g.lineWidth = 1.3; g.beginPath(); g.moveTo(c.x - 6, c.y); g.lineTo(c.x + 6, c.y); g.moveTo(c.x, c.y - 6); g.lineTo(c.x, c.y + 6); g.stroke();
+      g.fillStyle = '#ffd6f3'; g.beginPath(); g.arc(c.x, c.y, 1.5, 0, 6.2832); g.fill();
+    });
+    var sr = cell * 0.34;
+    st.stones.forEach(function (s) {
+      g.globalCompositeOperation = 'screen'; glow(g, s.x, s.y, sr * 2.1, s.col, 0.2); g.globalCompositeOperation = 'source-over';
+      g.fillStyle = '#04071a'; g.beginPath(); g.arc(s.x, s.y, sr * 0.8, 0, 6.2832); g.fill();                      // centro oscuro
+      g.strokeStyle = rgba(s.col, 0.95); g.lineWidth = 2.2; g.beginPath(); g.arc(s.x, s.y, sr, 0, 6.2832); g.stroke();      // aro de afuera
+      g.strokeStyle = rgba(s.col, 0.6); g.lineWidth = 1.1; g.beginPath(); g.arc(s.x, s.y, sr * 0.7, 0, 6.2832); g.stroke(); // aro de adentro
+    });
+    // 6. partículas luminosas cerca de los bordes
+    for (i = 0; i < 46; i++) {
+      var side = R(), px2 = R() * w, py2 = R() * h;
+      if (side < 0.5) px2 = R() < 0.5 ? R() * Math.max(10, br.left * 0.9) : w - R() * Math.max(10, (w - br.right) * 0.9); else py2 = R() < 0.5 ? R() * Math.max(14, br.top * 0.8) : h - R() * Math.max(14, (h - br.bottom) * 0.8);
+      if (inBody(px2, py2, 4)) continue;
+      var pc = cols[(R() * 3) | 0], pr = 0.6 + R() * 1.3; st.sparks.push({ x: px2, y: py2, col: pc, r: pr, ph: R() * 6.28, per: 3 + R() * 5 });
+      g.fillStyle = rgba(pc, 0.55); g.beginPath(); g.arc(px2, py2, pr, 0, 6.2832); g.fill();
+    }
+  }
+
+  /* Capa animada: solo el resplandor de las fichas, de los cruces y de las partículas. ~12 cuadros por segundo, apagada con "Animaciones" desactivado. */
+  function tick(ts) {
+    raf = 0; if (!on || !fx) return;
+    if (ts - lastT >= 80) {
+      lastT = ts; var g = fx.getContext('2d'), tt = ts / 1000;
+      g.setTransform(st.dpr, 0, 0, st.dpr, 0, 0); g.clearRect(0, 0, st.w, st.h); g.globalCompositeOperation = 'screen';
+      st.stones.forEach(function (s) { var k = 0.5 + 0.5 * Math.sin(tt * 6.2832 / s.per + s.ph); glow(g, s.x, s.y, 30, s.col, 0.1 + 0.3 * k); });
+      st.crosses.forEach(function (c) { var k = 0.5 + 0.5 * Math.sin(tt * 6.2832 / 6 + c.ph); glow(g, c.x, c.y, 16, C.fucsia, 0.1 + 0.4 * k); });
+      st.sparks.forEach(function (s) { var k = Math.pow(0.5 + 0.5 * Math.sin(tt * 6.2832 / s.per + s.ph), 3); if (k > 0.05) { g.fillStyle = rgba(s.col, 0.75 * k); g.beginPath(); g.arc(s.x, s.y, s.r + 0.9, 0, 6.2832); g.fill(); } });
+      g.globalCompositeOperation = 'source-over';
+    }
+    raf = requestAnimationFrame(tick);
+  }
+  function ensure() {
+    if (fx) return true; var base = document.getElementById('menuBg'); if (!base || !base.parentNode) return false;
+    fx = document.createElement('canvas'); fx.id = 'menuFx'; fx.setAttribute('aria-hidden', 'true'); base.parentNode.insertBefore(fx, base.nextSibling); return true;
+  }
+  function fit(dpr) { st.dpr = dpr; if (fx) { fx.width = Math.round(st.w * dpr); fx.height = Math.round(st.h * dpr); } }
+  function sync(want) {
+    on = !!want && st.stones.length + st.sparks.length > 0; if (on && !ensure()) on = false;
+    if (!on) { if (raf) { cancelAnimationFrame(raf); raf = 0; } if (fx) { fx.hidden = true; } return; }
+    var base = document.getElementById('menuBg'); if (base) fit(Math.min(2, window.devicePixelRatio || 1));
+    fx.hidden = false; if (!raf) raf = requestAnimationFrame(tick);
+  }
+  function hide() { if (fx) fx.hidden = true; if (raf) { cancelAnimationFrame(raf); raf = 0; } on = false; }
+  document.addEventListener('visibilitychange', function () { if (document.hidden) { if (raf) { cancelAnimationFrame(raf); raf = 0; } } else if (on && !raf) raf = requestAnimationFrame(tick); });
+  root.PenteNeon = { draw: draw, sync: sync, hide: hide };
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
 /*
  * PENTE CORE — lógica pura, sin DOM, sin red.
  * Funciona en navegador (window.PenteCore) y en Node (require).
@@ -3305,6 +3456,123 @@ window.GALAXY_GAME = {
 });
 </script>
 <script>
+/* LOGROS de Pente. Lógica pura (sin DOM ni red): se prueba en Node.
+ * Estado (dentro de stats.ach, viaja con el perfil): { c: { contador: n }, u: ['ga1', ...] logros ya ganados, k: ['AB12:p', ...] eventos de torneo ya contados }.
+ * Contadores que SUMAN entre aparatos: bd_<tablero>, l6, cap, tri, dbl, cb, fast, tp, td, tg. Los que van por MÁXIMO: m_fr, m_ds.
+ * OJO: lo informa el navegador, así que sirve para motivar, no para competir (igual que el XP). */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.PenteAch = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+  var CAP = 10000000;
+  var BOARDS = ['clasico', 'tradicional', 'glow', 'papel', 'playa', 'jardin', 'halloween', 'galaxia'];
+  var GTYPES = ['classic', 'triples', 'gomoku', 'blitz', 'bullet', 'four', 'ffa', 'daily'];
+  var SUMS = ['l6', 'cap', 'tri', 'dbl', 'cb', 'fast', 'tp', 'td', 'tg'].concat(BOARDS.map(function (b) { return 'bd_' + b; }));
+  var MAXES = ['m_fr', 'm_ds'];
+  function stat(ctx, mode, f) { var s = ctx && ctx.stats && ctx.stats[mode]; return s ? s[f] || 0 : 0; }
+  function cnt(ctx, k) { return (ctx && ctx.c && ctx.c[k]) || 0; }
+  function boardFam(id, theme) { return { id: id, group: 'board', theme: theme, tiers: [10, 50, 200], val: function (x) { return cnt(x, 'bd_' + theme); } }; }
+  /* Cada familia tiene 1 o más escalones; el logro es `id + número de escalón` (ga1, ga2, ga3). */
+  var FAMILIES = [
+    boardFam('ga', 'galaxia'), boardFam('ha', 'halloween'), boardFam('ja', 'jardin'), boardFam('pl', 'playa'), boardFam('pa', 'papel'), boardFam('ne', 'glow'),
+    { id: 'l6', group: 'tactic', tiers: [1, 20, 100], val: function (x) { return cnt(x, 'l6'); } },
+    { id: 'cp', group: 'tactic', tiers: [10, 50, 250], val: function (x) { return cnt(x, 'cap'); } },
+    { id: 'tr', group: 'tactic', tiers: [25], val: function (x) { return cnt(x, 'tri'); } },
+    { id: 'db', group: 'tactic', tiers: [1], val: function (x) { return cnt(x, 'dbl'); } },
+    { id: 'cb', group: 'tactic', tiers: [1], val: function (x) { return cnt(x, 'cb'); } },
+    { id: 'fs', group: 'tactic', tiers: [1], val: function (x) { return cnt(x, 'fast'); } },
+    { id: 'a1', group: 'ai', tiers: [1], val: function (x) { return stat(x, 'ai_beginner', 'w'); } },
+    { id: 'a2', group: 'ai', tiers: [1], val: function (x) { return stat(x, 'ai_easy', 'w'); } },
+    { id: 'a3', group: 'ai', tiers: [1], val: function (x) { return stat(x, 'ai_medium', 'w'); } },
+    { id: 'a4', group: 'ai', tiers: [1], val: function (x) { return stat(x, 'ai_hard', 'w'); } },
+    { id: 'gy', group: 'ai', tiers: [1, 10], val: function (x) { return stat(x, 'ai_goody', 'w'); } },
+    { id: 'on', group: 'online', tiers: [1, 25, 100], val: function (x) { return stat(x, 'online', 'w'); } },
+    { id: 'tp', group: 'online', tiers: [1], val: function (x) { return cnt(x, 'tp'); } },
+    { id: 'td', group: 'online', tiers: [1], val: function (x) { return cnt(x, 'td'); } },
+    { id: 'tg', group: 'online', tiers: [1], val: function (x) { return cnt(x, 'tg'); } },
+    { id: 'fr', group: 'online', tiers: [1], val: function (x) { return cnt(x, 'm_fr'); } },
+    { id: 'ds', group: 'habit', tiers: [3, 7, 30], val: function (x) { return cnt(x, 'm_ds'); } },
+    { id: 'lv', group: 'habit', tiers: [10, 25, 50], val: function (x) { return (x && x.level) || 1; } },
+    { id: 'co', group: 'habit', tiers: [8], val: function (x) { return BOARDS.filter(function (b) { return cnt(x, 'bd_' + b) > 0; }).length; } },
+    { id: 'mo', group: 'habit', tiers: [8], val: function (x) { return GTYPES.filter(function (g) { return stat(x && { stats: x.stats && x.stats.gm }, g, 'p') > 0; }).length; } }
+  ];
+  var GROUPS = ['board', 'tactic', 'ai', 'online', 'habit'];
+  var IDS = {}; FAMILIES.forEach(function (f) { f.tiers.forEach(function (n, i) { IDS[f.id + (i + 1)] = { fam: f, tier: i + 1, target: n }; }); });
+
+  function num(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? Math.min(v, CAP) : 0; }
+  function clean(x) {
+    x = x && typeof x === 'object' ? x : {};
+    var c = {}, src = x.c && typeof x.c === 'object' ? x.c : {};
+    SUMS.concat(MAXES).forEach(function (k) { var v = num(src[k]); if (v) c[k] = v; });
+    var seen = {}, u = (Array.isArray(x.u) ? x.u : []).filter(function (id) { if (!IDS[id] || seen[id]) return false; seen[id] = 1; return true; }).sort();
+    var s2 = {}, k = (Array.isArray(x.k) ? x.k : []).filter(function (e) { if (typeof e !== 'string' || !/^[A-Za-z0-9]{3,10}:[pdg]$/.test(e) || s2[e]) return false; s2[e] = 1; return true; }).slice(-40);
+    return { c: c, u: u, k: k };
+  }
+  function empty(a) { return !Object.keys(a.c).length && !a.u.length && !a.k.length; }
+  function merge(local, base, remote) {
+    var l = clean(local), b = clean(base), r = clean(remote), o = { c: {}, u: l.u.concat(r.u), k: r.k.concat(l.k) };
+    SUMS.forEach(function (k) { var v = num((r.c[k] || 0) + Math.max(0, (l.c[k] || 0) - (b.c[k] || 0))); if (v) o.c[k] = v; });
+    MAXES.forEach(function (k) { var v = Math.max(l.c[k] || 0, r.c[k] || 0); if (v) o.c[k] = v; });
+    return clean(o);
+  }
+  /* d: { l6: 2, cap: 3, ..., m_fr: 4 } (suma o máximo según el contador), ev: ['CODE:p'] eventos de torneo que se cuentan una sola vez */
+  function add(state, d, ev) {
+    var s = clean(state), c = s.c;
+    Object.keys(d || {}).forEach(function (k) {
+      if (SUMS.indexOf(k) >= 0) c[k] = num((c[k] || 0) + num(d[k]));
+      else if (MAXES.indexOf(k) >= 0) c[k] = Math.max(c[k] || 0, num(d[k]));
+    });
+    (ev || []).forEach(function (e) {
+      if (s.k.indexOf(e) >= 0) return; s.k.push(e);
+      var t = e.slice(-1); c[t === 'p' ? 'tp' : t === 'd' ? 'td' : 'tg'] = num((c[t === 'p' ? 'tp' : t === 'd' ? 'td' : 'tg'] || 0) + 1);
+    });
+    return clean(s);
+  }
+  /* ctx: { stats (perfil), level }. Devuelve { state, fresh: [ids recién ganados] } */
+  function evaluate(state, ctx) {
+    var s = clean(state), fresh = [], x = { c: s.c, stats: ctx && ctx.stats, level: ctx && ctx.level };
+    FAMILIES.forEach(function (f) { var v = f.val(x); f.tiers.forEach(function (n, i) { var id = f.id + (i + 1); if (v >= n && s.u.indexOf(id) < 0) { s.u.push(id); fresh.push(id); } }); });
+    return { state: clean(s), fresh: fresh };
+  }
+  function progress(state, ctx) {           // para la pantalla: por familia, valor actual y escalones
+    var s = clean(state), x = { c: s.c, stats: ctx && ctx.stats, level: ctx && ctx.level };
+    return FAMILIES.map(function (f) { var v = f.val(x); return { id: f.id, group: f.group, theme: f.theme, value: v, tiers: f.tiers.map(function (n, i) { var id = f.id + (i + 1); return { id: id, n: n, done: s.u.indexOf(id) >= 0 || v >= n }; }) }; });
+  }
+  function total() { return Object.keys(IDS).length; }
+
+  /* Mira la partida jugada (state.moves con las capturas de cada jugada) y cuenta lo que hizo `me`. Solo partidas de 2 jugadores. */
+  function analyze(st, me) {
+    var out = { l6: 0, cap: 0, tri: 0, dbl: 0, cb: 0, fast: 0 };
+    if (!st || !st.moves || st.players === 4 || !me || st.ffa) return out;
+    var n = st.size, B = new Array(n * n), i; for (i = 0; i < B.length; i++) B[i] = 0;
+    var v = st.options && st.options.variant, grp = v === 'triples' ? 3 : 2, pts = [0, 0, 0], worstDeficit = 0, mine = 0;
+    function get(x, y) { return x < 0 || y < 0 || x >= n || y >= n ? -1 : B[y * n + x]; }
+    st.moves.forEach(function (m) {
+      var p = m.player; B[m.y * n + m.x] = p;
+      (m.captured || []).forEach(function (c) { B[c.y * n + c.x] = 0; });
+      var groups = v === 'gomoku' ? 0 : Math.floor((m.captured || []).length / grp);
+      pts[p] += groups;
+      if (p !== me) { worstDeficit = Math.max(worstDeficit, pts[p] - pts[me]); return; }
+      mine++; out.cap += groups; if (groups >= 2) out.dbl++;
+      var six = false, tri = false;
+      [[1, 0], [0, 1], [1, 1], [1, -1]].forEach(function (d) {
+        var a = 1, x = m.x + d[0], y = m.y + d[1]; while (get(x, y) === me) { a++; x += d[0]; y += d[1]; }
+        var e1 = get(x, y); x = m.x - d[0]; y = m.y - d[1]; while (get(x, y) === me) { a++; x -= d[0]; y -= d[1]; }
+        var e2 = get(x, y);
+        if (a >= 6) six = true; if (a === 3 && e1 === 0 && e2 === 0) tri = true;
+      });
+      if (six) out.l6++; if (tri) out.tri++;
+    });
+    var won = st.status === 'won' && st.winner === me;
+    if (won && worstDeficit >= 4) out.cb = 1;
+    if (won && mine <= 20) out.fast = 1;
+    return out;
+  }
+  return { FAMILIES: FAMILIES, GROUPS: GROUPS, BOARDS: BOARDS, IDS: IDS, clean: clean, empty: empty, merge: merge, add: add, evaluate: evaluate, progress: progress, total: total, analyze: analyze };
+});
+</script>
+<script>
 /* Imágenes del personaje Clásico (cabeza y hombros, 160 px, WebP): 14 colores x 6 expresiones, y 20 peinados en grises (hair.01..hair.20). Generado por tools/avatar-assets (no editar a mano). */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
@@ -3503,9 +3771,9 @@ window.GALAXY_GAME = {
  * OJO: las estadísticas de máquina y local las informa el navegador, así que no sirven para un ranking; las online las va a verificar el servidor.
  */
 (function (root, factory) {
-  if (typeof module === 'object' && module.exports) module.exports = factory(require('./xp.js'));
-  else root.PenteProfile = factory(root.PenteXP);
-})(typeof self !== 'undefined' ? self : this, function (XP) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./xp.js'), require('./achievements.js'));
+  else root.PenteProfile = factory(root.PenteXP, root.PenteAch);
+})(typeof self !== 'undefined' ? self : this, function (XP, ACH) {
   'use strict';
 
   var MODES = ['ai_beginner', 'ai_easy', 'ai_medium', 'ai_hard', 'ai_goody', 'local', 'online'];
@@ -3537,6 +3805,7 @@ window.GALAXY_GAME = {
     });
     var gm = cleanGm(st.gm); if (Object.keys(gm).length) out.gm = gm;
     var xp = XP.clean(st.xp); if (xp.t || xp.f.length || xp.dd) out.xp = xp;      // XP y niveles (xp.js): viaja junto con las estadísticas
+    var ach = ACH.clean(st.ach); if (!ACH.empty(ach)) out.ach = ach;                // logros (achievements.js)
     return out;
   }
   function avatarLib() { try { if (typeof window !== 'undefined') return window.PenteAvatar || null; return require('./avatar.js'); } catch (e) { return null; } }
@@ -3609,6 +3878,7 @@ window.GALAXY_GAME = {
     });
     if (Object.keys(gm).length) out.gm = gm;
     var xp = XP.merge(local.xp, base.xp, remote.xp); if (xp.t || xp.f.length || xp.dd) out.xp = xp;
+    var ach = ACH.merge(local.ach, base.ach, remote.ach); if (!ACH.empty(ach)) out.ach = ach;
     return out;
   }
   function cleanPrefs(pr) {
@@ -6067,6 +6337,188 @@ window.GALAXY_GAME = {
 })(typeof self !== 'undefined' ? self : this);
 </script>
 <script>
+/* Logros — es */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.es, {
+    "ach.title": "Logros",
+    "ach.sub": "Se ganan jugando. Cada tablero, cada jugada y cada día suman.",
+    "ach.count": "{a} de {b} logros",
+    "ach.new1": "🏅 Logro nuevo: {name}",
+    "ach.newN": "🏅 {n} logros nuevos",
+    "ach.next": "Próximo: {name}",
+    "ach.all": "¡Completo!",
+    "ach.note": "Se guardan en tu perfil y viajan con tu cuenta. Sirven para motivar, no para competir. Los contadores de jugadas arrancan desde que se instaló esta versión.",
+    "ach.g.board": "Tableros",
+    "ach.g.tactic": "Jugadas",
+    "ach.g.ai": "Contra la máquina",
+    "ach.g.online": "Online y torneos",
+    "ach.g.habit": "Constancia",
+    "ach.d.board": "Jugá {n} partidas con el tablero {board}.",
+    "ach.d.l6": "Hacé {n} línea(s) de 6 o más fichas.",
+    "ach.d.cp": "Capturá {n} pares (o tríos, según el modo).",
+    "ach.d.tr": "Armá {n} tríos abiertos: tres seguidas con los dos extremos libres.",
+    "ach.d.db": "Capturá dos pares con una sola jugada.",
+    "ach.d.cb": "Ganá una partida estando 4 capturas abajo.",
+    "ach.d.fs": "Ganá una partida en 20 jugadas tuyas o menos.",
+    "ach.d.a1": "Ganale a la máquina en Fácil.",
+    "ach.d.a2": "Ganale a la máquina en Normal.",
+    "ach.d.a3": "Ganale a la máquina en Difícil.",
+    "ach.d.a4": "Ganale a la máquina en Muy difícil.",
+    "ach.d.gy": "Ganale {n} vez/veces a Goody.",
+    "ach.d.on": "Ganá {n} partidas online.",
+    "ach.d.tp": "Anotate en un torneo.",
+    "ach.d.td": "Ganá un duelo en un torneo.",
+    "ach.d.tg": "Terminá un torneo en el podio.",
+    "ach.d.fr": "Sumá un amigo.",
+    "ach.d.ds": "Jugá el desafío diario {n} días seguidos.",
+    "ach.d.lv": "Llegá al nivel {n}.",
+    "ach.d.co": "Jugá al menos una partida en cada uno de los 8 tableros.",
+    "ach.d.mo": "Jugá en los 8 modos: clásico, tríos, Gomoku, Blitz, Bullet, 2 contra 2, todos contra todos y desafío diario.",
+    "ach.ga1": "Astronauta",
+    "ach.ga2": "Capitán estelar",
+    "ach.ga3": "Almirante galáctico",
+    "ach.ha1": "Susto",
+    "ach.ha2": "Pesadilla",
+    "ach.ha3": "Rey de la noche",
+    "ach.ja1": "Brote",
+    "ach.ja2": "Jardinera",
+    "ach.ja3": "Selva",
+    "ach.pl1": "Arena en los pies",
+    "ach.pl2": "Surfista",
+    "ach.pl3": "Lobo de mar",
+    "ach.pa1": "Garabato",
+    "ach.pa2": "Dibujante",
+    "ach.pa3": "Cuaderno lleno",
+    "ach.ne1": "Prendido",
+    "ach.ne2": "Luces de neón",
+    "ach.ne3": "La ciudad que no duerme",
+    "ach.l61": "Seis no cuenta, pero igual me gusta",
+    "ach.l62": "Pasarse de rosca",
+    "ach.l63": "Maestra del seis",
+    "ach.cp1": "Primeras presas",
+    "ach.cp2": "Cazadora",
+    "ach.cp3": "Depredadora",
+    "ach.tr1": "Trío abierto",
+    "ach.db1": "Dos de un tiro",
+    "ach.cb1": "Remontada épica",
+    "ach.fs1": "Relámpago",
+    "ach.a11": "Primeros pasos",
+    "ach.a21": "Sin pasarse",
+    "ach.a31": "Dura de roer",
+    "ach.a41": "Mente fría",
+    "ach.gy1": "Le ganaste a Goody",
+    "ach.gy2": "Domadora de Goody",
+    "ach.on1": "Primera sangre",
+    "ach.on2": "Veterana online",
+    "ach.on3": "Leyenda online",
+    "ach.tp1": "Me anoté",
+    "ach.td1": "Primer duelo ganado",
+    "ach.tg1": "Al podio",
+    "ach.fr1": "Primer amigo",
+    "ach.ds1": "Constancia",
+    "ach.ds2": "Semana completa",
+    "ach.ds3": "Mes sin faltar",
+    "ach.lv1": "En camino",
+    "ach.lv2": "Con experiencia",
+    "ach.lv3": "Curtida",
+    "ach.co1": "Coleccionista de tableros",
+    "ach.mo1": "De todo un poco"
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
+/* Logros — en */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.en, {
+    "ach.title": "Achievements",
+    "ach.sub": "Earned by playing. Every board, every move and every day counts.",
+    "ach.count": "{a} of {b} achievements",
+    "ach.new1": "🏅 New achievement: {name}",
+    "ach.newN": "🏅 {n} new achievements",
+    "ach.next": "Next: {name}",
+    "ach.all": "Complete!",
+    "ach.note": "Saved to your profile and synced with your account. For motivation, not competition. Move counters start from when this version was installed.",
+    "ach.g.board": "Boards",
+    "ach.g.tactic": "Moves",
+    "ach.g.ai": "Against the machine",
+    "ach.g.online": "Online & tournaments",
+    "ach.g.habit": "Consistency",
+    "ach.d.board": "Play {n} games on the {board} board.",
+    "ach.d.l6": "Make {n} line(s) of 6 or more stones.",
+    "ach.d.cp": "Capture {n} pairs (or triples, depending on the mode).",
+    "ach.d.tr": "Make {n} open threes: three in a row with both ends free.",
+    "ach.d.db": "Capture two pairs with a single move.",
+    "ach.d.cb": "Win a game while 4 captures down.",
+    "ach.d.fs": "Win a game in 20 of your own moves or fewer.",
+    "ach.d.a1": "Beat the machine on Easy.",
+    "ach.d.a2": "Beat the machine on Normal.",
+    "ach.d.a3": "Beat the machine on Hard.",
+    "ach.d.a4": "Beat the machine on Very hard.",
+    "ach.d.gy": "Beat Goody {n} time(s).",
+    "ach.d.on": "Win {n} online games.",
+    "ach.d.tp": "Join a tournament.",
+    "ach.d.td": "Win a duel in a tournament.",
+    "ach.d.tg": "Finish a tournament on the podium.",
+    "ach.d.fr": "Add a friend.",
+    "ach.d.ds": "Play the daily challenge {n} days in a row.",
+    "ach.d.lv": "Reach level {n}.",
+    "ach.d.co": "Play at least one game on each of the 8 boards.",
+    "ach.d.mo": "Play all 8 modes: classic, triples, Gomoku, Blitz, Bullet, 2 vs 2, free-for-all and daily challenge.",
+    "ach.ga1": "Astronaut",
+    "ach.ga2": "Star Captain",
+    "ach.ga3": "Galactic Admiral",
+    "ach.ha1": "Spooked",
+    "ach.ha2": "Nightmare",
+    "ach.ha3": "King of the Night",
+    "ach.ja1": "Sprout",
+    "ach.ja2": "Gardener",
+    "ach.ja3": "Jungle",
+    "ach.pl1": "Sand Between the Toes",
+    "ach.pl2": "Surfer",
+    "ach.pl3": "Sea Wolf",
+    "ach.pa1": "Doodle",
+    "ach.pa2": "Sketcher",
+    "ach.pa3": "Full Notebook",
+    "ach.ne1": "Switched On",
+    "ach.ne2": "Neon Lights",
+    "ach.ne3": "The City That Never Sleeps",
+    "ach.l61": "Six Doesn't Count, But I Like It",
+    "ach.l62": "Overdoing It",
+    "ach.l63": "Six Master",
+    "ach.cp1": "First Catch",
+    "ach.cp2": "Hunter",
+    "ach.cp3": "Predator",
+    "ach.tr1": "Open Three",
+    "ach.db1": "Two for One",
+    "ach.cb1": "Epic Comeback",
+    "ach.fs1": "Lightning",
+    "ach.a11": "First Steps",
+    "ach.a21": "Not Overdoing It",
+    "ach.a31": "Tough Nut",
+    "ach.a41": "Cool Head",
+    "ach.gy1": "You Beat Goody",
+    "ach.gy2": "Goody Tamer",
+    "ach.on1": "First Blood",
+    "ach.on2": "Online Veteran",
+    "ach.on3": "Online Legend",
+    "ach.tp1": "I Signed Up",
+    "ach.td1": "First Duel Won",
+    "ach.tg1": "On the Podium",
+    "ach.fr1": "First Friend",
+    "ach.ds1": "Consistency",
+    "ach.ds2": "Full Week",
+    "ach.ds3": "A Month Without Missing",
+    "ach.lv1": "On the Way",
+    "ach.lv2": "Experienced",
+    "ach.lv3": "Seasoned",
+    "ach.co1": "Board Collector",
+    "ach.mo1": "A Bit of Everything"
+  });
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
 /* Textos de torneos — es (los mensajes del motor de reglas siguen en español) */
 (function (root) {
   'use strict';
@@ -6919,7 +7371,7 @@ window.GALAXY_GAME = {
       id: 'glow',
       css: { '--bg': '#070a18', '--panel': '#0f1538', '--panel-2': '#19225a', '--line': '#3a4cc0', '--accent-ink': '#02121a', '--accent': '#7cf0ff', '--s1a': '#ffd0ec', '--s1b': '#e0147a', '--s2a': '#eaffff', '--s2b': '#17bfe0', '--s3a': '#e6ffd0', '--s3b': '#35c03a', '--s4a': '#fff2c0', '--s4b': '#f0a000',
              '--board-shadow': '0 0 42px rgba(70,120,255,.38)' },
-      board: { bg: ['#060a18', '#131a3a'], line: 'rgba(110,150,255,.55)', lineGlow: 'rgba(80,130,255,.9)', star: 'rgba(170,200,255,.95)', label: 'rgba(150,185,255,.78)', labelHi: '#ffffff' },
+      board: { menuArt: 'neon', bg: ['#060a18', '#131a3a'], line: 'rgba(110,150,255,.55)', lineGlow: 'rgba(80,130,255,.9)', star: 'rgba(170,200,255,.95)', label: 'rgba(150,185,255,.78)', labelHi: '#ffffff' },
       stones: { 1: { a: '#ffd0ec', b: '#e0147a', glow: '#ff2d95', neon: 'pink' }, 2: { a: '#eaffff', b: '#17bfe0', glow: '#27e8ff', neon: 'cyan' }, 3: { a: '#e6ffd0', b: '#35c03a', glow: '#5dff5d', neon: 'green' }, 4: { a: '#fff2c0', b: '#f0a000', glow: '#ffc233', neon: 'amber' } },
       last: { ring: '#ffffff', dot: { 1: '#ffffff', 2: '#062030', 3: '#062030', 4: '#062030' } },
       zone: { fill: 'rgba(255,255,255,.07)', stroke: 'rgba(160,190,255,.55)' },
@@ -8548,7 +9000,7 @@ window.NEON_BREAK = {
   function saveCfg() { try { localStorage.setItem('pente.cfg', JSON.stringify(cfg)); } catch (e) {} markPrefs(); }
   var cfg = loadCfg();
   /* Perfil del jugador (src/profile.js): nombre, avatar y estadísticas. Por ahora vive en este dispositivo. */
-  var PP = window.PenteProfile, XP = window.PenteXP, profile = PP.empty(), recorded = false, xpLast = null;
+  var PP = window.PenteProfile, XP = window.PenteXP, ACH = window.PenteAch, profile = PP.empty(), recorded = false, xpLast = null;
   try { profile = PP.normalize(JSON.parse(localStorage.getItem('pente.profile') || 'null')); if (!profile.name) profile.name = PP.cleanName(localStorage.getItem('pente.name')); } catch (e) { profile = PP.empty(); }
   function saveProfile() { try { localStorage.setItem('pente.profile', JSON.stringify(profile)); } catch (e) {} }
   var drag = null;        // ficha que se está arrastrando con el dedo
@@ -9033,6 +9485,7 @@ window.NEON_BREAK = {
     var r = daily.result; if (!r || daily.xpFor === r.date) return;
     daily.xpFor = r.date; profile = PP.recordType(profile, 'daily', r.win ? 'win' : r.draw ? 'draw' : 'loss'); saveProfile(); scheduleSync(1500);
     xpLast = grantXp({ k: 'daily', win: !!r.win, moves: r.moves, streak: dailyStreak(r.date), date: r.date });
+    achDaily();
   }
   function dailyEnd() {
     recorded = endSeen = true; dailyGrant();
@@ -9162,7 +9615,7 @@ window.NEON_BREAK = {
   var MENU_SEED = 11;
   function hwSpiderSync() {                                                 // juguetes del menú: la araña de Halloween y la nave (minijuego) de Galaxia
     var want = cfg.menuBg && !document.hidden && $('menuOverlay').classList.contains('open'), art = theme().board.menuArt;
-    if (window.HwSpider) window.HwSpider.sync(art === 'halloween' && want); if (window.GxShip) window.GxShip.sync(art === 'galaxia' && want);
+    if (window.HwSpider) window.HwSpider.sync(art === 'halloween' && want); if (window.GxShip) window.GxShip.sync(art === 'galaxia' && want); if (window.PenteNeon && !(art === 'neon' && want)) window.PenteNeon.hide();
   }
   document.addEventListener('visibilitychange', hwSpiderSync);
   function renderMenuBg() {
@@ -9175,6 +9628,11 @@ window.NEON_BREAK = {
     if (th.board.menuArt === 'halloween' || th.board.menuArt === 'galaxia') {   // Halloween y Galaxia: el fondo es el arte de Ro, recortado tipo «cover»
       var mi = menuArtImg(th.board.menuArt); if (mi && mi.complete && mi.naturalWidth) { var sc0 = Math.max(w / mi.naturalWidth, h / mi.naturalHeight), dw = mi.naturalWidth * sc0, dh = mi.naturalHeight * sc0; g.setTransform(dpr, 0, 0, dpr, 0, 0); g.drawImage(mi, (w - dw) / 2, (h - dh) / 2, dw, dh); }
       return;
+    }
+    if (th.board.menuArt === 'neon' && window.PenteNeon) {                       // Neón: arcade / cyberpunk (neon-menu.js)
+      var nb = document.querySelector('#menuOverlay .screen-body'), nr = nb ? nb.getBoundingClientRect() : { left: w * 0.1, right: w * 0.9, top: h * 0.1, bottom: h * 0.9 };
+      g.scale(dpr, dpr); window.PenteNeon.draw(g, w, h, nr, cell, Math.round(w * 0.5 / cell) * cell, Math.round((h - cell * 2.2) / cell) * cell);
+      window.PenteNeon.sync(!!cfg.anim && !reducedMotion() && !document.hidden); return;
     }
     var cs = getComputedStyle($('menuOverlay')), line = cs.getPropertyValue('--line').trim() || '#888'; if (th.id === 'papel') line = 'rgba(40,44,70,.28)';
     var ox = Math.round(w * 0.5 / cell) * cell, oy = Math.round((h - cell * 2.2) / cell) * cell;
@@ -9260,6 +9718,71 @@ window.NEON_BREAK = {
     if (r.ups) { buildGemPickers(); buildThemePicker(); }
     return r;
   }
+  /* ---------- Logros (reglas en achievements.js) ---------- */
+  var achTimer = 0, achQueue = [];
+  function achCtx() { return { stats: profile.stats || {}, level: XP.levelOf(myXp().t).level }; }      // el nivel REAL (el modo "todo desbloqueado" no regala logros)
+  function achCount() { return ACH.clean(profile.stats && profile.stats.ach).u.length; }
+  function achSave(next) { profile.stats = Object.assign({}, profile.stats, { ach: next }); saveProfile(); scheduleSync(2500); }
+  function achCheck() {
+    var cur = ACH.clean(profile.stats && profile.stats.ach), r = ACH.evaluate(cur, achCtx());
+    if (!r.fresh.length) return;
+    achSave(r.state); achToast(r.fresh); var n = $('achMenuN'); if (n) n.textContent = achCount() + '/' + ACH.total();
+  }
+  function achAdd(d, ev) {                                         // suma contadores y revisa si se ganó algo
+    var cur = ACH.clean(profile.stats && profile.stats.ach), nx = ACH.add(cur, d, ev);
+    if (JSON.stringify(nx) !== JSON.stringify(cur)) achSave(nx);
+    achCheck();
+  }
+  function achTitle(id) { return t('ach.' + id); }
+  function achToast(ids) {
+    var el = $('achToast'); if (!el) { el = document.createElement('div'); el.id = 'achToast'; el.className = 'xptoast ach-toast'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+    el.textContent = ids.length === 1 ? t('ach.new1', { name: achTitle(ids[0]) }) : t('ach.newN', { n: ids.length });
+    el.classList.add('show'); clearTimeout(achTimer); achTimer = setTimeout(function () { el.classList.remove('show'); }, 4200);
+    sfx('levelup'); buzz([10, 40, 10]);
+  }
+  function achGame(me, mode) {                                     // al terminar una partida: tablero usado y jugadas que hizo `me`
+    if (!state || !isOver() || state.moves.length < XP.MIN_MOVES) return;
+    var d = {}; d['bd_' + themeId] = 1;
+    if (me && state.players !== 4) { var a = ACH.analyze(state, me); ['l6', 'cap', 'tri', 'dbl', 'cb', 'fast'].forEach(function (k) { if (a[k]) d[k] = a[k]; }); }
+    achAdd(d);
+  }
+  function achDaily() { var k = window.PenteDaily ? window.PenteDaily.dayKey() : ''; if (k) achAdd({ m_ds: dailyStreak(k) }); }
+  function achFriends() { var l = social.ov && social.ov.list || []; var n = l.filter(function (f) { return f.status === 'accepted'; }).length; if (n) achAdd({ m_fr: n }); }
+  function achTourney(m) {                                         // del torneo que se está viendo: ¿me anoté?, ¿gané algún duelo?, ¿quedé en el podio?
+    var S = m && m.S, me = tno.pid; if (!S || !me || !m.code && !tno.code) return;
+    var code = String(m.code || tno.code).replace(/[^A-Za-z0-9]/g, '').slice(0, 10); if (code.length < 3) return;
+    if (!(S.players || []).some(function (p) { return p.id === me; })) return;
+    var ev = [code + ':p'];
+    if ((S.rounds || []).some(function (r) { return (r.duels || []).some(function (d) { return d.status === 'done' && !d.bye && d.winner === me; }); })) ev.push(code + ':d');
+    var p = null; try { p = PT.podium(S); } catch (e) {}
+    if (p && [].concat(p.gold, p.silver, p.bronze).indexOf(me) >= 0) ev.push(code + ':g');
+    achAdd({}, ev);
+  }
+  var ACH_GROUP_THEME = { ga: 'galaxia', ha: 'halloween', ja: 'jardin', pl: 'playa', pa: 'papel', ne: 'glow' };
+  function achRender() {
+    var cur = ACH.clean(profile.stats && profile.stats.ach), prog = ACH.progress(cur, achCtx()), got = cur.u.length, tot = ACH.total();
+    $('achSub').textContent = t('ach.count', { a: got, b: tot }); $('achFill').style.width = Math.round(100 * got / tot) + '%';
+    var box = $('achBody'); box.innerHTML = '';
+    ACH.GROUPS.forEach(function (g) {
+      var fams = prog.filter(function (f) { return f.group === g; }); if (!fams.length) return;
+      var sec = el('section', 'ach-grp'); sec.appendChild(el('h3', 'ach-h', t('ach.g.' + g)));
+      fams.forEach(function (f) {
+        var done = f.tiers.filter(function (x) { return x.done; }), next = f.tiers.filter(function (x) { return !x.done; })[0], card = el('div', 'ach-card' + (next ? '' : ' full') + (done.length ? ' has' : ''));
+        var top = done.length ? done[done.length - 1] : f.tiers[0];
+        var head = el('div', 'ach-top'); head.appendChild(el('span', 'ach-medal', done.length ? '🏅' : '🔒'));
+        var tx = el('div', 'ach-tx'); tx.appendChild(el('b', '', achTitle(top.id)));
+        var sh = next || f.tiers[f.tiers.length - 1], desc = t('ach.d.' + (f.group === 'board' ? 'board' : f.id), { n: sh.n, board: f.theme ? t('theme.' + f.theme) : '' });
+        tx.appendChild(el('small', '', desc)); head.appendChild(tx); card.appendChild(head);
+        if (next) {
+          var bar = el('div', 'xpbar ach-bar'), fill = el('i'); fill.style.width = Math.min(100, Math.round(100 * f.value / next.n)) + '%'; bar.appendChild(fill); card.appendChild(bar);
+          card.appendChild(el('div', 'ach-prog', Math.min(f.value, next.n) + ' / ' + next.n + (f.tiers.length > 1 && done.length ? '  ·  ' + t('ach.next', { name: achTitle(next.id) }) : '')));
+        } else card.appendChild(el('div', 'ach-prog', t('ach.all')));
+        if (f.tiers.length > 1) { var chips = el('div', 'ach-chips'); f.tiers.forEach(function (x) { chips.appendChild(el('span', 'ach-chip' + (x.done ? ' on' : ''), (x.done ? '✓ ' : '') + achTitle(x.id))); }); card.appendChild(chips); }
+        sec.appendChild(card);
+      });
+      box.appendChild(sec);
+    });
+  }
   // Nivel VERIFICADO (lo da el servidor) como globito: el que ven los demás
   /* País y bandera. Las banderas se dibujan con una letra aparte (Twemoji Country Flags) porque Windows no muestra banderas emoji. */
   var COUNTRY_CODES = 'AF AX AL DZ AS AD AO AI AQ AG AR AM AW AU AT AZ BS BH BD BB BY BE BZ BJ BM BT BO BQ BA BW BR IO VG BN BG BF BI KH CM CA CV KY CF TD CL CN CX CC CO KM CG CD CK CR CI HR CU CW CY CZ DK DJ DM DO EC EG SV GQ ER EE SZ ET FK FO FJ FI FR GF PF GA GM GE DE GH GI GR GL GD GP GU GT GG GN GW GY HT HN HK HU IS IN ID IR IQ IE IM IL IT JM JP JE JO KZ KE KI XK KW KG LA LV LB LS LR LY LI LT LU MO MG MW MY MV ML MT MH MQ MR MU YT MX FM MD MC MN ME MS MA MZ MM NA NR NP NL NC NZ NI NE NG NU KP MK MP NO OM PK PW PS PA PG PY PE PH PL PT PR QA RE RO RU RW WS SM ST SA SN RS SC SL SG SX SK SI SB SO ZA KR SS ES LK BL SH KN LC MF PM VC SD SR SE CH SY TW TJ TZ TH TL TG TK TO TT TN TR TM TC TV UG UA AE GB US UY UZ VU VA VE VN WF EH YE ZM ZW'.split(' ');
@@ -9301,6 +9824,7 @@ window.NEON_BREAK = {
     $('mxLv').textContent = lvLine(lv); xpBar('mxFill', lv.pct, true);
     $('mxTxt').textContent = lv.max ? 'MAX' : lv.into + '/' + lv.need;
     $('menuXp').title = xpTitle(lv.level);
+    var an = $('achMenuN'); if (an) an.textContent = achCount() + '/' + ACH.total();
   }
   function renderProfXp() {
     var lv = myLevel(), nx = XP.nextUnlock(lv.level);
@@ -10570,6 +11094,7 @@ window.NEON_BREAK = {
   function recordResult() {
     if (recorded || tut.active || lab.active || !state || !isOver() || online.spectator) return;
     recorded = true;
+    achGame(online.active ? (online.spectator ? 0 : online.me) : ai.active ? ai.human : 0);
     if (state.players === 4 && !online.active) { profile = PP.recordType(profile, xpModeKey(), 'played'); saveProfile(); scheduleSync(1500); return; }      // 2 vs 2 en un aparato: se cuenta como jugada (no hay un "yo")
     var w = online.active ? (online.over ? online.over.winner : state.winner) : localOver ? localOver.winner : state.winner;
     var mode = online.active ? 'online' : ai.active ? 'ai_' + ai.level : 'local', me = online.active ? online.me : ai.active ? ai.human : 0;
@@ -11816,6 +12341,8 @@ window.NEON_BREAK = {
     $('admAll').checked = UNLOCK_ALL; $('admMsg').textContent = ''; admRender(); open('adminOverlay');
   }
   $('btnAdmin').addEventListener('click', admOpen);
+  $('btnAch').addEventListener('click', function () { achCheck(); achRender(); open('achOverlay'); });
+  $('btnAchBack').addEventListener('click', function () { open('menuOverlay'); });
   $('btnAdmBack').addEventListener('click', function () { open('profileOverlay'); renderProfile(); });
   $('admAll').addEventListener('change', function () { UNLOCK_ALL = $('admAll').checked; try { if (UNLOCK_ALL) localStorage.setItem('pente.unlockAll', '1'); else localStorage.removeItem('pente.unlockAll'); } catch (e) {} levelsChanged(); });
   $('btnAdmReset').addEventListener('click', function () { adm.draft = XP.defaultLevels(); ['boards', 'gems'].forEach(function (k) { adm.draft[k] = adm.draft[k] || {}; }); window.Themes.list.forEach(function (th) { adm.draft.boards[th.id] = adm.draft.boards[th.id] || 1; }); window.Themes.gems.forEach(function (g) { adm.draft.gems[g.id] = adm.draft.gems[g.id] || 1; }); AVK.forEach(function (k) { var base = adm.draft.parts[k] || {}; adm.draft.parts[k] = {}; avList(k).forEach(function (id) { adm.draft.parts[k][id] = base[id] || 1; }); }); admRender(); $('admMsg').textContent = t('adm.resetDone'); });
@@ -11899,7 +12426,7 @@ window.NEON_BREAK = {
   }
   function frLoad() {
     frRender(); if (!socialOk()) return;
-    Auth.friendsOverview().then(function (o) { social.ov = o && typeof o === 'object' ? o : { list: [], stats_public: true }; frRender(); dmUnreadLoad(); }, function (e) { frMsg(frErr(e), true); });
+    Auth.friendsOverview().then(function (o) { social.ov = o && typeof o === 'object' ? o : { list: [], stats_public: true }; achFriends(); frRender(); dmUnreadLoad(); }, function (e) { frMsg(frErr(e), true); });
   }
   function frAct(p, what) {
     var done = function () { frMsg(''); frLoad(); }, fail = function (e) { frMsg(frErr(e), true); };
@@ -12095,6 +12622,7 @@ window.NEON_BREAK = {
     }).then(function (ok) {
       sync.busy = false; renderAcct();
       if (sync.dirty && Auth.user) { sync.dirty = false; scheduleSync(ok ? 500 : 15000); }
+      achCheck();
       return ok;
     });
     return sync.promise;
@@ -13035,7 +13563,7 @@ window.NEON_BREAK = {
       case 'tcall': tnoCall(m); break;
       case 'tcfg': tnoCall({ text: t('tno.cfgChanged', { fmt: tnFmt(m.cfg.format), b: m.cfg.bestOf, n: m.cfg.minDuels }) }); break;
       case 'tgame': tnoCall({ text: t('tno.rulesChanged', { rules: tnoRules(m.game) }) }); break;
-      case 'tsnap': tno.snap = m; tno.chat = m.chat || []; tnoRender(); tnoRenderChat(); tnoCheckGo(m); tnoRenderLive(); break;
+      case 'tsnap': tno.snap = m; achTourney(m); tno.chat = m.chat || []; tnoRender(); tnoRenderChat(); tnoCheckGo(m); tnoRenderLive(); break;
       case 'terror': {
         if ((m.code === 'BAD_TOKEN' || m.code === 'TN_NOT_FOUND') && (tno.snap || tno.token)) { tnoReset(); tnoNote(t(m.code === 'TN_NOT_FOUND' ? 'tno.closed.gone' : 'tno.err.BAD_TOKEN'), true); if ($('tnoOverlay').classList.contains('open')) { tnRenderList(); tnoRenderLive(); open('tnOverlay'); } break; }
         if (m.code === 'TN_STARTED' && tno.intent && tno.intent.t === 'tjoin' && tno.net) { tno.intent = { t: 'tspectate', code: tno.intent.code }; tno.net.send(tno.intent); tnoNote('', false); break; }      // ya empezó: se puede mirar con el link
@@ -13107,7 +13635,7 @@ window.NEON_BREAK = {
     if (!socialOk() || !tno.org) return;
     if (social.ov && Date.now() - tno.friendsAt < 30000) { tnoRender(); return; }
     if (tno.friendsBusy) return; tno.friendsBusy = true;
-    Auth.friendsOverview().then(function (o) { social.ov = o && typeof o === 'object' ? o : { list: [], stats_public: true }; tno.friendsAt = Date.now(); tno.friendsBusy = false; tnoRender(); }, function () { tno.friendsBusy = false; tno.friendsAt = Date.now(); social.ov = social.ov || { list: [], stats_public: true }; tnoRender(); });
+    Auth.friendsOverview().then(function (o) { social.ov = o && typeof o === 'object' ? o : { list: [], stats_public: true }; achFriends(); tno.friendsAt = Date.now(); tno.friendsBusy = false; tnoRender(); }, function () { tno.friendsBusy = false; tno.friendsAt = Date.now(); social.ov = social.ov || { list: [], stats_public: true }; tnoRender(); });
   }
   function tnoInvite(p) {
     tno.inviting = tno.inviting || {}; tno.inviting[p.id] = p.name;
@@ -13305,7 +13833,7 @@ window.NEON_BREAK = {
   tnoLoadSess();
 
   applyI18n(); buildThemePicker(); syncSizePicker(); syncOpts(); syncMode(); syncVis(); resize(); open('menuOverlay'); initOnline(); updateSide();
-  window.__pente = { adminOpen: admOpen, get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, startAI: startAI, get ai() { return ai; }, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; }, get tut() { return tut; }, get profile() { return profile; }, get auth() { return Auth; }, get sync() { return sync; }, setChatW: setChatW, syncProfile: syncProfile, get tn() { return tn; }, get tno() { return tno; } };  // utilidad para pruebas manuales
+  window.__pente = { stoneImg: stoneImg, adminOpen: admOpen, get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, startAI: startAI, get ai() { return ai; }, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; }, get tut() { return tut; }, get profile() { return profile; }, get auth() { return Auth; }, get sync() { return sync; }, setChatW: setChatW, syncProfile: syncProfile, get tn() { return tn; }, get tno() { return tno; } };  // utilidad para pruebas manuales
 })();
 </script>
 <script>
