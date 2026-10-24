@@ -1060,6 +1060,17 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
 html[data-theme="glow"] #menuBg { opacity: 1; -webkit-mask-image: none; mask-image: none; }
 #menuFx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
 #menuFx[hidden] { display: none; }
+
+/* Comentario del desafío diario */
+.cmt-box { margin: 12px 0; padding: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; text-align: left; }
+.cmt-lbl { font-weight: 700; margin-bottom: 8px; font-size: 14px; }
+.cmt-row { display: flex; gap: 8px; } .cmt-row input { flex: 1; min-width: 0; min-height: 44px; padding: 8px 12px; font: inherit; font-size: 16px; color: var(--text); background: var(--bg); border: 2px solid var(--line); border-radius: 10px; }
+.cmt-row input:focus { outline: none; border-color: var(--accent); }
+.cmt-note { margin-top: 8px; font-size: 12px; opacity: .7; line-height: 1.35; }
+.cmt-txt { font-style: italic; line-height: 1.4; word-break: break-word; }
+.board li .cmt-row-txt { grid-column: 2 / -1; font-style: italic; font-size: 13px; opacity: .85; white-space: normal; word-break: break-word; display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+.board li .cmt-row-txt button { white-space: nowrap; flex: none; padding: 6px 10px; min-height: 36px; }
+.board li .cmt-row-txt.hid { opacity: .5; text-decoration: line-through; }
 </style>
 </head>
 <body>
@@ -1210,7 +1221,7 @@ html[data-theme="glow"] #menuBg { opacity: 1; -webkit-mask-image: none; mask-ima
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v117</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v118</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -1370,6 +1381,7 @@ html[data-theme="glow"] #menuBg { opacity: 1; -webkit-mask-image: none; mask-ima
     <p class="daily-info" id="dailyInfo"></p>
     <p class="hint" id="dailyRules" data-i18n="daily.rules"></p>
     <p class="daily-res" id="dailyRes" hidden></p>
+    <div class="cmt-box" id="dailyCmt" hidden></div>
     <p class="hint" id="dailyStreak"></p>
     <p class="online-msg" id="dailyMsg" role="status" aria-live="polite"></p>
     <div class="btns">
@@ -1890,6 +1902,7 @@ html[data-theme="glow"] #menuBg { opacity: 1; -webkit-mask-image: none; mask-ima
     <p class="endtitle" id="endText"></p>
     <p class="endscore" id="endScore" hidden></p>
     <p class="sub" id="endHint"></p>
+    <div class="cmt-box" id="endCmt" hidden></div>
     <div class="xpcard" id="endXp" hidden>
       <div class="xp-gain" id="xpGain"></div>
       <div class="xp-parts" id="xpParts"></div>
@@ -1910,7 +1923,7 @@ html[data-theme="glow"] #menuBg { opacity: 1; -webkit-mask-image: none; mask-ima
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 117;</script>
+<script>window.PENTE_VERSION = 118;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -6500,7 +6513,18 @@ window.GALAXY_GAME = {
     "ach.lv2": "Con experiencia",
     "ach.lv3": "Curtida",
     "ach.co1": "Coleccionista de tableros",
-    "ach.mo1": "De todo un poco"
+    "ach.mo1": "De todo un poco",
+    "cmt.label": "Dejá un comentario sobre el desafío de hoy",
+    "cmt.ph": "Contá cómo te fue… (máx. 140)",
+    "cmt.send": "Publicar",
+    "cmt.note": "Es uno solo y no se puede cambiar. Lo leen quienes ya terminaron el desafío de hoy, en el ranking. Sin links.",
+    "cmt.yours": "Tu comentario de hoy:",
+    "cmt.bad": "No se pudo publicar: escribí algo y sin links.",
+    "cmt.notDone": "Terminá el desafío para poder comentar.",
+    "cmt.locked": "Terminá el desafío de hoy para leer los comentarios.",
+    "cmt.hidden": "(oculto)",
+    "cmt.hide": "Ocultar",
+    "cmt.show": "Mostrar"
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -6591,7 +6615,18 @@ window.GALAXY_GAME = {
     "ach.lv2": "Experienced",
     "ach.lv3": "Seasoned",
     "ach.co1": "Board Collector",
-    "ach.mo1": "A Bit of Everything"
+    "ach.mo1": "A Bit of Everything",
+    "cmt.label": "Leave a comment about today's challenge",
+    "cmt.ph": "Tell us how it went… (max 140)",
+    "cmt.send": "Post",
+    "cmt.note": "Just one, and it can't be changed. Anyone who has finished today's challenge can read it in the ranking. No links.",
+    "cmt.yours": "Your comment today:",
+    "cmt.bad": "Couldn't post: write something, and no links.",
+    "cmt.notDone": "Finish the challenge to comment.",
+    "cmt.locked": "Finish today's challenge to read the comments.",
+    "cmt.hidden": "(hidden)",
+    "cmt.hide": "Hide",
+    "cmt.show": "Show"
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -9422,7 +9457,7 @@ window.NEON_BREAK = {
   /* ---------- Desafío diario ----------
    * Una partida por día contra la máquina, misma posición para todos. La juega el servidor (valida cada ficha, mueve la máquina y mide el tiempo);
    * acá solo se dibuja. El tablero se mueve al instante con lo que pongo yo, y la respuesta de la máquina llega del servidor. */
-  var daily = { active: false, net: null, conn: '', info: null, result: null, t0: 0, wantPlay: false, boardOpen: false, boardFrom: 'daily', board: null, tab: 'today' };
+  var daily = { active: false, net: null, conn: '', info: null, result: null, t0: 0, wantPlay: false, boardOpen: false, boardFrom: 'daily', board: null, tab: 'today', comment: '' };
   var DAILY_KEY = 'pente.daily';
   function dailyStore() { try { var d = JSON.parse(localStorage.getItem(DAILY_KEY) || '{}'); return d && typeof d === 'object' && d.days ? d : { days: {} }; } catch (e) { return { days: {} }; } }
   function dailyRemember(r) {
@@ -9463,6 +9498,26 @@ window.NEON_BREAK = {
   }
   setInterval(function () { if (daily.active && state && !isOver() && !$('modeBar').hidden) $('modeBar').textContent = dailyBar(); }, 1000);
 
+  /* Comentario del desafío: uno solo, después de terminarlo. Lo leen quienes ya terminaron el desafío de hoy (en el ranking). */
+  function cmtBuild(box) {
+    var r = daily.result || (daily.info && daily.info.result);
+    var key = (r ? 1 : 0) + '|' + daily.comment; if (box.dataset.k === key) return; box.dataset.k = key;       // no se vuelve a armar si nada cambió (así no se borra lo que estás escribiendo)
+    box.innerHTML = ''; box.hidden = !r; if (!r) return;
+    if (daily.comment) { box.appendChild(el('div', 'cmt-lbl', t('cmt.yours'))); box.appendChild(el('div', 'cmt-txt', '“' + daily.comment + '”')); return; }
+    box.appendChild(el('div', 'cmt-lbl', t('cmt.label')));
+    var row = el('div', 'cmt-row'), inp = el('input'); inp.type = 'text'; inp.maxLength = 140; inp.placeholder = t('cmt.ph'); inp.setAttribute('aria-label', t('cmt.label')); inp.autocomplete = 'off';
+    var btn = el('button', 'btn primary', t('cmt.send')); btn.type = 'button'; btn.disabled = true;
+    inp.addEventListener('input', function () { btn.disabled = !inp.value.trim(); });
+    function send() {
+      var txt = inp.value.trim(); if (!txt || !daily.net) return; btn.disabled = true; msg.textContent = '';
+      dailyToken(function (tk) { daily.net && daily.net.send({ t: 'dailyComment', text: txt, jwt: tk }); });
+    }
+    btn.addEventListener('click', send); inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); send(); } });
+    row.appendChild(inp); row.appendChild(btn); box.appendChild(row);
+    var msg = el('div', 'cmt-note', t('cmt.note')); msg.id = box.id + 'Msg'; box.appendChild(msg);
+  }
+  function cmtRender() { ['dailyCmt', 'endCmt'].forEach(function (id) { var b = $(id); if (b) cmtBuild(b); }); }
+  function cmtMsg(txt) { ['dailyCmtMsg', 'endCmtMsg'].forEach(function (id) { var m = $(id); if (m) m.textContent = txt; }); }
   function dailyMsg(txt) { $('dailyMsg').textContent = txt || ''; }
   function dailyToken(cb) {
     var A = typeof Auth !== 'undefined' ? Auth : null;
@@ -9501,7 +9556,7 @@ window.NEON_BREAK = {
     var play = $('btnDailyPlay'); play.hidden = !!r || need || !i;
     play.textContent = t(i && i.status === 'playing' && i.moves.length ? 'daily.resume' : 'daily.play');
     $('btnDailyLogin').hidden = !need || !!r || !i;
-    $('btnDailyShare').hidden = !r;
+    $('btnDailyShare').hidden = !r; cmtRender();
     if (i && need && !r) dailyMsg(t('daily.needAccount')); else if (i && $('dailyMsg').textContent === t('daily.needAccount')) dailyMsg('');
   }
   function dailyApplyView(m) {                                 // reconstruye la partida del servidor: posición del día + jugadas hechas
@@ -9529,9 +9584,11 @@ window.NEON_BREAK = {
         if (daily.wantPlay) { daily.wantPlay = false; closeAll(); render(); } else if ($('dailyOverlay').classList.contains('open')) { dailyMsg(''); renderDaily(); }
         return;
       }
-      daily.info = m;
+      daily.info = m; if (m.status === 'done') { daily.comment = m.comment || ''; cmtRender(); }
       if (daily.wantPlay && m.status !== 'done' && !m.needAccount) { dailyApplyView(m); return; }
       daily.wantPlay = false; dailyMsg(''); if ($('dailyOverlay').classList.contains('open')) renderDaily();
+    } else if (m.t === 'dailyCommentOk') {
+      daily.comment = m.text; cmtRender();
     } else if (m.t === 'dailyBoard') {
       daily.board = m; if ($('boardOverlay').classList.contains('open')) renderBoard();
     } else if (m.t === 'dailyMove') {
@@ -9548,6 +9605,7 @@ window.NEON_BREAK = {
       } else if (m.result) dailyEndRefresh();
     } else if (m.t === 'error') {
       if (m.code === 'SERVER_ERROR' && daily.boardOpen) { $('boardMsg').textContent = t('daily.boardErr'); }
+      else if (m.code === 'BAD_COMMENT' || m.code === 'ALREADY_COMMENTED' || m.code === 'NOT_DONE') { if (m.code === 'ALREADY_COMMENTED') { dailyHello(); } else { cmtMsg(t('cmt.' + (m.code === 'BAD_COMMENT' ? 'bad' : 'notDone'))); var bs = document.querySelectorAll('.cmt-box .btn'); for (var bi = 0; bi < bs.length; bi++) bs[bi].disabled = false; } }
       else if (m.code === 'NEED_ACCOUNT') { daily.wantPlay = false; if (daily.info) daily.info.needAccount = true; renderDaily(); }
       else if (m.code === 'ILLEGAL' && daily.active && daily.net) dailyHello();   // desfasaje: se pide la partida entera de nuevo
     }
@@ -9592,6 +9650,7 @@ window.NEON_BREAK = {
     if (!b) { $('boardMsg').textContent = t('daily.boardLoading'); return; }
     $('boardMsg').textContent = '';
     var part = today ? b.today : b.week;
+    if (today && b.commentsLocked) { var lk = document.createElement('li'); lk.className = 'gap'; lk.textContent = t('cmt.locked'); ls.appendChild(lk); }
     if (!part.rows.length) { $('boardMsg').textContent = t('daily.boardEmpty'); return; }
     function row(r) {
       var li = document.createElement('li'); if (r.me) li.className = 'me'; if (today && !r.win) li.className += ' none';
@@ -9600,7 +9659,13 @@ window.NEON_BREAK = {
       who.appendChild(lvChip(r.xp));
       var val = document.createElement('span'); val.className = 'val';
       val.textContent = today ? (r.win ? t('daily.rowWin', { moves: r.moves, time: fmtMs(r.ms) }) : r.playing ? t('daily.rowPlaying', { moves: r.moves }) : t('daily.rowNoWin')) : t('daily.rowWeek', { points: r.points, wins: r.wins, played: r.played });
-      li.appendChild(pos); li.appendChild(who); li.appendChild(val); return li;
+      li.appendChild(pos); li.appendChild(who); li.appendChild(val);
+      if (today && r.comment) {
+        var cm = el('div', 'cmt-row-txt' + (r.hidden ? ' hid' : ''), '“' + r.comment + '”' + (r.hidden ? '  ' + t('cmt.hidden') : ''));
+        if (b.admin && r.cid) { var hb = el('button', 'btn small', t(r.hidden ? 'cmt.show' : 'cmt.hide')); hb.type = 'button'; hb.addEventListener('click', function () { dailyToken(function (tk) { daily.net && daily.net.send({ t: 'dailyHide', cid: r.cid, hide: !r.hidden, jwt: tk }); }); }); cm.appendChild(hb); }
+        li.appendChild(cm);
+      }
+      return li;
     }
     part.rows.forEach(function (r) { ls.appendChild(row(r)); });
     if (part.mine) { var g = document.createElement('li'); g.className = 'gap'; g.textContent = '…'; ls.appendChild(g); ls.appendChild(row(part.mine)); }
@@ -13915,7 +13980,7 @@ window.NEON_BREAK = {
   tnoLoadSess();
 
   applyI18n(); buildThemePicker(); syncSizePicker(); syncOpts(); syncMode(); syncVis(); resize(); open('menuOverlay'); initOnline(); updateSide();
-  window.__pente = { stoneImg: stoneImg, adminOpen: admOpen, get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, startAI: startAI, get ai() { return ai; }, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; }, get tut() { return tut; }, get profile() { return profile; }, get auth() { return Auth; }, get sync() { return sync; }, setChatW: setChatW, syncProfile: syncProfile, get tn() { return tn; }, get tno() { return tno; } };  // utilidad para pruebas manuales
+  window.__pente = { get daily() { return daily; }, cmtRender: cmtRender, renderBoard: renderBoard, stoneImg: stoneImg, adminOpen: admOpen, get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, startAI: startAI, get ai() { return ai; }, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; }, get tut() { return tut; }, get profile() { return profile; }, get auth() { return Auth; }, get sync() { return sync; }, setChatW: setChatW, syncProfile: syncProfile, get tn() { return tn; }, get tno() { return tno; } };  // utilidad para pruebas manuales
 })();
 </script>
 <script>
