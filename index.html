@@ -1022,7 +1022,7 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
 /* Galaxia: nave flotante del menú y su minijuego (src/invaders.js) */
 #gxShip { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 6; }
 #gxShip.play { pointer-events: auto; touch-action: none; z-index: 9; }
-#gxShipHit { position: fixed; left: 0; top: 0; border: 0; padding: 0; background: transparent; border-radius: 50%; z-index: 7; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+#gxShipHit { position: fixed; left: 0; top: 0; border: 0; padding: 0; background: transparent; border-radius: 50%; z-index: 7; cursor: grab; touch-action: none; -webkit-tap-highlight-color: transparent; }
 #gxShip[hidden], #gxShipHit[hidden] { display: none; }
 #menuOverlay.gx-playing > :not(#gxShip):not(#menuBg) { opacity: 0; pointer-events: none; }
 </style>
@@ -1174,7 +1174,7 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v107</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v108</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -1852,7 +1852,7 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 107;</script>
+<script>window.PENTE_VERSION = 108;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -2411,7 +2411,8 @@ window.GALAXY_GAME = {
     var host = document.getElementById('menuOverlay'); if (!host) return false; if (cv) return true; loadImgs();
     cv = document.createElement('canvas'); cv.id = 'gxShip'; cv.setAttribute('aria-hidden', 'true'); host.appendChild(cv); g = cv.getContext('2d');
     hit = document.createElement('button'); hit.type = 'button'; hit.id = 'gxShipHit'; hit.setAttribute('aria-label', 'Minijuego'); host.appendChild(hit);
-    hit.addEventListener('click', function (e) { e.preventDefault(); start(); });
+    hit.addEventListener('click', function (e) { e.preventDefault(); if (e.detail === 0) start(); });                  // teclado (Enter); con el dedo/mouse se resuelve abajo
+    hit.addEventListener('pointerdown', hdown); hit.addEventListener('pointermove', hmove); hit.addEventListener('pointerup', hup); hit.addEventListener('pointercancel', hup);
     cv.addEventListener('pointerdown', cdown); cv.addEventListener('pointermove', cmove); cv.addEventListener('pointerup', cup); cv.addEventListener('pointercancel', cup);
     document.addEventListener('keydown', kdown); document.addEventListener('keyup', function (e) { delete keys[e.key]; });
     return true;
@@ -2508,9 +2509,42 @@ window.GALAXY_GAME = {
     var im = imgs && imgs.g_nave_azul; if (!im) { coin('azul0', x, y, w * 0.9, alpha); return; }
     var h = w * im.naturalHeight / im.naturalWidth; g.save(); if (alpha != null) g.globalAlpha = alpha; g.drawImage(im, x - w / 2, y - h / 2, w, h); g.restore();
   }
-  function drawIdle() {                                                        // la nave flota de un lado a otro por arriba, con vaivén
-    var s = Math.max(46, Math.min(66, H * 0.07)), u = (T * 0.035) % 1, tri = u < 0.5 ? u * 2 : 2 - u * 2, x = s + (W - s * 2) * (0.5 - 0.5 * Math.cos(Math.PI * tri)), y = Math.max(s * 0.95, H * 0.075) + Math.sin(T * 1.6) * 7;
-    g.save(); g.shadowColor = 'rgba(111,227,255,.7)'; g.shadowBlur = 16; g.translate(x, y); g.rotate(Math.sin(T * 1.2) * 0.1); shipSprite(0, 0, s * 1.15, 1); g.restore();
+  /* La nave del menú: cruza sola; si la mantenés apretada y la arrastrás, la empujás (al soltar sigue de largo y vuelve a su ruta). Un toque corto abre el juego. */
+  var fl = { x: -1, y: 0, vx: 0, vy: 0, dir: 1, drag: null };
+  function shipSize() { return Math.max(46, Math.min(66, H * 0.07)); }
+  function homeY(s) { return Math.max(s * 0.95, H * 0.075); }
+  function hpoint(e) { var r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+  function hdown(e) {
+    if (mode !== 'idle') return; e.preventDefault(); try { hit.setPointerCapture(e.pointerId); } catch (x) { /* sin captura */ }
+    var p = hpoint(e); fl.drag = { id: e.pointerId, dx: fl.x - p.x, dy: fl.y - p.y, t0: performance.now(), x0: p.x, y0: p.y, moved: false, t: performance.now(), lx: fl.x, ly: fl.y }; fl.vx = fl.vy = 0; hit.style.cursor = 'grabbing';
+  }
+  function hmove(e) {
+    var d = fl.drag; if (!d || e.pointerId !== d.id) return; var p = hpoint(e), now = performance.now(), s = shipSize();
+    if (!d.moved && (Math.hypot(p.x - d.x0, p.y - d.y0) > 8 || now - d.t0 > 260)) d.moved = true;
+    if (!d.moved) return;
+    var nx = Math.max(s * 0.6, Math.min(W - s * 0.6, p.x + d.dx)), ny = Math.max(s * 0.6, Math.min(H - s * 0.6, p.y + d.dy)), dt = Math.max(0.008, (now - d.t) / 1000), k = Math.min(1, dt * 14);
+    fl.vx += ((nx - d.lx) / dt - fl.vx) * k; fl.vy += ((ny - d.ly) / dt - fl.vy) * k; fl.x = nx; fl.y = ny; d.lx = nx; d.ly = ny; d.t = now;
+  }
+  function hup(e) {
+    var d = fl.drag; if (!d || e.pointerId !== d.id) return; fl.drag = null; hit.style.cursor = ''; try { hit.releasePointerCapture(e.pointerId); } catch (x) { /* nada */ }
+    if (!d.moved) { start(); return; }                                                                        // toque corto: a jugar
+    if (performance.now() - d.t > 90) { fl.vx = fl.vy = 0; } var sp = Math.hypot(fl.vx, fl.vy), cap = 1400; if (sp > cap) { fl.vx *= cap / sp; fl.vy *= cap / sp; }
+    if (Math.abs(fl.vx) > 30) fl.dir = fl.vx > 0 ? 1 : -1;
+  }
+  function drawIdle(dt) {
+    var s = shipSize(), hy = homeY(s), cruise = Math.max(40, W / 15);
+    if (fl.x < 0) { fl.x = s; fl.y = hy; fl.vx = cruise; }
+    if (!fl.drag) {
+      var wantX = fl.dir * cruise, wantY = (hy + Math.sin(T * 1.6) * 7 - fl.y) * 2.2;                          // vuelve a su ruta de arriba, con vaivén
+      fl.vx += (wantX - fl.vx) * Math.min(1, dt * 0.9); fl.vy += (wantY - fl.vy) * Math.min(1, dt * 1.6);
+      fl.x += fl.vx * dt; fl.y += fl.vy * dt;
+      if (fl.x > W - s * 0.6) { fl.x = W - s * 0.6; fl.dir = -1; if (fl.vx > 0) fl.vx = -fl.vx * 0.5; }
+      if (fl.x < s * 0.6) { fl.x = s * 0.6; fl.dir = 1; if (fl.vx < 0) fl.vx = -fl.vx * 0.5; }
+      if (fl.y > H - s * 0.6) { fl.y = H - s * 0.6; if (fl.vy > 0) fl.vy = -fl.vy * 0.4; }
+      if (fl.y < s * 0.6) { fl.y = s * 0.6; if (fl.vy < 0) fl.vy = -fl.vy * 0.4; }
+    }
+    var x = fl.x, y = fl.y, tilt = Math.max(-0.45, Math.min(0.45, fl.vx / 900)) + Math.sin(T * 1.2) * 0.06;
+    g.save(); g.shadowColor = 'rgba(111,227,255,.7)'; g.shadowBlur = fl.drag && fl.drag.moved ? 26 : 16; g.translate(x, y); g.rotate(tilt); shipSprite(0, 0, s * 1.15, 1); g.restore();
     hit.style.width = hit.style.height = s * 1.25 + 'px'; hit.style.transform = 'translate(' + (x - s * 0.625) + 'px,' + (y - s * 0.625) + 'px)';
     if (!imgs || !imgs.azul0) hit.style.opacity = 0.01;
   }
@@ -2543,7 +2577,7 @@ window.GALAXY_GAME = {
     raf = 0; if (!on || document.hidden || !fit()) return;
     var dt = last ? Math.min(0.033, (now - last) / 1000) : 0.016; last = now; T += dt;
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
-    if (mode === 'idle') { if (!reduced() || true) drawIdle(); }
+    if (mode === 'idle') drawIdle(dt);
     else { if (mode === 'play') stepGame(dt); else if (G) G.t += dt; if (G) drawGame(); }
     raf = requestAnimationFrame(frame);
   }
