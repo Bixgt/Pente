@@ -1179,7 +1179,7 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v109</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v110</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -1857,7 +1857,7 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 109;</script>
+<script>window.PENTE_VERSION = 110;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -9040,7 +9040,7 @@ window.NEON_BREAK = {
   /* Fondo del menú en Playa: las canaletas (misma talla que en el tablero) sobre una grilla que cubre toda la pantalla, y un mar que SOLO viene
    * de la izquierda: sube, deja espuma y se retira, de a ratos. Es una capa aparte (menuSea) para no redibujar las conchas en cada cuadro. */
   function carveGrid(g, w, h, cell, ox, oy) {
-    var gw = Math.max(kind === 'earth' ? 1.2 : 1.6, cell * (kind === 'earth' ? 0.03 : 0.052));
+    var gw = Math.max(1.6, cell * 0.052);
     var lines = function (width, color, dx, dy) {
       g.strokeStyle = color; g.lineWidth = width; g.beginPath();
       for (var x = ox; x <= w + cell; x += cell) { g.moveTo(x + dx, -cell); g.lineTo(x + dx, h + cell); }
@@ -9878,7 +9878,7 @@ window.NEON_BREAK = {
   function grooveFor(W, n, cell, off, kind) {
     var key = W + '|' + n + '|' + Math.round(off * 10) + '|' + (kind || '');
     if (grooveCache[key]) return grooveCache[key];
-    var cv = document.createElement('canvas'); cv.width = cv.height = W; var g = cv.getContext('2d'), gw = Math.max(1.6, cell * 0.052), i;
+    var cv = document.createElement('canvas'); cv.width = cv.height = W; var g = cv.getContext('2d'), gw = Math.max(kind === 'earth' ? 1.2 : 1.6, cell * (kind === 'earth' ? 0.03 : 0.052)), i;
     g.lineCap = 'butt';
     var a0 = off, a1 = off + (n - 1) * cell;
     var lines = function (width, color, dx, dy, border) {
