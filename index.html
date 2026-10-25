@@ -1255,7 +1255,7 @@ html[data-theme="papel"] #menuOverlay .brand h1::before { content: ''; position:
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v124</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v125</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -1962,7 +1962,7 @@ html[data-theme="papel"] #menuOverlay .brand h1::before { content: ''; position:
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 124;</script>
+<script>window.PENTE_VERSION = 125;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -9822,7 +9822,7 @@ window.NEON_BREAK = {
   var hwImg = null;
   var menuImgs = {};
   function menuArtImg(kind) {                                               // fondos de menú hechos con arte de Ro (Halloween y Galaxia)
-    if (menuImgs[kind]) return menuImgs[kind]; var src = kind === 'halloween' ? window.HALLOWEEN_MENU : kind === 'galaxia' ? window.GALAXY_MENU : kind === 'jardin' ? 'garden-menu.webp' : null; if (!src) return null;
+    if (menuImgs[kind]) return menuImgs[kind]; var src = kind === 'halloween' ? window.HALLOWEEN_MENU : kind === 'galaxia' ? window.GALAXY_MENU : kind === 'jardin' ? 'garden-menu.webp' : kind === 'papel' ? 'paper-menu.webp' : null; if (!src) return null;
     var im = menuImgs[kind] = new Image(); im.onload = function () { renderMenuBg(); }; im.src = src; return im;
   }
   function seaWanted() { var b = theme().board; return !!(b.waves) && !document.hidden && cfg.menuBg && $('menuOverlay').classList.contains('open'); }
@@ -9919,8 +9919,9 @@ window.NEON_BREAK = {
     var dpr = Math.min(2, window.devicePixelRatio || 1), cell = Math.max(38, Math.min(56, Math.round(Math.min(w, h) / 9)));
     cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
     var save = { ctx: ctx, cell: metrics.cell, off: metrics.off }, g = cv.getContext('2d'), th = theme();
-    if (th.board.menuArt === 'halloween' || th.board.menuArt === 'galaxia' || th.board.menuArt === 'jardin') {   // Halloween y Galaxia: el fondo es el arte de Ro, recortado tipo «cover»
-      var mi = menuArtImg(th.board.menuArt); if (mi && mi.complete && mi.naturalWidth) { var sc0 = Math.max(w / mi.naturalWidth, h / mi.naturalHeight), dw = mi.naturalWidth * sc0, dh = mi.naturalHeight * sc0; g.setTransform(dpr, 0, 0, dpr, 0, 0); g.drawImage(mi, (w - dw) / 2, (h - dh) / 2, dw, dh); }
+    var artK = th.id === 'papel' ? 'papel' : th.board.menuArt;
+    if (artK === 'halloween' || artK === 'galaxia' || artK === 'jardin' || artK === 'papel') {   // Halloween y Galaxia: el fondo es el arte de Ro, recortado tipo «cover»
+      var mi = menuArtImg(artK); if (mi && mi.complete && mi.naturalWidth) { var sc0 = Math.max(w / mi.naturalWidth, h / mi.naturalHeight), dw = mi.naturalWidth * sc0, dh = mi.naturalHeight * sc0; g.setTransform(dpr, 0, 0, dpr, 0, 0); g.drawImage(mi, (w - dw) / 2, (h - dh) / 2, dw, dh); }
       return;
     }
     if (th.board.menuArt === 'neon' && window.PenteNeon) {                       // Neón: arcade / cyberpunk (neon-menu.js)
