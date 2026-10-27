@@ -1151,6 +1151,18 @@ html[data-theme="jardin"] .app .btn:hover:not(:disabled) { filter: brightness(1.
 html[data-theme="jardin"] .app .btn.primary { background: linear-gradient(180deg, #4ea546, #2a7227); border-color: #123d12; }
 html[data-theme="jardin"] .app .btn:disabled { background: rgba(14,32,20,.85); color: #6f8f78; border-color: #1f3a27; box-shadow: none; text-shadow: none; }
 @media (min-width: 1100px) { html[data-theme="jardin"] .stage { grid-template-columns: 340px minmax(0, 1fr) var(--chatw, 320px); } }
+
+/* Buzón de comentarios */
+.fb-text { min-height: 120px; }
+.fb-inbox { display: grid; gap: 10px; margin: 10px 0; }
+.fb-card { background: var(--panel-2, var(--panel)); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+.fb-card.done { opacity: .6; }
+.fb-head { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; }
+.fb-kind { font-size: 13px; }
+.fb-date { margin-left: auto; font-size: 12px; color: var(--muted); }
+.fb-body { margin: 8px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.fb-info { display: block; color: var(--muted); font-size: 11px; overflow-wrap: anywhere; }
+#fbMsg.bad { color: var(--bad, #c0392b); }
 </style>
 </head>
 <body>
@@ -1301,7 +1313,7 @@ html[data-theme="jardin"] .app .btn:disabled { background: rgba(14,32,20,.85); c
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v131</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v132</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -1646,7 +1658,7 @@ html[data-theme="jardin"] .app .btn:disabled { background: rgba(14,32,20,.85); c
       <label class="check"><input type="checkbox" data-cfg="botDelay"><span><span data-i18n="cfg.botDelay"></span><small data-i18n="cfg.botDelayHint"></small></span></label>
       <label class="check"><input type="checkbox" data-cfg="chat"><span><span data-i18n="cfg.chat"></span><small data-i18n="cfg.chatHint"></small></span></label>
       <label class="check"><input type="checkbox" data-cfg="zone"><span><span data-i18n="cfg.zone"></span><small data-i18n="cfg.zoneHint"></small></span></label>
-      <div class="btns"><button type="button" class="btn" id="btnCfgReset" data-i18n="cfg.reset"></button></div>
+      <div class="btns"><button type="button" class="btn" id="btnFeedback" data-i18n="fb.btn"></button><button type="button" class="btn" id="btnCfgReset" data-i18n="cfg.reset"></button></div>
     </section>
 
     <div class="btns"><button class="btn primary" id="btnSettingsBack" data-i18n="menu.back"></button></div>
@@ -1800,6 +1812,7 @@ html[data-theme="jardin"] .app .btn:disabled { background: rgba(14,32,20,.85); c
 <div class="overlay screen" id="pviewOverlay">
   <div class="screen-body">
     <div class="pv-head"><span class="pv-av" id="pvAv"></span><div><h2 id="pvName"></h2><p class="sub" id="pvRel"></p></div></div>
+    <div class="field" id="pvH2hBox" hidden><span class="lbl" data-i18n="h2h.title"></span><div class="prof-stats" id="pvH2h"></div><p class="hint" id="pvH2hNote"></p></div>
     <div class="field" id="pvStatsBox"><span class="lbl" data-i18n="prof.stats"></span><div class="prof-stats" id="pvStats"></div><h3 class="gm-h" data-i18n="prof.byType"></h3><div class="prof-stats" id="pvGm"></div><div class="charts" id="pvCharts"></div><p class="hint" id="pvNote"></p></div>
     <p class="hint" id="pvMsg" role="status" aria-live="polite"></p>
     <div class="btns" id="pvActions"></div>
@@ -1874,6 +1887,22 @@ html[data-theme="jardin"] .app .btn:disabled { background: rgba(14,32,20,.85); c
     <div id="achBody"></div>
     <p class="hint" data-i18n="ach.note"></p>
     <div class="btns"><button class="btn primary" id="btnAchBack" data-i18n="menu.back"></button></div>
+  </div>
+</div>
+<div class="overlay screen" id="feedbackOverlay">
+  <div class="screen-body">
+    <h2 data-i18n="fb.title"></h2>
+    <p class="sub" data-i18n="fb.sub"></p>
+    <div class="field"><span class="lbl" data-i18n="fb.kind"></span>
+      <div class="seg" id="fbKind" role="group"><button type="button" class="seg-opt" aria-pressed="true" data-val="bug" data-i18n="fb.kind.bug"></button><button type="button" class="seg-opt" aria-pressed="false" data-val="idea" data-i18n="fb.kind.idea"></button><button type="button" class="seg-opt" aria-pressed="false" data-val="other" data-i18n="fb.kind.other"></button></div></div>
+    <div class="field"><textarea id="fbText" class="fb-text" rows="5" maxlength="1500"></textarea></div>
+    <p class="hint" id="fbMsg" role="status" aria-live="polite"></p>
+    <div class="btns"><button type="button" class="btn primary" id="btnFbSend" data-i18n="fb.send"></button></div>
+    <div class="field" id="fbInboxBox" hidden><span class="lbl" data-i18n="fb.inbox"></span>
+      <label class="check"><input type="checkbox" id="fbAll"><span><span data-i18n="fb.showDone"></span></span></label>
+      <div id="fbInbox" class="fb-inbox"></div>
+      <div class="btns"><button type="button" class="btn" id="btnFbRefresh" data-i18n="fb.refresh"></button></div></div>
+    <div class="btns"><button class="btn primary" id="btnFbBack" data-i18n="menu.back"></button></div>
   </div>
 </div>
 <div class="overlay screen" id="adminOverlay">
@@ -2008,7 +2037,7 @@ html[data-theme="jardin"] .app .btn:disabled { background: rgba(14,32,20,.85); c
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 131;</script>
+<script>window.PENTE_VERSION = 132;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -4821,6 +4850,11 @@ window.GALAXY_GAME = {
       friendRequest: function (name) { return authed('POST', '/rest/v1/rpc/friend_request', { p: String(name == null ? '' : name) }).then(function (r) { return typeof r === 'string' ? r : ''; }); },
       friendRespond: function (id, accept) { return authed('POST', '/rest/v1/rpc/friend_respond', { p: String(id || ''), accept: !!accept }).then(function (r) { return typeof r === 'string' ? r : ''; }); },
       friendRemove: function (id) { return authed('POST', '/rest/v1/rpc/friend_remove', { p: String(id || '') }).then(function (r) { return typeof r === 'string' ? r : ''; }); },
+      feedbackSend: function (kind, body, info) { return authed('POST', '/rest/v1/rpc/feedback_send', { k: String(kind || 'other'), b: String(body == null ? '' : body), i: String(info || '') }).then(function (r) { return typeof r === 'string' ? r : ''; }); },
+      feedbackList: function (all) { return authed('POST', '/rest/v1/rpc/feedback_list', { only_open: !all }).then(function (r) { return Array.isArray(r) ? r : []; }); },
+      feedbackDone: function (id, v) { return authed('POST', '/rest/v1/rpc/feedback_done', { p: Number(id), v: !!v }); },
+      feedbackDelete: function (id) { return authed('POST', '/rest/v1/rpc/feedback_delete', { p: Number(id) }); },
+      pairStats: function (name) { return authed('POST', '/rest/v1/rpc/pair_stats', { p: String(name == null ? '' : name) }); },
       profileView: function (name) { return authed('POST', '/rest/v1/rpc/profile_view', { p: String(name == null ? '' : name) }); },
       /* Chat privado entre amigos, 24 h (supabase/chat.sql) */
       dmSend: function (id, text) { return authed('POST', '/rest/v1/rpc/dm_send', { to_id: String(id || ''), msg: String(text == null ? '' : text) }).then(function (r) { return typeof r === 'string' ? r : ''; }); },
@@ -7091,6 +7125,9 @@ window.GALAXY_GAME = {
     'pv.pending_out': 'Le enviaste una solicitud',
     'pv.none': 'Jugador de Pente',
     'pv.hidden': 'Esta persona eligió mostrar sus estadísticas solo a sus amigos.',
+    'h2h.title': 'Partidas entre vos y esta persona', 'h2h.total': 'Total',
+    'h2h.note': 'Cuentan las partidas online de 2 jugadores con al menos 10 jugadas, desde que existe este registro.',
+    'h2h.none': 'Todavía no jugaste online contra {name}. Cuando lo hagas, acá vas a ver cómo te va.',
     'pv.note': 'Estas estadísticas las informa el dispositivo de cada jugador. Sirven para jugar, no para un ranking.',
     'pv.noGames': 'Todavía no jugó ninguna partida completa.',
     'lobby.who': 'Tocaste a {name}',
@@ -7155,12 +7192,75 @@ window.GALAXY_GAME = {
     'pv.pending_out': 'You sent them a request',
     'pv.none': 'Pente player',
     'pv.hidden': 'This person chose to show their stats only to their friends.',
+    'h2h.title': 'Games between you and this player', 'h2h.total': 'Total',
+    'h2h.note': 'Counts online 2-player games with at least 10 moves, since this record began.',
+    'h2h.none': "You haven't played {name} online yet. Once you do, you'll see how it goes here.",
     'pv.note': 'These stats are reported by each player\'s device. They\'re for fun, not for a ranking.',
     'pv.noGames': 'No completed games yet.',
     'lobby.who': 'You tapped {name}',
     'lobby.noProfile': 'There\'s no account with that name (it may be someone without an account).'
   });
 })(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
+/* Textos del buzón de comentarios — es */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.es, {
+    'fb.btn': '💬 Mandarle un comentario a Ro',
+    'fb.title': 'Comentarios',
+    'fb.sub': '¿Encontraste un error o se te ocurrió algo para agregar? Contámelo acá y lo leo desde mi celular.',
+    'fb.kind': '¿Qué es?',
+    'fb.kind.bug': '🐞 Un error',
+    'fb.kind.idea': '💡 Una idea',
+    'fb.kind.other': '💬 Otra cosa',
+    'fb.ph': 'Escribí qué pasó o qué te gustaría. Si es un error, contá en qué pantalla estabas y qué tocaste.',
+    'fb.send': 'Enviar',
+    'fb.sent': '¡Listo, llegó! Gracias por avisar.',
+    'fb.short': 'Escribí un poquito más (mínimo 3 letras).',
+    'fb.limit': 'Mandaste varios seguidos. Probá de nuevo en un rato.',
+    'fb.needLogin': 'Para mandar comentarios necesitás entrar con tu cuenta (desde tu perfil). Así puedo contestarte y evitamos el spam.',
+    'fb.err': 'No se pudo enviar. Revisá la conexión y probá de nuevo.',
+    'fb.inbox': 'Bandeja (solo la ves vos)',
+    'fb.showDone': 'Mostrar también los resueltos',
+    'fb.empty': 'No hay comentarios pendientes. Silencio sospechoso.',
+    'fb.done': 'Resuelto',
+    'fb.reopen': 'Reabrir',
+    'fb.del': 'Borrar',
+    'fb.anon': '(sin nombre)',
+    'fb.refresh': 'Actualizar'
+  });
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script>
+/* Textos del buzón de comentarios — en */
+(function (root) {
+  'use strict';
+  Object.assign(root.I18n.STRINGS.en, {
+    'fb.btn': '💬 Send feedback to Ro',
+    'fb.title': 'Feedback',
+    'fb.sub': 'Found a bug or have an idea? Tell me here and I will read it from my phone.',
+    'fb.kind': 'What is it?',
+    'fb.kind.bug': '🐞 A bug',
+    'fb.kind.idea': '💡 An idea',
+    'fb.kind.other': '💬 Something else',
+    'fb.ph': 'Describe what happened or what you would like. For a bug, say which screen you were on and what you tapped.',
+    'fb.send': 'Send',
+    'fb.sent': 'Done, it arrived! Thanks for letting me know.',
+    'fb.short': 'Write a bit more (at least 3 letters).',
+    'fb.limit': 'You sent several in a row. Try again in a while.',
+    'fb.needLogin': 'You need to sign in (from your profile) to send feedback. That way I can reply and we avoid spam.',
+    'fb.err': 'Could not send. Check your connection and try again.',
+    'fb.inbox': 'Inbox (only you see this)',
+    'fb.showDone': 'Also show resolved',
+    'fb.empty': 'No pending feedback. Suspicious silence.',
+    'fb.done': 'Resolved',
+    'fb.reopen': 'Reopen',
+    'fb.del': 'Delete',
+    'fb.anon': '(no name)',
+    'fb.refresh': 'Refresh'
+  });
+})(typeof window !== 'undefined' ? window : globalThis);
 </script>
 <script>
 /* Textos de torneos online — es */
@@ -9124,7 +9224,21 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
     return out;
   }
 
-  return { chooseMove: chooseMove, supported: supported, _Engine: Engine, WIN: WIN };
+  /* Variación de Goody: entre las jugadas casi tan buenas como la mejor (a menos de ~25 puntos, o 3 %) elige una al azar, con más peso a la primera.
+   * Nunca toca jugadas forzadas (victoria propia, defensa obligatoria, resultados por ganar/perder). Así, repetir una misma secuencia contra Goody ya no da la misma partida. */
+  function vary(r, rnd) {
+    if (!r) return null;
+    var base = { x: r.x, y: r.y };
+    if (r.why !== 'search' || !r.ranked || r.ranked.length < 2) return base;
+    var best = r.ranked[0].v; if (Math.abs(best) >= WIN - 1000) return base;
+    var margin = Math.max(25, Math.abs(best) * 0.03), pool = r.ranked.filter(function (q) { return q.v >= best - margin; }).slice(0, 4);
+    if (pool.length < 2) return base;
+    var w = [1, 0.7, 0.5, 0.35], tot = 0, i; for (i = 0; i < pool.length; i++) tot += w[i];
+    var t = (rnd || Math.random)() * tot; for (i = 0; i < pool.length; i++) { t -= w[i]; if (t <= 0) break; }
+    var q = pool[Math.min(i, pool.length - 1)]; return { x: q.x, y: q.y };
+  }
+
+  return { chooseMove: chooseMove, vary: vary, supported: supported, _Engine: Engine, WIN: WIN };
 });
 </script>
 <script>
@@ -9606,7 +9720,7 @@ window.NEON_BREAK = {
   function aiThink(st, level, cb) {
     function old() { var mv = null; try { mv = window.PenteAI.chooseMove(st, { level: level === 'goody' ? 'hard' : level }); } catch (e) {} cb(mv); }
     if (level !== 'goody') { old(); return; }
-    masterAsk(st, { timeMs: MASTER_MS }, function (r) { if (r) cb({ x: r.x, y: r.y }); else old(); });
+    masterAsk(st, { timeMs: MASTER_MS, rank: true }, function (r) { if (r) { var v = window.PenteMaster.vary ? window.PenteMaster.vary(r) : null; cb(v || { x: r.x, y: r.y }); } else old(); });     // con variación: entre jugadas casi iguales no elige siempre la misma
   }
 
   /* ---------- Desafío diario ----------
@@ -9656,6 +9770,7 @@ window.NEON_BREAK = {
   /* Comentario del desafío: uno solo, después de terminarlo. Lo leen quienes ya terminaron el desafío de hoy (en el ranking). */
   function cmtBuild(box) {
     var r = daily.result || (daily.info && daily.info.result);
+    if (box.id === 'endCmt' && !daily.active) r = null;                      // el comentario del día es solo del desafío diario (no en partidas contra la IA ni online)
     var key = (r ? 1 : 0) + '|' + daily.comment; if (box.dataset.k === key) return; box.dataset.k = key;       // no se vuelve a armar si nada cambió (así no se borra lo que estás escribiendo)
     box.innerHTML = ''; box.hidden = !r; if (!r) return;
     if (daily.comment) { box.appendChild(el('div', 'cmt-lbl', t('cmt.yours'))); box.appendChild(el('div', 'cmt-txt', '“' + daily.comment + '”')); return; }
@@ -11547,7 +11662,7 @@ window.NEON_BREAK = {
     if (daily.active) { dailyEnd(); return; }
     recordResult();
     endSeen = true;
-    $('endText').textContent = resultText(); var es = $('endScore'); es.hidden = !scoreShown(); if (!es.hidden) es.textContent = t('score.series', { a: names[1] || '', sa: scoreOf(1), sb: scoreOf(2), b: names[2] || '' }); updateRematchUi(); renderEndXp(); open('endOverlay');
+    cmtRender(); $('endText').textContent = resultText(); var es = $('endScore'); es.hidden = !scoreShown(); if (!es.hidden) es.textContent = t('score.series', { a: names[1] || '', sa: scoreOf(1), sb: scoreOf(2), b: names[2] || '' }); updateRematchUi(); renderEndXp(); open('endOverlay');
   }
   function updateRematchUi() {
     var btn = $('btnRematch'), hint = $('endHint'), leave = $('btnEndMenu');
@@ -12201,8 +12316,9 @@ window.NEON_BREAK = {
     window.addEventListener('popstate', function () { guard(); backAction(); });
     window.__navBack = backAction;
   })();
-  $('btnRules').addEventListener('click', function () { open('rulesOverlay'); });
-  $('btnRulesClose').addEventListener('click', function () { open('menuOverlay'); });
+  var rulesFrom = 'menuOverlay';
+  $('btnRules').addEventListener('click', function () { rulesFrom = 'menuOverlay'; open('rulesOverlay'); });
+  $('btnRulesClose').addEventListener('click', function () { open(rulesFrom); });
   $('btnRestart').addEventListener('click', function () {
     if (daily.active) { if (!isOver()) ask(t('daily.resignConfirm'), t('hud.resign'), function () { if (!isOver() && daily.net) daily.net.send({ t: 'dailyResign' }); }); else open('dailyOverlay'); return; }
     if (online.spectator) { var bt = !!online.tourney && !!tno.code; leaveOnline(false); if (bt) { tnoConnect(); tnoOpen(); } else open('menuOverlay'); return; }
@@ -12745,6 +12861,53 @@ window.NEON_BREAK = {
     var ab = $('btnAdmin'); ab.hidden = true;
     if (logged && profile.nameSet && /^bixgt$/i.test(profile.name || '')) Auth.isAdmin().then(function (ok) { ab.hidden = !ok; }, function () {});   // el botón es solo comodidad: quien decide si podés guardar es la base de datos
   }
+  /* ---------- Buzón de comentarios (supabase/feedback.sql): cualquiera con cuenta manda; solo «Bixgt» lee la bandeja ---------- */
+  var fb = { kind: 'bug', admin: false };
+  function fbMsg(txt, bad) { var m = $('fbMsg'); m.textContent = txt || ''; m.classList.toggle('bad', !!bad); }
+  function fbKindSet(k) { fb.kind = k; document.querySelectorAll('#fbKind .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.val === k ? 'true' : 'false'); }); }
+  function fbOpen() {
+    var logged = !!(typeof Auth !== 'undefined' && Auth && Auth.user);
+    $('fbText').placeholder = t('fb.ph'); fbMsg(logged ? '' : t('fb.needLogin'), !logged); $('btnFbSend').disabled = !logged; $('fbText').disabled = !logged;
+    fb.admin = false; $('fbInboxBox').hidden = true; $('fbInbox').innerHTML = '';
+    open('feedbackOverlay');
+    if (logged && profile.nameSet && /^bixgt$/i.test(profile.name || '')) Auth.isAdmin().then(function (ok) { fb.admin = ok; $('fbInboxBox').hidden = !ok; if (ok) fbLoad(); }, function () {});
+  }
+  function fbLoad() {
+    var box = $('fbInbox'); box.textContent = '…';
+    Auth.feedbackList($('fbAll').checked).then(function (rows) {
+      box.innerHTML = '';
+      if (!rows.length) { box.appendChild(el('p', 'hint', t('fb.empty'))); return; }
+      rows.forEach(function (r) {
+        var card = el('div', 'fb-card' + (r.done ? ' done' : ''));
+        var d = new Date(Number(r.at)), head = el('div', 'fb-head');
+        head.appendChild(el('b', '', (r.name || t('fb.anon'))));
+        head.appendChild(el('span', 'fb-kind', t('fb.kind.' + r.kind)));
+        head.appendChild(el('span', 'fb-date', d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })));
+        card.appendChild(head); card.appendChild(el('p', 'fb-body', r.body));
+        if (r.info) card.appendChild(el('small', 'fb-info', r.info));
+        var bt = el('div', 'btns');
+        var b1 = el('button', 'btn', r.done ? t('fb.reopen') : t('fb.done')); b1.type = 'button';
+        b1.addEventListener('click', function () { Auth.feedbackDone(r.id, !r.done).then(fbLoad, function (e) { fbMsg(frErr(e), true); }); });
+        var b2 = el('button', 'btn ghost', t('fb.del')); b2.type = 'button';
+        b2.addEventListener('click', function () { Auth.feedbackDelete(r.id).then(fbLoad, function (e) { fbMsg(frErr(e), true); }); });
+        bt.appendChild(b1); bt.appendChild(b2); card.appendChild(bt); box.appendChild(card);
+      });
+    }, function (e) { box.textContent = ''; fbMsg(frErr(e), true); });
+  }
+  $('btnFeedback').addEventListener('click', fbOpen);
+  $('btnFbBack').addEventListener('click', function () { open('settingsOverlay'); });
+  $('fbKind').addEventListener('click', function (e) { var b = e.target.closest('.seg-opt'); if (b) fbKindSet(b.dataset.val); });
+  $('fbAll').addEventListener('change', fbLoad);
+  $('btnFbRefresh').addEventListener('click', fbLoad);
+  $('btnFbSend').addEventListener('click', function () {
+    var txt = $('fbText').value.trim(); if (txt.length < 3) { fbMsg(t('fb.short'), true); return; }
+    var btn = $('btnFbSend'); btn.disabled = true;
+    var info = 'v' + window.PENTE_VERSION + ' · ' + (window.innerWidth + 'x' + window.innerHeight) + ' · ' + String(navigator.userAgent || '').slice(0, 160);
+    Auth.feedbackSend(fb.kind, txt, info).then(function (r) {
+      btn.disabled = false;
+      if (r === 'ok') { $('fbText').value = ''; fbMsg(t('fb.sent')); if (fb.admin) fbLoad(); } else fbMsg(t(r === 'limit' ? 'fb.limit' : 'fb.short'), true);
+    }, function (e) { btn.disabled = false; fbMsg(frErr(e).replace(t('fr.err'), t('fb.err')), true); });
+  });
   /* ---------- Administrador: niveles de desbloqueo ---------- */
   var adm = { draft: null };
   function admRows(box, titleKey, items, group) {
@@ -12878,12 +13041,30 @@ window.NEON_BREAK = {
       if (social.from === 'lobby') $('pviewOverlay').classList.add('open'); else open('pviewOverlay');
     }, function (e) { socialNote(frErr(e), true); });
   }
+  /* Cara a cara: partidas online entre vos y esta persona (supabase/h2h.sql), por modo. */
+  var H2H_MODES = ['classic', 'triples', 'gomoku', 'blitz', 'bullet'];
+  function h2hRender(v) {
+    var wrap = $('pvH2hBox'), box = $('pvH2h'), note = $('pvH2hNote'); wrap.hidden = true; box.innerHTML = ''; note.textContent = '';
+    if (!v || v.relation === 'self' || !Auth || !Auth.pairStats) return;
+    var name = v.name;
+    Auth.pairStats(name).then(function (r) {
+      if (!social.view || social.view.name !== name || !r || !r.found) return;
+      function cell(cls, txt) { var d = document.createElement('div'); d.className = cls; d.textContent = txt; box.appendChild(d); }
+      [['', ''], ['prof.hP', 'prof.played'], ['prof.hW', 'prof.won'], ['prof.hL', 'prof.lost'], ['prof.hD', 'prof.drawn']].forEach(function (k) { cell('h', k[0] ? t(k[0]) : ''); if (k[0]) box.lastChild.title = t(k[1]); });
+      function row(label, s) { s = s || { p: 0, w: 0, l: 0, d: 0 }; cell('m', label); [s.p, s.w, s.l, s.d].forEach(function (n) { cell('n' + (n ? '' : ' z'), String(n || 0)); }); }
+      row(t('h2h.total'), r);
+      var modes = r.modes || {}; H2H_MODES.forEach(function (m) { if (modes[m] && modes[m].p) row(t('prof.gt.' + m), modes[m]); });
+      note.textContent = r.p ? t('h2h.note') : t('h2h.none', { name: name });
+      wrap.hidden = false;
+    }, function () {});
+  }
   function pvRender() {
     var v = social.view; if (!v) return;
     setAv($('pvAv'), v.avatar, 96, true); $('pvName').textContent = v.name; $('pvName').appendChild(lvChip(v.xp)); var vfl = flagChip(v.country); if (vfl) $('pvName').insertBefore(vfl, $('pvName').firstChild); $('pvRel').textContent = t('pv.' + (v.relation || 'none'));
     var st = PP.cleanStats(v.stats), has = Object.keys(st).length > 0;
     $('pvStats').hidden = !!v.hidden; $('pvCharts').hidden = !!v.hidden; if (v.hidden) { $('pvStats').innerHTML = ''; $('pvGm').innerHTML = ''; $('pvGm').previousElementSibling.hidden = true; $('pvCharts').innerHTML = ''; } else { fillStats($('pvStats'), st); fillGm($('pvGm'), st); fillCharts($('pvCharts'), st); }
     $('pvNote').textContent = v.hidden ? t('pv.hidden') : has ? t('pv.note') : t('pv.noGames');
+    h2hRender(v);
     var box = $('pvActions'); box.innerHTML = '';
     function btn(label, cls, fn) { var b = el('button', 'btn' + (cls ? ' ' + cls : ''), label); b.type = 'button'; b.addEventListener('click', fn); box.appendChild(b); }
     function run(pr) { pr.then(function (r) { var k = FR_MSG[r]; return viewPlayer(v.name, social.from).then(function () { if (k) { $('pvMsg').textContent = t(k, { name: v.name }); $('pvMsg').classList.toggle('bad', k !== 'fr.sent' && k !== 'fr.accepted'); } }); }, function (e) { $('pvMsg').textContent = frErr(e); $('pvMsg').classList.add('bad'); }); }
@@ -13644,10 +13825,11 @@ window.NEON_BREAK = {
   }
   document.querySelectorAll('#cfgTabs .tab').forEach(function (b) { b.addEventListener('click', function () { showTab(b.dataset.tab); }); });
   var cfgFromGame = false;                                    // la configuración se abrió desde la partida: al volver se retoma la partida
-  function openCfg(fromGame) {
+  var cfgBack = 'menuOverlay';                                // a qué pantalla vuelve «Volver» de los ajustes (menú, o Personalización si vinieron de ahí)
+  function openCfg(fromGame, back) {
     var tab = 'sound'; try { tab = sessionStorage.getItem('pente.tab') || 'sound'; } catch (e) {}
     if (!document.getElementById('tab-' + tab)) tab = 'sound';
-    cfgFromGame = !!fromGame; syncCfgUi(); showTab(tab); open('settingsOverlay');
+    cfgFromGame = !!fromGame; cfgBack = back || 'menuOverlay'; syncCfgUi(); showTab(tab); open('settingsOverlay');
   }
   $('btnSettings').addEventListener('click', function () { openCfg(false); });
   $('btnGameCfg').addEventListener('click', function () { openCfg(true); });
@@ -13656,10 +13838,10 @@ window.NEON_BREAK = {
   $('btnCustomize').addEventListener('click', function () { openCustomize('menuOverlay'); });
   $('btnToCustom').addEventListener('click', function () { openCustomize('settingsOverlay'); });
   $('btnCustomizeBack').addEventListener('click', function () { open(czFrom); });
-  $('czGoCfg').addEventListener('click', function () { openCfg(false); });
-  $('czGoRules').addEventListener('click', function () { open('rulesOverlay'); });
+  $('czGoCfg').addEventListener('click', function () { openCfg(cfgFromGame, 'customizeOverlay'); });
+  $('czGoRules').addEventListener('click', function () { rulesFrom = 'customizeOverlay'; open('rulesOverlay'); });
   $('czGoHelp').addEventListener('click', function () { tutStart(); });
-  $('btnSettingsBack').addEventListener('click', function () { if (cfgFromGame) { cfgFromGame = false; closeAll(); aiMaybeMove(); if (state && isOver()) updateResultBtn(); } else open('menuOverlay'); });
+  $('btnSettingsBack').addEventListener('click', function () { if (cfgFromGame) { cfgFromGame = false; closeAll(); aiMaybeMove(); if (state && isOver()) updateResultBtn(); } else open(cfgBack); });
   $('btnCfgReset').addEventListener('click', function () {
     ask(t('cfg.resetConfirm'), t('dlg.reset'), function () {
       for (var k in CFG_DEFAULTS) cfg[k] = CFG_DEFAULTS[k];
