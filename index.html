@@ -1313,7 +1313,7 @@ html[data-theme="jardin"] .app .btn:disabled { background: rgba(14,32,20,.85); c
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v136</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v137</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -2051,7 +2051,7 @@ html[data-theme="jardin"] .app .btn:disabled { background: rgba(14,32,20,.85); c
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 136;</script>
+<script>window.PENTE_VERSION = 137;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -3722,19 +3722,26 @@ window.GALAXY_GAME = {
       }
       return rec(k) ? path : null;
     }
-    // La mejor defensa del rival (opp) cuando "me" necesita rem jugadas más: gana si puede; si no, la que más demora mi victoria (o la frena),
-    // y entre defensas parecidas prefiere tapar una casilla ganadora o jugar pegado a las fichas. Solo para rem <= 2 (más es lento).
-    function defend(me, rem) {
-      var opp = 3 - me, all = empties(), thr = winCells(me), best = null, bestS = -1, j;
-      for (j = 0; j < all.length; j++) if (winAt(all[j], opp)) return xy(all[j]);
+    // Defensas del rival (opp) cuando "me" necesita rem jugadas más. Si el rival puede ganar ya, esa es la única. Si no, devuelve TODAS las que
+    // dejan la victoria de "me" lo más lejos posible (o la frenan del todo): entre ellas cualquiera "aguanta" igual, y quien llama elige la más natural.
+    // Cada una trae un puntaje de desempate (tapar una casilla ganadora, jugar pegado a las fichas). Solo para rem <= 2 (más es lento).
+    function defendSet(me, rem) {
+      var opp = 3 - me, all = empties(), thr = winCells(me), out = [], bestT = -1, j;
+      for (j = 0; j < all.length; j++) if (winAt(all[j], opp)) return { wins: xy(all[j]), set: [] };
       for (j = 0; j < all.length; j++) {
         var c = all[j], f = play(c, opp), mk = 0;
         for (var q = 1; q <= rem; q++) if (canWin(q, me, q <= 2)) { mk = q; break; }
         undo(f);
-        var sc = (mk ? mk : rem + 5) * 100 + (thr.indexOf(c) >= 0 ? 50 : 0) + (near(c, 1) ? 10 : near(c, 2) ? 5 : 0);
-        if (sc > bestS) { bestS = sc; best = c; }
+        var tier = mk ? mk : rem + 5;
+        if (tier > bestT) { bestT = tier; out = []; }
+        if (tier === bestT) { var o = xy(c); o.pref = (thr.indexOf(c) >= 0 ? 50 : 0) + (near(c, 1) ? 10 : near(c, 2) ? 5 : 0); out.push(o); }
       }
-      return best == null ? null : xy(best);
+      return { wins: null, set: out, tier: bestT };
+    }
+    function defend(me, rem) {                                    // la mejor por el puntaje de desempate (para tests y para la variante principal)
+      var d = defendSet(me, rem); if (d.wins) return d.wins;
+      var best = null; d.set.forEach(function (o) { if (!best || o.pref > best.pref) best = o; });
+      return best ? { x: best.x, y: best.y } : null;
     }
     function holdReplies(me) {                                    // respuestas del rival que no pierden enseguida (ni le dan una victoria en 1 a "me")
       var opp = 3 - me, out = [], all = empties();
@@ -3745,7 +3752,7 @@ window.GALAXY_GAME = {
     return {
       n: n, b: b, caps: caps, load: load, play: function (x, y, p) { return play(y * n + x, p); }, undo: undo,
       winAt: function (x, y, p) { return winAt(y * n + x, p); }, canWin: canWin, minWin: minWin, line: line,
-      winningMoves: winningMoves, defend: defend, holdReplies: holdReplies, empties: empties, winCellsOf: function (p) { return winCells(p).map(xy); }, capPts: function (x, y, p) { return capPts(y * n + x, p); }
+      winningMoves: winningMoves, defend: defend, defendSet: defendSet, holdReplies: holdReplies, empties: empties, winCellsOf: function (p) { return winCells(p).map(xy); }, capPts: function (x, y, p) { return capPts(y * n + x, p); }
     };
   }
   function fromState(s, opts) {
@@ -7507,10 +7514,6 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
 (function (root) {
   'use strict';
   Object.assign(root.I18n.STRINGS.es, {
-    'pz.off': 'Ojo: con esa jugada ya no se puede ganar en {k}. Podés seguir y ganar igual, o reintentar.',
-    'pz.threat2': 'El rival jugó en {r}. Te quedan dos casillas para ganar: {a}.',
-    'pz.threat1': 'El rival jugó en {r}. Ganás en {a}.',
-    'pz.quiet': 'El rival jugó en {r}. Seguí presionando.',
     'pz.sol.start': 'Así se ganaba:',
     'pz.sol.double': 'Jugás en {c}: amenazás ganar en {a} a la vez. El rival no puede tapar todo.',
     'pz.sol.single': 'Jugás en {c}: amenazás ganar en {a}. El rival tiene que tapar ahí.',
@@ -7578,10 +7581,6 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
 (function (root) {
   'use strict';
   Object.assign(root.I18n.STRINGS.en, {
-    'pz.off': 'Careful: with that move you can no longer win in {k}. You can keep going and still win, or retry.',
-    'pz.threat2': 'The rival played {r}. You have two winning squares left: {a}.',
-    'pz.threat1': 'The rival played {r}. You win at {a}.',
-    'pz.quiet': 'The rival played {r}. Keep the pressure on.',
     'pz.sol.start': 'This is how it was won:',
     'pz.sol.double': 'You play {c}: you threaten to win at {a} at once. The rival cannot block everything.',
     'pz.sol.single': 'You play {c}: you threaten to win at {a}. The rival has to block there.',
@@ -14005,27 +14004,31 @@ window.NEON_BREAK = {
     state = w.state; spawnFx(w.captured, 1); moveFeedback(w.captured, state.status !== 'playing', state.winner);
     if (state.status === 'won') { pzFinish(false, 'lost'); return; }
     if (state.status === 'draw') { pzFinish(false, 'draw'); return; }
-    tut.awaiting = true; pzAfterReply(mv); pzRenderCard(); render();
+    tut.awaiting = true; pzAfterReply(); pzRenderCard(); render();
   }
-  // El rival juega lo mejor que puede: gana si puede; si no, la defensa que más demora (o frena) tu victoria; y entre defensas parecidas, tapa una casilla ganadora.
-  // Así, si tu jugada de verdad obliga, no hay forma de zafar, y si no obliga, se defiende bien (no "se olvida" de defender).
+  // El rival juega lo mejor que puede: gana si puede; si no, se queda con las defensas que más frenan tu victoria (todas "aguantan" igual) y de entre ellas
+  // juega la que prefiere una IA fuerte (así, si no estás amenazando nada, arma su propio juego en vez de moverse al azar).
   function pzChooseReply() {
-    var rem = pz.k - pz.used, S = PS ? PS.fromState(state) : null, d = null;
-    if (S && rem >= 1 && rem <= 2) d = S.defend(1, rem);
-    if (d) return d;
-    var natural = null; try { natural = window.PenteAI.chooseMove(state, { level: 'hard', timeMs: 250 }); } catch (e) {}
-    return natural || P.legalMoves(state)[0];
+    var rem = pz.k - pz.used, S = PS ? PS.fromState(state) : null, d = null, rk = null;
+    try { rk = window.PenteAI.chooseMove(state, { level: 'hard', timeMs: 300, rank: true }); } catch (e) {}
+    if (S && rem >= 1 && rem <= 2) {
+      d = S.defendSet(1, rem);
+      if (d.wins) return d.wins;
+      if (d.set.length) {
+        var inSet = function (m) { return d.set.some(function (o) { return o.x === m.x && o.y === m.y; }); };
+        var ranked = rk && rk.ranked ? rk.ranked : [], i;
+        for (i = 0; i < ranked.length; i++) if (inSet(ranked[i])) return { x: ranked[i].x, y: ranked[i].y };
+        var best = d.set[0]; d.set.forEach(function (o) { if (o.pref > best.pref) best = o; });
+        return { x: best.x, y: best.y };
+      }
+    }
+    return rk ? { x: rk.x, y: rk.y } : P.legalMoves(state)[0];
   }
-  // Después de la respuesta del rival: ¿tu jugada todavía alcanza para ganar en el mínimo? ¿qué casillas te quedan ganadoras?
-  function pzAfterReply(rv) {
+  // Después de la respuesta del rival solo se anota (sin decirte nada) si tu jugada todavía alcanza para ganar en el mínimo: sirve para la pista.
+  function pzAfterReply() {
     if (!PS) return;
-    var S = PS.fromState(state), rem = pz.k - pz.used, cells = S.winCellsOf(1);
-    pz.on = rem >= 1 && rem <= 2 ? S.canWin(rem, 1, true) : pz.on;
-    var names = cells.map(function (c) { return P.coordName(c.x, c.y); }), rn = P.coordName(rv.x, rv.y);
-    if (!pz.on && rem >= 1) { pzSay(t('pz.off', { k: pz.k + ' ' + pzWord(pz.k) }), 'hint'); return; }
-    if (cells.length >= 2) { pzSay(t('pz.threat2', { r: rn, a: names.join(' / ') }), 'good'); tut.marks = tutMarks(cells.map(function (c) { return [c.x, c.y]; }), 'hl'); }
-    else if (cells.length === 1) { pzSay(t('pz.threat1', { r: rn, a: names[0] }), 'good'); tut.marks = tutMarks([[cells[0].x, cells[0].y]], 'hl'); }
-    else pzSay(t('pz.quiet', { r: rn }), '');
+    var rem = pz.k - pz.used;
+    if (rem >= 1 && rem <= 2) pz.on = PS.fromState(state).canWin(rem, 1, true);
   }
   function pzFinish(won, why) {
     var p = pz.puz; pz.done = true; pz.won = !!won; tut.awaiting = false; tut.marks = [];
