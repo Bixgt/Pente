@@ -1163,6 +1163,19 @@ html[data-theme="jardin"] .app .btn:disabled { background: rgba(14,32,20,.85); c
 .fb-body { margin: 8px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .fb-info { display: block; color: var(--muted); font-size: 11px; overflow-wrap: anywhere; }
 #fbMsg.bad { color: var(--bad, #c0392b); }
+/* Jardín: el dibujo trae una orla de hojas ancha; se agranda un poco para que la grilla y las fichas se vean más (la orla pisa un poco el borde, no importa) */
+html[data-theme="jardin"] #board { transform: scale(1.06); transform-origin: center; }
+@media (min-width: 1100px) and (min-height: 560px) { html[data-theme="jardin"] #board { transform: scale(1.14); } }
+
+/* Buzón: capturas adjuntas */
+.fb-pics { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.fb-pics:empty { display: none; }
+.fb-pic { position: relative; }
+.fb-pic img { display: block; height: 90px; max-width: 160px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); cursor: zoom-in; }
+.fb-pic button { position: absolute; top: -6px; right: -6px; width: 24px; height: 24px; border-radius: 50%; border: 0; background: var(--danger, #d44); color: #fff; font-size: 14px; line-height: 1; cursor: pointer; padding: 0; }
+.fb-attach { display: inline-flex; cursor: pointer; margin-bottom: 4px; }
+.fb-card .fb-pics { margin: 8px 0 0; }
+.fb-card .fb-pic img { height: 120px; max-width: 100%; }
 </style>
 </head>
 <body>
@@ -1313,7 +1326,7 @@ html[data-theme="jardin"] .app .btn:disabled { background: rgba(14,32,20,.85); c
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v137</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v138</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -1910,6 +1923,9 @@ html[data-theme="jardin"] .app .btn:disabled { background: rgba(14,32,20,.85); c
     <div class="field"><span class="lbl" data-i18n="fb.kind"></span>
       <div class="seg" id="fbKind" role="group"><button type="button" class="seg-opt" aria-pressed="true" data-val="bug" data-i18n="fb.kind.bug"></button><button type="button" class="seg-opt" aria-pressed="false" data-val="idea" data-i18n="fb.kind.idea"></button><button type="button" class="seg-opt" aria-pressed="false" data-val="other" data-i18n="fb.kind.other"></button></div></div>
     <div class="field"><textarea id="fbText" class="fb-text" rows="5" maxlength="1500"></textarea></div>
+    <div class="field"><div class="fb-pics" id="fbPics"></div>
+      <label class="btn fb-attach" id="fbAttachLbl"><input type="file" id="fbFile" accept="image/*" multiple hidden><span data-i18n="fb.attach"></span></label>
+      <small class="hint" data-i18n="fb.attachHint"></small></div>
     <p class="hint" id="fbMsg" role="status" aria-live="polite"></p>
     <div class="btns"><button type="button" class="btn primary" id="btnFbSend" data-i18n="fb.send"></button></div>
     <div class="field" id="fbInboxBox" hidden><span class="lbl" data-i18n="fb.inbox"></span>
@@ -2051,7 +2067,7 @@ html[data-theme="jardin"] .app .btn:disabled { background: rgba(14,32,20,.85); c
   </div>
 </div>
 
-<script>window.PENTE_VERSION = 137;</script>
+<script>window.PENTE_VERSION = 138;</script>
 <script>
 /* Red de seguridad para navegadores muy restrictivos (Safari con "protecciones de privacidad avanzada", modo Bloqueo,
  * navegadores dentro de apps como WhatsApp o Instagram): ahí localStorage puede LANZAR un error al tocarlo y el canvas puede
@@ -5097,7 +5113,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       friendRequest: function (name) { return authed('POST', '/rest/v1/rpc/friend_request', { p: String(name == null ? '' : name) }).then(function (r) { return typeof r === 'string' ? r : ''; }); },
       friendRespond: function (id, accept) { return authed('POST', '/rest/v1/rpc/friend_respond', { p: String(id || ''), accept: !!accept }).then(function (r) { return typeof r === 'string' ? r : ''; }); },
       friendRemove: function (id) { return authed('POST', '/rest/v1/rpc/friend_remove', { p: String(id || '') }).then(function (r) { return typeof r === 'string' ? r : ''; }); },
-      feedbackSend: function (kind, body, info) { return authed('POST', '/rest/v1/rpc/feedback_send', { k: String(kind || 'other'), b: String(body == null ? '' : body), i: String(info || '') }).then(function (r) { return typeof r === 'string' ? r : ''; }); },
+      feedbackSend: function (kind, body, info, imgs) { return authed('POST', '/rest/v1/rpc/feedback_send', { k: String(kind || 'other'), b: String(body == null ? '' : body), i: String(info || ''), m: Array.isArray(imgs) ? imgs.slice(0, 3) : [] }).then(function (r) { return typeof r === 'string' ? r : ''; }); },
       feedbackList: function (all) { return authed('POST', '/rest/v1/rpc/feedback_list', { only_open: !all }).then(function (r) { return Array.isArray(r) ? r : []; }); },
       feedbackDone: function (id, v) { return authed('POST', '/rest/v1/rpc/feedback_done', { p: Number(id), v: !!v }); },
       feedbackDelete: function (id) { return authed('POST', '/rest/v1/rpc/feedback_delete', { p: Number(id) }); },
@@ -7475,6 +7491,11 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     'fb.reopen': 'Reabrir',
     'fb.del': 'Borrar',
     'fb.anon': '(sin nombre)',
+    'fb.attach': '📎 Adjuntar captura',
+    'fb.attachHint': 'También podés pegar una imagen (Ctrl+V / mantener apretado y pegar) en el cuadro de texto. Hasta 3.',
+    'fb.picMax': 'Máximo 3 imágenes.',
+    'fb.picBad': 'Ese archivo no es una imagen que pueda leer.',
+    'fb.picRm': 'Quitar',
     'fb.refresh': 'Actualizar'
   });
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -7505,6 +7526,11 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     'fb.reopen': 'Reopen',
     'fb.del': 'Delete',
     'fb.anon': '(no name)',
+    'fb.attach': '📎 Attach screenshot',
+    'fb.attachHint': 'You can also paste an image (Ctrl+V / long-press and paste) into the text box. Up to 3.',
+    'fb.picMax': 'Up to 3 images.',
+    'fb.picBad': 'I can\'t read that file as an image.',
+    'fb.picRm': 'Remove',
     'fb.refresh': 'Refresh'
   });
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -8163,7 +8189,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       css: { '--bg': '#0f1b12', '--panel': '#182a1c', '--panel-2': '#213826', '--line': '#3d6a45', '--accent-ink': '#06150a', '--accent': '#9be564', '--s1a': '#ff5a5a', '--s1b': '#b00d1d', '--s2a': '#fffbe8', '--s2b': '#d8cfa8', '--s3a': '#fff0a0', '--s3b': '#e0a010', '--s4a': '#ffc4d0', '--s4b': '#e0708a',
              '--board-shadow': '0 10px 30px rgba(0,0,0,.45)' },
       // art: el fondo es la imagen GARDEN_IMG (marco de madera, piedras y enredaderas); la grilla se dibuja encima dentro de span (fracciones del lado). labelStroke: letras con contorno para leerse sobre las hojas
-      board: { deco: 'garden', menuArt: 'jardin', art: { img: 'GARDEN_IMG', span: [0.182, 0.793] }, labelPos: 0.825, labelFar: 0.13, groove: 'earth', labelStroke: 'rgba(20,45,10,.9)', bg: ['#79bd4a', '#4f9a35'], line: 'rgba(40,24,8,.8)', lineGlow: null, star: 'rgba(40,24,8,.92)', label: '#ffffff', labelHi: '#ffe66b' },
+      board: { deco: 'garden', menuArt: 'jardin', art: { img: 'GARDEN_IMG', span: [0.15, 0.82] }, labelPos: 0.65, labelPosTop: 0.47, labelFar: 0.47, labelFarBottom: 0.28, groove: 'earth', labelStroke: 'rgba(20,45,10,.9)', bg: ['#79bd4a', '#4f9a35'], line: 'rgba(40,24,8,.8)', lineGlow: null, star: 'rgba(40,24,8,.92)', label: '#ffffff', labelHi: '#ffe66b' },
       stones: // cada jugador es de UNA sola especie: J1 rosas rojas, J2 jazmines blancos (en 4 jugadores: rosas amarillas y jazmines azules)
       { 1: { a: '#ff5a5a', b: '#b00d1d', glow: null, motif: 'fl:red_rose' }, 2: { a: '#fffbe8', b: '#d8cfa8', glow: null, motif: 'fl:white_jasmine' }, 3: { a: '#fff0a0', b: '#e0a010', glow: null, motif: 'fl:yellow_rose' }, 4: { a: '#a8c8ff', b: '#1747b0', glow: null, motif: 'fl:blue_jasmine' } },
       last: { ring: '#ffffff', dot: { 1: '#ffffff', 2: '#2a2a2a', 3: '#2a2a2a', 4: '#2a2a2a' } },
@@ -10373,6 +10399,23 @@ window.NEON_BREAK = {
     if (menuImgs[kind]) return menuImgs[kind]; var src = kind === 'halloween' ? window.HALLOWEEN_MENU : kind === 'galaxia' ? window.GALAXY_MENU : kind === 'jardin' ? 'garden-menu.webp' : kind === 'papel' ? 'paper-menu.webp' : null; if (!src) return null;
     var im = menuImgs[kind] = new Image(); im.onload = function () { renderMenuBg(); }; im.src = src; return im;
   }
+
+  /* ---------- Precarga de imágenes: que el arte de cada tema ya esté listo cuando se necesita ---------- */
+  var THEME_FILES = { papel: ['paper-game-bg.webp', 'paper-notebook.webp', 'paper-menu.webp'], jardin: ['garden-game-bg.webp', 'garden-wood.webp', 'garden-flower.webp', 'garden-menu.webp'], glow: ['neon-bg.webp'] };
+  var preloaded = {};
+  function preloadTheme(id) {
+    if (preloaded[id]) return; preloaded[id] = true;
+    var th = null; try { th = window.Themes.byId[id]; } catch (e) {}
+    try { if (th && th.board && th.board.art) artImage(th.board.art); } catch (e) {}
+    (THEME_FILES[id] || []).forEach(function (f) { var im = new Image(); im.decoding = 'async'; im.src = f; });
+    try { if (th && th.board && th.board.menuArt) menuArtImg(th.board.menuArt); } catch (e) {}
+  }
+  function preloadAll() {                                       // primero el tema en uso, después los demás de a uno y sin apurar a la partida
+    try { preloadTheme(themeId); } catch (e) {}
+    var ids = []; try { (window.Themes.list || []).forEach(function (x) { if (x.id !== themeId && boardAllowed(x.id)) ids.push(x.id); }); } catch (e) {}
+    var idle = window.requestIdleCallback || function (fn) { return setTimeout(fn, 1200); };
+    (function next() { var id = ids.shift(); if (!id) return; idle(function () { try { preloadTheme(id); } catch (e) {} next(); }, { timeout: 4000 }); })();
+  }
   function seaWanted() { var b = theme().board; return !!(b.waves) && !document.hidden && cfg.menuBg && $('menuOverlay').classList.contains('open'); }
   function seaSync() {
     var cv = $('menuSea'); if (!cv) return;
@@ -11541,8 +11584,10 @@ window.NEON_BREAK = {
       ctx.font = (hiX ? '800 ' : '600 ') + Math.round(c * (th.board.paper ? 0.56 : 0.5)) + 'px ' + uiFont();
       ctx.fillStyle = hiX ? th.board.labelHi : th.board.label;
       var lbl = function (s, x, y) { if (th.board.labelStroke) { ctx.lineWidth = Math.max(2, c * 0.14); ctx.lineJoin = 'round'; ctx.strokeStyle = th.board.labelStroke; ctx.strokeText(s, x, y); } ctx.fillText(s, x, y); };
-      var far = th.board.labelFar ? px(boardN() - 1) + (metrics.w - px(boardN() - 1)) * th.board.labelFar : metrics.w - metrics.off * lp;     // Papel: el margen de abajo/derecha es más angosto que el de arriba/izquierda
-      lbl(P.COLS.charAt(i), px(i), metrics.off * lp); lbl(P.COLS.charAt(i), px(i), far);
+      var last = px(boardN() - 1), lpT = th.board.labelPosTop || lp, lfB = th.board.labelFarBottom || th.board.labelFar;
+      var far = th.board.labelFar ? last + (metrics.w - last) * th.board.labelFar : metrics.w - metrics.off * lp;     // Papel: el margen de abajo/derecha es más angosto que el de arriba/izquierda
+      var farB = lfB ? last + (metrics.w - last) * lfB : far;     // Jardín: la barra de arriba/abajo del marco no está a la misma distancia que la de izquierda/derecha
+      lbl(P.COLS.charAt(i), px(i), metrics.off * lpT); lbl(P.COLS.charAt(i), px(i), farB);
       ctx.font = (hiY ? '800 ' : '600 ') + Math.round(c * (th.board.paper ? 0.56 : 0.5)) + 'px ' + uiFont();
       ctx.fillStyle = hiY ? th.board.labelHi : th.board.label;
       lbl(String(i + 1), metrics.off * lp, px(i)); lbl(String(i + 1), far, px(i));
@@ -11575,6 +11620,7 @@ window.NEON_BREAK = {
     ctx.clearRect(0, 0, W, W);                          // por si el arte con transparencia (Papel) termina de cargar después del primer dibujo
     // fondo del tablero
     if (th.board.art && artImage(th.board.art)) ctx.drawImage(artImage(th.board.art), 0, 0, W, W);
+    else if (th.board.paper && th.board.art) return;     // Papel con su hoja de cuaderno todavía sin cargar: no se dibuja la hoja blanca de respaldo (se veía un rectángulo blanco detrás); se vuelve a dibujar al cargar
     else if (th.board.paper) ctx.drawImage(paperFor(W), 0, 0);
     else if (th.board.wood) ctx.drawImage(woodFor(W), 0, 0);
     else if (th.board.sand) ctx.drawImage(sandFor(W), 0, 0);
@@ -13243,13 +13289,49 @@ window.NEON_BREAK = {
     if (logged && profile.nameSet && /^bixgt$/i.test(profile.name || '')) Auth.isAdmin().then(function (ok) { ab.hidden = !ok; }, function () {});   // el botón es solo comodidad: quien decide si podés guardar es la base de datos
   }
   /* ---------- Buzón de comentarios (supabase/feedback.sql): cualquiera con cuenta manda; solo «Bixgt» lee la bandeja ---------- */
-  var fb = { kind: 'bug', admin: false };
+  var fb = { kind: 'bug', admin: false, pics: [] };
+  // Capturas: se achican (lado mayor 1600 px) y se guardan como JPEG calidad .85 (~150-400 KB); hasta 3 por comentario
+  function fbShrink(file) {
+    return new Promise(function (res, rej) {
+      var url = URL.createObjectURL(file), im = new Image();
+      im.onload = function () {
+        var k = Math.min(1, 1600 / Math.max(im.naturalWidth, im.naturalHeight)), c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(im.naturalWidth * k)); c.height = Math.max(1, Math.round(im.naturalHeight * k));
+        var g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        var q = 0.85, out = c.toDataURL('image/jpeg', q);
+        while (out.length > 650000 && q > 0.4) { q -= 0.1; out = c.toDataURL('image/jpeg', q); }
+        out.length <= 690000 ? res(out) : rej(new Error('big'));
+      };
+      im.onerror = function () { URL.revokeObjectURL(url); rej(new Error('bad')); };
+      im.src = url;
+    });
+  }
+  function fbPicsDraw() {
+    var box = $('fbPics'); box.innerHTML = '';
+    fb.pics.forEach(function (d, i) {
+      var w = el('div', 'fb-pic'), im = el('img'); im.src = d; im.alt = '';
+      var x = el('button', '', '×'); x.type = 'button'; x.setAttribute('aria-label', t('fb.picRm'));
+      x.addEventListener('click', function () { fb.pics.splice(i, 1); fbPicsDraw(); });
+      w.appendChild(im); w.appendChild(x); box.appendChild(w);
+    });
+  }
+  function fbAddFiles(files) {
+    var list = Array.prototype.slice.call(files || []).filter(function (f) { return /^image\//.test(f.type); });
+    if (!list.length) { if (files && files.length) fbMsg(t('fb.picBad'), true); return; }
+    list.reduce(function (p, f) {
+      return p.then(function () {
+        if (fb.pics.length >= 3) { fbMsg(t('fb.picMax'), true); return; }
+        return fbShrink(f).then(function (d) { fb.pics.push(d); fbPicsDraw(); fbMsg(''); }, function () { fbMsg(t('fb.picBad'), true); });
+      });
+    }, Promise.resolve());
+  }
   function fbMsg(txt, bad) { var m = $('fbMsg'); m.textContent = txt || ''; m.classList.toggle('bad', !!bad); }
   function fbKindSet(k) { fb.kind = k; document.querySelectorAll('#fbKind .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.val === k ? 'true' : 'false'); }); }
   function fbOpen() {
     var logged = !!(typeof Auth !== 'undefined' && Auth && Auth.user);
     $('fbText').placeholder = t('fb.ph'); fbMsg(logged ? '' : t('fb.needLogin'), !logged); $('btnFbSend').disabled = !logged; $('fbText').disabled = !logged;
-    fb.admin = false; $('fbInboxBox').hidden = true; $('fbInbox').innerHTML = '';
+    fb.admin = false; $('fbInboxBox').hidden = true; $('fbInbox').innerHTML = ''; $('fbFile').disabled = !logged; $('fbAttachLbl').classList.toggle('disabled', !logged);
     open('feedbackOverlay');
     if (logged && profile.nameSet && /^bixgt$/i.test(profile.name || '')) Auth.isAdmin().then(function (ok) { fb.admin = ok; $('fbInboxBox').hidden = !ok; if (ok) fbLoad(); }, function () {});
   }
@@ -13265,6 +13347,16 @@ window.NEON_BREAK = {
         head.appendChild(el('span', 'fb-kind', t('fb.kind.' + r.kind)));
         head.appendChild(el('span', 'fb-date', d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })));
         card.appendChild(head); card.appendChild(el('p', 'fb-body', r.body));
+        if (r.imgs && r.imgs.length) {
+          var pics = el('div', 'fb-pics');
+          r.imgs.forEach(function (d) {
+            if (typeof d !== 'string' || d.indexOf('data:image/jpeg;base64,') !== 0) return;
+            var im = el('img'); im.src = d; im.alt = ''; im.title = '↗';
+            im.addEventListener('click', function () { var w = window.open(); if (w) { w.document.write('<title>Pente</title><body style="margin:0;background:#111"><img style="max-width:100%;display:block;margin:auto" src="' + d + '">'); w.document.close(); } });
+            var pw = el('div', 'fb-pic'); pw.appendChild(im); pics.appendChild(pw);
+          });
+          card.appendChild(pics);
+        }
         if (r.info) card.appendChild(el('small', 'fb-info', r.info));
         var bt = el('div', 'btns');
         var b1 = el('button', 'btn', r.done ? t('fb.reopen') : t('fb.done')); b1.type = 'button';
@@ -13279,14 +13371,22 @@ window.NEON_BREAK = {
   $('btnFbBack').addEventListener('click', function () { open('menuOverlay'); });
   $('fbKind').addEventListener('click', function (e) { var b = e.target.closest('.seg-opt'); if (b) fbKindSet(b.dataset.val); });
   $('fbAll').addEventListener('change', fbLoad);
+  $('fbFile').addEventListener('change', function () { fbAddFiles(this.files); this.value = ''; });
+  $('fbText').addEventListener('paste', function (e) {
+    var items = (e.clipboardData && e.clipboardData.items) || [], fl = [];
+    for (var i = 0; i < items.length; i++) if (items[i].kind === 'file' && /^image\//.test(items[i].type)) { var f = items[i].getAsFile(); if (f) fl.push(f); }
+    if (fl.length) { e.preventDefault(); fbAddFiles(fl); }
+  });
+  $('fbText').addEventListener('dragover', function (e) { if (e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types || [], 'Files') >= 0) e.preventDefault(); });
+  $('fbText').addEventListener('drop', function (e) { if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) { e.preventDefault(); fbAddFiles(e.dataTransfer.files); } });
   $('btnFbRefresh').addEventListener('click', fbLoad);
   $('btnFbSend').addEventListener('click', function () {
     var txt = $('fbText').value.trim(); if (txt.length < 3) { fbMsg(t('fb.short'), true); return; }
     var btn = $('btnFbSend'); btn.disabled = true;
     var info = 'v' + window.PENTE_VERSION + ' · ' + (window.innerWidth + 'x' + window.innerHeight) + ' · ' + String(navigator.userAgent || '').slice(0, 160);
-    Auth.feedbackSend(fb.kind, txt, info).then(function (r) {
+    Auth.feedbackSend(fb.kind, txt, info, fb.pics).then(function (r) {
       btn.disabled = false;
-      if (r === 'ok') { $('fbText').value = ''; fbMsg(t('fb.sent')); if (fb.admin) fbLoad(); } else fbMsg(t(r === 'limit' ? 'fb.limit' : 'fb.short'), true);
+      if (r === 'ok') { $('fbText').value = ''; fb.pics = []; fbPicsDraw(); fbMsg(t('fb.sent')); if (fb.admin) fbLoad(); } else fbMsg(t(r === 'limit' ? 'fb.limit' : 'fb.short'), true);
     }, function (e) { btn.disabled = false; fbMsg(frErr(e).replace(t('fr.err'), t('fb.err')), true); });
   });
   /* ---------- Administrador: niveles de desbloqueo ---------- */
@@ -13595,7 +13695,7 @@ window.NEON_BREAK = {
       var m = PP.merge(snap, remote, uid, curPrefs());
       return m.push ? Auth.saveProfile(m.body).then(function () { return m; }) : m;
     }).then(function (m) {
-      var cur = profile, np = m.profile, oldName = cur.name;
+      var cur = profile, np = m.profile, oldName = cur.name, xpBefore = JSON.stringify(cur.stats && cur.stats.xp);
       np.stats = PP.mergeStats(cur.stats, snap.stats, np.stats);               // lo que se jugó mientras se sincronizaba no se pierde
       if (JSON.stringify(np.stats) !== JSON.stringify(np.base)) sync.dirty = true;
       if (cur.nameAt !== snap.nameAt) { np.avatar = cur.avatar; np.nameAt = cur.nameAt; sync.dirty = true; }
@@ -13606,6 +13706,7 @@ window.NEON_BREAK = {
       applyProfileName();
       if (profile.name !== oldName) { try { localStorage.setItem('pente.name', profile.name); } catch (e) {} }
       renderProfileBtn();
+      if (JSON.stringify(profile.stats && profile.stats.xp) !== xpBefore) levelsChanged();      // el nivel llegó de la nube: se destraban los tableros, fichas y temas sin tener que recargar
       if ($('profileOverlay').classList.contains('open') && document.activeElement !== $('profName')) renderProfile();
       if ($('statsOverlay').classList.contains('open')) renderStats();
       sync.state = 'ok'; sync.at = Date.now(); sync.err = '';
@@ -14015,11 +14116,14 @@ window.NEON_BREAK = {
       d = S.defendSet(1, rem);
       if (d.wins) return d.wins;
       if (d.set.length) {
-        var inSet = function (m) { return d.set.some(function (o) { return o.x === m.x && o.y === m.y; }); };
+        // Entre las defensas equivalentes, la más natural: tapar una casilla ganadora (pref alto). Si ninguna defensa alcanza (todas pierden igual),
+        // el conjunto es todo el tablero y sin este filtro la IA elegía cualquier cosa en vez de tapar el cinco.
+        var maxPref = -1; d.set.forEach(function (o) { if (o.pref > maxPref) maxPref = o.pref; });
+        var top = d.set.filter(function (o) { return o.pref === maxPref; });
+        var inSet = function (m) { return top.some(function (o) { return o.x === m.x && o.y === m.y; }); };
         var ranked = rk && rk.ranked ? rk.ranked : [], i;
         for (i = 0; i < ranked.length; i++) if (inSet(ranked[i])) return { x: ranked[i].x, y: ranked[i].y };
-        var best = d.set[0]; d.set.forEach(function (o) { if (o.pref > best.pref) best = o; });
-        return { x: best.x, y: best.y };
+        return { x: top[0].x, y: top[0].y };
       }
     }
     return rk ? { x: rk.x, y: rk.y } : P.legalMoves(state)[0];
@@ -15028,7 +15132,7 @@ window.NEON_BREAK = {
   setInterval(function () { if ($('tnoOverlay').classList.contains('open') && tno.snap && tno.snap.status === 'open') tnoRender(); }, 4000);      // la sesión puede terminar de cargar con la pantalla ya abierta
   tnoLoadSess();
 
-  applyI18n(); buildThemePicker(); syncSizePicker(); syncOpts(); syncMode(); syncVis(); resize(); open('menuOverlay'); initOnline(); updateSide();
+  applyI18n(); buildThemePicker(); syncSizePicker(); syncOpts(); syncMode(); syncVis(); resize(); open('menuOverlay'); initOnline(); updateSide(); preloadAll();
   window.__pente = { tnoRender: tnoRender, get daily() { return daily; }, cmtRender: cmtRender, renderBoard: renderBoard, stoneImg: stoneImg, adminOpen: admOpen, get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, startAI: startAI, get ai() { return ai; }, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; }, get tut() { return tut; }, get profile() { return profile; }, get auth() { return Auth; }, get sync() { return sync; }, setChatW: setChatW, syncProfile: syncProfile, get tn() { return tn; }, get tno() { return tno; } };  // utilidad para pruebas manuales
 })();
 </script>
