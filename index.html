@@ -2399,7 +2399,8 @@ html[data-theme="jardin"] .app .btn:disabled { background: rgba(14,32,20,.85); c
     var imgs = loadSet('GARDEN_STONES'), name = motif.slice(3), im = imgs && imgs[name + '_' + frame], kk = root.GARDEN_PETAL_K;
     return im && kk ? { img: im, k: kk[name.split('_')[1]] || 1.2 } : null;
   }
-  root.Deco = { grow: FL_GROW, board: board, stone: stone, petal: petal, motifs: Object.keys(M) };
+  function growOf(motif) { return motif.indexOf('gx:') === 0 ? 1 : motif.indexOf('fl:') === 0 ? FL_GROW : GROW; }
+  root.Deco = { growOf: growOf, grow: FL_GROW, board: board, stone: stone, petal: petal, motifs: Object.keys(M) };
 })(typeof self !== 'undefined' ? self : this);
 </script>
 <script>
@@ -11317,7 +11318,8 @@ window.NEON_BREAK = {
     return (sprites[key] = { cv: cv, size: size }, spriteCount++, sprites[key]);
   }
   function drawMotif(cx, cy, st, alpha, highlight, scale, lift, seed, r, th, player, spin) {   // Jardín, Halloween, Galaxia: ver deco.js
-    var sp = window.Deco.stone(st.motif, seed, r / scale * 1.02), s = sp.size * scale;
+    var r0 = r / scale * 1.02, cap = metrics.cell * 0.49 / (window.Deco.growOf ? window.Deco.growOf(st.motif) : 1);     // la ficha dibujada (con su «crecimiento») nunca pasa de una casilla: con tamaño «grande» se pisaban entre vecinas
+    var sp = window.Deco.stone(st.motif, seed, Math.min(r0, cap)), s = sp.size * scale;
     ctx.save(); ctx.globalAlpha = alpha;
     ctx.shadowColor = 'rgba(0,0,0,' + (0.5 - 0.12 * (lift || 0)) + ')'; ctx.shadowBlur = r * (0.35 + (lift || 0) * 0.7); ctx.shadowOffsetY = r * (0.12 + (lift || 0) * 0.5);
     if (spin) { ctx.translate(cx, cy); ctx.rotate(spin); ctx.drawImage(sp.cv, -s / 2, -s / 2, s, s); } else ctx.drawImage(sp.cv, cx - s / 2, cy - s / 2, s, s);
