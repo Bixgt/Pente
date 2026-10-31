@@ -8845,13 +8845,134 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
     if (bar % 8 === 7 && e >= 4) hush(t, 0.1, 5000, 0.012 + (e - 4) * 0.01, true);
   }
 
+  /* ---------- Halloween: "casa embrujada" ----------
+   * Sol menor, 88 BPM, 16 compases (~44 s). Inspirado en el ESTILO de las marchas teatrales de Halloween (tuba y metales «oom-pah», pizzicato/xilófono seco,
+   * coro, cromatismos), con melodía propia. Suma campanada, viento, truenos, un crujido, un aullido y dos risas malvadas. Todo sintetizado; sale de tools/make_music.py. */
+  C.Gm = [55, 58, 62]; C.D7 = [54, 57, 60, 62]; C.Cm = [55, 60, 63]; C.Eb = [55, 58, 63]; C.D7b9 = [54, 57, 60, 63];
+  var H_ROOT = { Gm: 43, D7: 38, Cm: 48, Eb: 39, D7b9: 38 };
+  var BARS_HALLOWEEN = [      // melodía original (sol menor, con notas torcidas): [posición en corcheas, nota, duración]
+    ['Gm', 43, [[0, 74, 1], [1, 74, 1], [2, 77, 1], [3, 74, 1], [4, 70, 2], [6, 67, 2]]],
+    ['Gm', 43, [[0, 69, 1], [1, 70, 1], [2, 72, 1], [3, 70, 1], [4, 69, 2], [6, 67, 2]]],
+    ['D7', 38, [[0, 74, 1], [1, 75, 1], [2, 74, 1], [3, 72, 1], [4, 69, 2], [6, 66, 2]]],
+    ['Gm', 43, [[0, 67, 3], [4, 62, 4]]],
+    ['Cm', 48, [[0, 72, 1], [1, 72, 1], [2, 75, 1], [3, 72, 1], [4, 68, 2], [6, 65, 2]]],
+    ['Cm', 48, [[0, 67, 1], [1, 68, 1], [2, 70, 1], [3, 68, 1], [4, 67, 2], [6, 65, 2]]],
+    ['D7b9', 38, [[0, 69, 1], [1, 70, 1], [2, 69, 1], [3, 66, 1], [4, 69, 2], [6, 74, 2]]],
+    ['D7', 38, [[0, 73, 3], [4, 74, 2], [7, 73, 1]]],
+    ['Gm', 43, [[0, 79, 1], [1, 79, 1], [2, 82, 1], [3, 79, 1], [4, 77, 2], [6, 74, 2]]],
+    ['Eb', 39, [[0, 75, 1], [1, 77, 1], [2, 79, 1], [3, 77, 1], [4, 75, 2], [6, 72, 2]]],
+    ['Cm', 48, [[0, 72, 2], [2, 75, 2], [4, 79, 2], [6, 75, 2]]],
+    ['D7', 38, [[0, 78, 1], [1, 79, 1], [2, 78, 1], [3, 75, 1], [4, 74, 4]]],
+    ['Gm', 43, [[0, 74, 1], [1, 74, 1], [2, 77, 1], [3, 74, 1], [4, 70, 2], [6, 67, 2]]],
+    ['Cm', 48, [[0, 72, 1], [1, 72, 1], [2, 75, 1], [3, 72, 1], [4, 68, 2], [6, 65, 2]]],
+    ['D7b9', 38, [[0, 69, 2], [2, 72, 2], [4, 75, 2], [6, 78, 2]]],
+    ['Gm', 43, [[0, 79, 3], [4, 67, 3], [7, 66, 1]]]
+  ];
+  function pad(m, t, d, v) { note(m, t, d, { vol: v, cut: 650, send: 0.4, atk: Math.min(1.1, d * 0.45), parts: [[1, 1], [1.004, 0.8], [2, 0.5], [3, 0.3, d * 0.5]] }); }
+  function drone(m, t, d, v) { note(m, t, d, { vol: v, cut: 420, send: 0.25, atk: 0.6, parts: [[1, 1], [2, 0.55], [3, 0.3], [5, 0.12]] }); }
+  function musicbox(m, t, d, v) { note(m, t, d, { vol: v, cut: 4800, send: 0.65, atk: 0.003, parts: [[1, 1, d * 0.8], [2.76, 0.28, 0.25], [5.4, 0.12, 0.1], [1.012, 0.35, d * 0.7]] }); }     // el segundo parcial algo desafinado: caja de música vieja
+  function bellToll(m, t, v) { note(m, t, 5.5, { vol: v, cut: 2400, send: 0.7, atk: 0.004, parts: [[1, 1, 3.8], [2.01, 0.55, 2.4], [2.76, 0.4, 1.6], [4.07, 0.22, 1.0], [5.43, 0.12, 0.6]] }); }
+  function gust(t, dur, f0, f1, vol) {                                       // viento: ruido en bucle por un filtro que sube y baja
+    var sN = oc.createBufferSource(), f = oc.createBiquadFilter(), g = oc.createGain(), s = oc.createGain();
+    sN.buffer = noiseBuf; sN.loop = true; f.type = 'bandpass'; f.Q.value = 1.6;
+    f.frequency.setValueAtTime(f0, t); f.frequency.linearRampToValueAtTime(f1, t + dur * 0.55); f.frequency.linearRampToValueAtTime(f0 * 0.8, t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + dur * 0.45); g.gain.linearRampToValueAtTime(0.0001, t + dur);
+    sN.connect(f); f.connect(g); g.connect(ob); s.gain.value = 0.35; g.connect(s); s.connect(verb); sN.start(t); sN.stop(t + dur + 0.05);
+  }
+  function thunder(t, vol) {                                                 // trueno: chasquido corto + retumbar con rebotes que se apagan
+    var i, hits = [[0, 1], [0.35, 0.6], [0.9, 0.5], [1.7, 0.32], [2.6, 0.2]];
+    for (i = 0; i < hits.length; i++) (function (dt, k) {
+      var sN = oc.createBufferSource(), f = oc.createBiquadFilter(), g = oc.createGain(), s = oc.createGain(), dur = i === 0 ? 3.2 : 1.8;
+      sN.buffer = noiseBuf; sN.loop = true; f.type = 'lowpass'; f.Q.value = 0.9;
+      f.frequency.setValueAtTime(i === 0 ? 1800 : 520, t + dt); f.frequency.exponentialRampToValueAtTime(70, t + dt + dur);
+      g.gain.setValueAtTime(0.0001, t + dt); g.gain.exponentialRampToValueAtTime(vol * k, t + dt + (i === 0 ? 0.012 : 0.08)); g.gain.exponentialRampToValueAtTime(0.0001, t + dt + dur);
+      sN.connect(f); f.connect(g); g.connect(ob); s.gain.value = 0.5; g.connect(s); s.connect(verb); sN.start(t + dt); sN.stop(t + dt + dur + 0.05);
+    })(hits[i][0], hits[i][1]);
+    var o = oc.createOscillator(), og = oc.createGain();                      // el piso del trueno: un seno grave que baja
+    o.type = 'sine'; o.frequency.setValueAtTime(62, t); o.frequency.exponentialRampToValueAtTime(30, t + 2.4);
+    og.gain.setValueAtTime(0.0001, t); og.gain.exponentialRampToValueAtTime(vol * 0.9, t + 0.05); og.gain.exponentialRampToValueAtTime(0.0001, t + 2.6);
+    o.connect(og); og.connect(ob); o.start(t); o.stop(t + 2.7);
+  }
+  function creak(t, vol) {                                                   // puerta que cruje: diente de sierra lento que se retuerce, con filtro que pasa por una vocal
+    var o = oc.createOscillator(), f = oc.createBiquadFilter(), g = oc.createGain(), lfo = oc.createOscillator(), lg = oc.createGain(), s = oc.createGain();
+    o.type = 'sawtooth'; o.frequency.setValueAtTime(95, t); o.frequency.linearRampToValueAtTime(210, t + 0.9); o.frequency.linearRampToValueAtTime(130, t + 1.7);
+    lfo.frequency.value = 23; lg.gain.value = 14; lfo.connect(lg); lg.connect(o.frequency);
+    f.type = 'bandpass'; f.Q.value = 7; f.frequency.setValueAtTime(500, t); f.frequency.linearRampToValueAtTime(1500, t + 1.0); f.frequency.linearRampToValueAtTime(700, t + 1.7);
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + 0.25); g.gain.linearRampToValueAtTime(vol * 0.6, t + 1.3); g.gain.linearRampToValueAtTime(0.0001, t + 1.8);
+    o.connect(f); f.connect(g); g.connect(ob); s.gain.value = 0.3; g.connect(s); s.connect(verb); o.start(t); lfo.start(t); o.stop(t + 1.9); lfo.stop(t + 1.9);
+  }
+  function howl(t, vol) {                                                    // aullido lejano: seno con vibrato que sube y cae
+    var o = oc.createOscillator(), o2 = oc.createOscillator(), g = oc.createGain(), lfo = oc.createOscillator(), lg = oc.createGain(), lp = oc.createBiquadFilter(), s = oc.createGain();
+    o.type = 'sawtooth'; lp.type = 'lowpass'; lp.frequency.value = 900;
+    o.frequency.setValueAtTime(240, t); o.frequency.exponentialRampToValueAtTime(520, t + 1.2); o.frequency.setValueAtTime(520, t + 1.9); o.frequency.exponentialRampToValueAtTime(300, t + 3.4);
+    lfo.frequency.value = 5.2; lg.gain.value = 9; lfo.connect(lg); lg.connect(o.frequency);
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + 1.0); g.gain.linearRampToValueAtTime(vol * 0.8, t + 2.4); g.gain.linearRampToValueAtTime(0.0001, t + 3.6);
+    o.connect(lp); lp.connect(g); g.connect(ob); s.gain.value = 0.7; g.connect(s); s.connect(verb); o.start(t); lfo.start(t); o.stop(t + 3.7); lfo.stop(t + 3.7);
+  }
+  var dist = null;
+  function distCurve() {                                                     // saturación suave: la voz se vuelve más áspera y amenazante
+    var c = new Float32Array(1024), i, x; for (i = 0; i < 1024; i++) { x = i / 512 - 1; c[i] = Math.tanh(x * 3.2) * 0.8; } return c;
+  }
+  /* Una carcajada: n sílabas «ja» (garganta = diente de sierra con vibrato, dos formantes de vocal, soplido al empezar).
+   * f0 = tono de la primera sílaba, drop = cuánto baja cada sílaba (semitonos), step = segundos entre sílabas, fm = formantes [F1, F2]. */
+  function laugh(t, o) {
+    var n = o.n, i, ws = oc.createWaveShaper(); ws.curve = distCurve(); ws.connect(ob); var send = oc.createGain(); send.gain.value = 0.55; ws.connect(send); send.connect(verb);
+    for (i = 0; i < n; i++) {
+      var last = i === n - 1, ts = t + i * o.step + (last ? 0.04 : 0), d = last ? o.step * 2.3 : o.step * 0.72, f = o.f0 * Math.pow(2, -(i * o.drop) / 12) * (o.rise ? Math.pow(2, i * o.rise / 12) : 1);
+      var src = oc.createOscillator(), vib = oc.createOscillator(), vg = oc.createGain(), g = oc.createGain();
+      src.type = 'sawtooth'; src.frequency.setValueAtTime(f * 1.06, ts); src.frequency.exponentialRampToValueAtTime(f * (last ? 0.8 : 0.9), ts + d);
+      vib.frequency.value = last ? 6.5 : 5; vg.gain.value = f * (last ? 0.05 : 0.02); vib.connect(vg); vg.connect(src.frequency);
+      var f1 = oc.createBiquadFilter(), f2 = oc.createBiquadFilter(), mix = oc.createGain();
+      f1.type = f2.type = 'bandpass'; f1.frequency.value = o.fm[0]; f2.frequency.value = o.fm[1]; f1.Q.value = 5; f2.Q.value = 6;
+      var g1 = oc.createGain(), g2 = oc.createGain(); g1.gain.value = 1; g2.gain.value = 0.6;
+      src.connect(f1); src.connect(f2); f1.connect(g1); f2.connect(g2); g1.connect(mix); g2.connect(mix); mix.connect(g);
+      g.gain.setValueAtTime(0.0001, ts); g.gain.exponentialRampToValueAtTime(o.vol * (last ? 1 : 0.8 + 0.2 * (i % 2)), ts + 0.03); g.gain.exponentialRampToValueAtTime(o.vol * (last ? 0.7 : 0.25), ts + d * 0.5); g.gain.exponentialRampToValueAtTime(0.0001, ts + d);
+      g.connect(ws); src.start(ts); vib.start(ts); src.stop(ts + d + 0.05); vib.stop(ts + d + 0.05);
+      var br = oc.createBufferSource(), bf = oc.createBiquadFilter(), bg = oc.createGain();                              // la «j»: un soplido
+      br.buffer = noiseBuf; bf.type = 'bandpass'; bf.frequency.value = o.breath; bf.Q.value = 0.9;
+      bg.gain.setValueAtTime(o.vol * 0.55, ts); bg.gain.exponentialRampToValueAtTime(0.0001, ts + 0.07);
+      br.connect(bf); bf.connect(bg); bg.connect(ob); br.start(ts); br.stop(ts + 0.09);
+    }
+  }
+  function tuba(m, t, d, v) { note(m, t, d, { vol: v, cut: 700, send: 0.12, atk: 0.02, parts: [[1, 1], [2, 0.7, 0.3], [3, 0.4, 0.2], [4, 0.2, 0.12]] }); }
+  function stab(m, t, d, v) { note(m, t, d, { vol: v, cut: 2100, send: 0.25, atk: 0.025, parts: [[1, 1], [2, 0.8], [3, 0.55], [4, 0.4], [5, 0.25]] }); }        // metales en seco
+  function xylo(m, t, d, v) { note(m, t, d, { vol: v, cut: 5600, send: 0.35, atk: 0.003, parts: [[1, 1, d * 0.5], [3, 0.35, 0.09], [6, 0.18, 0.05]] }); }
+  function scheduleHalloween(bar, e, t) {
+    var b = BARS[bar], ch = C[b[0]], root = H_ROOT[b[0]], i, last = bar % 4 === 3, walk = bar === 7 || bar === 15;
+    // «oom-pah» de marcha fúnebre: tuba en 1 y 3, metales secos en 2 y 4
+    if (e === 0) { tuba(root, t, EIGHTH * 1.6, 0.22); thump(t, 0.22, 0.45); }
+    if (e === 4 && !walk) { tuba(root + (b[0] === 'Gm' || b[0] === 'Cm' ? 7 : 0), t, EIGHTH * 1.6, 0.18); thump(t, 0.16, 0.45); }
+    if (e === 4 && walk) { tuba(root + 7, t, EIGHTH * 0.9, 0.17); thump(t, 0.16, 0.45); }
+    if (walk && e >= 5) tuba(root + 7 - (e - 4), t, EIGHTH * 0.9, 0.15);                         // bajo que baja de a semitonos
+    if ((e === 2 || e === 6) && !(walk && e === 6)) for (i = 1; i < ch.length; i++) stab(ch[i], t + i * 0.006, EIGHTH * 0.9, 0.034);
+    if (e === 2 || e === 6) hush(t, 0.09, 1900, 0.05, false);                                    // caja seca
+    if (e === 3 || e === 7) block(t, 0.04, 1350);                                                // huesitos que traquetean
+    // coro («ooh») sostenido: más lleno en la segunda mitad
+    if (e === 0 && (bar % 2 === 0)) for (i = 0; i < ch.length; i++) pad(ch[i] + (bar >= 8 ? 12 : 0), t + i * 0.02, EIGHTH * 15.6, bar >= 8 ? 0.03 : 0.022);
+    // melodía: xilófono seco, y cuando se repite se le suma una celesta una octava arriba
+    b[2].forEach(function (m) {
+      if (m[0] !== e) return;
+      xylo(m[1], t, Math.min(1.2, EIGHTH * m[2] + 0.25), 0.085);
+      if (bar >= 8) musicbox(m[1] + 12, t, Math.min(1.8, EIGHTH * m[2] + 0.6), 0.04);
+    });
+    if (e === 0 && bar % 4 === 0) gust(t, EIGHTH * 8 * 1.6, 380, 900, 0.03);
+    if (e === 0 && bar === 0) bellToll(43, t, 0.14);
+    // risas y truenos: son grabaciones (tools/halloween-samples) que mezcla tools/make_music.py: risa 1 en el compás 3, truenos en el 7 y el 11, risa 2 en el 13
+    if (e === 4 && bar === 5) creak(t, 0.05);
+    if (e === 4 && bar === 15) howl(t, 0.05);
+    if (last && e >= 5 && bar % 8 === 7) hush(t, 0.07, 3200, 0.02 + (e - 5) * 0.015, false);     // redoble que sube antes de repetir
+    if (bar % 8 === 7 && e === 6) hush(t, 1.4, 4200, 0.02, true);                                 // platillo que se abre
+  }
+
   var TRACKS = {
     lounge: { bpm: 92, bars: BARS_LOUNGE, sched: scheduleLounge, file: 'audio/loop-16k.wav' },
     'battle-clasico': { bpm: 104, bars: BARS_BATTLE, sched: scheduleClasico, file: 'audio/battle-clasico-16k.wav' },
     'battle-glow': { bpm: 94, bars: BARS_BATTLE, sched: scheduleGlow, file: 'audio/battle-glow-16k.wav' },
     'battle-tradicional': { bpm: 92, bars: BARS_TRAD, sched: scheduleTrad, file: 'audio/battle-tradicional-16k.wav' },
     'battle-papel': { bpm: 100, bars: BARS_PAPEL, sched: schedulePapel, file: 'audio/battle-papel-16k.wav' },
-    'battle-playa': { bpm: 100, bars: BARS_PLAYA, sched: schedulePlaya, file: 'audio/battle-playa-16k.wav' }
+    'battle-playa': { bpm: 100, bars: BARS_PLAYA, sched: schedulePlaya, file: 'audio/battle-playa-16k.wav' },
+    'battle-halloween': { bpm: 88, bars: BARS_HALLOWEEN, sched: scheduleHalloween, file: 'audio/battle-halloween-16k.wav' },
+    'lounge-halloween': { bpm: 88, bars: BARS_HALLOWEEN, sched: scheduleHalloween, file: 'audio/battle-halloween-16k.wav' }      // el menú de Halloween usa el mismo archivo
   };
 
   var schedule = scheduleLounge;
@@ -8960,6 +9081,7 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
   }
   // Qué tema corresponde: la pantalla del juego lo avisa ('battle' mientras hay una partida en curso, 'lounge' en el resto)
   function setTrack(name) {
+    if (!TRACKS[name] && /^lounge-/.test(name)) name = 'lounge';        // sin música propia para el menú de ese estilo: la de siempre
     if (!TRACKS[name] || name === want) return;
     want = name;
     if (!enabled) return;
@@ -12067,7 +12189,7 @@ window.NEON_BREAK = {
     var m = window.PenteMusic; if (!m || !m.setTrack) return;
     clearTimeout(musicT);                                       // se decide recién cuando se asienta la pantalla (abrir una sección pasa por un estado intermedio)
     musicT = setTimeout(function () {
-      m.setTrack(state && !isOver() && !tut.active && !lab.active && !document.body.classList.contains('in-screen') ? 'battle-' + themeId : 'lounge');
+      m.setTrack(state && !isOver() && !tut.active && !lab.active && !document.body.classList.contains('in-screen') ? 'battle-' + themeId : 'lounge-' + themeId);
     }, 120);
   }
   var musicT = 0;
