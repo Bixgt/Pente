@@ -43,7 +43,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 html, body { overflow-x: clip; }     /* el marco de los tableros con arte puede sobresalir de la pantalla: que no genere scroll lateral */
 .app { display: flex; flex-direction: column; min-height: 100%; max-width: 1000px; margin: 0 auto; padding: 12px var(--gutter) calc(12px + env(safe-area-inset-bottom)); gap: 12px; }
 
-.hud { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; min-height: 54px; }     /* alto fijo para todos los temas: así el tablero mide lo mismo en todos */
+.hud { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; min-height: 54px; }
+.hud:not(.ffa) { height: 108px; }     /* celular: tres renglones por jugador */     /* alto fijo para todos los temas: así el tablero mide lo mismo en todos */
 .player { background: var(--panel); border-radius: var(--radius); padding: 10px 12px; border: 2px solid transparent; transition: border-color .15s, background .15s; min-width: 0; }
 .player.active { border-color: var(--accent); background: var(--panel-2); }
 .player .row { display: flex; align-items: center; gap: 8px; }
@@ -67,7 +68,7 @@ html, body { overflow-x: clip; }     /* el marco de los tableros con arte puede 
 .pip.on { background: var(--accent); border-color: var(--accent); }
 
 /* Reserva dos renglones siempre: si el aviso se hace largo, el tablero NO se mueve (con el dedo encima sería un desastre). */
-.status { text-align: center; font-weight: 600; min-height: 32px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; line-height: 1.35; }
+.status { text-align: center; font-weight: 600; height: 42px; overflow: hidden; box-sizing: border-box; display: flex; align-items: center; justify-content: center; line-height: 1.35; }
 .status .toast { color: var(--accent); }
 
 .board-wrap { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; min-height: 0; position: relative; }
@@ -215,13 +216,14 @@ body.in-screen .app { visibility: hidden; }
   .app { max-width: min(1800px, 100vw) !important; height: 100vh; height: 100dvh; min-height: 0; }
   .stage { min-height: 0; }
   .board-wrap { container-type: size; }
+  .hud:not(.ffa) { height: 54px; }
   #board { width: min(100cqw, 100cqh, 1400px); }
   /* encabezado compacto: nombre, reloj y capturas en una sola línea */
   .app { padding-top: 6px; padding-bottom: 6px; gap: 6px; }
   .player { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 14px; padding: 5px 12px; }
   .player[hidden] { display: none; }
   .player .clock, .player .caps { margin-top: 0; }
-  .status { min-height: 32px; }
+  .status { height: 34px; }
   .actions { min-height: 0; }
   .actions .btn { padding-top: 8px; padding-bottom: 8px; }
 }
@@ -1131,7 +1133,7 @@ html[data-theme="papel"] .side .movelist li { font-size: 1.3em; padding: 5px 4px
 html[data-theme="papel"] .side .movelist .mv::before { width: 15px; height: 15px; }
 
 /* ---------- Jardín: pantalla de juego (arte de Ro): patio de fondo, tablero con marco de madera, paneles verdes con borde de madera ---------- */
-html[data-theme="jardin"] body { background: #0f1b12 url(garden-game-bg.webp) center / cover fixed no-repeat; }
+html[data-theme="jardin"] body { background: #0f1b12 url(garden-game-bg2.webp) center / cover fixed no-repeat; }
 html[data-theme="jardin"] #board { box-shadow: none; border-radius: 0; filter: drop-shadow(0 14px 18px rgba(0,0,0,.55)); }
 html[data-theme="jardin"] .status { color: #f6f0d6; text-shadow: 0 1px 4px rgba(0,0,0,.85); }
 html[data-theme="jardin"] .status .toast { color: #b9f08a; }
@@ -8225,7 +8227,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       css: { '--bg': '#0f1b12', '--panel': '#182a1c', '--panel-2': '#213826', '--line': '#3d6a45', '--accent-ink': '#06150a', '--accent': '#9be564', '--s1a': '#ff5a5a', '--s1b': '#b00d1d', '--s2a': '#fffbe8', '--s2b': '#d8cfa8', '--s3a': '#fff0a0', '--s3b': '#e0a010', '--s4a': '#ffc4d0', '--s4b': '#e0708a',
              '--board-shadow': '0 10px 30px rgba(0,0,0,.45)' },
       // art: el fondo es la imagen GARDEN_IMG (marco de madera, piedras y enredaderas); la grilla se dibuja encima dentro de span (fracciones del lado). labelStroke: letras con contorno para leerse sobre las hojas
-      board: { deco: 'garden', menuArt: 'jardin', art: { img: 'GARDEN_IMG', span: [0.1475, 0.8525] }, labelPos: 0.51, labelPosTop: 0.644, labelFar: 0.52, labelFarBottom: 0.376, groove: 'earth', labelStroke: 'rgba(20,45,10,.9)', bg: ['#79bd4a', '#4f9a35'], line: 'rgba(40,24,8,.8)', lineGlow: null, star: 'rgba(40,24,8,.92)', label: '#ffffff', labelHi: '#ffe66b' },
+      board: { deco: 'garden', menuArt: 'jardin', art: { img: 'garden-board-coords.webp', span: [0.1388, 0.8638], plain: { img: 'garden-board-plain.webp', span: [0.1163, 0.8871] } }, carve: true, labelSize: 0.52, labelPos: 0.619, labelPosTop: 0.643, labelFar: 0.364, labelFarBottom: 0.382, groove: 'earth', bg: ['#79bd4a', '#4f9a35'], line: 'rgba(40,24,8,.8)', lineGlow: null, star: 'rgba(40,24,8,.92)', label: '#ffffff', labelHi: '#ffe66b' },
       stones: // cada jugador es de UNA sola especie: J1 rosas rojas, J2 jazmines blancos (en 4 jugadores: rosas amarillas y jazmines azules)
       { 1: { a: '#ff5a5a', b: '#b00d1d', glow: null, motif: 'fl:red_rose' }, 2: { a: '#fffbe8', b: '#d8cfa8', glow: null, motif: 'fl:white_jasmine' }, 3: { a: '#fff0a0', b: '#e0a010', glow: null, motif: 'fl:yellow_rose' }, 4: { a: '#a8c8ff', b: '#1747b0', glow: null, motif: 'fl:blue_jasmine' } },
       last: { ring: '#ffffff', dot: { 1: '#ffffff', 2: '#2a2a2a', 3: '#2a2a2a', 4: '#2a2a2a' } },
@@ -10559,12 +10561,12 @@ window.NEON_BREAK = {
   }
 
   /* ---------- Precarga de imágenes: que el arte de cada tema ya esté listo cuando se necesita ---------- */
-  var THEME_FILES = { papel: ['paper-game-bg.webp', 'paper-notebook.webp', 'paper-menu.webp'], jardin: ['garden-game-bg.webp', 'garden-wood.webp', 'garden-flower.webp', 'garden-menu.webp'], glow: ['neon-bg.webp'] };
+  var THEME_FILES = { papel: ['paper-game-bg.webp', 'paper-notebook.webp', 'paper-menu.webp'], jardin: ['garden-game-bg2.webp', 'garden-board-coords.webp', 'garden-board-plain.webp', 'garden-wood.webp', 'garden-flower.webp', 'garden-menu.webp'], glow: ['neon-bg.webp'] };
   var preloaded = {};
   function preloadTheme(id) {
     if (preloaded[id]) return; preloaded[id] = true;
     var th = null; try { th = window.Themes.byId[id]; } catch (e) {}
-    try { if (th && th.board && th.board.art) artImage(th.board.art); } catch (e) {}
+    try { if (th && th.board && th.board.art) { artImage(th.board.art); if (th.board.art.plain) artImage(th.board.art.plain); } } catch (e) {}
     (THEME_FILES[id] || []).forEach(function (f) { var im = new Image(); im.decoding = 'async'; im.src = f; });
     try { if (th && th.board && th.board.menuArt) menuArtImg(th.board.menuArt); } catch (e) {}
   }
@@ -11156,16 +11158,17 @@ window.NEON_BREAK = {
     render();
   }
   var artImgs = {};
+  function artOf(th) { var a = th && th.board && th.board.art; return a && a.plain && !cfg.coords ? a.plain : a; }     // Jardín tiene dos tableros: con letras/números (doble marco) y sin ellos
   function artImage(a) {            // imagen de fondo de un tablero con arte (Jardín); mientras carga se usa el fondo dibujado por código
     var k = a.img; if (artImgs[k]) return artImgs[k].ok ? artImgs[k].im : null;
-    var src = window[k]; if (!src) return null;
+    var src = window[k] || (/\.(webp|png|jpe?g)$/i.test(k) ? k : ''); if (!src) return null;
     var im = new Image(), rec = artImgs[k] = { im: im, ok: false };
     im.onload = function () { rec.ok = true; baseCache.ver++; if (typeof render === 'function') try { render(); } catch (e) {} };
     im.src = src; return null;
   }
   if (window.Deco) window.Deco.onReady = function () { baseCache.ver++; try { buildThemePicker(); } catch (e) {} if (typeof render === 'function') try { render(); } catch (e) {} try { if ($('menuOverlay').classList.contains('open')) renderMenuBg(); } catch (e) {} };      // fichas de Jardín/Halloween listas
   function layout() {      // con coordenadas hay margen sup./izq. para letras y números; sin ellas el tablero aprovecha ese espacio
-    var n = boardN(), art = theme().board.art;
+    var n = boardN(), art = artOf(theme());
     if (canvas === $('board')) {        // los tableros con marco se agrandan para que la GRILLA mida lo mismo que en el tablero simple (el marco sobresale un poco); sin pasarse del ancho/alto de la pantalla
       var sc = 1;
       if (art) {
@@ -11187,7 +11190,7 @@ window.NEON_BREAK = {
   }
   function drawStone(x, y, player, alpha, highlight) { drawStonePx(px(x), px(y), player, alpha, highlight, 1, 0, seedOf(x, y, player), rotFor(x, y, player)); }
   // scale > 1 y lift (0..1) = ficha levantada: más grande y con sombra más lejana
-  function stoneK() { return ({ small: 0.30, normal: 0.42, large: 0.50 }[cfg.stoneSize] || 0.42); }   // radio de la ficha como fracción de la casilla (0.5 = se tocan)
+  function stoneK() { return ({ small: 0.34, normal: 0.45, large: 0.49 }[cfg.stoneSize] || 0.45); }   // radio de la ficha como fracción de la casilla (0.5 = se tocan)
   var hlPlayer = 1;
   function drawStonePx(cx, cy, player, alpha, highlight, scale, lift, seed, spin) {
     var th = theme(), st = th.stones[player]; hlPlayer = player;
@@ -11367,9 +11370,19 @@ window.NEON_BREAK = {
     g.putImageData(id, 0, 0);
     return (sprites[key] = { cv: cv, size: size }, spriteCount++, sprites[key]);
   }
+  /* Parte visible de un sprite (lado mayor de lo que no es transparente / lado del lienzo): así TODAS las fichas, sean dibujo o código, miden lo mismo en pantalla */
+  function visFrac(cv) {
+    if (cv._vf) return cv._vf; var f = 1;
+    try {
+      var n = 48, t = document.createElement('canvas'); t.width = t.height = n; var g = t.getContext('2d'); g.drawImage(cv, 0, 0, n, n);
+      var d = g.getImageData(0, 0, n, n).data, x0 = n, x1 = -1, y0 = n, y1 = -1, x, y;
+      for (y = 0; y < n; y++) for (x = 0; x < n; x++) if (d[(y * n + x) * 4 + 3] > 60) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+      if (x1 >= 0) f = Math.max(0.35, Math.min(1, Math.max(x1 - x0 + 1, y1 - y0 + 1) / n));
+    } catch (e) {}
+    return (cv._vf = f);
+  }
   function drawMotif(cx, cy, st, alpha, highlight, scale, lift, seed, r, th, player, spin) {   // Jardín, Halloween, Galaxia: ver deco.js
-    var r0 = r / scale * 1.02, cap = metrics.cell * 0.49 / (window.Deco.growOf ? window.Deco.growOf(st.motif) : 1);     // la ficha dibujada (con su «crecimiento») nunca pasa de una casilla: con tamaño «grande» se pisaban entre vecinas
-    var sp = window.Deco.stone(st.motif, seed, Math.min(r0, cap)), s = sp.size * scale;
+    var sp = window.Deco.stone(st.motif, seed, r / scale * 1.02), s = 2 * r / visFrac(sp.cv);     // lo visible mide 2·r, igual que la ficha lisa de los otros tableros
     ctx.save(); ctx.globalAlpha = alpha;
     ctx.shadowColor = 'rgba(0,0,0,' + (0.5 - 0.12 * (lift || 0)) + ')'; ctx.shadowBlur = r * (0.35 + (lift || 0) * 0.7); ctx.shadowOffsetY = r * (0.12 + (lift || 0) * 0.5);
     if (spin) { ctx.translate(cx, cy); ctx.rotate(spin); ctx.drawImage(sp.cv, -s / 2, -s / 2, s, s); } else ctx.drawImage(sp.cv, cx - s / 2, cy - s / 2, s, s);
@@ -11377,7 +11390,7 @@ window.NEON_BREAK = {
     if (highlight) drawWinMark(cx, cy, r, player, th, seed);
   }
   function drawShell(cx, cy, st, alpha, highlight, scale, lift, seed, r, th, player, spin) {
-    var sp = shellSprite(st.shell, seed, r / scale * 1.1), s = sp.size * scale;
+    var sp = shellSprite(st.shell, seed, r / scale * 1.1), s = 2 * r / visFrac(sp.cv);
     ctx.save(); ctx.globalAlpha = alpha;
     ctx.shadowColor = 'rgba(70,45,15,' + (0.5 - 0.12 * (lift || 0)) + ')'; ctx.shadowBlur = r * (0.3 + (lift || 0) * 0.7); ctx.shadowOffsetY = r * (0.1 + (lift || 0) * 0.5); ctx.shadowOffsetX = r * 0.04;
     if (spin) { ctx.translate(cx, cy); ctx.rotate(spin); ctx.drawImage(sp.cv, -s / 2, -s / 2, s, s); } else ctx.drawImage(sp.cv, cx - s / 2, cy - s / 2, s, s);
@@ -11448,7 +11461,7 @@ window.NEON_BREAK = {
     return (sprites[key] = { cv: cv, size: size });
   }
   function drawScribble(cx, cy, st, alpha, highlight, scale, lift, seed, rScaled, th, spin) {
-    var r0 = rScaled / scale * 1.12, sp = scribbleSprite(st.scribble, seed, r0), s = sp.size * scale;
+    var r0 = rScaled / scale * 1.12, sp = scribbleSprite(st.scribble, seed, r0), s = 2 * rScaled / visFrac(sp.cv);
     ctx.save(); ctx.globalAlpha = alpha;
     if (lift) { ctx.shadowColor = 'rgba(0,0,0,.28)'; ctx.shadowBlur = rScaled * (0.3 + lift * 0.6); ctx.shadowOffsetY = rScaled * lift * 0.5; }
     if (spin) { ctx.translate(cx, cy); ctx.rotate(spin); ctx.drawImage(sp.cv, -s / 2, -s / 2, s, s); } else ctx.drawImage(sp.cv, cx - s / 2, cy - s / 2, s, s);
@@ -11793,16 +11806,23 @@ window.NEON_BREAK = {
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     for (var i = 0; i < boardN(); i++) {
       var hiX = active && active.x === i, hiY = active && active.y === i;
-      ctx.font = (hiX ? '800 ' : '600 ') + Math.round(c * (th.board.paper ? 0.56 : 0.5)) + 'px ' + uiFont();
+      ctx.font = (hiX ? '800 ' : '600 ') + Math.round(c * (th.board.paper ? 0.56 : th.board.labelSize || 0.5)) + 'px ' + uiFont();
       ctx.fillStyle = hiX ? th.board.labelHi : th.board.label;
-      var lbl = function (s, x, y) { if (th.board.labelStroke) { ctx.lineWidth = Math.max(2, c * 0.14); ctx.lineJoin = 'round'; ctx.strokeStyle = th.board.labelStroke; ctx.strokeText(s, x, y); } ctx.fillText(s, x, y); };
+      var lbl = function (s, x, y, hi) {
+        if (th.board.carve) {                                                    // Jardín: letras talladas en el marco de madera (labio claro abajo-derecha, sombra arriba-izquierda, fondo oscuro)
+          var d = Math.max(1, c * 0.035);
+          ctx.fillStyle = 'rgba(255,214,150,.62)'; ctx.fillText(s, x + d, y + d);
+          ctx.fillStyle = 'rgba(26,10,0,.8)'; ctx.fillText(s, x - d * 0.55, y - d * 0.55);
+          ctx.fillStyle = hi ? '#f0b94e' : '#3a1804'; ctx.fillText(s, x, y); return;
+        }
+        if (th.board.labelStroke) { ctx.lineWidth = Math.max(2, c * 0.14); ctx.lineJoin = 'round'; ctx.strokeStyle = th.board.labelStroke; ctx.strokeText(s, x, y); } ctx.fillText(s, x, y); };
       var last = px(boardN() - 1), lpT = th.board.labelPosTop || lp, lfB = th.board.labelFarBottom || th.board.labelFar;
       var far = th.board.labelFar ? last + (metrics.w - last) * th.board.labelFar : metrics.w - metrics.off * lp;     // Papel: el margen de abajo/derecha es más angosto que el de arriba/izquierda
       var farB = lfB ? last + (metrics.w - last) * lfB : far;     // Jardín: la barra de arriba/abajo del marco no está a la misma distancia que la de izquierda/derecha
-      lbl(P.COLS.charAt(i), px(i), metrics.off * lpT); lbl(P.COLS.charAt(i), px(i), farB);
-      ctx.font = (hiY ? '800 ' : '600 ') + Math.round(c * (th.board.paper ? 0.56 : 0.5)) + 'px ' + uiFont();
+      lbl(P.COLS.charAt(i), px(i), metrics.off * lpT, hiX); lbl(P.COLS.charAt(i), px(i), farB, hiX);
+      ctx.font = (hiY ? '800 ' : '600 ') + Math.round(c * (th.board.paper ? 0.56 : th.board.labelSize || 0.5)) + 'px ' + uiFont();
       ctx.fillStyle = hiY ? th.board.labelHi : th.board.label;
-      lbl(String(i + 1), metrics.off * lp, px(i)); lbl(String(i + 1), far, px(i));
+      lbl(String(i + 1), metrics.off * lp, px(i), hiY); lbl(String(i + 1), far, px(i), hiY);
     }
     ctx.restore();
   }
@@ -11831,12 +11851,11 @@ window.NEON_BREAK = {
     var i;
     ctx.clearRect(0, 0, W, W);                          // por si el arte con transparencia (Papel) termina de cargar después del primer dibujo
     // fondo del tablero
-    if (th.board.art && artImage(th.board.art)) ctx.drawImage(artImage(th.board.art), 0, 0, W, W);
+    if (artOf(th) && artImage(artOf(th))) ctx.drawImage(artImage(artOf(th)), 0, 0, W, W);
     else if (th.board.paper && th.board.art) return;     // Papel con su hoja de cuaderno todavía sin cargar: no se dibuja la hoja blanca de respaldo (se veía un rectángulo blanco detrás); se vuelve a dibujar al cargar
     else if (th.board.paper) ctx.drawImage(paperFor(W), 0, 0);
     else if (th.board.wood) ctx.drawImage(woodFor(W), 0, 0);
     else if (th.board.sand) ctx.drawImage(sandFor(W), 0, 0);
-    else if (th.board.art && artImage(th.board.art)) ctx.drawImage(artImage(th.board.art), 0, 0, W, W);
     else if (th.board.deco && window.Deco) ctx.drawImage(window.Deco.board(th.board.deco, W), 0, 0);
     else {
       var bg = ctx.createLinearGradient(0, 0, W, W);
