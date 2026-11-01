@@ -1128,7 +1128,7 @@ html[data-theme="papel"] .side .movelist li { color: #1b2150; }
 html[data-theme="papel"] .app .btn { background: rgba(250,244,230,.96); border: 2.5px solid #1b2150; border-radius: 15px 12px 14px 12px / 12px 15px 12px 14px; box-shadow: 1px 2px 0 rgba(27,33,80,.4), 0 4px 10px rgba(0,0,0,.35); color: #11142e; }
 html[data-theme="papel"] .app .btn:hover:not(:disabled) { background: #fffaf0; }
 html[data-theme="papel"] .app .btn.primary { background: repeating-linear-gradient(112deg, #3f6bff 0 3px, #2f56ee 3px 5px, #4a77ff 5px 8px); color: #fff; border-color: #0a1448; text-shadow: 0 1px 0 rgba(0,0,40,.5); }
-html[data-theme="papel"] .app .btn:disabled { background: rgba(20,28,62,.85); color: #6f7bb0; border-color: #2a356e; box-shadow: none; }
+html[data-theme="papel"] .app .btn:disabled { background: #cfc5ad; color: #6a6250; border-color: #8a8165; box-shadow: none; text-shadow: none; opacity: 1; }     /* opaco: antes era translúcido y sobre la hoja se veía lavado/blanco */
 html[data-theme="papel"] .side .movelist li { font-size: 1.3em; padding: 5px 4px; }
 html[data-theme="papel"] .side .movelist .mv::before { width: 15px; height: 15px; }
 
@@ -8204,7 +8204,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       css: { '--bg': '#1a1b23', '--panel': '#24252f', '--panel-2': '#30323f', '--line': '#6b70a8', '--accent-ink': '#0b0f33', '--accent': '#8d9bff', '--s1a': '#8a8a8e', '--s1b': '#2b2b2e', '--s2a': '#7d8aff', '--s2b': '#1f2fc4', '--s3a': '#ff8f86', '--s3b': '#b81d14', '--s4a': '#6fd68b', '--s4b': '#126b2c',
              '--board-shadow': '0 10px 30px rgba(0,0,0,.45)' },
       // paper: true -> letra a mano y, si la imagen no cargó, una hoja arrugada generada por código; art: la hoja de cuaderno de Ro (PAPER_IMG), la grilla va a la derecha del margen rojo
-      board: { paper: true, labelPos: 0.72, labelFar: 0.2, art: { img: 'PAPER_IMG', span: [0.225, 0.875] }, bg: ['#fdfcf9', '#efece4'], line: 'rgba(18,18,20,.9)', lineGlow: null, star: 'rgba(18,18,20,.92)', label: 'rgba(30,30,34,.6)', labelHi: '#c0261d' },
+      board: { paper: true, labelPos: 0.87, labelPosTop: 0.79, labelFar: 0.17, labelFarBottom: 0.35, art: { img: 'PAPER_IMG', span: [0.1975, 0.874] }, bg: ['#fdfcf9', '#efece4'], line: 'rgba(18,18,20,.9)', lineGlow: null, star: 'rgba(18,18,20,.92)', label: 'rgba(30,30,34,.6)', labelHi: '#c0261d' },
       // scribble: las fichas son garabatos que cierran un círculo ('pencil' = grafito, 'pen' = lapicera)
       stones: { 1: { a: '#8a8a8e', b: '#2b2b2e', glow: null, scribble: 'pencil' }, 2: { a: '#7d8aff', b: '#1f2fc4', glow: null, scribble: 'pen' }, 3: { a: '#ff8f86', b: '#b81d14', glow: null, scribble: 'pen' }, 4: { a: '#6fd68b', b: '#126b2c', glow: null, scribble: 'pencil' } },
       last: { ring: '#d1342b', dot: { 1: '#ffffff', 2: '#ffffff', 3: '#ffffff', 4: '#ffffff' } },
@@ -11170,10 +11170,9 @@ window.NEON_BREAK = {
   function layout() {      // con coordenadas hay margen sup./izq. para letras y números; sin ellas el tablero aprovecha ese espacio
     var n = boardN(), art = artOf(theme());
     if (canvas === $('board')) {        // los tableros con marco se agrandan para que la GRILLA mida lo mismo que en el tablero simple (el marco sobresale un poco); sin pasarse del ancho/alto de la pantalla
-      var sc = 1;
-      if (art) {
-        sc = Math.max(1, (cfg.coords ? (n - 1) / (n + 2.1) : (n - 1) / n) / (art.span[1] - art.span[0]));      // sin tope: la grilla mide SIEMPRE lo mismo que en el tablero simple; lo que sobra es solo el marco, que puede salirse de la pantalla (letras y grilla quedan adentro)
-      }
+      var sc = art ? Math.max(1, (cfg.coords ? (n - 1) / (n + 2.1) : (n - 1) / n) / (art.span[1] - art.span[0])) : 1;      // sin tope: la grilla mide SIEMPRE lo mismo que en el tablero simple; lo que sobra es solo el marco, que puede salirse de la pantalla (letras y grilla quedan adentro)
+      var want = Math.round((canvas.clientWidth || 600) * Math.min(2, window.devicePixelRatio || 1) * sc);        // el lienzo tiene los píxeles del tamaño FINAL (con la ampliación): si no, el navegador lo estira y las fichas se ven borrosas
+      if (want > 4 && canvas.width !== want) { canvas.width = canvas.height = want; metrics.w = want; }
       canvas.style.transformOrigin = window.innerWidth >= 1100 ? '0% 50%' : '';        // en pantalla ancha el marco sobresale hacia la derecha (donde hay lugar), no sobre el panel
       canvas.style.transform = sc > 1.005 ? 'scale(' + sc.toFixed(4) + ')' : '';
     }
