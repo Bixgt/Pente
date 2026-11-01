@@ -40,9 +40,10 @@ body {
   overscroll-behavior: none;
 }
 button { font: inherit; color: inherit; cursor: pointer; }
+html, body { overflow-x: clip; }     /* el marco de los tableros con arte puede sobresalir de la pantalla: que no genere scroll lateral */
 .app { display: flex; flex-direction: column; min-height: 100%; max-width: 1000px; margin: 0 auto; padding: 12px var(--gutter) calc(12px + env(safe-area-inset-bottom)); gap: 12px; }
 
-.hud { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.hud { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; min-height: 54px; }     /* alto fijo para todos los temas: así el tablero mide lo mismo en todos */
 .player { background: var(--panel); border-radius: var(--radius); padding: 10px 12px; border: 2px solid transparent; transition: border-color .15s, background .15s; min-width: 0; }
 .player.active { border-color: var(--accent); background: var(--panel-2); }
 .player .row { display: flex; align-items: center; gap: 8px; }
@@ -66,7 +67,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .pip.on { background: var(--accent); border-color: var(--accent); }
 
 /* Reserva dos renglones siempre: si el aviso se hace largo, el tablero NO se mueve (con el dedo encima sería un desastre). */
-.status { text-align: center; font-weight: 600; min-height: 2.8em; display: flex; align-items: center; justify-content: center; line-height: 1.35; }
+.status { text-align: center; font-weight: 600; min-height: 32px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; line-height: 1.35; }
 .status .toast { color: var(--accent); }
 
 .board-wrap { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; min-height: 0; position: relative; }
@@ -220,7 +221,7 @@ body.in-screen .app { visibility: hidden; }
   .player { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 14px; padding: 5px 12px; }
   .player[hidden] { display: none; }
   .player .clock, .player .caps { margin-top: 0; }
-  .status { min-height: 1.6em; }
+  .status { min-height: 32px; }
   .actions { min-height: 0; }
   .actions .btn { padding-top: 8px; padding-bottom: 8px; }
 }
@@ -11168,9 +11169,7 @@ window.NEON_BREAK = {
     if (canvas === $('board')) {        // los tableros con marco se agrandan para que la GRILLA mida lo mismo que en el tablero simple (el marco sobresale un poco); sin pasarse del ancho/alto de la pantalla
       var sc = 1;
       if (art) {
-        var cw = canvas.clientWidth || 600, ideal = (cfg.coords ? (n - 1) / (n + 2.1) : (n - 1) / n) / (art.span[1] - art.span[0]);
-        var wr = canvas.parentNode.getBoundingClientRect(), cy = wr.top + wr.height / 2, maxH = 2 * Math.min(cy, window.innerHeight - cy) - 4;
-        sc = Math.max(1, Math.min(ideal, (window.innerWidth - 4) / cw, maxH / cw));
+        sc = Math.max(1, (cfg.coords ? (n - 1) / (n + 2.1) : (n - 1) / n) / (art.span[1] - art.span[0]));      // sin tope: la grilla mide SIEMPRE lo mismo que en el tablero simple; lo que sobra es solo el marco, que puede salirse de la pantalla (letras y grilla quedan adentro)
       }
       canvas.style.transformOrigin = window.innerWidth >= 1100 ? '0% 50%' : '';        // en pantalla ancha el marco sobresale hacia la derecha (donde hay lugar), no sobre el panel
       canvas.style.transform = sc > 1.005 ? 'scale(' + sc.toFixed(4) + ')' : '';
