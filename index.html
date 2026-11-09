@@ -1252,6 +1252,22 @@ html[data-theme="jardin"] #playOverlay .hero.quick::after { content: ""; positio
   #playOverlay #btnDaily .hero-board { display: none; }
   #playOverlay .screen-body::before, #playOverlay .screen-body::after { opacity: .14; }
 }
+
+/* ---- Títulos de logros: el color dice qué tan difícil es ---- */
+.rk1 { --rk: #8fc27a; } .rk2 { --rk: #43b8c8; } .rk3 { --rk: #f09a45; } .rk4 { --rk: #c068f0; } .rk5 { --rk: #ffcf5a; }
+.ttl-list { display: flex; flex-wrap: wrap; gap: 6px; max-height: 200px; overflow-y: auto; padding: 2px; }
+.ttl-chip { font: inherit; font-size: 12.5px; font-weight: 700; padding: 5px 11px; border-radius: 99px; color: var(--rk, var(--muted)); border: 1px solid color-mix(in srgb, var(--rk, var(--line)) 60%, transparent); background: color-mix(in srgb, var(--rk, var(--text)) 13%, transparent); cursor: default; }
+button.ttl-chip { cursor: pointer; }
+button.ttl-chip[aria-pressed="true"] { background: color-mix(in srgb, var(--rk, var(--accent)) 34%, transparent); box-shadow: 0 0 0 2px var(--rk, var(--accent)); }
+.ttl-none { --rk: var(--muted); }
+.ttl-chip.rk5, .ach-chip.rk5, .plvl.ttl.rk5 { background: linear-gradient(135deg, #1b1530, #3a2a6a); border-color: #ffcf5a; color: #ffe08a; text-shadow: 0 0 8px rgba(255, 207, 90, .45); }
+button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #261c46, #51398f); }
+.ach-chip[class*="rk"] { color: var(--rk); border-color: color-mix(in srgb, var(--rk) 55%, transparent); }
+.ach-chip.on[class*="rk"] { background: color-mix(in srgb, var(--rk) 16%, transparent); }
+.ach-medal[class*="rk"] { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; font-size: 22px; background: color-mix(in srgb, var(--rk) 22%, transparent); box-shadow: 0 0 0 2px var(--rk); }
+.ach-legend { margin: 4px 0 10px; } .ach-legend small { display: block; color: var(--muted); margin-bottom: 6px; }
+.player .name .plvl.ttl { color: var(--rk); opacity: .95; }
+.player .name .plvl.ttl.rk5 { background: none; text-shadow: 0 0 6px rgba(255, 207, 90, .5); }
 </style>
 </head>
 <body>
@@ -2054,6 +2070,7 @@ html[data-theme="jardin"] #playOverlay .hero.quick::after { content: ""; positio
       <div class="xp-foot" id="pxFoot"></div>
       <p class="hint" id="pxNext"></p><p class="hint" id="pxEvent"></p><p class="hint" data-i18n="xp.how"></p>
     </div>
+    <div class="field"><span class="lbl" data-i18n="ttl.label"></span><div class="ttl-list" id="profTitles" role="group"></div><p class="hint" id="profTitleHint"></p></div>
     <p class="hint" id="profNote"></p>
     <div class="btns"><button type="button" class="btn" id="btnProfStats" data-i18n="prof.stats"></button><button type="button" class="btn" id="btnAdmin" hidden data-i18n="adm.btn"></button></div>
     <div class="field acct" id="acctBox" hidden>
@@ -4113,6 +4130,11 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     return FAMILIES.map(function (f) { var v = f.val(x); return { id: f.id, group: f.group, theme: f.theme, value: v, tiers: f.tiers.map(function (n, i) { var id = f.id + (i + 1); return { id: id, n: n, done: s.u.indexOf(id) >= 0 || v >= n }; }) }; });
   }
   function total() { return Object.keys(IDS).length; }
+  /* Dificultad de cada logro: 1 (fácil) a 5 (de los más difíciles). Decide el color del título. */
+  var RANK = { ga1: 1, ga2: 2, ga3: 4, ha1: 1, ha2: 2, ha3: 4, ja1: 1, ja2: 2, ja3: 4, pl1: 1, pl2: 2, pl3: 4, pa1: 1, pa2: 2, pa3: 4, ne1: 1, ne2: 2, ne3: 4,
+    l61: 1, l62: 2, l63: 4, cp1: 1, cp2: 2, cp3: 4, tr1: 2, db1: 2, cb1: 3, fs1: 3, a11: 1, a21: 1, a31: 3, a41: 4, gy1: 4, gy2: 5,
+    on1: 1, on2: 3, on3: 5, tp1: 1, td1: 2, tg1: 4, fr1: 1, ds1: 1, ds2: 2, ds3: 5, lv1: 2, lv2: 3, lv3: 5, co1: 3, mo1: 3 };
+  function rank(id) { return RANK[id] || 1; }
 
   /* Mira la partida jugada (state.moves con las capturas de cada jugada) y cuenta lo que hizo `me`. Solo partidas de 2 jugadores. */
   function analyze(st, me) {
@@ -4142,7 +4164,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     if (won && mine <= 20) out.fast = 1;
     return out;
   }
-  return { FAMILIES: FAMILIES, GROUPS: GROUPS, BOARDS: BOARDS, IDS: IDS, clean: clean, empty: empty, merge: merge, add: add, evaluate: evaluate, progress: progress, total: total, analyze: analyze };
+  return { FAMILIES: FAMILIES, GROUPS: GROUPS, BOARDS: BOARDS, IDS: IDS, clean: clean, empty: empty, merge: merge, add: add, evaluate: evaluate, progress: progress, total: total, analyze: analyze, rank: rank };
 });
 </script>
 <script>
@@ -6969,6 +6991,9 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
   'use strict';
   Object.assign(root.I18n.STRINGS.es, {
     "ach.title": "Logros",
+    "ach.legend": "El color de cada logro dice qué tan difícil es, de menos a más:",
+    "ach.rar.1": "Musgo", "ach.rar.2": "Mar", "ach.rar.3": "Brasa", "ach.rar.4": "Orquídea", "ach.rar.5": "Eclipse",
+    "ttl.label": "Título", "ttl.none": "Sin título", "ttl.hint": "Elegí uno de los que ganaste con tus logros: aparece en tu perfil y debajo de tu nombre al jugar.", "ttl.empty": "Todavía no ganaste logros. Cada logro que consigas te da un título para usar.",
     "ach.sub": "Se ganan jugando. Cada tablero, cada jugada y cada día suman.",
     "ach.count": "{a} de {b} logros",
     "ach.new1": "🏅 Logro nuevo: {name}",
@@ -7071,6 +7096,9 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
   'use strict';
   Object.assign(root.I18n.STRINGS.en, {
     "ach.title": "Achievements",
+    "ach.legend": "A achievement's color shows how hard it is, from easiest to hardest:",
+    "ach.rar.1": "Moss", "ach.rar.2": "Sea", "ach.rar.3": "Ember", "ach.rar.4": "Orchid", "ach.rar.5": "Eclipse",
+    "ttl.label": "Title", "ttl.none": "No title", "ttl.hint": "Pick one you earned with your achievements: it shows on your profile and under your name when you play.", "ttl.empty": "You haven't earned any achievements yet. Each one you get unlocks a title to use.",
     "ach.sub": "Earned by playing. Every board, every move and every day counts.",
     "ach.count": "{a} of {b} achievements",
     "ach.new1": "🏅 New achievement: {name}",
@@ -10966,6 +10994,24 @@ window.NEON_BREAK = {
     achCheck();
   }
   function achTitle(id) { return t('ach.' + id); }
+  /* Título del perfil: uno de los logros ya ganados. Se guarda en el aparato y con las preferencias de la cuenta. */
+  var myTitle = ''; try { myTitle = localStorage.getItem('pente.title') || ''; } catch (e) {}
+  function titleOk(id) { return !!(id && ACH.IDS[id] && ACH.clean(profile.stats && profile.stats.ach).u.indexOf(id) >= 0); }
+  function curTitle() { return titleOk(myTitle) ? myTitle : ''; }
+  function titleChip(id, tag) { var c = document.createElement(tag || 'span'); c.className = 'ttl-chip rk' + ACH.rank(id); c.textContent = achTitle(id); return c; }
+  function setTitle(id) {
+    id = titleOk(id) ? id : ''; if (id === myTitle) return; myTitle = id;
+    try { if (id) localStorage.setItem('pente.title', id); else localStorage.removeItem('pente.title'); } catch (e) {}
+    markPrefs(); renderTitles(); if (state) render();
+  }
+  function renderTitles() {
+    var box = $('profTitles'); if (!box) return;
+    var u = ACH.clean(profile.stats && profile.stats.ach).u.slice().sort(function (a, b) { return ACH.rank(b) - ACH.rank(a) || achTitle(a).localeCompare(achTitle(b)); });
+    box.innerHTML = ''; var cur = curTitle();
+    var none = document.createElement('button'); none.type = 'button'; none.className = 'ttl-chip ttl-none'; none.textContent = t('ttl.none'); none.setAttribute('aria-pressed', String(!cur)); none.addEventListener('click', function () { setTitle(''); }); box.appendChild(none);
+    u.forEach(function (id) { var b = titleChip(id, 'button'); b.type = 'button'; b.setAttribute('aria-pressed', String(id === cur)); b.addEventListener('click', function () { setTitle(id); }); box.appendChild(b); });
+    $('profTitleHint').textContent = u.length ? t('ttl.hint') : t('ttl.empty');
+  }
   function achToast(ids) {
     var el = $('achToast'); if (!el) { el = document.createElement('div'); el.id = 'achToast'; el.className = 'xptoast ach-toast'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
     el.textContent = ids.length === 1 ? t('ach.new1', { name: achTitle(ids[0]) }) : t('ach.newN', { n: ids.length });
@@ -10995,13 +11041,14 @@ window.NEON_BREAK = {
     var cur = ACH.clean(profile.stats && profile.stats.ach), prog = ACH.progress(cur, achCtx()), got = cur.u.length, tot = ACH.total();
     $('achSub').textContent = t('ach.count', { a: got, b: tot }); $('achFill').style.width = Math.round(100 * got / tot) + '%';
     var box = $('achBody'); box.innerHTML = '';
+    var lg = el('div', 'ach-legend'); lg.appendChild(el('small', '', t('ach.legend'))); var lgr = el('div', 'ttl-list'); for (var rk = 1; rk <= 5; rk++) { var lc = el('span', 'ttl-chip rk' + rk, t('ach.rar.' + rk)); lgr.appendChild(lc); } lg.appendChild(lgr); box.appendChild(lg);
     ACH.GROUPS.forEach(function (g) {
       var fams = prog.filter(function (f) { return f.group === g; }); if (!fams.length) return;
       var sec = el('section', 'ach-grp'); sec.appendChild(el('h3', 'ach-h', t('ach.g.' + g)));
       fams.forEach(function (f) {
         var done = f.tiers.filter(function (x) { return x.done; }), next = f.tiers.filter(function (x) { return !x.done; })[0], card = el('div', 'ach-card' + (next ? '' : ' full') + (done.length ? ' has' : ''));
         var top = done.length ? done[done.length - 1] : f.tiers[0];
-        var head = el('div', 'ach-top'); head.appendChild(el('span', 'ach-medal', done.length ? '🏅' : '🔒'));
+        var head = el('div', 'ach-top'); head.appendChild(el('span', 'ach-medal' + (done.length ? ' rk' + ACH.rank(top.id) : ''), done.length ? '🏅' : '🔒'));
         var tx = el('div', 'ach-tx'); tx.appendChild(el('b', '', achTitle(top.id)));
         var sh = next || f.tiers[f.tiers.length - 1], desc = t('ach.d.' + (f.group === 'board' ? 'board' : f.id), { n: sh.n, board: f.theme ? t('theme.' + f.theme) : '' });
         tx.appendChild(el('small', '', desc)); head.appendChild(tx); card.appendChild(head);
@@ -11009,7 +11056,7 @@ window.NEON_BREAK = {
           var bar = el('div', 'xpbar ach-bar'), fill = el('i'); fill.style.width = Math.min(100, Math.round(100 * f.value / next.n)) + '%'; bar.appendChild(fill); card.appendChild(bar);
           card.appendChild(el('div', 'ach-prog', Math.min(f.value, next.n) + ' / ' + next.n + (f.tiers.length > 1 && done.length ? '  ·  ' + t('ach.next', { name: achTitle(next.id) }) : '')));
         } else card.appendChild(el('div', 'ach-prog', t('ach.all')));
-        if (f.tiers.length > 1) { var chips = el('div', 'ach-chips'); f.tiers.forEach(function (x) { chips.appendChild(el('span', 'ach-chip' + (x.done ? ' on' : ''), (x.done ? '✓ ' : '') + achTitle(x.id))); }); card.appendChild(chips); }
+        if (f.tiers.length > 1) { var chips = el('div', 'ach-chips'); f.tiers.forEach(function (x) { chips.appendChild(el('span', 'ach-chip rk' + ACH.rank(x.id) + (x.done ? ' on' : ''), (x.done ? '✓ ' : '') + achTitle(x.id))); }); card.appendChild(chips); }
         sec.appendChild(card);
       });
       box.appendChild(sec);
@@ -12339,7 +12386,7 @@ window.NEON_BREAK = {
       el.classList.toggle('offline', online.active && seatsOf(p).some(function (x) { return !online.connected[x]; }));
       var mine = !tut.active && !lab.active && ((ai.active && p === ai.human) || (online.active && !online.spectator && p === online.me));
       var pav = tut.active || lab.active ? '' : mine ? profile.avatar : ((online.active || online.spectator) && online.players !== 4 && online.avatars ? online.avatars[p] : '');
-      $('pname' + p).innerHTML = (pav ? avInline(pav, 24) + ' ' : '') + esc((names[p] || '…') + (online.active && online.me === p && online.players !== 4 ? ' ' + t('online.you') : '')) + (ai.active && !ai.four && !online.active && p === ai.bot && ai.level && ai.level !== 'goody' && !tut.active && !lab.active ? '<small class="plvl">' + esc(t('ai.' + ai.level)) + '</small>' : '');
+      $('pname' + p).innerHTML = (pav ? avInline(pav, 24) + ' ' : '') + esc((names[p] || '…') + (online.active && online.me === p && online.players !== 4 ? ' ' + t('online.you') : '')) + (mine && curTitle() ? '<small class="plvl ttl rk' + ACH.rank(curTitle()) + '">' + esc(achTitle(curTitle())) + '</small>' : '') + (ai.active && !ai.four && !online.active && p === ai.bot && ai.level && ai.level !== 'goody' && !tut.active && !lab.active ? '<small class="plvl">' + esc(t('ai.' + ai.level)) + '</small>' : '');
       var tw = state.options.capturesToWin;
       $('caps' + p).innerHTML = tw > 20 ? '' : pips(state.captures[p], tw) + '<span>' + state.captures[p] + '/' + tw + '</span>';   // gomoku: sin capturas
     });
@@ -13656,7 +13703,7 @@ window.NEON_BREAK = {
     $('nameClaim').hidden = !(logged && !profile.nameSet);
     $('nameHint').textContent = logged ? (profile.nameSet ? t('name.locked') : t('name.pick')) : '';
     $('nameHint').hidden = !logged;
-    renderProfXp(); renderCountry();
+    renderProfXp(); renderCountry(); renderTitles();
     var ab = $('btnAdmin'); ab.hidden = true;
     if (logged && profile.nameSet && /^bixgt$/i.test(profile.name || '')) Auth.isAdmin().then(function (ok) { ab.hidden = !ok; }, function () {});   // el botón es solo comodidad: quien decide si podés guardar es la base de datos
   }
@@ -14047,12 +14094,13 @@ window.NEON_BREAK = {
   setTimeout(fetchLevels, 300);
   var acct = { step: 'out', mode: storeGet('pente.loginMode') === 'pw' ? 'pw' : 'mail', email: '', cd: 0, cdTimer: 0, busy: false }, sync = { busy: false, dirty: false, timer: 0, state: 'idle', at: 0, err: '', promise: null };
   var applyingRemote = false;
-  function curPrefs() { var p = { theme: themeId, lang: window.I18n.getLang(), cfg: cfg }; if (myCountry) p.country = myCountry; return p; }
+  function curPrefs() { var p = { theme: themeId, lang: window.I18n.getLang(), cfg: cfg }; if (myCountry) p.country = myCountry; if (curTitle()) p.title = curTitle(); return p; }
   function markPrefs() { if (applyingRemote) return; profile.prefsAt = Date.now(); saveProfile(); scheduleSync(2000); }
   function applyRemotePrefs(p) {
     applyingRemote = true;
     try {
       if (p.theme && window.Themes.byId[p.theme] && p.theme !== themeId && !(cfg.randomBoard && !themeUserPicked)) setTheme(p.theme);
+      myTitle = /^[a-z0-9]{3,4}$/.test(p.title || '') ? p.title : ''; try { if (myTitle) localStorage.setItem('pente.title', myTitle); else localStorage.removeItem('pente.title'); } catch (e) {}
       myCountry = /^[A-Z]{2}$/.test(p.country || '') ? p.country : ''; try { if (myCountry) localStorage.setItem('pente.country', myCountry); else localStorage.removeItem('pente.country'); } catch (e) {} renderCountry();
       if (p.lang && window.I18n.STRINGS[p.lang] && p.lang !== window.I18n.getLang()) setLanguage(p.lang);
       if (p.cfg) {
