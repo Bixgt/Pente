@@ -949,6 +949,8 @@ body.in-lab .status, body.in-lab #btnRestart, body.in-lab #btnClaim, body.in-lab
 .lab-coach-out ul { margin: 4px 0 0; padding-left: 18px; }
 .lab-coach-out .alts { margin-top: 6px; color: var(--muted); }
 .lab-coach-out .alts b { color: #5aa9ff; }
+.lab-coach-out .xh { margin-top: 8px; font-weight: 700; font-size: 12px; letter-spacing: .03em; text-transform: uppercase; color: var(--muted); }
+.lab-coach-out .xtip div:not(.xh) { margin-top: 4px; padding: 6px 8px; border-radius: 8px; background: rgba(90,169,255,.12); }
 .lab-coach-out small { display: block; margin-top: 6px; color: var(--muted); font-size: 11.5px; }
 .lab-note { text-align: center; font-size: 13px; font-weight: 700; color: var(--accent); }
 .lab-note:empty { display: none; }
@@ -8161,6 +8163,52 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     "lab.tag.blockCapture": "Evita que capture ahí",
     "lab.tag.center": "Arrancar en el centro",
     "lab.tag.develop": "Suma presencia y deja opciones abiertas",
+    "lab.x.before": "Cómo está la mesa",
+    "lab.x.why": "Qué logra esta jugada",
+    "lab.x.skip": "Si no la jugás",
+    "lab.x.warn": "Ojo con esto",
+    "lab.x.tips": "Para entenderlo",
+    "lab.x.quiet": "No hay amenazas urgentes de ninguno de los dos: es momento de construir.",
+    "lab.x.meWin": "Vos ganás ya mismo jugando en {at}.",
+    "lab.x.oppWin": "El rival gana en su próximo turno jugando en {at}: es lo primero que hay que mirar.",
+    "lab.x.oppOpen3": "El rival tiene un tres abierto: si lo dejás, arma un cuatro abierto en {at} y no lo podés parar.",
+    "lab.x.meOpen3": "Vos tenés un tres abierto: jugando en {at} armás un cuatro abierto.",
+    "lab.x.oppThree": "El rival puede armar un cuatro jugando en {at} (te obligaría a responder).",
+    "lab.x.oppCap": "El rival puede capturar jugando en {at} ({n} fichas).",
+    "lab.x.meCap": "Vos podés capturar jugando en {at} ({n} fichas).",
+    "lab.y.win": "Esta jugada completa tu línea y gana.",
+    "lab.y.blockWin": "{at} es la casilla donde el rival ganaba: ocupándola le sacás la victoria.",
+    "lab.y.blockOpen3": "{at} es una de las dos puntas de su tres abierto: tapándola no puede armar el cuatro abierto.",
+    "lab.y.blockFour": "En {at} cortás su línea justo antes de que quede en cuatro.",
+    "lab.y.blockThree": "En {at} cortás su tres abierto antes de que se complete.",
+    "lab.y.blockCapture": "En {at} ocupás el lugar donde te podía capturar.",
+    "lab.y.capture": "Captura {n} fichas: llegás a {caps} de {goal} puntos de captura.",
+    "lab.y.openFour": "Arma un cuatro abierto: ganás jugando en {at} y solo puede tapar una de las dos.",
+    "lab.y.four": "Arma un cuatro: amenazás ganar en {at}, así que el rival tiene que tapar sí o sí.",
+    "lab.y.openThree": "Arma un tres abierto: si no lo frenan, el próximo turno lo convertís en cuatro abierto.",
+    "lab.y.center": "Arrancás en el centro, donde las líneas tienen más espacio en todas las direcciones.",
+    "lab.y.develop": "No amenaza nada todavía, pero suma fichas conectadas y deja varias líneas posibles.",
+    "lab.s.oppWinsHere": "El rival jugaría en {at} y ganaría.",
+    "lab.s.oppOpenFour": "El rival jugaría en {at} y armaría un cuatro abierto: partida perdida.",
+    "lab.s.oppFour": "El rival jugaría en {at} y armaría un cuatro: te obliga a defender y pierdes el control.",
+    "lab.s.oppOpenThree": "El rival jugaría en {at} y armaría un tres abierto.",
+    "lab.s.oppCaptureHere": "El rival jugaría en {at} y te capturaría {n} fichas.",
+    "lab.w.moreWins": "Ojo: el rival también ganaba en {at}. Si hay dos casillas ganadoras no alcanza con tapar una.",
+    "lab.w.leavesWin": "Después de esta jugada el rival igual gana en {at}.",
+    "lab.w.exposes": "Deja un par tuyo que el rival puede capturar jugando en {at}.",
+    "lab.w.ignoresOpen3": "Esta jugada no frena su tres abierto ({at}): fijate que tu amenaza sea más rápida, si no, tapá.",
+    "lab.t.blockWin": "Regla de oro: antes de armar nada propio, mirá si el rival gana en su próximo turno.",
+    "lab.t.blockOpen3": "Un tres abierto (libre en las dos puntas) hay que frenarlo ya: si deja pasar un turno se vuelve cuatro abierto, que ya no se puede tapar.",
+    "lab.t.blockFour": "Un cuatro con una sola salida se tapa en esa salida. Con dos salidas ya es tarde.",
+    "lab.t.blockThree": "Frenar el tres antes de que sea cuatro te ahorra quedar a la defensiva.",
+    "lab.t.blockCapture": "En Pente un par expuesto vale: si te lo capturan perdés fichas y puntos de captura.",
+    "lab.t.capture": "Capturar suma puntos hacia la victoria y además abre huecos en la línea del rival.",
+    "lab.t.openFour": "Un cuatro abierto (libre en las dos puntas) no se puede frenar: es la jugada que decide partidas.",
+    "lab.t.four": "Un cuatro obliga al rival a tapar: sirve para ganar tiempo o forzar su jugada.",
+    "lab.t.openThree": "El tres abierto es la base del ataque: obliga al rival a reaccionar.",
+    "lab.t.exposes": "Dos fichas tuyas seguidas con una rival en un extremo y el otro vacío = captura. Evitá dejarlas así.",
+    "lab.t.center": "El centro es la mejor casilla de apertura.",
+    "lab.t.develop": "Sin amenazas, jugá donde tus fichas se conecten y tengas más de una línea posible.",
     'lab.menu': 'Practicar',
     'lab.menuSub': 'Tablero libre: armá jugadas y repasá partidas',
     'lab.title': 'Tablero de práctica',
@@ -8255,6 +8303,52 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     "lab.tag.blockCapture": "Stops them capturing there",
     "lab.tag.center": "Start in the center",
     "lab.tag.develop": "Adds presence and keeps options open",
+    "lab.x.before": "The board right now",
+    "lab.x.why": "What this move does",
+    "lab.x.skip": "If you don't play it",
+    "lab.x.warn": "Watch out",
+    "lab.x.tips": "To understand it",
+    "lab.x.quiet": "No urgent threats from either side: time to build.",
+    "lab.x.meWin": "You win right now by playing {at}.",
+    "lab.x.oppWin": "The opponent wins next turn by playing {at}: look at this first.",
+    "lab.x.oppOpen3": "The opponent has an open three: if you leave it, they make an open four at {at} and can't be stopped.",
+    "lab.x.meOpen3": "You have an open three: playing {at} makes an open four.",
+    "lab.x.oppThree": "The opponent can make a four by playing {at} (it would force you to answer).",
+    "lab.x.oppCap": "The opponent can capture by playing {at} ({n} stones).",
+    "lab.x.meCap": "You can capture by playing {at} ({n} stones).",
+    "lab.y.win": "This move completes your line and wins.",
+    "lab.y.blockWin": "{at} is where the opponent would win: taking it removes their victory.",
+    "lab.y.blockOpen3": "{at} is one end of their open three: blocking it stops the open four.",
+    "lab.y.blockFour": "At {at} you cut their line right before it becomes a four.",
+    "lab.y.blockThree": "At {at} you cut their open three before it completes.",
+    "lab.y.blockCapture": "At {at} you take the spot where they could capture you.",
+    "lab.y.capture": "Captures {n} stones: you reach {caps} of {goal} capture points.",
+    "lab.y.openFour": "Makes an open four: you win by playing {at} and they can only block one end.",
+    "lab.y.four": "Makes a four: you threaten to win at {at}, so the opponent must block.",
+    "lab.y.openThree": "Makes an open three: if it isn't stopped, next turn it becomes an open four.",
+    "lab.y.center": "You start in the center, where lines have the most room in every direction.",
+    "lab.y.develop": "It threatens nothing yet, but connects stones and keeps several lines possible.",
+    "lab.s.oppWinsHere": "The opponent would play {at} and win.",
+    "lab.s.oppOpenFour": "The opponent would play {at} and make an open four: game over.",
+    "lab.s.oppFour": "The opponent would play {at} and make a four: you'd have to defend and lose the initiative.",
+    "lab.s.oppOpenThree": "The opponent would play {at} and make an open three.",
+    "lab.s.oppCaptureHere": "The opponent would play {at} and capture {n} of your stones.",
+    "lab.w.moreWins": "Careful: the opponent also wins at {at}. With two winning squares, blocking one isn't enough.",
+    "lab.w.leavesWin": "After this move the opponent still wins at {at}.",
+    "lab.w.exposes": "It leaves a pair of yours that the opponent can capture by playing {at}.",
+    "lab.w.ignoresOpen3": "This move doesn't stop their open three ({at}): make sure your threat is faster, otherwise block.",
+    "lab.t.blockWin": "Golden rule: before building anything, check whether the opponent wins next turn.",
+    "lab.t.blockOpen3": "An open three (free at both ends) must be stopped now: one turn later it's an open four, which can't be blocked.",
+    "lab.t.blockFour": "A four with one exit is blocked at that exit. With two exits it's too late.",
+    "lab.t.blockThree": "Stopping the three before it becomes a four keeps you from being on the defensive.",
+    "lab.t.blockCapture": "In Pente an exposed pair matters: if captured you lose stones and capture points.",
+    "lab.t.capture": "Capturing scores toward the win and opens holes in the opponent's lines.",
+    "lab.t.openFour": "An open four (free at both ends) can't be stopped: it decides games.",
+    "lab.t.four": "A four forces the opponent to block: use it to gain time or force their move.",
+    "lab.t.openThree": "The open three is the base of attack: it forces the opponent to react.",
+    "lab.t.exposes": "Two of your stones in a row with an enemy at one end and the other end empty = capture. Avoid leaving them like that.",
+    "lab.t.center": "The center is the best opening square.",
+    "lab.t.develop": "With no threats, play where your stones connect and you keep more than one possible line.",
     'lab.menu': 'Practice',
     'lab.menuSub': 'Free board: build positions and review games',
     'lab.title': 'Practice board',
@@ -10057,6 +10151,90 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
     }
     return tags;
   }
+  /* ---- Explicación ampliada: qué pasa en la mesa antes de jugar, qué logra la jugada, qué pasa si no se juega y qué conviene aprender. ---- */
+  function emptyCells(s) { var out = [], x, y; for (y = 0; y < s.size; y++) for (x = 0; x < s.size; x++) if (P.get(s, x, y) === P.EMPTY) out.push({ x: x, y: y }); return out; }
+  function near(s, x, y, r) { for (var dy = -r; dy <= r; dy++) for (var dx = -r; dx <= r; dx++) { if (P.inBounds(s, x + dx, y + dy) && P.get(s, x + dx, y + dy) !== P.EMPTY) return true; } return false; }
+  function coords(list, max) { return list.slice(0, max || 4).map(function (c) { return P.coordName(c.x, c.y); }).join(', '); }
+  /* Casillas donde `color` ganaría ya, donde armaría un cuatro abierto (= tiene un tres abierto) y donde capturaría. */
+  function threatMap(s, color) {
+    var res = { win: [], open4: [], four: [], cap: [] }, st = withTurn(s, color);
+    emptyCells(s).forEach(function (c) {
+      if (!near(s, c.x, c.y, 2)) return;
+      var r = P.playMove(st, c.x, c.y, color); if (!r.ok) return;
+      if (r.won) { res.win.push(c); return; }
+      if (r.captured && r.captured.length) res.cap.push({ x: c.x, y: c.y, n: r.captured.length });
+      var m = runAt(r.state, c.x, c.y, color);
+      if (m.L >= 4) { var w = winCells(r.state, c.x, c.y, color); if (w >= 2) res.open4.push(c); else if (w === 1) res.four.push(c); }
+    });
+    return res;
+  }
+  function explain(state, color, x, y) {
+    var s = withTurn(state, color), opp = P.opponent(color), out = { before: [], why: [], skip: [], warn: [], tips: [] }, tip = {};
+    function addTip(k) { if (!tip[k]) { tip[k] = 1; out.tips.push(k); } }
+    var mine = P.playMove(s, x, y, color); if (!mine.ok) return out;
+    var tOpp = threatMap(s, opp), tMe = threatMap(s, color), cc = s.captures || {};
+    // 1) La mesa antes de mover
+    if (tMe.win.length) out.before.push({ k: 'meWin', at: coords(tMe.win) });
+    if (tOpp.win.length) out.before.push({ k: 'oppWin', at: coords(tOpp.win), n: tOpp.win.length });
+    if (!tOpp.win.length && tOpp.open4.length) out.before.push({ k: 'oppOpen3', at: coords(tOpp.open4) });
+    if (!tMe.win.length && tMe.open4.length) out.before.push({ k: 'meOpen3', at: coords(tMe.open4) });
+    if (!tOpp.win.length && !tOpp.open4.length && tOpp.four.length) out.before.push({ k: 'oppThree', at: coords(tOpp.four) });
+    if (tOpp.cap.length) out.before.push({ k: 'oppCap', at: coords(tOpp.cap), n: tOpp.cap.reduce(function (a, c) { return a + c.n; }, 0) });
+    if (tMe.cap.length) out.before.push({ k: 'meCap', at: coords(tMe.cap), n: tMe.cap.reduce(function (a, c) { return a + c.n; }, 0) });
+    if (!out.before.length) out.before.push({ k: 'quiet' });
+    // 2) Qué logra la jugada (con coordenadas)
+    var tags = tagsFor(s, x, y, color), at = P.coordName(x, y), after = mine.state;
+    tags.forEach(function (tg) {
+      if (tg.k === 'win') { out.why.push({ k: 'win' }); }
+      else if (tg.k === 'blockWin') { out.why.push({ k: 'blockWin', at: at }); addTip('blockWin'); if (tOpp.win.length > 1) out.warn.push({ k: 'moreWins', at: coords(tOpp.win.filter(function (c) { return c.x !== x || c.y !== y; })) }); }
+      else if (tg.k === 'capture') { var pts = P.captureInfo(s, x, y, color).points; out.why.push({ k: 'capture', n: tg.n, caps: (cc[color] || 0) + pts, goal: s.options.capturesToWin }); addTip('capture'); }
+      else if (tg.k === 'openFour') { out.why.push({ k: 'openFour', at: coords(openWinCells(after, x, y, color)) }); addTip('openFour'); }
+      else if (tg.k === 'four') { out.why.push({ k: 'four', at: coords(openWinCells(after, x, y, color)) }); addTip('four'); }
+      else if (tg.k === 'openThree') { out.why.push({ k: 'openThree' }); addTip('openThree'); }
+      else if (tg.k === 'blockFour') { var iso = tOpp.open4.some(function (c) { return c.x === x && c.y === y; }); out.why.push({ k: iso ? 'blockOpen3' : 'blockFour', at: at }); addTip(iso ? 'blockOpen3' : 'blockFour'); }
+      else if (tg.k === 'blockThree') { out.why.push({ k: 'blockThree', at: at }); addTip('blockThree'); }
+      else if (tg.k === 'blockCapture') { out.why.push({ k: 'blockCapture', at: at }); addTip('blockCapture'); }
+      else out.why.push({ k: tg.k });
+    });
+    if (!out.why.length) out.why.push({ k: s.board.some(function (v) { return v; }) ? 'develop' : 'center' });
+    if (mine.won) return out;
+    // 3) Si no la jugás, ¿qué hace el rival ahí?
+    var th = P.playMove(withTurn(s, opp), x, y, opp);
+    if (th.ok) {
+      if (th.won) out.skip.push({ k: 'oppWinsHere', at: at });
+      else {
+        var ot = tagsFor(withTurn(s, opp), x, y, opp).map(function (g) { return g.k; });
+        if (ot.indexOf('openFour') >= 0) out.skip.push({ k: 'oppOpenFour', at: at });
+        else if (ot.indexOf('four') >= 0) out.skip.push({ k: 'oppFour', at: at });
+        else if (ot.indexOf('openThree') >= 0) out.skip.push({ k: 'oppOpenThree', at: at });
+        if (th.captured && th.captured.length) out.skip.push({ k: 'oppCaptureHere', at: at, n: th.captured.length });
+      }
+    }
+    // 4) Ojo: qué riesgos deja la jugada
+    if (!tOpp.win.length && tOpp.open4.length && !tOpp.open4.some(function (c) { return c.x === x && c.y === y; }) && !tags.some(function (g) { return g.k === 'openFour' || g.k === 'four' || g.k === 'win'; })) { out.warn.push({ k: 'ignoresOpen3', at: coords(tOpp.open4) }); addTip('blockOpen3'); }
+    var tAfterOpp = threatMap(withTurn(after, opp), opp);
+    if (tAfterOpp.win.length) out.warn.push({ k: 'leavesWin', at: coords(tAfterOpp.win) });
+    else {
+      var newCap = tAfterOpp.cap.filter(function (c) { return !tOpp.cap.some(function (o) { return o.x === c.x && o.y === c.y; }); });
+      if (newCap.length) { out.warn.push({ k: 'exposes', at: coords(newCap) }); addTip('exposes'); }
+    }
+    if (out.why.length === 1 && (out.why[0].k === 'develop' || out.why[0].k === 'center')) addTip(out.why[0].k);
+    return out;
+  }
+  /* Casillas vacías donde `color` gana de inmediato en el tablero s, cerca de (x,y). */
+  function openWinCells(s, x, y, color) {
+    var seen = {}, res = [];
+    AXES.forEach(function (a) {
+      for (var d = -4; d <= 4; d++) {
+        var cx = x + a[0] * d, cy = y + a[1] * d, k = cx + ',' + cy;
+        if (!d || seen[k] || !P.inBounds(s, cx, cy) || P.get(s, cx, cy) !== P.EMPTY) continue;
+        seen[k] = 1;
+        var r = P.playMove(withTurn(s, color), cx, cy, color);
+        if (r.ok && r.won && r.state.winner === color) res.push({ x: cx, y: cy });
+      }
+    });
+    return res;
+  }
   function describe(s, e, color) {
     var tags = tagsFor(s, e.x, e.y, color);
     if (!tags.length) tags.push({ k: s.board.some(function (v) { return v; }) ? 'develop' : 'center' });
@@ -10084,7 +10262,7 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
     r = AI.chooseMove(s, { level: 'hard', timeMs: opts.timeMs || 1500, rank: true, vary: opts.vary === undefined ? 350 : opts.vary, rng: function () { return 0.5; } });
     return r && r.ranked ? fromRanked(s, color, r.ranked, AI.WIN) : null;
   }
-  return { advise: advise, fromRanked: fromRanked, turnState: withTurn, tagsFor: tagsFor };
+  return { advise: advise, fromRanked: fromRanked, turnState: withTurn, tagsFor: tagsFor, explain: explain };
 });
 </script>
 <script>
@@ -14817,7 +14995,18 @@ window.NEON_BREAK = {
     var who = c.r.color === 1 ? t('lab.p1') : t('lab.p2'), d, ul, li;
     d = document.createElement('div'); d.textContent = t('lab.coachFor', { who: who }); out.appendChild(d);
     d = document.createElement('div'); var b = document.createElement('b'); b.textContent = t('lab.coachBest', { coord: c.r.best.coord }); d.appendChild(b); out.appendChild(d);
-    ul = document.createElement('ul'); c.r.best.tags.forEach(function (tg) { li = document.createElement('li'); li.textContent = tagText(tg); ul.appendChild(li); }); out.appendChild(ul);
+    var ex = null; try { ex = window.PenteCoach.explain(lab.coachState || state, c.r.color, c.r.best.x, c.r.best.y); } catch (e) { ex = null; }
+    function sect(title, arr, pre) {
+      if (!arr || !arr.length) return;
+      var h = document.createElement('div'); h.className = 'xh'; h.textContent = t(title); out.appendChild(h);
+      var u = document.createElement('ul'); arr.forEach(function (it) { var l = document.createElement('li'); l.textContent = t(pre + it.k, it); u.appendChild(l); }); out.appendChild(u);
+    }
+    if (ex) {
+      sect('lab.x.before', ex.before, 'lab.x.'); sect('lab.x.why', ex.why, 'lab.y.'); sect('lab.x.skip', ex.skip, 'lab.s.'); sect('lab.x.warn', ex.warn, 'lab.w.');
+      var tp = document.createElement('div'); tp.className = 'xtip'; if (ex.tips.length) { var th = document.createElement('div'); th.className = 'xh'; th.textContent = t('lab.x.tips'); tp.appendChild(th); ex.tips.slice(0, 2).forEach(function (k) { var q = document.createElement('div'); q.textContent = '💡 ' + t('lab.t.' + k); tp.appendChild(q); }); out.appendChild(tp); }
+    } else {
+      ul = document.createElement('ul'); c.r.best.tags.forEach(function (tg) { li = document.createElement('li'); li.textContent = tagText(tg); ul.appendChild(li); }); out.appendChild(ul);
+    }
     if (c.r.verdict) { d = document.createElement('div'); d.textContent = t(c.r.verdict === 'win' ? 'lab.coachWin' : 'lab.coachLost'); out.appendChild(d); }
     if (c.r.alts.length) {
       d = document.createElement('div'); d.className = 'alts'; d.appendChild(document.createTextNode(t('lab.coachAlts') + ' '));
@@ -14834,7 +15023,7 @@ window.NEON_BREAK = {
       lab.coachBusy = false; btn.disabled = false;
       if (!lab.active || step !== lab.i || st !== state) return;
       if (!r) { out.textContent = t(st.status === 'playing' ? 'lab.coachNone' : 'lab.coachOver'); return; }
-      lab.coach = { i: step, r: r }; labCoachShow(); sfx('pick'); render();
+      lab.coach = { i: step, r: r }; lab.coachState = window.PenteCoach.turnState(st, color); labCoachShow(); sfx('pick'); render();
     }
     setTimeout(function () {                                   // primero se pinta "Pensando…"; el cálculo lo hace Goody en el Worker
       var s = window.PenteCoach.turnState(st, color);
