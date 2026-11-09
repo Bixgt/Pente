@@ -9191,7 +9191,8 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
   };
 
   // Valor de una racha de L fichas con "open" extremos libres (0, 1 o 2).
-  function lineScore(L, open) {
+  function lineScore(L, open, exactN) {
+    if (exactN && L > exactN) return 0;             // "cinco exacto": seis o más no gana, no vale nada
     if (L >= 5) return 100000;
     if (open === 0) return 0;
     if (L === 4) return open === 2 ? 20000 : 4000;
@@ -9217,7 +9218,7 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
         var who = side ? rv[side - 1] : p; L = 1; open = 0;
         for (d = 1; d < 5; d++) { cx = x + dx * d; cy = y + dy * d; v = cellAt(s, cx, cy); if (v === who) L++; else { if (v === 0) open++; break; } }
         for (d = 1; d < 5; d++) { cx = x - dx * d; cy = y - dy * d; v = cellAt(s, cx, cy); if (v === who) L++; else { if (v === 0) open++; break; } }
-        var ls = lineScore(L, open);
+        var ls = lineScore(L, open, s.options.exactFive ? (s.options.lineToWin || 5) : 0);
         if (side) blockBest = Math.max(blockBest, ls * 0.92); else total += ls;
       }
       total += blockBest;
@@ -9243,7 +9244,7 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
         var L = 1, cx = x + dx, cy = y + dy;
         while (cx >= 0 && cy >= 0 && cx < n && cy < n && b[cy * n + cx] === v) { L++; cx += dx; cy += dy; }
         var after = (cx >= 0 && cy >= 0 && cx < n && cy < n) ? b[cy * n + cx] : -1, before = (px >= 0 && py >= 0 && px < n && py < n) ? b[py * n + px] : -1;
-        var open = (after === 0 ? 1 : 0) + (before === 0 ? 1 : 0), sc = lineScore(L, open);
+        var open = (after === 0 ? 1 : 0) + (before === 0 ? 1 : 0), sc = lineScore(L, open, s.options.exactFive ? (s.options.lineToWin || 5) : 0);
         if (L === vuln && ((after === 0 && before > 0 && before !== v) || (before === 0 && after > 0 && after !== v))) sc -= 650;   // par con un rival de un lado y hueco del otro: lo pueden capturar
         score += (v === p) ? sc : -sc * (s.ffa ? 0.55 : 1.05);
       }
@@ -9599,7 +9600,7 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
           idx = y * W + x; c1 = 0; c2 = 0; bad = false;
           for (i = 0; i < WL; i++) { v = B[idx + i * d]; if (v === 3) { bad = true; break; } if (v === me) c1++; else if (v === o) c2++; }
           if (bad) continue;
-          if (c2 === 0) { if (c1) { sc += WT[Math.min(c1, 4)]; if (c1 === WL - 1 && (!exact || exactGap(idx, d, me))) L_win = true; } } else if (c1 === 0) { sc -= WT[Math.min(c2, 4)] * 1.05; if (c2 === WL - 1 && (!exact || exactGap(idx, d, o))) L_oppFour = true; }
+          if (c2 === 0) { if (c1 && (!exact || c1 < WL - 1 || (c1 === WL - 1 && exactGap(idx, d, me)))) { sc += WT[Math.min(c1, 4)]; if (c1 === WL - 1) L_win = true; } } else if (c1 === 0) { if (!exact || c2 < WL - 1 || (c2 === WL - 1 && exactGap(idx, d, o))) { sc -= WT[Math.min(c2, 4)] * 1.05; if (c2 === WL - 1) L_oppFour = true; } }
         }
       }
       // capturas y pares en peligro
@@ -9850,6 +9851,20 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
     });
     return best;
   }
+  /* Casillas vacías cercanas a (x,y) donde `color` ganaría de inmediato en el tablero s (usa las reglas reales: con "cinco exacto" una línea de seis no cuenta). */
+  function winCells(s, x, y, color) {
+    var seen = {}, n = 0;
+    AXES.forEach(function (a) {
+      for (var d = -4; d <= 4; d++) {
+        var cx = x + a[0] * d, cy = y + a[1] * d, k = cx + ',' + cy;
+        if (!d || seen[k] || !P.inBounds(s, cx, cy) || P.get(s, cx, cy) !== P.EMPTY) continue;
+        seen[k] = 1;
+        var r = P.playMove(withTurn(s, color), cx, cy, color);
+        if (r.ok && r.won && r.state.winner === color) n++;
+      }
+    });
+    return n;
+  }
   function tagsFor(s, x, y, color) {
     var opp = P.opponent(color), tags = [], mine = P.playMove(withTurn(s, color), x, y, color);
     if (!mine.ok) return tags;
@@ -9858,10 +9873,11 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
     if (theirs.ok && theirs.won) tags.push({ k: 'blockWin' });
     if (mine.captured && mine.captured.length) tags.push({ k: 'capture', n: mine.captured.length });
     var m = runAt(mine.state, x, y, color);
-    if (m.L >= 4) tags.push({ k: m.open === 2 ? 'openFour' : 'four' }); else if (m.L === 3 && m.open === 2) tags.push({ k: 'openThree' });
+    var wc = winCells(mine.state, x, y, color);
+    if (wc >= 1 && m.L >= 4) tags.push({ k: wc >= 2 ? 'openFour' : 'four' }); else if (m.L === 3 && m.open === 2) tags.push({ k: 'openThree' });
     if (theirs.ok && !theirs.won) {
       var o = runAt(theirs.state, x, y, opp);
-      if (o.L >= 4) tags.push({ k: 'blockFour' }); else if (o.L === 3 && o.open === 2) tags.push({ k: 'blockThree' });
+      if (o.L >= 4 && winCells(theirs.state, x, y, opp) >= 1) tags.push({ k: 'blockFour' }); else if (o.L === 3 && o.open === 2) tags.push({ k: 'blockThree' });
       if (theirs.captured && theirs.captured.length) tags.push({ k: 'blockCapture' });
     }
     return tags;
