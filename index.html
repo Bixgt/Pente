@@ -1341,6 +1341,8 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       <label class="lab-sw"><input type="checkbox" id="labCap" checked><span data-i18n="lab.cap"></span></label>
       <small class="lab-hint" data-i18n="lab.capHint"></small>
       <label class="lab-sw"><input type="checkbox" id="labAlt" checked><span data-i18n="lab.alt"></span></label>
+      <label class="lab-sw"><input type="checkbox" id="labExact" checked><span data-i18n="lab.exact"></span></label>
+      <label class="lab-sw"><input type="checkbox" id="labMark5" checked><span data-i18n="lab.mark5"></span></label>
       <div class="lab-row"><label><span data-i18n="lab.size"></span><select id="labSize"><option value="13" data-i18n="lab.size13"></option><option value="19" data-i18n="lab.size19"></option></select></label>
         <label><span data-i18n="lab.rules"></span><select id="labVar"><option value="classic" data-i18n="lab.v.classic"></option><option value="pairs3" data-i18n="lab.v.pairs3"></option><option value="triples" data-i18n="lab.v.triples"></option><option value="gomoku" data-i18n="lab.v.gomoku"></option></select></label></div>
       <div class="lab-acts">
@@ -8152,6 +8154,8 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     'lab.cap': 'Capturar solas',
     'lab.capHint': 'Si lo apagás, las fichas no se sacan solas: las quitás vos con la goma.',
     'lab.alt': 'Alternar colores',
+    'lab.exact': 'Victoria solo con líneas de 5',
+    'lab.mark5': 'Marcar líneas de 5 con círculos rojos',
     'lab.size': 'Tablero',
     'lab.size13': '13 × 13',
     'lab.size19': '19 × 19',
@@ -8233,6 +8237,8 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     'lab.cap': 'Auto captures',
     'lab.capHint': 'If you turn it off, stones are not removed on their own: you remove them with the eraser.',
     'lab.alt': 'Alternate colors',
+    'lab.exact': 'Win only with lines of 5',
+    'lab.mark5': 'Mark lines of 5 with red circles',
     'lab.size': 'Board',
     'lab.size13': '13 × 13',
     'lab.size19': '19 × 19',
@@ -10169,7 +10175,9 @@ window.NEON_BREAK = {
   // ¿terminó la partida? (en online puede terminar por abandono, sin que el tablero lo muestre)
   var pz = { active: false, puz: null, k: 1, used: 0, on: true, done: false, demo: false, hints: 0, level: 'rand', last: '', hist: [] };   // problemas tácticos (comparten el tablero y la tarjeta del tutorial)
   var tut = { active: false, i: 0, solved: false, awaiting: false, marks: [], token: 0, fb: '', fbRaw: '', fbKind: '', timers: [] };   // tutorial interactivo (ver sección al final)
-  var lab = { active: false, coach: null, hist: [], i: 0, tool: '1', cap: true, alt: true, size: 13, variant: 'classic', hover: null, pen: null, timer: 0, trayKey: '' };   // tablero de práctica (ver sección al final)
+  try { var lx = localStorage.getItem('pente.labExact'), lm = localStorage.getItem('pente.labMark5'); } catch (e) {}
+  var lab = { active: false, coach: null, hist: [], i: 0, tool: '1', cap: true, alt: true, exact: true, mark5: true, size: 13, variant: 'classic', hover: null, pen: null, timer: 0, trayKey: '' };   // tablero de práctica (ver sección al final)
+  if (lx === '0' || lx === '1') lab.exact = lx === '1'; else lab.exact = !!settings.exactFive; if (lm === '0') lab.mark5 = false;
   var localOver = null;   // fin por tiempo en partidas locales / contra la máquina: { winner, reason:'timeout' }
   function isOver() { if (lab.active) return false; return !state || state.status !== 'playing' || !!localOver || (online.active && !!online.over); }
   function canPlayNow() { return !!state && !lab.active && !isOver() && (!tut.active || tut.awaiting) && (!online.active || turnSeat() === online.seat) && (!ai.active || !botNow()); }
@@ -14623,6 +14631,21 @@ window.NEON_BREAK = {
    * (lab.hist = [{ s: estado, marks: [...] }]); atrás/adelante solo cambian de paso. La lógica pura está en src/lab.js. */
   var L = window.PenteLab, LAB_COL = '#f5a623', labNoteT = 0;
   function labCur() { return lab.hist[lab.i]; }
+  /* "Victoria solo con líneas de 5": el tablero libre usa la misma regla que las partidas ("cinco exacto"), también para el entrenador. */
+  function labWithExact(s) { if (s.options.variant === 'gomoku' || !!s.options.exactFive === !!lab.exact) return s; return Object.assign({}, s, { options: Object.assign({}, s.options, { exactFive: !!lab.exact }) }); }
+  /* Fichas que forman una línea ganadora (de exactamente 5 si la opción está tildada; de 5 o más si no) para marcarlas con círculos rojos. */
+  function labWinCells(s) {
+    var out = [], seen = {}, n = s.size, WL = s.options.lineToWin || 5, ex = !!s.options.exactFive && s.options.variant !== 'gomoku';
+    [[1, 0], [0, 1], [1, 1], [1, -1]].forEach(function (d) {
+      for (var y = 0; y < n; y++) for (var x = 0; x < n; x++) {
+        var v = s.board[y * n + x]; if (!v) continue;
+        var px0 = x - d[0], py0 = y - d[1]; if (px0 >= 0 && py0 >= 0 && px0 < n && py0 < n && s.board[py0 * n + px0] === v) continue;
+        var run = [], cx = x, cy = y; while (cx >= 0 && cy >= 0 && cx < n && cy < n && s.board[cy * n + cx] === v) { run.push({ x: cx, y: cy }); cx += d[0]; cy += d[1]; }
+        if (ex ? run.length === WL : run.length >= WL) run.forEach(function (c) { var k = c.x + ',' + c.y; if (!seen[k]) { seen[k] = 1; out.push(c); } });
+      }
+    });
+    return out;
+  }
   function labNote(msg) { var el = $('labNote'); el.textContent = msg || ''; clearTimeout(labNoteT); if (msg) labNoteT = setTimeout(function () { el.textContent = ''; }, 4500); }
   function labPlayStop() { if (lab.timer) { clearInterval(lab.timer); lab.timer = 0; } }
   function labGo(i) {                                        // ir a un paso del historial
@@ -14695,9 +14718,9 @@ window.NEON_BREAK = {
       ctx.restore();
     });
   }
-  function labDrawRing(x, y, alpha) {
+  function labDrawRing(x, y, alpha, col) {
     var c = metrics.cell;
-    [['rgba(0,0,0,.45)', 3], [LAB_COL, 0]].forEach(function (p) {
+    [['rgba(0,0,0,.45)', 3], [col || LAB_COL, 0]].forEach(function (p) {
       ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = p[0]; ctx.lineWidth = Math.max(3, c * 0.1) + p[1];
       ctx.beginPath(); ctx.arc(px(x), px(y), c * 0.5, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
     });
@@ -14751,6 +14774,7 @@ window.NEON_BREAK = {
   function labDrawMarks() {
     if (!state || !lab.hist.length) return;
     labDrawCoach();
+    if (lab.mark5) labWinCells(state).forEach(function (c0) { labDrawRing(c0.x, c0.y, 0.95, '#ff3b30'); });
     labCur().marks.forEach(function (m) { if (m.k === 'r') labDrawRing(m.x, m.y, 0.95); else labDrawArrow(m.x, m.y, m.x2, m.y2, 0.95); });
     var h = lab.down ? lab.down.to : lab.hover; if (!h) return;
     var c = metrics.cell, v = P.get(state, h.x, h.y);
@@ -14776,7 +14800,7 @@ window.NEON_BREAK = {
     $('labBack').disabled = lab.i <= 0; $('labFwd').disabled = lab.i >= last; $('labPlay').disabled = last <= 0;
     $('labPlay').textContent = lab.timer ? '❚❚' : '▶▶'; $('labPlay').setAttribute('aria-label', t(lab.timer ? 'lab.pause' : 'lab.play')); $('labPlay').title = t(lab.timer ? 'lab.pause' : 'lab.play');
     $('labPos').textContent = t('lab.pos', { i: lab.i, n: last });
-    $('labCap').checked = lab.cap; $('labAlt').checked = lab.alt;
+    $('labCap').checked = lab.cap; $('labAlt').checked = lab.alt; $('labExact').checked = lab.exact; $('labMark5').checked = lab.mark5;
     labTrayDraw();
   }
   function labSyncSelects() {
@@ -14785,7 +14809,7 @@ window.NEON_BREAK = {
   }
   function labFresh(size, variant) {
     labPlayStop(); lab.size = size; lab.variant = variant; labSyncSelects();
-    lab.hist = [{ s: L.blank(size, variant), marks: [] }]; lab.i = 0; labNote('');
+    lab.hist = [{ s: labWithExact(L.blank(size, variant)), marks: [] }]; lab.i = 0; labNote('');
     labGo(0);
   }
   function labNames() { names[1] = t('lab.p1'); names[2] = t('lab.p2'); }
@@ -14846,8 +14870,8 @@ window.NEON_BREAK = {
     var g = L.parseGame($('labTxt').value), err = $('labErr');
     if (!g.ok) { err.textContent = g.error === 'BAD_COORD' ? t('lab.errCoord', { token: g.token }) : t('lab.errEmpty'); return; }
     var r = L.replay(g); err.textContent = '';
-    labPlayStop(); lab.size = g.size; lab.variant = g.variant; labSyncSelects();
-    lab.hist = r.states.map(function (s) { return { s: s, marks: [] }; });
+    labPlayStop(); lab.size = g.size; lab.variant = g.variant; labSyncSelects(); if (/(?:Reglas|Rules)\s*:/i.test($('labTxt').value)) lab.exact = !!g.exactFive; try { localStorage.setItem('pente.labExact', lab.exact ? '1' : '0'); } catch (e) {}
+    lab.hist = r.states.map(function (s) { return { s: labWithExact(s), marks: [] }; });
     $('labPasteBox').hidden = true; $('labTxt').value = '';
     labGo(0);
     labNote(r.failedAt ? t('lab.failed', { n: r.failedAt, coord: r.coord }) : t('lab.loaded', { n: lab.hist.length - 1 }));
@@ -14869,6 +14893,11 @@ window.NEON_BREAK = {
     render();
   });
   $('labCap').addEventListener('change', function () { lab.cap = this.checked; });
+  $('labExact').addEventListener('change', function () {
+    lab.exact = this.checked; try { localStorage.setItem('pente.labExact', lab.exact ? '1' : '0'); } catch (e) {}
+    lab.hist = lab.hist.map(function (h) { return { s: labWithExact(h.s), marks: h.marks }; }); labGo(lab.i);
+  });
+  $('labMark5').addEventListener('change', function () { lab.mark5 = this.checked; try { localStorage.setItem('pente.labMark5', lab.mark5 ? '1' : '0'); } catch (e) {} render(); });
   $('labAlt').addEventListener('change', function () { lab.alt = this.checked; if (lab.alt && (lab.tool === '1' || lab.tool === '2')) lab.tool = state.current === 2 ? '2' : '1'; render(); });
   $('labSize').addEventListener('change', function () { labConfirmFresh(+this.value, lab.variant); });
   $('labVar').addEventListener('change', function () { labConfirmFresh(lab.size, this.value); });
