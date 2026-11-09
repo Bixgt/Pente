@@ -53,6 +53,7 @@ html, body { overflow-x: clip; }     /* el marco de los tableros con arte puede 
 .stone-ico.s2 { background: radial-gradient(circle at 35% 30%, var(--s2a), var(--s2b) 75%); }
 .stone-ico.s3 { background: radial-gradient(circle at 35% 30%, var(--s3a), var(--s3b) 75%); }
 .stone-ico.s4 { background: radial-gradient(circle at 35% 30%, var(--s4a), var(--s4b) 75%); }
+.player .name .plvl { display: block; font-size: 11px; font-weight: 600; opacity: .72; line-height: 1.1; margin-top: 1px; }
 .player .name { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* marcador de la serie (partidas ganadas), estilo tablero de básquet: dígitos ámbar sobre fondo oscuro */
 .player .row .name { min-width: 0; }
@@ -1220,7 +1221,8 @@ html[data-theme="jardin"] .app .btn:disabled { background: rgba(14,32,20,.85); c
 #playOverlay .hero-board::before { opacity: .16; }
 #playOverlay .quick-ic { position: relative; width: 78px; height: 78px; border-radius: 22px; background: color-mix(in srgb, var(--accent) 10%, var(--panel-2)); border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent); color: var(--accent); transform: rotate(0deg); box-shadow: inset 0 0 18px color-mix(in srgb, var(--accent) 14%, transparent); }
 #playOverlay .quick-ic svg { width: 44px; height: 44px; }
-#playOverlay .hero.quick { background-image: url(garden-flower.webp), url(play-board.webp), linear-gradient(160deg, color-mix(in srgb, var(--accent) 7%, var(--panel)), var(--panel) 60%); background-repeat: no-repeat; background-size: 46px auto, auto 125%, auto; background-position: right 150px top 14px, right -70px center, 0 0; }
+#playOverlay .hero.quick { background-image: url(play-board.webp), linear-gradient(160deg, color-mix(in srgb, var(--accent) 7%, var(--panel)), var(--panel) 60%); background-repeat: no-repeat; background-size: auto 125%, auto; background-position: right -70px center, 0 0; }
+html[data-theme="jardin"] #playOverlay .hero.quick::after { content: ""; position: absolute; right: 150px; top: 14px; width: 46px; height: 44px; background: url(garden-flower.webp) center / contain no-repeat; pointer-events: none; }
 #playOverlay .hero.quick .hero-cta { background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 92%, #fff), var(--accent)); color: var(--accent-ink); padding: 11px 24px; font-size: 17px; box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 35%, transparent); }
 #playOverlay .hero.quick .hero-board { display: none; }
 #playOverlay #btnDaily .hero-tag { font-size: 15px; letter-spacing: 0; opacity: 1; color: var(--accent); font-weight: 800; }
@@ -1240,7 +1242,8 @@ html[data-theme="jardin"] .app .btn:disabled { background: rgba(14,32,20,.85); c
   #playOverlay .tiles .tile:nth-child(-n+3) .tile-ic { width: 60px; height: 60px; }
 }
 @media (max-width: 899px) {
-  #playOverlay .hero.quick { background-size: 40px auto, auto 85%, auto; background-position: right 12px top 10px, right -70px bottom -26px, 0 0; padding: 20px 16px; }
+  #playOverlay .hero.quick { background-size: auto 85%, auto; background-position: right -70px bottom -26px, 0 0; padding: 20px 16px; }
+  html[data-theme="jardin"] #playOverlay .hero.quick::after { right: 12px; top: 10px; width: 40px; height: 38px; }
   #playOverlay .quick-tx { max-width: 60%; }
   #playOverlay .hero.quick .hero-title { font-size: 24px; }
   #playOverlay .quick-ic { width: 58px; height: 58px; border-radius: 18px; }
@@ -5535,10 +5538,10 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'ai.sideSwap': 'Uno y uno',
       'ai.start': 'Empezar',
       'ai.offline': 'Todo corre en tu dispositivo: funciona sin conexión.',
-      'ai.name.beginner': 'Máquina (fácil)',
-      'ai.name.easy': 'Máquina (normal)',
-      'ai.name.medium': 'Máquina (difícil)',
-      'ai.name.hard': 'Máquina (muy difícil)',
+      'ai.name.beginner': 'Bot',
+      'ai.name.easy': 'Bot',
+      'ai.name.medium': 'Bot',
+      'ai.name.hard': 'Bot',
       'ai.name.goody': 'Goody',
       'dlg.ok': 'Aceptar',
       'dlg.cancel': 'Cancelar',
@@ -5866,10 +5869,10 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'ai.sideSwap': 'Take turns',
       'ai.start': 'Start',
       'ai.offline': 'Everything runs on your device: it works offline.',
-      'ai.name.beginner': 'Machine (easy)',
-      'ai.name.easy': 'Machine (normal)',
-      'ai.name.medium': 'Machine (hard)',
-      'ai.name.hard': 'Machine (very hard)',
+      'ai.name.beginner': 'Bot',
+      'ai.name.easy': 'Bot',
+      'ai.name.medium': 'Bot',
+      'ai.name.hard': 'Bot',
       'ai.name.goody': 'Goody',
       'dlg.ok': 'OK',
       'dlg.cancel': 'Cancel',
@@ -7850,6 +7853,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     'tno.waitOrg': 'Esperando que el organizador inicie el torneo. Mientras tanto, no cierres esta pantalla.',
     'tno.leave': 'Salir del torneo',
     'tno.leaveConfirm': '¿Salir del torneo? Si ya empezó, perdés por walkover los duelos que te falten.',
+    'tno.left': 'Saliste del torneo.',
     'tno.close': 'Cerrar torneo',
     'tno.closeConfirm': '¿Cerrar el torneo para todos? No se puede deshacer.',
     'tno.back': 'Volver al torneo',
@@ -7985,6 +7989,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     'tno.waitOrg': 'Waiting for the organizer to start the tournament. Keep this screen open.',
     'tno.leave': 'Leave tournament',
     'tno.leaveConfirm': 'Leave the tournament? If it has started, you forfeit your remaining duels.',
+    'tno.left': 'You left the tournament.',
     'tno.close': 'Close tournament',
     'tno.closeConfirm': 'Close the tournament for everyone? This cannot be undone.',
     'tno.back': 'Back to the tournament',
@@ -12334,7 +12339,7 @@ window.NEON_BREAK = {
       el.classList.toggle('offline', online.active && seatsOf(p).some(function (x) { return !online.connected[x]; }));
       var mine = !tut.active && !lab.active && ((ai.active && p === ai.human) || (online.active && !online.spectator && p === online.me));
       var pav = tut.active || lab.active ? '' : mine ? profile.avatar : ((online.active || online.spectator) && online.players !== 4 && online.avatars ? online.avatars[p] : '');
-      $('pname' + p).innerHTML = (pav ? avInline(pav, 24) + ' ' : '') + esc((names[p] || '…') + (online.active && online.me === p && online.players !== 4 ? ' ' + t('online.you') : ''));
+      $('pname' + p).innerHTML = (pav ? avInline(pav, 24) + ' ' : '') + esc((names[p] || '…') + (online.active && online.me === p && online.players !== 4 ? ' ' + t('online.you') : '')) + (ai.active && !ai.four && !online.active && p === ai.bot && ai.level && ai.level !== 'goody' && !tut.active && !lab.active ? '<small class="plvl">' + esc(t('ai.' + ai.level)) + '</small>' : '');
       var tw = state.options.capturesToWin;
       $('caps' + p).innerHTML = tw > 20 ? '' : pips(state.captures[p], tw) + '<span>' + state.captures[p] + '/' + tw + '</span>';   // gomoku: sin capturas
     });
@@ -15499,7 +15504,15 @@ window.NEON_BREAK = {
     var m = tno.snap, org = !!(m && m.you && m.you.org);
     if (tno.view) { tnoReset(); tnRenderList(); tnoRenderLive(); open('tnOverlay'); return; }
     if (!m) { tnoReset(); tnRenderList(); tnoRenderLive(); open('tnOverlay'); return; }
-    ask(t(org ? 'tno.closeConfirm' : 'tno.leaveConfirm'), t(org ? 'tno.close' : 'tno.leave'), function () { tnoSend({ t: org ? 'tclose' : 'tleave' }); });
+    /* Salir siempre tiene que terminar: si el torneo ya terminó, o si la conexión se cayó (celu dormido, app en segundo plano) o el servidor no contesta, se sale igual en este dispositivo. */
+    function forceLeave() { var c = tno.code; tnoReset(); tnRenderList(); tnoRenderLive(); if (!online.active) open('tnOverlay'); tnoNote(t('tno.left'), false); return c; }
+    var done = !!(m.S && m.S.status === 'finished');
+    if (done) { forceLeave(); return; }
+    ask(t(org ? 'tno.closeConfirm' : 'tno.leaveConfirm'), t(org ? 'tno.close' : 'tno.leave'), function () {
+      var code = tno.code;
+      if (!tnoSend({ t: org ? 'tclose' : 'tleave' })) { forceLeave(); return; }
+      setTimeout(function () { if (tno.code && tno.code === code) forceLeave(); }, 4000);
+    });
   });
   /* invitación recibida por la conexión de presencia */
   function onTInvite(m) {
