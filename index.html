@@ -609,7 +609,11 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 .hero.done .hero-streak { background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--accent); }
 .hero.done .hero-cta { color: var(--accent); }
 .hero:active { transform: scale(.985); }
-.hero.quick { margin-bottom: 6px; }
+.hero.quick { margin-bottom: 6px; display: flex; align-items: center; gap: 16px; }
+.hero.quick > * { display: block; }
+.quick-ic { flex: none; width: 64px; height: 64px; display: grid !important; place-items: center; border-radius: 18px; background: rgba(0,0,0,.14); }
+.quick-tx { display: flex !important; flex-direction: column; gap: 3px; min-width: 0; }
+.hero.quick .hero-cta { margin-top: 8px; display: inline-block; align-self: flex-start; padding: 8px 16px; border-radius: 999px; background: rgba(0,0,0,.2); font-weight: 800; }
 .quick-opts { display: flex; justify-content: flex-end; margin: 0 0 12px; }
 .quick-opts .btn { min-height: 0; padding: 6px 12px; font-size: 13px; }
 .tiles { display: flex; flex-direction: column; gap: 10px; margin-bottom: 6px; }
@@ -730,6 +734,19 @@ body.in-tut .btn.gamecfg { display: none; }
 .seek-toast[hidden] { display: none; }
 .seek-txt { flex: 1; min-width: 0; font-size: 14px; line-height: 1.3; }
 .seek-toast .btn.small { min-height: 38px; padding: 6px 12px; flex: none; }
+@media (min-width: 900px) {
+  #playOverlay .screen-body { display: grid; grid-template-columns: minmax(0, 1fr) 300px; column-gap: 20px; align-items: start; width: min(100%, 1120px); }
+  #playOverlay h2 { grid-column: 1 / -1; }
+  #playOverlay .hero.quick { grid-column: 1; grid-row: 2; margin: 0 0 8px; padding: 26px 24px; min-height: 150px; }
+  #playOverlay .quick-opts { grid-column: 1; grid-row: 3; margin: 0 0 14px; }
+  #playOverlay #btnDaily { grid-column: 2; grid-row: 2 / span 2; margin: 0 0 14px; align-self: stretch; display: flex; flex-direction: column; justify-content: space-between; }
+  #playOverlay .tiles { grid-column: 1 / -1; grid-row: 4; grid-template-columns: repeat(3, 1fr) !important; margin: 0; }
+  #playOverlay .tiles .tile:nth-child(-n+3) { flex-direction: column; text-align: center; padding: 22px 14px 18px; gap: 10px; }
+  #playOverlay .tiles .tile:nth-child(-n+3) .tile-tx { align-items: center; }
+  #playOverlay .tiles .tile:nth-child(-n+3) .tile-ic { width: 54px; height: 54px; border-radius: 16px; }
+  #playOverlay .tiles .tile:nth-child(-n+3) .tile-t { font-size: 19px; }
+  #playOverlay .screen-body > .btns { grid-column: 1 / -1; }
+}
 @media (min-width: 900px) { #playOverlay .tiles { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); } }
 
 /* Menú del tema Papel: hoja blanca (gris casi blanco) con letras negras, así las fichas del fondo se ven más */
@@ -1183,6 +1200,55 @@ html[data-theme="jardin"] .app .btn:disabled { background: rgba(14,32,20,.85); c
 .board-wrap { position: relative; z-index: 1; }
 .actions, .status, .side { position: relative; z-index: 3; }
 .app .player { position: relative; z-index: 3; }
+
+/* ---- Jugar: estilo "vitrina" (paneles oscuros con borde dorado, laureles y hojas) ---- */
+#playOverlay { --leaf: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 200'%3E%3Cpath d='M60 196C56 140 58 80 70 8' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round'/%3E%3Cg fill='%23000'%3E%3Cpath d='M58 176c-26-4-40-22-42-44 24 2 40 18 42 44z'/%3E%3Cpath d='M58 150c24-6 38-24 40-46-24 4-38 22-40 46z'/%3E%3Cpath d='M60 124c-24-6-38-24-38-46 22 4 36 22 38 46z'/%3E%3Cpath d='M62 98c24-8 36-26 36-48-22 6-34 24-36 48z'/%3E%3Cpath d='M64 70c-20-8-30-26-28-46 18 6 28 24 28 46z'/%3E%3Cpath d='M68 44c16-8 24-22 22-38-14 6-22 20-22 38z'/%3E%3C/g%3E%3C/svg%3E"); }
+#playOverlay h2 { display: flex; align-items: center; justify-content: center; gap: 18px; text-align: center; font-size: 30px; letter-spacing: .01em; padding-bottom: 14px; margin-bottom: 18px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent) center bottom / min(260px, 60%) 2px no-repeat; }
+#playOverlay h2::before, #playOverlay h2::after { content: ""; width: 34px; height: 46px; background: var(--accent); -webkit-mask: var(--leaf) center / contain no-repeat; mask: var(--leaf) center / contain no-repeat; transform: rotate(-22deg); }
+#playOverlay h2::after { transform: rotate(22deg) scaleX(-1); }
+#playOverlay .screen-body { position: relative; }
+#playOverlay .screen-body::before, #playOverlay .screen-body::after { content: ""; position: absolute; pointer-events: none; background: var(--accent); opacity: .22; -webkit-mask: var(--leaf) center / contain no-repeat; mask: var(--leaf) center / contain no-repeat; }
+#playOverlay .screen-body::before { z-index: 0; width: 120px; height: 200px; right: -90px; bottom: -70px; transform: rotate(35deg); }
+#playOverlay .screen-body::after { z-index: 0; width: 90px; height: 150px; left: -80px; bottom: -40px; transform: rotate(-30deg) scaleX(-1); }
+#playOverlay .hero { background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 7%, var(--panel)), var(--panel) 60%); color: var(--text); border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent); box-shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 0 0 1px color-mix(in srgb, var(--accent) 12%, transparent); border-radius: 22px; }
+#playOverlay .hero:hover { border-color: var(--accent); }
+#playOverlay .hero-title { font-size: 30px; }
+#playOverlay .hero-sub { opacity: .8; }
+#playOverlay .hero-cta { color: var(--accent); }
+#playOverlay .hero-board { opacity: .9; }
+#playOverlay .hero-board::before { opacity: .16; }
+#playOverlay .quick-ic { position: relative; width: 78px; height: 78px; border-radius: 22px; background: color-mix(in srgb, var(--accent) 10%, var(--panel-2)); border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent); color: var(--accent); transform: rotate(0deg); box-shadow: inset 0 0 18px color-mix(in srgb, var(--accent) 14%, transparent); }
+#playOverlay .quick-ic svg { width: 44px; height: 44px; }
+#playOverlay .hero.quick { background-image: url(garden-flower.webp), url(play-board.webp), linear-gradient(160deg, color-mix(in srgb, var(--accent) 7%, var(--panel)), var(--panel) 60%); background-repeat: no-repeat; background-size: 46px auto, auto 125%, auto; background-position: right 150px top 14px, right -70px center, 0 0; }
+#playOverlay .hero.quick .hero-cta { background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 92%, #fff), var(--accent)); color: var(--accent-ink); padding: 11px 24px; font-size: 17px; box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 35%, transparent); }
+#playOverlay .hero.quick .hero-board { display: none; }
+#playOverlay #btnDaily .hero-tag { font-size: 15px; letter-spacing: 0; opacity: 1; color: var(--accent); font-weight: 800; }
+#playOverlay #btnDaily .hero-title { font-size: 28px; margin-top: 12px; }
+#playOverlay #btnDaily .hero-board { top: 58px; right: -26px; width: 120px; height: 120px; }
+#playOverlay .tile, #playOverlay .hero, #playOverlay .quick-opts { position: relative; z-index: 1; }
+#playOverlay #btnDaily .hero-cta { align-self: center; text-align: center; padding: 10px 18px; border-radius: 999px; border: 1.5px solid var(--accent); color: var(--accent); }
+#playOverlay .quick-opts .btn { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+#playOverlay .tile { position: relative; border-radius: 20px; background: linear-gradient(170deg, color-mix(in srgb, var(--text) 6%, var(--panel)), var(--panel)); border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--line)); box-shadow: 0 6px 18px rgba(0,0,0,.28); transition: transform .12s, border-color .15s, box-shadow .15s; }
+#playOverlay .tile:hover { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 8px 24px color-mix(in srgb, var(--accent) 22%, transparent); transform: translateY(-2px); }
+#playOverlay .tile-ic { background: transparent; border: 1.5px solid color-mix(in srgb, var(--accent) 55%, transparent); }
+#playOverlay .tile.primary { background: linear-gradient(170deg, color-mix(in srgb, var(--accent) 16%, var(--panel)), var(--panel)); }
+@media (min-width: 900px) {
+  #playOverlay .tiles .tile:nth-child(-n+3)::before { content: ""; position: absolute; left: 50%; top: -7px; width: 12px; height: 12px; margin-left: -6px; background: var(--accent); transform: rotate(45deg); border-radius: 2px; box-shadow: 0 0 0 4px var(--bg, #14151a); }
+  #playOverlay .tiles .tile:nth-child(-n+3) .tile-ic { border: 0; background: transparent; }
+  #playOverlay .tiles .tile:nth-child(-n+3) .tile-ic svg { width: 40px; height: 40px; }
+  #playOverlay .tiles .tile:nth-child(-n+3) .tile-ic { width: 60px; height: 60px; }
+}
+@media (max-width: 899px) {
+  #playOverlay .hero.quick { background-size: 40px auto, auto 85%, auto; background-position: right 12px top 10px, right -70px bottom -26px, 0 0; padding: 20px 16px; }
+  #playOverlay .quick-tx { max-width: 60%; }
+  #playOverlay .hero.quick .hero-title { font-size: 24px; }
+  #playOverlay .quick-ic { width: 58px; height: 58px; border-radius: 18px; }
+  #playOverlay .quick-ic svg { width: 34px; height: 34px; }
+  #playOverlay .hero.quick .hero-cta { padding: 9px 18px; font-size: 15px; }
+  #playOverlay #btnDaily .hero-board { display: none; }
+  #playOverlay .screen-body::before, #playOverlay .screen-body::after { opacity: .14; }
+}
 </style>
 </head>
 <body>
@@ -1473,9 +1539,11 @@ html[data-theme="jardin"] .app .btn:disabled { background: rgba(14,32,20,.85); c
   <div class="screen-body">
     <h2 data-i18n="menu.play"></h2>
     <button type="button" class="hero quick" id="btnQuick">
-      <span class="hero-title" data-i18n="quick.title"></span>
+      <span class="quick-ic" aria-hidden="true"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="11" rx="3.5"/><path d="M12 8V4.5"/><circle cx="12" cy="3.6" r="1.1"/><circle cx="9" cy="13" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1.3" fill="currentColor" stroke="none"/><path d="M9.5 16.2h5"/><path d="M2 12.5v3M22 12.5v3"/></svg></span>
+      <span class="quick-tx"><span class="hero-title" data-i18n="quick.title"></span>
       <span class="hero-sub" id="quickSub"></span>
-      <span class="hero-cta" data-i18n="quick.cta"></span>
+      <span class="hero-cta" data-i18n="quick.cta"></span></span>
+      <i class="hero-board" aria-hidden="true"><img class="hero-stone s1" alt="" width="34" height="34"><img class="hero-stone s2" alt="" width="34" height="34"></i>
     </button>
     <div class="quick-opts"><button type="button" class="btn" id="btnQuickOpts" data-i18n="quick.opts"></button></div>
     <button type="button" class="hero" id="btnDaily">
@@ -10586,8 +10654,8 @@ window.NEON_BREAK = {
     ctx = save.ctx; metrics.cell = save.cell; metrics.off = save.off; return out;
   }
   function renderHeroStones() {
-    var a = document.querySelector('.hero-stone.s1'), b = document.querySelector('.hero-stone.s2'); if (!a || !b) return;
-    var d = Math.round(72 * Math.min(2, window.devicePixelRatio || 1)); a.src = stoneImg(1, d); b.src = stoneImg(2, d);
+    var d = Math.round(72 * Math.min(2, window.devicePixelRatio || 1)), s1 = stoneImg(1, d), s2 = stoneImg(2, d);
+    document.querySelectorAll('.hero-stone.s1').forEach(function (a) { a.src = s1; }); document.querySelectorAll('.hero-stone.s2').forEach(function (b) { b.src = s2; });
   }
   /* Fondo del menú en Playa: las canaletas (misma talla que en el tablero) sobre una grilla que cubre toda la pantalla, y un mar que SOLO viene
    * de la izquierda: sube, deja espuma y se retira, de a ratos. Es una capa aparte (menuSea) para no redibujar las conchas en cada cuadro. */
