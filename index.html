@@ -1265,6 +1265,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
 .ach-chip[class*="rk"] { color: var(--rk); border-color: color-mix(in srgb, var(--rk) 55%, transparent); }
 .ach-chip.on[class*="rk"] { background: color-mix(in srgb, var(--rk) 16%, transparent); }
 .ach-medal[class*="rk"] { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; font-size: 22px; background: color-mix(in srgb, var(--rk) 22%, transparent); box-shadow: 0 0 0 2px var(--rk); }
+.pv-title { margin: 4px 0 2px; }
 .ach-legend { margin: 4px 0 10px; } .ach-legend small { display: block; color: var(--muted); margin-bottom: 6px; }
 .player .name .plvl.ttl { color: var(--rk); opacity: .95; }
 .player .name .plvl.ttl.rk5 { background: none; text-shadow: 0 0 6px rgba(255, 207, 90, .5); }
@@ -1939,7 +1940,8 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
 <!-- Perfil de otra persona -->
 <div class="overlay screen" id="pviewOverlay">
   <div class="screen-body">
-    <div class="pv-head"><span class="pv-av" id="pvAv"></span><div><h2 id="pvName"></h2><p class="sub" id="pvRel"></p></div></div>
+    <div class="pv-head"><span class="pv-av" id="pvAv"></span><div><h2 id="pvName"></h2><div id="pvTitle" class="pv-title" hidden></div><p class="sub" id="pvRel"></p></div></div>
+    <div class="field" id="pvAchBox" hidden><span class="lbl" id="pvAchLbl"></span><div class="ttl-list" id="pvAch"></div></div>
     <div class="field" id="pvH2hBox" hidden><span class="lbl" data-i18n="h2h.title"></span><div class="prof-stats" id="pvH2h"></div><p class="hint" id="pvH2hNote"></p></div>
     <div class="field" id="pvStatsBox"><span class="lbl" data-i18n="prof.stats"></span><div class="prof-stats" id="pvStats"></div><h3 class="gm-h" data-i18n="prof.byType"></h3><div class="prof-stats" id="pvGm"></div><div class="charts" id="pvCharts"></div><p class="hint" id="pvNote"></p></div>
     <p class="hint" id="pvMsg" role="status" aria-live="polite"></p>
@@ -4097,11 +4099,15 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     SUMS.concat(MAXES).forEach(function (k) { var v = num(src[k]); if (v) c[k] = v; });
     var seen = {}, u = (Array.isArray(x.u) ? x.u : []).filter(function (id) { if (!IDS[id] || seen[id]) return false; seen[id] = 1; return true; }).sort();
     var s2 = {}, k = (Array.isArray(x.k) ? x.k : []).filter(function (e) { if (typeof e !== 'string' || !/^[A-Za-z0-9]{3,10}:[pdg]$/.test(e) || s2[e]) return false; s2[e] = 1; return true; }).slice(-40);
-    return { c: c, u: u, k: k };
+    var ts = Math.floor(Number(x.ts)); ts = isFinite(ts) && ts > 0 && ts < 4e12 ? ts : 0;
+    var ti = typeof x.ti === 'string' && u.indexOf(x.ti) >= 0 ? x.ti : '';          // título elegido: tiene que ser uno de los ya ganados. ts = cuándo se eligió (gana el más nuevo al sincronizar)
+    var out = { c: c, u: u, k: k }; if (ti) out.ti = ti; if (ts) out.ts = ts;
+    return out;
   }
-  function empty(a) { return !Object.keys(a.c).length && !a.u.length && !a.k.length; }
+  function empty(a) { return !Object.keys(a.c).length && !a.u.length && !a.k.length && !a.ts; }
   function merge(local, base, remote) {
     var l = clean(local), b = clean(base), r = clean(remote), o = { c: {}, u: l.u.concat(r.u), k: r.k.concat(l.k) };
+    var lt = l.ts || 0, rt = r.ts || 0; if (lt >= rt) { o.ti = l.ti || ''; o.ts = lt; } else { o.ti = r.ti || ''; o.ts = rt; }
     SUMS.forEach(function (k) { var v = num((r.c[k] || 0) + Math.max(0, (l.c[k] || 0) - (b.c[k] || 0))); if (v) o.c[k] = v; });
     MAXES.forEach(function (k) { var v = Math.max(l.c[k] || 0, r.c[k] || 0); if (v) o.c[k] = v; });
     return clean(o);
@@ -10995,14 +11001,13 @@ window.NEON_BREAK = {
   }
   function achTitle(id) { return t('ach.' + id); }
   /* Título del perfil: uno de los logros ya ganados. Se guarda en el aparato y con las preferencias de la cuenta. */
-  var myTitle = ''; try { myTitle = localStorage.getItem('pente.title') || ''; } catch (e) {}
   function titleOk(id) { return !!(id && ACH.IDS[id] && ACH.clean(profile.stats && profile.stats.ach).u.indexOf(id) >= 0); }
-  function curTitle() { return titleOk(myTitle) ? myTitle : ''; }
+  function curTitle() { var c = ACH.clean(profile.stats && profile.stats.ach); return c.ti || ''; }
   function titleChip(id, tag) { var c = document.createElement(tag || 'span'); c.className = 'ttl-chip rk' + ACH.rank(id); c.textContent = achTitle(id); return c; }
   function setTitle(id) {
-    id = titleOk(id) ? id : ''; if (id === myTitle) return; myTitle = id;
-    try { if (id) localStorage.setItem('pente.title', id); else localStorage.removeItem('pente.title'); } catch (e) {}
-    markPrefs(); renderTitles(); if (state) render();
+    id = titleOk(id) ? id : ''; if (id === curTitle()) return;
+    var c = ACH.clean(profile.stats && profile.stats.ach); c.ti = id; c.ts = Date.now(); if (!id) delete c.ti;
+    achSave(c); renderTitles(); if (state) render();
   }
   function renderTitles() {
     var box = $('profTitles'); if (!box) return;
@@ -13978,6 +13983,12 @@ window.NEON_BREAK = {
     var st = PP.cleanStats(v.stats), has = Object.keys(st).length > 0;
     $('pvStats').hidden = !!v.hidden; $('pvCharts').hidden = !!v.hidden; if (v.hidden) { $('pvStats').innerHTML = ''; $('pvGm').innerHTML = ''; $('pvGm').previousElementSibling.hidden = true; $('pvCharts').innerHTML = ''; } else { fillStats($('pvStats'), st); fillGm($('pvGm'), st); fillCharts($('pvCharts'), st); }
     $('pvNote').textContent = v.hidden ? t('pv.hidden') : has ? t('pv.note') : t('pv.noGames');
+    var pt = $('pvTitle'), pa = ACH.clean(st.ach), pbox = $('pvAchBox'); pt.innerHTML = ''; pt.hidden = true; pbox.hidden = true; $('pvAch').innerHTML = '';
+    if (!v.hidden && pa.u.length) {
+      if (pa.ti) { pt.appendChild(titleChip(pa.ti)); pt.hidden = false; }
+      pa.u.slice().sort(function (a, b) { return ACH.rank(b) - ACH.rank(a) || achTitle(a).localeCompare(achTitle(b)); }).forEach(function (id) { $('pvAch').appendChild(titleChip(id)); });
+      $('pvAchLbl').textContent = t('ach.count', { a: pa.u.length, b: ACH.total() }); pbox.hidden = false;
+    }
     h2hRender(v);
     var box = $('pvActions'); box.innerHTML = '';
     function btn(label, cls, fn) { var b = el('button', 'btn' + (cls ? ' ' + cls : ''), label); b.type = 'button'; b.addEventListener('click', fn); box.appendChild(b); }
@@ -14094,13 +14105,12 @@ window.NEON_BREAK = {
   setTimeout(fetchLevels, 300);
   var acct = { step: 'out', mode: storeGet('pente.loginMode') === 'pw' ? 'pw' : 'mail', email: '', cd: 0, cdTimer: 0, busy: false }, sync = { busy: false, dirty: false, timer: 0, state: 'idle', at: 0, err: '', promise: null };
   var applyingRemote = false;
-  function curPrefs() { var p = { theme: themeId, lang: window.I18n.getLang(), cfg: cfg }; if (myCountry) p.country = myCountry; if (curTitle()) p.title = curTitle(); return p; }
+  function curPrefs() { var p = { theme: themeId, lang: window.I18n.getLang(), cfg: cfg }; if (myCountry) p.country = myCountry; return p; }
   function markPrefs() { if (applyingRemote) return; profile.prefsAt = Date.now(); saveProfile(); scheduleSync(2000); }
   function applyRemotePrefs(p) {
     applyingRemote = true;
     try {
       if (p.theme && window.Themes.byId[p.theme] && p.theme !== themeId && !(cfg.randomBoard && !themeUserPicked)) setTheme(p.theme);
-      myTitle = /^[a-z0-9]{3,4}$/.test(p.title || '') ? p.title : ''; try { if (myTitle) localStorage.setItem('pente.title', myTitle); else localStorage.removeItem('pente.title'); } catch (e) {}
       myCountry = /^[A-Z]{2}$/.test(p.country || '') ? p.country : ''; try { if (myCountry) localStorage.setItem('pente.country', myCountry); else localStorage.removeItem('pente.country'); } catch (e) {} renderCountry();
       if (p.lang && window.I18n.STRINGS[p.lang] && p.lang !== window.I18n.getLang()) setLanguage(p.lang);
       if (p.cfg) {
