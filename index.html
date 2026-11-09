@@ -1221,7 +1221,15 @@ html[data-theme="jardin"] .app .btn:disabled { background: rgba(14,32,20,.85); c
 #playOverlay .hero-board::before { opacity: .16; }
 #playOverlay .quick-ic { position: relative; width: 78px; height: 78px; border-radius: 22px; background: color-mix(in srgb, var(--accent) 10%, var(--panel-2)); border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent); color: var(--accent); transform: rotate(0deg); box-shadow: inset 0 0 18px color-mix(in srgb, var(--accent) 14%, transparent); }
 #playOverlay .quick-ic svg { width: 44px; height: 44px; }
-#playOverlay .hero.quick { background-image: url(play-board.webp), linear-gradient(160deg, color-mix(in srgb, var(--accent) 7%, var(--panel)), var(--panel) 60%); background-repeat: no-repeat; background-size: auto 125%, auto; background-position: right -70px center, 0 0; }
+#playOverlay .hero.quick { background-image: var(--qb, url(play-board-clasico.webp)), linear-gradient(160deg, color-mix(in srgb, var(--accent) 7%, var(--panel)), var(--panel) 60%); background-repeat: no-repeat; background-size: auto 122%, auto; background-position: right -24px center, 0 0; }
+html[data-theme="clasico"] { --qb: url(play-board-clasico.webp); }
+html[data-theme="tradicional"] { --qb: url(play-board-tradicional.webp); }
+html[data-theme="glow"] { --qb: url(play-board-glow.webp); }
+html[data-theme="papel"] { --qb: url(play-board-papel.webp); }
+html[data-theme="playa"] { --qb: url(play-board-playa.webp); }
+html[data-theme="jardin"] { --qb: url(play-board-jardin.webp); }
+html[data-theme="halloween"] { --qb: url(play-board-halloween.webp); }
+html[data-theme="galaxia"] { --qb: url(play-board-galaxia.webp); }
 html[data-theme="jardin"] #playOverlay .hero.quick::after { content: ""; position: absolute; right: 150px; top: 14px; width: 46px; height: 44px; background: url(garden-flower.webp) center / contain no-repeat; pointer-events: none; }
 #playOverlay .hero.quick .hero-cta { background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 92%, #fff), var(--accent)); color: var(--accent-ink); padding: 11px 24px; font-size: 17px; box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 35%, transparent); }
 #playOverlay .hero.quick .hero-board { display: none; }
@@ -1269,6 +1277,13 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
 .ach-legend { margin: 4px 0 10px; } .ach-legend small { display: block; color: var(--muted); margin-bottom: 6px; }
 .player .name .plvl.ttl { color: var(--rk); opacity: .95; }
 .player .name .plvl.ttl.rk5 { background: none; text-shadow: 0 0 6px rgba(255, 207, 90, .5); }
+
+.lab-caps, .lab-bot { display: flex; flex-direction: column; gap: 6px; padding-top: 8px; }
+.lab-caps > b, .lab-bot > b { font-size: 13px; }
+.lab-capsrow { display: flex; flex-wrap: wrap; gap: 8px 14px; }
+.lab-cap { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px; }
+.lab-cap output { min-width: 18px; text-align: center; font-weight: 800; font-variant-numeric: tabular-nums; }
+.lab-cap .btn.small { min-width: 32px; padding: 4px 8px; }
 </style>
 </head>
 <body>
@@ -1343,6 +1358,16 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       <label class="lab-sw"><input type="checkbox" id="labAlt" checked><span data-i18n="lab.alt"></span></label>
       <label class="lab-sw"><input type="checkbox" id="labExact" checked><span data-i18n="lab.exact"></span></label>
       <label class="lab-sw"><input type="checkbox" id="labMark5" checked><span data-i18n="lab.mark5"></span></label>
+      <div class="lab-caps"><b data-i18n="lab.caps"></b>
+        <div class="lab-capsrow">
+          <span class="lab-cap"><span data-i18n="lab.p1"></span><button type="button" class="btn small" id="labCapDec1" aria-label="-">−</button><output id="labCapVal1">0</output><button type="button" class="btn small" id="labCapInc1" aria-label="+">+</button></span>
+          <span class="lab-cap"><span data-i18n="lab.p2"></span><button type="button" class="btn small" id="labCapDec2" aria-label="-">−</button><output id="labCapVal2">0</output><button type="button" class="btn small" id="labCapInc2" aria-label="+">+</button></span>
+        </div></div>
+      <div class="lab-bot"><b data-i18n="lab.bot"></b>
+        <div class="lab-row"><label><span data-i18n="lab.botLevel"></span><select id="labBotLevel"></select></label>
+          <label><span data-i18n="lab.botSide"></span><select id="labBotSide"><option value="1" data-i18n="lab.p1"></option><option value="2" data-i18n="lab.p2"></option></select></label></div>
+        <div class="lab-acts"><button type="button" class="btn primary" id="labBotGo" data-i18n="lab.botStart"></button><button type="button" class="btn" id="labBotStop" hidden data-i18n="lab.botStop"></button></div>
+        <div class="lab-note" id="labBotNote" role="status" aria-live="polite"></div></div>
       <div class="lab-row"><label><span data-i18n="lab.size"></span><select id="labSize"><option value="13" data-i18n="lab.size13"></option><option value="19" data-i18n="lab.size19"></option></select></label>
         <label><span data-i18n="lab.rules"></span><select id="labVar"><option value="classic" data-i18n="lab.v.classic"></option><option value="pairs3" data-i18n="lab.v.pairs3"></option><option value="triples" data-i18n="lab.v.triples"></option><option value="gomoku" data-i18n="lab.v.gomoku"></option></select></label></div>
       <div class="lab-acts">
@@ -5369,7 +5394,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'end.draw': 'Empate: el tablero se llenó',
       'end.rematch': 'Revancha',
       'end.toMenu': 'Volver al menú',
-      'confirm.leaveAI': '¿Dejar la partida contra la máquina?',
+      'confirm.leaveAI': '¿Dejar la partida contra el bot?',
       'confirm.restart': '¿Reiniciar la partida en curso?',
       'err.OCCUPIED': 'Esa intersección ya está ocupada.',
       'err.OUT_OF_BOUNDS': 'Fuera del tablero.',
@@ -5468,7 +5493,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'err.BAD_REQUEST': 'Algo salió mal. Probá de nuevo.',
       'menu.local': 'Local',
       'local.title': 'Partida local',
-      'local.sub': 'Contra otra persona o contra la máquina.',
+      'local.sub': 'Contra otra persona o contra un bot.',
       'local.mode': 'Contra quién',
       'local.modePerson': 'Otra persona',
       'local.modeAI': 'La máquina',
@@ -5545,7 +5570,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'cfg.loupeHint': 'Un cuadrado abajo a la derecha amplía la zona mientras arrastrás una ficha, para ver bien dónde cae. (Pensado para celular).',
       'theme.papel': 'Papel',
       'err.CHAT_RATE': 'Más despacio: un mensaje por vez.',
-      'menu.ai': 'Jugar contra la máquina',
+      'menu.ai': 'Jugar contra bot',
       'ai.title': 'Contra la máquina',
       'ai.sub': 'Sin internet y sin esperar a nadie.',
       'ai.yourName': 'Tu nombre',
@@ -5941,7 +5966,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     'tut.prev': 'Atrás',
     'tut.next': 'Siguiente',
     'tut.skip': 'Saltar',
-    'tut.play': 'Jugar contra la máquina',
+    'tut.play': 'Jugar contra bot',
     'tut.hintGeneric': 'Fijate en los puntos marcados.',
     'tut.generic.other': 'Probá en el punto marcado.',
     'tut.generic.wrong': 'Esa no. Probá de nuevo.',
@@ -6565,8 +6590,8 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     "daily.heroStreakRisk": "{n} · no la pierdas",
     "daily.chipTodo": "Desafío de hoy sin jugar",
     "daily.chipDone": "Desafío de hoy listo",
-    "play.localSub": "En este dispositivo: con un amigo o contra la máquina",
-    "quick.title": "Jugar contra la máquina",
+    "play.localSub": "En este dispositivo: con un amigo o contra un bot",
+    "quick.title": "Jugar contra bot",
     "quick.cta": "Tocá y empezás →",
     "quick.opts": "Cambiar opciones",
     "play.onlineSub": "Con código, salas públicas o amigos",
@@ -6834,8 +6859,8 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     "daily.heroStreakRisk": "{n} · don't lose it",
     "daily.chipTodo": "Today's challenge not played",
     "daily.chipDone": "Today's challenge done",
-    "play.localSub": "On this device: with a friend or against the machine",
-    "quick.title": "Play the machine",
+    "play.localSub": "On this device: with a friend or against a bot",
+    "quick.title": "Play vs bot",
     "quick.cta": "Tap and play →",
     "quick.opts": "Change options",
     "play.onlineSub": "With a code, public rooms or friends",
@@ -8154,6 +8179,17 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     'lab.cap': 'Capturar solas',
     'lab.capHint': 'Si lo apagás, las fichas no se sacan solas: las quitás vos con la goma.',
     'lab.alt': 'Alternar colores',
+    'lab.caps': 'Capturas',
+    'lab.bot': 'Bot de práctica',
+    'lab.botLevel': 'Nivel',
+    'lab.botSide': 'Juega con',
+    'lab.botStart': 'Jugar contra bot',
+    'lab.botPause': 'Pausar',
+    'lab.botResume': 'Seguir',
+    'lab.botStop': 'Quitar bot',
+    'lab.botPaused': 'Bot en pausa.',
+    'lab.botThinking': 'El bot está pensando…',
+    'lab.botNone': 'El bot no encontró jugada.',
     'lab.exact': 'Victoria solo con líneas de 5',
     'lab.mark5': 'Marcar líneas de 5 con círculos rojos',
     'lab.size': 'Tablero',
@@ -8237,6 +8273,17 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     'lab.cap': 'Auto captures',
     'lab.capHint': 'If you turn it off, stones are not removed on their own: you remove them with the eraser.',
     'lab.alt': 'Alternate colors',
+    'lab.caps': 'Captures',
+    'lab.bot': 'Practice bot',
+    'lab.botLevel': 'Level',
+    'lab.botSide': 'Plays as',
+    'lab.botStart': 'Play against bot',
+    'lab.botPause': 'Pause',
+    'lab.botResume': 'Resume',
+    'lab.botStop': 'Remove bot',
+    'lab.botPaused': 'Bot paused.',
+    'lab.botThinking': 'The bot is thinking…',
+    'lab.botNone': 'The bot found no move.',
     'lab.exact': 'Win only with lines of 5',
     'lab.mark5': 'Mark lines of 5 with red circles',
     'lab.size': 'Board',
@@ -10176,7 +10223,7 @@ window.NEON_BREAK = {
   var pz = { active: false, puz: null, k: 1, used: 0, on: true, done: false, demo: false, hints: 0, level: 'rand', last: '', hist: [] };   // problemas tácticos (comparten el tablero y la tarjeta del tutorial)
   var tut = { active: false, i: 0, solved: false, awaiting: false, marks: [], token: 0, fb: '', fbRaw: '', fbKind: '', timers: [] };   // tutorial interactivo (ver sección al final)
   try { var lx = localStorage.getItem('pente.labExact'), lm = localStorage.getItem('pente.labMark5'); } catch (e) {}
-  var lab = { active: false, coach: null, hist: [], i: 0, tool: '1', cap: true, alt: true, exact: true, mark5: true, size: 13, variant: 'classic', hover: null, pen: null, timer: 0, trayKey: '' };   // tablero de práctica (ver sección al final)
+  var lab = { active: false, coach: null, hist: [], i: 0, tool: '1', cap: true, alt: true, exact: true, mark5: true, bot: { on: false, paused: false, busy: false, token: 0, color: 2, level: 'easy' }, size: 13, variant: 'classic', hover: null, pen: null, timer: 0, trayKey: '' };   // tablero de práctica (ver sección al final)
   if (lx === '0' || lx === '1') lab.exact = lx === '1'; else lab.exact = !!settings.exactFive; if (lm === '0') lab.mark5 = false;
   var localOver = null;   // fin por tiempo en partidas locales / contra la máquina: { winner, reason:'timeout' }
   function isOver() { if (lab.active) return false; return !state || state.status !== 'playing' || !!localOver || (online.active && !!online.over); }
@@ -14663,7 +14710,45 @@ window.NEON_BREAK = {
     if (ni < 0 || ni > lab.hist.length - 1) { labPlayStop(); return; }
     labGo(ni); if (d > 0) labStepFx(prev); else sfx('pick');
   }
-  function labPush(s, marks) { lab.hist = lab.hist.slice(0, lab.i + 1); lab.hist.push({ s: s, marks: marks }); labGo(lab.hist.length - 1); }
+  function labPush(s, marks) { lab.hist = lab.hist.slice(0, lab.i + 1); lab.hist.push({ s: s, marks: marks }); labGo(lab.hist.length - 1); labBotKick(); }
+  /* Capturas a mano: se cuentan igual que en las barras de arriba (con "−" y "+"; cada cambio es un paso del historial, así se puede volver atrás). */
+  function labCapMax() { return state ? Math.max(1, state.options.capturesToWin || 5) : 5; }
+  function labCapChange(p, d) {
+    if (!lab.active || !state) return;
+    var cur = state.captures[p] || 0, nx = Math.max(0, Math.min(labCapMax(), cur + d)); if (nx === cur) return;
+    var caps = Object.assign({}, state.captures); caps[p] = nx;
+    labPush(Object.assign({}, state, { captures: caps }), labCur().marks);
+  }
+  /* Bot de práctica: juega con el color elegido cuando le toca; se puede pausar, seguir y cambiar de nivel en cualquier momento. */
+  function labBotNote(m) { var n = $('labBotNote'); if (n) n.textContent = m || ''; }
+  function labBotUi() {
+    var b = lab.bot; $('labBotLevel').value = b.level; $('labBotSide').value = String(b.color);
+    $('labBotGo').textContent = t(!b.on ? 'lab.botStart' : b.paused ? 'lab.botResume' : 'lab.botPause'); $('labBotGo').classList.toggle('primary', !b.on || b.paused);
+    $('labBotStop').hidden = !b.on;
+    labBotNote(!b.on ? '' : b.paused ? t('lab.botPaused') : b.busy ? t('lab.botThinking') : '');
+  }
+  function labBotKick() {
+    var b = lab.bot; labBotUi();
+    if (!lab.active || !b.on || b.paused || b.busy || !state || state.status !== 'playing' || state.current !== b.color || labWinCells(state).length) return;
+    b.busy = true; labBotUi();
+    var tok = ++b.token, st = state, started = Date.now();
+    setTimeout(function () {
+      if (tok !== b.token) { return; }
+      aiThink(st, b.level, function (mv) {
+        if (tok !== b.token) return;
+        setTimeout(function () {
+          if (tok !== b.token) return;
+          b.busy = false;
+          if (!lab.active || !b.on || b.paused || st !== state) { labBotKick(); return; }
+          if (!mv) { labBotNote(t('lab.botNone')); return; }
+          var r = L.place(state, mv.x, mv.y, b.color, lab.cap);
+          if (!r.ok) { labBotNote(t('lab.botNone')); return; }
+          labPush(r.state, labCur().marks); spawnFx(r.captured, b.color === 1 ? 2 : 1); moveFeedback(r.captured, false);
+        }, Math.max(0, 450 - (Date.now() - started)));
+      });
+    }, 60);
+  }
+  function labBotReset() { lab.bot.token++; lab.bot.busy = false; lab.bot.on = false; lab.bot.paused = false; labBotNote(''); }
   function labPlace(x, y) {
     var color = lab.tool === '2' ? 2 : 1, r = L.place(state, x, y, color, lab.cap);
     if (!r.ok) { labNote(t('lab.occupied')); sfx('error'); return; }
@@ -14801,6 +14886,7 @@ window.NEON_BREAK = {
     $('labPlay').textContent = lab.timer ? '❚❚' : '▶▶'; $('labPlay').setAttribute('aria-label', t(lab.timer ? 'lab.pause' : 'lab.play')); $('labPlay').title = t(lab.timer ? 'lab.pause' : 'lab.play');
     $('labPos').textContent = t('lab.pos', { i: lab.i, n: last });
     $('labCap').checked = lab.cap; $('labAlt').checked = lab.alt; $('labExact').checked = lab.exact; $('labMark5').checked = lab.mark5;
+    $('labCapVal1').textContent = state ? (state.captures[1] || 0) : 0; $('labCapVal2').textContent = state ? (state.captures[2] || 0) : 0;
     labTrayDraw();
   }
   function labSyncSelects() {
@@ -14808,7 +14894,7 @@ window.NEON_BREAK = {
     sz.value = String(lab.size); $('labVar').value = lab.variant;
   }
   function labFresh(size, variant) {
-    labPlayStop(); lab.size = size; lab.variant = variant; labSyncSelects();
+    labPlayStop(); lab.bot.token++; lab.bot.busy = false; lab.size = size; lab.variant = variant; labSyncSelects();
     lab.hist = [{ s: labWithExact(L.blank(size, variant)), marks: [] }]; lab.i = 0; labNote('');
     labGo(0);
   }
@@ -14826,7 +14912,7 @@ window.NEON_BREAK = {
   }
   function labStop() {
     if (!lab.active) return;
-    lab.active = false; labPlayStop(); lab.down = lab.hover = null; lab.hist = []; lab.coach = null;
+    lab.active = false; labPlayStop(); labBotReset(); lab.down = lab.hover = null; lab.hist = []; lab.coach = null;
     document.body.classList.remove('in-lab'); $('labPanel').hidden = true;
     clk = null; localOver = null; state = null; names[1] = names[2] = '';
     hover = pending = drag = settle = null; fx.length = 0;
@@ -14870,7 +14956,7 @@ window.NEON_BREAK = {
     var g = L.parseGame($('labTxt').value), err = $('labErr');
     if (!g.ok) { err.textContent = g.error === 'BAD_COORD' ? t('lab.errCoord', { token: g.token }) : t('lab.errEmpty'); return; }
     var r = L.replay(g); err.textContent = '';
-    labPlayStop(); lab.size = g.size; lab.variant = g.variant; labSyncSelects(); if (/(?:Reglas|Rules)\s*:/i.test($('labTxt').value)) lab.exact = !!g.exactFive; try { localStorage.setItem('pente.labExact', lab.exact ? '1' : '0'); } catch (e) {}
+    labPlayStop(); lab.bot.token++; lab.bot.busy = false; lab.size = g.size; lab.variant = g.variant; labSyncSelects(); if (/(?:Reglas|Rules)\s*:/i.test($('labTxt').value)) lab.exact = !!g.exactFive; try { localStorage.setItem('pente.labExact', lab.exact ? '1' : '0'); } catch (e) {}
     lab.hist = r.states.map(function (s) { return { s: labWithExact(s), marks: [] }; });
     $('labPasteBox').hidden = true; $('labTxt').value = '';
     labGo(0);
@@ -14893,6 +14979,17 @@ window.NEON_BREAK = {
     render();
   });
   $('labCap').addEventListener('change', function () { lab.cap = this.checked; });
+  [1, 2].forEach(function (p) { $('labCapDec' + p).addEventListener('click', function () { labCapChange(p, -1); }); $('labCapInc' + p).addEventListener('click', function () { labCapChange(p, 1); }); });
+  (function () { var sel = $('labBotLevel'); ['beginner', 'easy', 'medium', 'hard', 'goody'].forEach(function (lv) { var o = document.createElement('option'); o.value = lv; o.setAttribute('data-i18n', 'ai.' + lv); o.textContent = t('ai.' + lv); sel.appendChild(o); }); })();
+  $('labBotLevel').addEventListener('change', function () { lab.bot.level = this.value; labBotUi(); });
+  $('labBotSide').addEventListener('change', function () { lab.bot.color = this.value === '1' ? 1 : 2; lab.bot.token++; lab.bot.busy = false; labBotKick(); });
+  $('labBotGo').addEventListener('click', function () {
+    var b = lab.bot;
+    if (!b.on) { b.on = true; b.paused = false; b.busy = false; labBotKick(); }
+    else if (b.paused) { b.paused = false; labBotKick(); }
+    else { b.paused = true; b.token++; b.busy = false; labBotUi(); }
+  });
+  $('labBotStop').addEventListener('click', function () { labBotReset(); labBotUi(); });
   $('labExact').addEventListener('change', function () {
     lab.exact = this.checked; try { localStorage.setItem('pente.labExact', lab.exact ? '1' : '0'); } catch (e) {}
     lab.hist = lab.hist.map(function (h) { return { s: labWithExact(h.s), marks: h.marks }; }); labGo(lab.i);
