@@ -609,6 +609,9 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 .hero.done .hero-streak { background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--accent); }
 .hero.done .hero-cta { color: var(--accent); }
 .hero:active { transform: scale(.985); }
+.hero.quick { margin-bottom: 6px; }
+.quick-opts { display: flex; justify-content: flex-end; margin: 0 0 12px; }
+.quick-opts .btn { min-height: 0; padding: 6px 12px; font-size: 13px; }
 .tiles { display: flex; flex-direction: column; gap: 10px; margin-bottom: 6px; }
 .tile { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 16px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); text-align: left; color: var(--text); }
 .tile:hover { border-color: var(--accent); }
@@ -1469,6 +1472,12 @@ html[data-theme="jardin"] .app .btn:disabled { background: rgba(14,32,20,.85); c
 <div class="overlay screen" id="playOverlay">
   <div class="screen-body">
     <h2 data-i18n="menu.play"></h2>
+    <button type="button" class="hero quick" id="btnQuick">
+      <span class="hero-title" data-i18n="quick.title"></span>
+      <span class="hero-sub" id="quickSub"></span>
+      <span class="hero-cta" data-i18n="quick.cta"></span>
+    </button>
+    <div class="quick-opts"><button type="button" class="btn" id="btnQuickOpts" data-i18n="quick.opts"></button></div>
     <button type="button" class="hero" id="btnDaily">
       <span class="hero-top"><span class="hero-tag" data-i18n="daily.heroTag"></span><span class="hero-streak" id="heroStreak" hidden></span></span>
       <span class="hero-title" id="heroTitle"></span>
@@ -6456,6 +6465,9 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     "daily.chipTodo": "Desafío de hoy sin jugar",
     "daily.chipDone": "Desafío de hoy listo",
     "play.localSub": "En este dispositivo: con un amigo o contra la máquina",
+    "quick.title": "Jugar contra la máquina",
+    "quick.cta": "Tocá y empezás →",
+    "quick.opts": "Cambiar opciones",
     "play.onlineSub": "Con código, salas públicas o amigos",
     "play.tutorialSub": "Las reglas en un par de minutos",
     "xp.lvShort": "Nv {n}",
@@ -6722,6 +6734,9 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     "daily.chipTodo": "Today's challenge not played",
     "daily.chipDone": "Today's challenge done",
     "play.localSub": "On this device: with a friend or against the machine",
+    "quick.title": "Play the machine",
+    "quick.cta": "Tap and play →",
+    "quick.opts": "Change options",
     "play.onlineSub": "With a code, public rooms or friends",
     "play.tutorialSub": "The rules in a couple of minutes",
     "xp.lvShort": "Lv {n}",
@@ -9950,6 +9965,7 @@ window.NEON_BREAK = {
   var settings = { tournamentRule: true, exactFive: true, size: 13, timer: true, mode: 'classic' };      // opciones de la partida (menú principal)
   var MODES = ['classic', 'triples', 'gomoku', 'blitz', 'bullet'];     // modo de juego = variante de reglas (+ blitz y bullet, que son solo otro reloj)
   try { var mv0 = localStorage.getItem('pente.mode'); if (MODES.indexOf(mv0) >= 0) settings.mode = mv0; } catch (e) {}
+  try { var op0 = JSON.parse(localStorage.getItem('pente.opts') || 'null'); if (op0) ['tournamentRule', 'exactFive', 'timer'].forEach(function (k) { if (typeof op0[k] === 'boolean') settings[k] = op0[k]; }); } catch (e) {}
   var gameMode = 'classic';                                              // modo de la partida en curso (no cambia si se toca el menú a mitad de partida)
   function modeVariant(m) { return m === 'blitz' || m === 'bullet' ? 'classic' : m; }
   function coreOpts(extra) {
@@ -12313,6 +12329,7 @@ window.NEON_BREAK = {
     if (id === 'menuOverlay') $('btnResume').hidden = !(state && !isOver());
     if (id === 'playOverlay') $('btnTutorial').classList.toggle('primary', !tutDone());
     if (id === 'playOverlay' || id === 'menuOverlay') renderHero();
+    if (id === 'playOverlay' && typeof quickRefresh === 'function') quickRefresh();
     $(id).classList.add('open');
     if (id === 'menuOverlay') { renderXpMini(); renderMenuBg(); tipsStart(); }
     if (id === 'menuOverlay' || id === 'playOverlay') dailySyncQuiet();
@@ -13107,6 +13124,13 @@ window.NEON_BREAK = {
   document.querySelectorAll('#aiSide .seg-opt').forEach(function (b) { b.addEventListener('click', function () { aiPref.side = b.dataset.val; saveAiPref(); syncAiUi(); }); });
   // "Jugar local": un solo botón de inicio; según el modo arranca con otra persona o contra la máquina
   var localMode = 'person'; try { if (localStorage.getItem('pente.localMode') === 'ai') localMode = 'ai'; } catch (e) {}
+  /* Jugar rápido: un toque y arranca contra la máquina con lo último que elegiste (nivel, quién empieza, tablero y reglas); todo se guarda solo. */
+  function quickRefresh() {
+    var sd = { first: 'ai.sideFirst', second: 'ai.sideSecond', random: 'ai.sideRandom', swap: 'ai.sideSwap' }[aiPref.side] || 'ai.sideSwap';
+    $('quickSub').textContent = [t('ai.' + aiPref.level), settings.size + '×' + settings.size, t(sd)].join(' · ');
+  }
+  $('btnQuick').addEventListener('click', function () { startAI(aiPref.level, aiPref.side); });
+  $('btnQuickOpts').addEventListener('click', function () { localMode = 'ai'; localPlayers = 2; try { localStorage.setItem('pente.localMode', 'ai'); localStorage.setItem('pente.localPlayers', '2'); } catch (e) {} syncLocalMode(); accSummaries(); open('localOverlay'); accSet($('accLocal'), true); });
   var localPlayers = 2; try { var lp0 = localStorage.getItem('pente.localPlayers'); if (lp0 === '4' || lp0 === '5') localPlayers = Number(lp0); } catch (e) {}      // 2 | 4 (2 contra 2) | 5 (4 todos contra todos)
   function syncLocalMode() {
     document.querySelectorAll('#localMode .seg-opt').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.val === localMode)); });
@@ -13297,7 +13321,7 @@ window.NEON_BREAK = {
   /* ---------- Opciones de partida compartidas (local y online) ---------- */
   function syncOpts() { document.querySelectorAll('input[data-opt]').forEach(function (i) { i.checked = !!settings[i.getAttribute('data-opt')]; }); }
   document.querySelectorAll('input[data-opt]').forEach(function (i) {
-    i.addEventListener('change', function () { settings[i.getAttribute('data-opt')] = i.checked; syncOpts(); });
+    i.addEventListener('change', function () { settings[i.getAttribute('data-opt')] = i.checked; syncOpts(); try { localStorage.setItem('pente.opts', JSON.stringify({ tournamentRule: !!settings.tournamentRule, exactFive: !!settings.exactFive, timer: !!settings.timer })); } catch (e) {} });
   });
   /* Modo de juego (variante de reglas): el mismo selector en la pantalla local y en la de crear sala online */
   function syncMode() {
