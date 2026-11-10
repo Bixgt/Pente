@@ -1,7 +1,7 @@
 /* Service worker de Pente: permite jugar sin conexión.
  * Estrategia: red primero (así las actualizaciones llegan apenas hay internet) y caché como respaldo.
  * Para forzar que todos reciban una versión nueva: cambiar CACHE_VERSION. */
-const CACHE_VERSION = 'pente-v171';
+const CACHE_VERSION = 'pente-v172';
 const PRECACHE = ['./', './index.html', './manifest.webmanifest', './config.js', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './icons/apple-touch-icon.png', './icons/favicon.svg', './icons/favicon-32.png', './icons/favicon-48.png', './icons/favicon-96.png', './icons/favicon-192.png', './icons/favicon-16.png', './favicon.ico'];
 
 self.addEventListener('install', (e) => {
@@ -33,4 +33,28 @@ self.addEventListener('fetch', (e) => {
       return res;
     }).catch(() => caches.match(req).then((hit) => hit || (req.mode === 'navigate' ? caches.match('./index.html') : undefined)))
   );
+});
+
+/* Avisos push: el servidor manda {title, body, url, tag, kind}. Si la app está abierta y a la vista, ya avisa por adentro y no se duplica. */
+self.addEventListener('push', (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (err) { d = { body: e.data ? e.data.text() : '' }; }
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+    if (list.some((c) => c.visibilityState === 'visible')) return;
+    return self.registration.showNotification(d.title || 'Pente', {
+      body: d.body || '', icon: './icons/icon-192.png', badge: './icons/favicon-96.png',
+      tag: d.tag || d.kind || 'pente', renotify: true, data: { url: d.url || './?notis=1' }
+    });
+  }));
+});
+
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  const url = (e.notification.data && e.notification.data.url) || './?notis=1';
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+    for (const c of list) {
+      if ('focus' in c) { c.postMessage({ t: 'open', url }); return c.focus(); }
+    }
+    return self.clients.openWindow(url);
+  }));
 });

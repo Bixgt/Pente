@@ -1647,7 +1647,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v171</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v172</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -2151,6 +2151,17 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
     <h2 data-i18n="nt.title"></h2>
     <p class="sub" data-i18n="nt.sub"></p>
     <div id="ntList"></div>
+    <div class="field" id="ntPush" hidden>
+      <span class="lbl" data-i18n="push.title"></span>
+      <p class="hint" id="pushMsg" role="status" aria-live="polite"></p>
+      <div class="btns"><button type="button" class="btn" id="pushBtn"></button></div>
+      <div id="pushKinds" hidden>
+        <label class="check"><input type="checkbox" data-k="invite"><span data-i18n="push.k.invite"></span></label>
+        <label class="check"><input type="checkbox" data-k="tourney"><span data-i18n="push.k.tourney"></span></label>
+        <label class="check"><input type="checkbox" data-k="friend"><span data-i18n="push.k.friend"></span></label>
+        <label class="check"><input type="checkbox" data-k="feedback"><span data-i18n="push.k.feedback"></span></label>
+      </div>
+    </div>
     <div class="btns"><button class="btn" id="ntClear" hidden data-i18n="nt.clear"></button><button class="btn primary" id="btnNotifBack" data-i18n="menu.back"></button></div>
   </div>
 </div>
@@ -5749,6 +5760,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'rooms.play': 'Jugar',
       'rooms.watch': 'Mirar',
       'rooms.back': 'Volver a tu partida',
+      'push.title': 'Avisos en este aparato', 'push.sub': 'Activalos para que te avisemos al celular cuando te inviten a un torneo, te reten o te manden una solicitud de amistad, aunque la app esté cerrada.', 'push.on': 'Avisos activados en este aparato.', 'push.enable': 'Activar avisos', 'push.disable': 'Desactivar avisos', 'push.working': 'Activando…', 'push.denied': 'Los avisos están bloqueados en este navegador. Para activarlos, permitilos desde la configuración del sitio y volvé acá.', 'push.login': 'Para activar los avisos tenés que iniciar sesión con tu cuenta.', 'push.unsupported': 'Este navegador no permite avisos.', 'push.ios': 'En iPhone los avisos solo funcionan si instalás la app: en Safari tocá Compartir y «Agregar a pantalla de inicio», y abrila desde ahí.', 'push.srvOff': 'Los avisos todavía no están activados en el servidor.', 'push.err': 'No se pudieron activar los avisos. Probá de nuevo en un rato.', 'push.k.invite': 'Retos de amigos', 'push.k.tourney': 'Invitaciones a torneos', 'push.k.friend': 'Solicitudes de amistad', 'push.k.feedback': 'Mis comentarios revisados', 'ch.pushed': 'No está conectado: le mandamos un aviso al celular. Esperando que acepte…',
       'nt.fbTitle': 'Revisamos tu comentario', 'nt.fbDefault': 'Ya lo vimos y lo tuvimos en cuenta. ¡Gracias por avisar!', 'nt.fbOk': 'Listo', 'fb.notify': 'Avisar', 'fb.notifyPh': 'Mensaje para el usuario (opcional)', 'fb.notifySend': 'Marcar y avisar', 'fb.cancel': 'Cancelar', 'fb.notified': 'Listo: se marcó como resuelto y se le avisó.',
       'nt.title': 'Notificaciones', 'nt.sub': 'Retos, amistades e invitaciones a torneos quedan acá hasta que los borres o dejen de estar disponibles.', 'nt.empty': 'No tenés nada pendiente.', 'nt.friend': 'Quiere ser tu amigo/a', 'nt.seek': '{name} busca rival', 'nt.join': 'Unirme', 'nt.view': 'Ver torneo', 'nt.dismiss': 'Borrar', 'nt.clear': 'Borrar todo', 'nt.now': 'recién', 'nt.min': 'hace {n} min', 'nt.hr': 'hace {n} h',
       'rooms.backRoom': 'Volver a tu sala',
@@ -6086,6 +6098,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'rooms.play': 'Play',
       'rooms.watch': 'Watch',
       'rooms.back': 'Back to your game',
+      'push.title': 'Alerts on this device', 'push.sub': 'Turn them on to get an alert on your phone when you are invited to a tournament, challenged or sent a friend request, even if the app is closed.', 'push.on': 'Alerts are on for this device.', 'push.enable': 'Turn on alerts', 'push.disable': 'Turn off alerts', 'push.working': 'Turning on…', 'push.denied': 'Alerts are blocked in this browser. To turn them on, allow them in the site settings and come back.', 'push.login': 'Sign in with your account to turn on alerts.', 'push.unsupported': 'This browser does not support alerts.', 'push.ios': 'On iPhone, alerts only work if you install the app: in Safari tap Share and «Add to Home Screen», then open it from there.', 'push.srvOff': 'Alerts are not turned on in the server yet.', 'push.err': 'Could not turn on alerts. Try again in a while.', 'push.k.invite': 'Friend challenges', 'push.k.tourney': 'Tournament invites', 'push.k.friend': 'Friend requests', 'push.k.feedback': 'My reviewed feedback', 'ch.pushed': 'They are not online: we sent an alert to their phone. Waiting for them to accept…',
       'nt.fbTitle': 'We reviewed your feedback', 'nt.fbDefault': 'We saw it and took it into account. Thanks for letting us know!', 'nt.fbOk': 'Got it', 'fb.notify': 'Notify', 'fb.notifyPh': 'Message for the user (optional)', 'fb.notifySend': 'Resolve and notify', 'fb.cancel': 'Cancel', 'fb.notified': 'Done: marked as resolved and the user was notified.',
       'nt.title': 'Notifications', 'nt.sub': 'Challenges, friend requests and tournament invites stay here until you delete them or they are no longer available.', 'nt.empty': 'Nothing pending.', 'nt.friend': 'Wants to be your friend', 'nt.seek': '{name} is looking for an opponent', 'nt.join': 'Join', 'nt.view': 'View tournament', 'nt.dismiss': 'Delete', 'nt.clear': 'Delete all', 'nt.now': 'just now', 'nt.min': '{n} min ago', 'nt.hr': '{n} h ago',
       'rooms.backRoom': 'Back to your room',
@@ -13557,6 +13570,7 @@ window.NEON_BREAK = {
   function invRules(o) { o = o || {}; var mode = o.bullet ? 'bullet' : o.blitz ? 'blitz' : o.variant || 'classic'; return t('mode.' + mode) + ' · ' + (o.size || 13) + '×' + (o.size || 13); }
   function onInviteMessage(m) {
     if (m && m.t === 'chkRes') { ntOnCheck(m); return; }
+    if (m && (m.t === 'pushKey' || m.t === 'pushRes')) { pushOnMsg(m); return; }
     if (m && m.t === 'looking') { onLooking(m); return; }
     if (m && m.t === 'tinvite') { onTInvite(m); return; }
     if (!m || m.t !== 'invite' || !m.code || !m.from) return;
@@ -13656,7 +13670,7 @@ window.NEON_BREAK = {
   }
   $('btnNotif').addEventListener('click', function () {
     try { if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission(); } catch (e) {}
-    open('notifOverlay'); ntRender(); ntCheck(); ntFbLoad();
+    open('notifOverlay'); ntRender(); ntCheck(); ntFbLoad(); pushRender();
     if (socialOk()) Auth.friendsOverview().then(function (o) { social.ov = o && typeof o === 'object' ? o : social.ov; nt.pend = ((social.ov && social.ov.list) || []).filter(function (x) { return x.status === 'pending' && x.dir === 'in'; }).length; ntBadge(); if ($('notifOverlay').classList.contains('open')) ntRender(); }, function () {});
   });
   $('btnNotifBack').addEventListener('click', function () { open('menuOverlay'); });
@@ -13675,6 +13689,83 @@ window.NEON_BREAK = {
   try { var nc = JSON.parse(localStorage.getItem('pente.ntCache') || 'null'); if (nc) { nt.fb = Array.isArray(nc.fb) ? nc.fb : []; nt.pend = Math.min(99, Number(nc.pend) || 0); nt.pendKnown = true; } } catch (e) {}      // el numerito aparece al instante con lo último que se sabía; después se actualiza
   ntBadge();
   (function () { var tries = 0, iv = setInterval(function () { tries++; if (socialOk()) { clearInterval(iv); ntFbLoad(); frBadgeRefresh(true); } else if (tries > 25) { clearInterval(iv); nt.fb = []; nt.pend = 0; ntCacheSave(); ntBadge(); } }, 1500); })();
+
+  /* ---------- Avisos push: llegan al celular aunque la app esté cerrada (servidor: push.js) ---------- */
+  var PUSH_PREFS_KEY = 'pente.pushPrefs', pushWait = {};
+  function pushSupported() { return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && location.protocol.indexOf('http') === 0; }
+  function pushIsIos() { return /iPad|iPhone|iPod/.test(navigator.userAgent || '') || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
+  function pushStandalone() { return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true; }
+  function pushPrefs() { var d = { invite: true, tourney: true, friend: true, feedback: true }; try { var v = JSON.parse(localStorage.getItem(PUSH_PREFS_KEY) || 'null'); if (v) Object.keys(d).forEach(function (k) { if (v[k] === false) d[k] = false; }); } catch (e) {} return d; }
+  function pushOnMsg(m) { var w = pushWait[m.t === 'pushKey' ? 'pushKey' : m.for]; if (w) { delete pushWait[m.t === 'pushKey' ? 'pushKey' : m.for]; clearTimeout(w.t); w.ok(m); } }
+  function pushCall(msg) {                                         // manda un pedido por la conexión liviana de la cuenta y espera la respuesta
+    return new Promise(function (ok, no) {
+      inviteSync();
+      if (!inv.net || !inv.net.isOpen()) { var n = 0, iv = setInterval(function () { n++; if (inv.net && inv.net.isOpen()) { clearInterval(iv); go(); } else if (n > 20) { clearInterval(iv); no(new Error('net')); } }, 400); } else go();
+      function go() { var key = msg.t; pushWait[key] = { ok: ok, t: setTimeout(function () { delete pushWait[key]; no(new Error('timeout')); }, 9000) }; inv.net.send(msg); }
+    });
+  }
+  function pushAuthed(msg) { return Auth.accessToken().then(function (tk) { return pushCall(Object.assign({ jwt: tk }, msg)); }); }
+  function pushPing(msg) { try { if (!Auth || !Auth.user || !inv.net || !inv.net.isOpen()) return; Auth.accessToken().then(function (tk) { if (tk && inv.net && inv.net.isOpen()) inv.net.send(Object.assign({ jwt: tk }, msg)); }); } catch (e) {} }
+  function pushB64(s) { var p = '='.repeat((4 - s.length % 4) % 4), b = (s + p).replace(/-/g, '+').replace(/_/g, '/'), r = atob(b), o = new Uint8Array(r.length); for (var i = 0; i < r.length; i++) o[i] = r.charCodeAt(i); return o; }
+  function pushSub() { return navigator.serviceWorker.ready.then(function (reg) { return reg.pushManager.getSubscription(); }); }
+  function pushMsg(txt, bad) { var m = $('pushMsg'); if (m) { m.textContent = txt || ''; m.classList.toggle('bad', !!bad); } }
+  function pushRender() {
+    var box = $('ntPush'); if (!box) return;
+    if (!pushSupported()) { box.hidden = false; $('pushBtn').hidden = true; $('pushKinds').hidden = true; pushMsg(t(pushIsIos() && !pushStandalone() ? 'push.ios' : 'push.unsupported')); return; }
+    box.hidden = false; $('pushBtn').hidden = false;
+    if (Notification.permission === 'denied') { $('pushBtn').hidden = true; $('pushKinds').hidden = true; pushMsg(t('push.denied'), true); return; }
+    pushSub().then(function (sub) {
+      var on = !!sub && Notification.permission === 'granted';
+      $('pushBtn').textContent = t(on ? 'push.disable' : 'push.enable'); $('pushBtn').classList.toggle('primary', !on); $('pushBtn').dataset.on = on ? '1' : '';
+      $('pushKinds').hidden = !on; var p = pushPrefs();
+      Array.prototype.forEach.call($('pushKinds').querySelectorAll('input[data-k]'), function (c) { c.checked = p[c.dataset.k] !== false; });
+      pushMsg(on ? t('push.on') : (pushIsIos() && !pushStandalone() ? t('push.ios') : t('push.sub')));
+    }, function () {});
+  }
+  function pushEnable() {
+    if (!socialOk()) { pushMsg(t('push.login'), true); return; }
+    pushMsg(t('push.working'));
+    Notification.requestPermission().then(function (perm) {
+      if (perm !== 'granted') { pushRender(); return; }
+      return pushCall({ t: 'pushKey' }).then(function (k) {
+        if (!k.enabled || !k.key) { pushMsg(t('push.srvOff'), true); return; }
+        return navigator.serviceWorker.ready.then(function (reg) { return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: pushB64(k.key) }); }).then(function (sub) {
+          return pushAuthed({ t: 'pushSub', sub: sub.toJSON(), prefs: pushPrefs(), ua: navigator.userAgent }).then(function (r) { if (!r.ok) { sub.unsubscribe(); pushMsg(t('push.err'), true); } else { pushRender(); } });
+        });
+      });
+    }).catch(function () { pushMsg(t('push.err'), true); });
+  }
+  function pushDisable() {
+    pushSub().then(function (sub) { if (!sub) return; var ep = sub.endpoint; return sub.unsubscribe().then(function () { return pushAuthed({ t: 'pushOff', endpoint: ep }).catch(function () {}); }); }).then(pushRender, pushRender);
+  }
+  $('pushBtn').addEventListener('click', function () { if (this.dataset.on) pushDisable(); else pushEnable(); });
+  Array.prototype.forEach.call($('pushKinds').querySelectorAll('input[data-k]'), function (c) {
+    c.addEventListener('change', function () {
+      var p = pushPrefs(); p[c.dataset.k] = c.checked; try { localStorage.setItem(PUSH_PREFS_KEY, JSON.stringify(p)); } catch (e) {}
+      pushSub().then(function (sub) { if (sub) pushAuthed({ t: 'pushPrefs', endpoint: sub.endpoint, prefs: p }).catch(function () {}); });
+    });
+  });
+  function pushResync() {                                          // si ya estaba activado, se vuelve a registrar en el servidor (por si se perdió o cambió la dirección)
+    if (!pushSupported() || Notification.permission !== 'granted' || !socialOk()) return;
+    pushSub().then(function (sub) { if (sub) return pushAuthed({ t: 'pushSub', sub: sub.toJSON(), prefs: pushPrefs(), ua: navigator.userAgent }); }).catch(function () {});
+  }
+  setTimeout(function () { var n = 0, iv = setInterval(function () { n++; if (socialOk()) { clearInterval(iv); setTimeout(pushResync, 3000); } else if (n > 25) clearInterval(iv); }, 1500); }, 0);
+  setTimeout(function () {                                         // al mandar una solicitud de amistad o avisar un comentario revisado, el servidor le manda el aviso al celular de la otra persona
+    if (!Auth) return;
+    var fr = Auth.friendRequest, fn = Auth.feedbackNotify;
+    Auth.friendRequest = function (name) { return fr.apply(Auth, arguments).then(function (r) { if (r === 'sent') pushPing({ t: 'pushFriend', name: String(name || '') }); return r; }); };
+    Auth.feedbackNotify = function (id) { return fn.apply(Auth, arguments).then(function (r) { pushPing({ t: 'pushFb', id: Number(id) }); return r; }); };
+  }, 0);
+  function pushDeep(url) {                                         // se tocó un aviso con la app ya abierta
+    try {
+      var u = new URL(url, location.href), q = u.searchParams, code = (q.get('sala') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5), tc = q.get('t');
+      if (code.length === 5) { $('onCode').value = code; onlineMsg(''); open('onlineOverlay'); accOpenJoin(); }
+      else if (tc) { open('tnOverlay'); tnoJoinCode(tc); }
+      else if (q.get('notis')) { $('btnNotif').click(); }
+    } catch (e) {}
+  }
+  if ('serviceWorker' in navigator) { try { navigator.serviceWorker.addEventListener('message', function (e) { if (e.data && e.data.t === 'open' && e.data.url) pushDeep(e.data.url); }); } catch (e) {} }
+  if (/[?&]notis=/.test(location.search)) { try { history.replaceState(null, '', location.href.replace(/([?&])notis=[^&#]*&?/, '$1').replace(/[?&]$/, '')); } catch (e) {} setTimeout(function () { $('btnNotif').click(); }, 900); }
   function challengeOpen(p) {
     if (!p || !p.id) return; ch = { id: p.id, name: p.name };
     $('chTitle').textContent = t('ch.title', { name: p.name });
@@ -13723,7 +13814,7 @@ window.NEON_BREAK = {
   }
   function inviteResult(m) {
     var iv = online.invite; if (!iv) return; online.invite = null;
-    $('waitMsg').textContent = m.ok ? t('ch.sent', { name: iv.name }) : t(m.reason === 'offline' ? 'ch.offline' : m.reason === 'notfriends' ? 'ch.notfriends' : 'ch.err', { name: iv.name });
+    $('waitMsg').textContent = m.ok ? t(m.pushed ? 'ch.pushed' : 'ch.sent', { name: iv.name }) : t(m.reason === 'offline' ? 'ch.offline' : m.reason === 'notfriends' ? 'ch.notfriends' : 'ch.err', { name: iv.name });
   }
 
   /* ---------- Flecha de volver (arriba a la izquierda) y botón "atrás" del navegador/celu ---------- */
