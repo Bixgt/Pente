@@ -457,6 +457,93 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
 .acc-head[aria-expanded="true"] .acc-chev { transform: rotate(-135deg); margin-bottom: -3px; }
 .acc-body { padding: 2px 14px 14px; }
 .acc-body[hidden] { display: none; }
+
+/* ---- Opciones de partida: tarjetas ---- */
+#localOverlay .screen-body { width: min(100%, 980px); }
+#localOverlay .opt-head { display: flex; align-items: center; gap: 14px; margin: 4px 0 14px; }
+#localOverlay .opt-head h2 { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(26px, 4vw, 36px); margin: 0; }
+#localOverlay .opt-head .sub { margin: 2px 0 0; }
+#localOverlay .opt-gear { flex: none; width: 54px; height: 54px; display: grid; place-items: center; font-size: 34px; color: var(--accent); border-radius: 16px; background: var(--panel); border: 1px solid var(--line); }
+#localOverlay .opt-grid { display: grid; grid-template-columns: 1fr; gap: 14px; align-items: start; }
+#localOverlay .oc-sub { margin-top: 12px; }
+#localOverlay .oc-sub label.lbl { display: block; margin: 0 0 6px; font-size: 14px; }
+#localOverlay .oc-sub input { width: 100%; }
+#localOverlay .acc, #localOverlay .acc-body { display: contents; }
+#localOverlay .acc-head { display: none; }
+#localOverlay .acc-body[hidden] { display: contents; }
+#localOverlay .opt-grid > [hidden], #localOverlay .opt-grid [data-mode][hidden], #localOverlay .opt-grid .l2only[hidden] { display: none !important; }
+#localOverlay .opt-grid .oc-players, #localOverlay .oc-comp, #localOverlay .oc-modes, #localOverlay .oc-bot, #localOverlay .oc-four, #localOverlay .rules-card { margin: 0; padding: 14px 16px 16px; border-radius: 18px; background: linear-gradient(180deg, var(--panel), var(--panel-2)); border: 1px solid var(--line); box-shadow: 0 8px 22px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.05); }
+#localOverlay .opt-grid .lbl, #localOverlay .oc-title { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; font-family: Georgia, 'Times New Roman', serif; font-size: 19px; font-weight: 700; color: var(--text); }
+#localOverlay .oc-players > .lbl::before { content: '👥'; } #localOverlay .oc-modes > .lbl::before { content: '🎮'; }
+#localOverlay .oc-comp > .lbl::before { content: '🤖'; } #localOverlay .oc-bot > .lbl::before { content: '🎯'; }
+#localOverlay .oc-title::before { content: '🎚️'; }
+#localOverlay .opt-grid .seg-opt { border-radius: 14px; min-height: 52px; transition: transform .08s, box-shadow .15s, background .15s; }
+#localOverlay .opt-grid .seg-opt[aria-pressed="true"] { background: linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 72%, #000)); color: #1a1205; border-color: color-mix(in srgb, var(--accent) 80%, #fff); box-shadow: 0 0 0 1px rgba(255,255,255,.18) inset, 0 6px 16px color-mix(in srgb, var(--accent) 35%, transparent); }
+#localOverlay .rules-card { display: grid; gap: 4px 18px; grid-template-columns: 1fr; }
+#localOverlay .rules-card .oc-title { grid-column: 1 / -1; }
+#localOverlay .rules-card .check { margin: 8px 0; padding: 10px 12px; border-radius: 12px; background: var(--bg); border: 1px solid var(--line); }
+#localOverlay .rules-card .oc-size { margin: 0; padding: 0; }
+#localOverlay .rules-card .oc-size > .lbl { font-size: 15px; margin-bottom: 8px; }
+#localOverlay .rules-card .oc-size > .lbl::before { content: '⏱'; }
+#localOverlay .btns { flex-direction: row; justify-content: center; align-items: center; margin-top: 20px; }
+#localOverlay #btnStart { order: 1; width: min(100%, 420px); flex: none; min-height: 58px; font-size: 19px; border-radius: 999px; background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 88%, #fff), var(--accent)); color: #1a1205; box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 40%, transparent); }
+#localOverlay #btnStart::before { content: '▶'; margin-right: 10px; font-size: 16px; }
+#localOverlay #btnLocalBack { order: 2; border-radius: 999px; min-height: 58px; }
+@media (min-width: 900px) {
+  #localOverlay .opt-grid { grid-template-columns: 1fr 1fr; }
+  #localOverlay .oc-players { grid-column: 1; grid-row: 1; } #localOverlay .oc-comp { grid-column: 1; grid-row: 2; } #localOverlay .oc-modes { grid-column: 2; grid-row: 1 / span 2; }
+  #localOverlay .oc-four, #localOverlay .rules-card { grid-column: 1 / -1; }
+  #localOverlay .rules-card { grid-template-columns: 1fr 1fr 230px; align-items: start; }
+  #localOverlay .rules-card .oc-size { grid-column: 3; grid-row: 2 / span 3; padding: 12px; border-radius: 14px; background: var(--bg); border: 1px solid var(--line); }
+}
+/* ---- Opciones de partida · versión vitrina (más cerca de la referencia) ---- */
+#localOverlay { background: radial-gradient(1200px 500px at 85% -10%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 60%), radial-gradient(900px 500px at 0% 105%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 60%), var(--bg); }
+#localOverlay::before, #localOverlay::after { content: ''; position: fixed; pointer-events: none; width: 260px; height: 220px; opacity: .55; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 220'%3E%3Cg fill='none' stroke='%23c9974a' stroke-width='1.4' opacity='.8'%3E%3Cpath d='M10 210 C80 150 150 90 250 20'/%3E%3C/g%3E%3Cg fill='%23c9974a'%3E%3Cpath opacity='.55' d='M60 170 q10-40 45-50 q-5 38-45 50z'/%3E%3Cpath opacity='.7' d='M95 140 q14-38 52-42 q-8 36-52 42z'/%3E%3Cpath opacity='.5' d='M130 112 q18-34 58-34 q-12 34-58 34z'/%3E%3Cpath opacity='.65' d='M170 80 q22-28 62-24 q-16 30-62 24z'/%3E%3Cpath opacity='.45' d='M80 175 q-22-24-18-62 q28 24 18 62z'/%3E%3Cpath opacity='.5' d='M125 140 q-18-28-10-62 q24 28 10 62z'/%3E%3Cpath opacity='.45' d='M170 108 q-14-26-4-58 q20 26 4 58z'/%3E%3C/g%3E%3C/svg%3E") no-repeat center / contain; z-index: 0; }
+#localOverlay::before { top: 0; right: 0; transform: scaleY(-1); }
+#localOverlay::after { bottom: 0; left: 0; transform: scaleX(-1); }
+#localOverlay .screen-body { position: relative; z-index: 1; width: min(100%, 1020px); }
+#localOverlay .opt-head { gap: 18px; margin: 6px 0 18px; }
+#localOverlay .opt-head > div { flex: 1; position: relative; }
+#localOverlay .opt-head > div::after { content: ''; position: absolute; left: 62%; right: 0; top: 34%; height: 1px; background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 70%, transparent), transparent); }
+#localOverlay .opt-gear { width: auto; height: auto; border: 0; font-size: 64px; line-height: 1; background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 80%, #fff), color-mix(in srgb, var(--accent) 70%, #000)); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 4px 10px color-mix(in srgb, var(--accent) 30%, transparent)); }
+#localOverlay .opt-head h2 { color: color-mix(in srgb, var(--accent) 35%, #fff); text-shadow: 0 2px 14px color-mix(in srgb, var(--accent) 25%, transparent); letter-spacing: .01em; }
+#localOverlay .opt-grid { align-items: stretch; gap: 16px; }
+#localOverlay .opt-grid .oc-players, #localOverlay .oc-comp, #localOverlay .oc-modes, #localOverlay .oc-bot, #localOverlay .oc-four, #localOverlay .rules-card { border-radius: 22px; border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line)); background: linear-gradient(180deg, color-mix(in srgb, var(--panel) 92%, #fff 3%), var(--panel-2)); box-shadow: 0 10px 28px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.06); padding: 18px 20px 20px; }
+#localOverlay .opt-grid .lbl, #localOverlay .oc-title { font-size: 21px; color: color-mix(in srgb, var(--accent) 22%, var(--text)); margin-bottom: 14px; }
+#localOverlay .oc-players > .lbl::before, #localOverlay .oc-modes > .lbl::before, #localOverlay .oc-comp > .lbl::before, #localOverlay .oc-bot > .lbl::before, #localOverlay .oc-title::before { font-size: 24px; filter: sepia(1) saturate(2.2) hue-rotate(-12deg) brightness(1.05); }
+#localOverlay .oc-sub .lbl { font-size: 15px; margin: 14px 0 8px; font-family: inherit; color: var(--muted); font-weight: 600; }
+#localOverlay .oc-sub .lbl::before { content: none; }
+#localOverlay .oc-sub > label.lbl { display: block; }
+#localOverlay .oc-players { display: flex; flex-direction: column; } #localOverlay .oc-players[hidden] { display: none; }
+#localOverlay #localPlayers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; flex: 1; }
+#localOverlay #localPlayers .seg-opt { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 120px; font-size: 14px; line-height: 1.2; }
+#localOverlay #localPlayers .seg-opt::before { font-size: 30px; line-height: 1; }
+#localOverlay #localPlayers [data-pl="2"]::before { content: '👥'; } #localOverlay #localPlayers [data-pl="4"]::before { content: '👥👥'; font-size: 22px; } #localOverlay #localPlayers [data-pl="5"]::before { content: '👥👥👥'; font-size: 17px; }
+#localOverlay .modePicker .seg-opt { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 56px; }
+#localOverlay .modePicker [data-gm="classic"]::before { content: '🏆'; } #localOverlay .modePicker [data-gm="triples"]::before { content: '🔺'; } #localOverlay .modePicker [data-gm="gomoku"]::before { content: '#'; font-weight: 900; font-size: 22px; }
+#localOverlay #localMode { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+#localOverlay #localMode .seg-opt { display: flex; align-items: center; justify-content: center; gap: 10px; }
+#localOverlay #localMode [data-val="person"]::before { content: '👤'; } #localOverlay #localMode [data-val="ai"]::before { content: '🤖'; }
+#localOverlay .opt-grid .seg-opt { background: color-mix(in srgb, var(--bg) 82%, #000); border: 1.5px solid color-mix(in srgb, var(--accent) 16%, var(--line)); }
+#localOverlay .opt-grid .seg-opt[aria-pressed="true"] { background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 92%, #fff), color-mix(in srgb, var(--accent) 78%, #000)); color: #1a1205; border-color: color-mix(in srgb, var(--accent) 70%, #fff); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent), 0 8px 20px color-mix(in srgb, var(--accent) 38%, transparent); }
+#localOverlay .rules-card .check input { appearance: none; -webkit-appearance: none; width: 28px; height: 28px; border-radius: 8px; border: 1.5px solid color-mix(in srgb, var(--accent) 60%, var(--line)); background: color-mix(in srgb, var(--bg) 80%, #000); display: grid; place-items: center; margin-top: 0; cursor: pointer; }
+#localOverlay .rules-card .check input:checked { background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 92%, #fff), color-mix(in srgb, var(--accent) 75%, #000)); border-color: color-mix(in srgb, var(--accent) 70%, #fff); }
+#localOverlay .rules-card .check input:checked::after { content: '✓'; color: #1a1205; font-weight: 900; font-size: 18px; line-height: 1; }
+#localOverlay .rules-card .check { align-items: center; background: color-mix(in srgb, var(--bg) 70%, transparent); border-color: color-mix(in srgb, var(--accent) 14%, var(--line)); }
+#localOverlay .rules-card .check > span > span { font-size: 16px; font-weight: 600; }
+#localOverlay .rules-card .oc-size { text-align: center; background: linear-gradient(180deg, color-mix(in srgb, var(--panel) 90%, #fff 4%), var(--panel-2)); border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line)); border-radius: 18px; }
+#localOverlay .rules-card .oc-size > .lbl { flex-direction: column; justify-content: center; gap: 6px; font-family: inherit; font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+#localOverlay .rules-card .oc-size > .lbl::before { font-size: 34px; filter: sepia(1) saturate(2.2) hue-rotate(-12deg); }
+@media (min-width: 900px) {
+  #localOverlay .oc-players { grid-column: 1; grid-row: 1; } #localOverlay .oc-modes { grid-column: 2; grid-row: 1; } #localOverlay .oc-comp { grid-column: 1; grid-row: 2; } #localOverlay .oc-bot { grid-column: 2; grid-row: 2; }
+  #localOverlay .rules-card { grid-template-columns: 1fr 1fr 240px; }
+  #localOverlay .rules-card .check:nth-of-type(1) { grid-column: 1; grid-row: 2; } #localOverlay .rules-card .check:nth-of-type(2) { grid-column: 1; grid-row: 3; } #localOverlay .rules-card .check:nth-of-type(3) { grid-column: 2; grid-row: 2; }
+  #localOverlay .rules-card .oc-size { grid-column: 3; grid-row: 2 / span 3; }
+}
+#localOverlay .btns { display: flex; width: 100%; }
+@media (min-width: 900px) { #localOverlay #btnLocalBack { display: none; } }
+@media (max-width: 899px) { #localOverlay .rules-card .oc-size { order: 9; margin-top: 8px; } }
+@media (max-width: 899px) { #localOverlay .btns { flex-direction: column-reverse; } #localOverlay #btnStart, #localOverlay #btnLocalBack { width: 100%; } }
 .acc-inner { background: var(--bg); }
 .acc-link { padding: 0; cursor: pointer; color: inherit; font: inherit; }
 .acc-link .acc-chev { transform: rotate(-45deg); margin-bottom: 0; }
@@ -1667,37 +1754,42 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
 <!-- Partida local -->
 <div class="overlay screen" id="localOverlay">
   <div class="screen-body">
-    <h2 data-i18n="local.title"></h2>
-    <p class="sub" data-i18n="local.sub"></p>
-    <div class="field"><span class="lbl" data-i18n="four.pick"></span>
+    <div class="opt-head"><span class="opt-gear" aria-hidden="true">⚙</span><div><h2 data-i18n="local.title"></h2>
+    <p class="sub" data-i18n="local.sub"></p></div></div>
+    <div class="opt-grid">
+    <div class="field oc-players"><span class="lbl" data-i18n="four.pick"></span>
       <div class="seg" id="localPlayers" role="group"><button type="button" class="seg-opt" data-pl="2" data-i18n="four.p2"></button><button type="button" class="seg-opt" data-pl="4" data-i18n="four.p4"></button><button type="button" class="seg-opt" data-pl="5" data-i18n="four.p5"></button></div></div>
-    <div id="loc4" hidden>
+    <div id="loc4" class="oc-four" hidden>
       <p class="hint" data-i18n="four.localHint"></p>
       <div class="l4rows" id="l4rows"></div>
       <div class="field" id="l4LevelBox"><span class="lbl" data-i18n="ai.level"></span>
         <div class="seg seg4" id="l4Level" role="group"><button type="button" class="seg-opt" data-val="beginner" data-i18n="ai.beginner"></button><button type="button" class="seg-opt" data-val="easy" data-i18n="ai.easy"></button><button type="button" class="seg-opt" data-val="medium" data-i18n="ai.medium"></button><button type="button" class="seg-opt" data-val="hard" data-i18n="ai.hard"></button></div></div>
     </div>
-    <div class="field"><span class="lbl" data-i18n="mode.pick"></span>
+    <div class="field oc-modes"><span class="lbl" data-i18n="mode.pick"></span>
       <div class="modes modePicker" role="group"><button type="button" class="seg-opt" data-gm="classic" data-i18n="mode.classic"></button><button type="button" class="seg-opt" data-gm="triples" data-i18n="mode.triples"></button><button type="button" class="seg-opt" data-gm="gomoku" data-i18n="mode.gomoku"></button><button type="button" class="seg-opt" data-gm="blitz" data-i18n="mode.blitz"></button><button type="button" class="seg-opt" data-gm="bullet" data-i18n="mode.bullet"></button></div>
       <p class="hint modeHint"></p></div>
-    <div class="field l2only"><span class="lbl" data-i18n="local.mode"></span>
-      <div class="seg" id="localMode" role="group"><button type="button" class="seg-opt" data-val="person" data-i18n="local.modePerson"></button><button type="button" class="seg-opt" data-val="ai" data-i18n="local.modeAI"></button></div></div>
-    <div class="field l2only"><label class="lbl" for="name1" data-i18n="menu.p1"></label><input type="text" id="name1" maxlength="18" autocomplete="off"></div>
-    <div class="field l2only" data-mode="person"><label class="lbl" for="name2" data-i18n="menu.p2"></label><input type="text" id="name2" maxlength="18" autocomplete="off"></div>
+    <div class="field l2only oc-comp"><span class="lbl" data-i18n="local.mode"></span>
+      <div class="seg" id="localMode" role="group"><button type="button" class="seg-opt" data-val="person" data-i18n="local.modePerson"></button><button type="button" class="seg-opt" data-val="ai" data-i18n="local.modeAI"></button></div>
+    <div class="oc-sub"><label class="lbl" for="name1" data-i18n="menu.p1"></label><input type="text" id="name1" maxlength="18" autocomplete="off"></div>
+    <div class="oc-sub" data-mode="person"><label class="lbl" for="name2" data-i18n="menu.p2"></label><input type="text" id="name2" maxlength="18" autocomplete="off"></div>
+    <div class="oc-sub" data-mode="ai"><span class="lbl" data-i18n="ai.side"></span>
+      <div class="seg" id="aiSide" role="group"><button type="button" class="seg-opt" data-val="swap" data-i18n="ai.sideSwap"></button><button type="button" class="seg-opt" data-val="first" data-i18n="ai.sideFirst"></button><button type="button" class="seg-opt" data-val="second" data-i18n="ai.sideSecond"></button><button type="button" class="seg-opt" data-val="random" data-i18n="ai.sideRandom"></button></div></div>
+    </div>
     <section class="acc" id="accLocal">
       <button type="button" class="acc-head" aria-expanded="false" aria-controls="accLocalBody"><span data-i18n="acc.opts"></span><span class="acc-sum" id="accLocalSum"></span><span class="acc-chev" aria-hidden="true"></span></button>
       <div class="acc-body" id="accLocalBody" hidden>
-    <div class="field" data-mode="ai"><span class="lbl" data-i18n="ai.level"></span>
+    <div class="field oc-bot" data-mode="ai"><span class="lbl" data-i18n="ai.level"></span>
       <div class="seg seg4" id="aiLevel" role="group"><button type="button" class="seg-opt" data-val="beginner" data-i18n="ai.beginner"></button><button type="button" class="seg-opt" data-val="easy" data-i18n="ai.easy"></button><button type="button" class="seg-opt" data-val="medium" data-i18n="ai.medium"></button><button type="button" class="seg-opt" data-val="hard" data-i18n="ai.hard"></button><button type="button" class="seg-opt seg-wide" data-val="goody" data-i18n="ai.goody"></button></div>
       <p class="hint" id="aiLevelHint"></p></div>
-    <div class="field" data-mode="ai"><span class="lbl" data-i18n="ai.side"></span>
-      <div class="seg" id="aiSide" role="group"><button type="button" class="seg-opt" data-val="swap" data-i18n="ai.sideSwap"></button><button type="button" class="seg-opt" data-val="first" data-i18n="ai.sideFirst"></button><button type="button" class="seg-opt" data-val="second" data-i18n="ai.sideSecond"></button><button type="button" class="seg-opt" data-val="random" data-i18n="ai.sideRandom"></button></div></div>
-    <div class="field"><span class="lbl" data-i18n="menu.size"></span><div class="seg sizePicker" role="group"><div class="size-col"><button type="button" class="seg-opt" data-size="13" data-i18n="menu.size13"></button><small class="size-sub" data-i18n="size.sub13"></small></div><div class="size-col"><button type="button" class="seg-opt" data-size="19" data-i18n="menu.size19"></button><small class="size-sub" data-i18n="size.sub19"></small></div></div></div>
+    <div class="rules-card"><h3 class="oc-title" data-i18n="opt.rules"></h3>
+    <div class="field oc-size"><span class="lbl" data-i18n="menu.size"></span><div class="seg sizePicker" role="group"><div class="size-col"><button type="button" class="seg-opt" data-size="13" data-i18n="menu.size13"></button><small class="size-sub" data-i18n="size.sub13"></small></div><div class="size-col"><button type="button" class="seg-opt" data-size="19" data-i18n="menu.size19"></button><small class="size-sub" data-i18n="size.sub19"></small></div></div></div>
     <label class="check"><input type="checkbox" data-opt="tournamentRule" checked><span><span data-i18n="menu.tournamentRule"></span><small data-i18n="menu.tournamentRuleHint"></small></span></label>
     <label class="check"><input type="checkbox" data-opt="exactFive"><span><span data-i18n="menu.exactFive"></span><small data-i18n="menu.exactFiveHint"></small></span></label>
     <label class="check"><input type="checkbox" data-opt="timer" checked><span><span data-i18n="menu.timer"></span><small data-i18n="menu.timerHint"></small></span></label>
+    </div>
       </div>
     </section>
+    </div>
     <div class="btns">
       <button class="btn primary" id="btnStart" data-i18n="menu.start"></button>
       <button class="btn" id="btnLocalBack" data-i18n="menu.back"></button>
@@ -5494,8 +5586,9 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'err.NOT_IN_ROOM': 'No estás en una sala.',
       'err.BAD_REQUEST': 'Algo salió mal. Probá de nuevo.',
       'menu.local': 'Local',
-      'local.title': 'Partida local',
-      'local.sub': 'Contra otra persona o contra un bot.',
+      'local.title': 'Opciones de partida',
+      'opt.rules': 'Reglas y ajustes avanzados',
+      'local.sub': 'Personalizá la experiencia a tu gusto.',
       'local.mode': 'Contra quién',
       'local.modePerson': 'Otra persona',
       'local.modeAI': 'La máquina',
@@ -5825,8 +5918,9 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'err.NOT_IN_ROOM': 'You\'re not in a room.',
       'err.BAD_REQUEST': 'Something went wrong. Try again.',
       'menu.local': 'Local',
-      'local.title': 'Local game',
-      'local.sub': 'On this device: against another person or against the machine (no internet needed).',
+      'local.title': 'Game options',
+      'opt.rules': 'Rules and advanced settings',
+      'local.sub': 'Set it up your way: against a person or a bot, on this device.',
       'local.mode': 'Against',
       'local.modePerson': 'Another person',
       'local.modeAI': 'The machine',
