@@ -615,6 +615,16 @@ html[data-theme="galaxia"] { --spr: hue-rotate(151deg); }
 .menu-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
 .menu-top-l { display: flex; gap: 10px; }
 .sq { position: relative; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; background: var(--panel); border: 2px solid var(--line); border-radius: 14px; color: var(--text); cursor: pointer; padding: 0; }
+.sq-n { position: absolute; top: -7px; right: -7px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--danger); color: #fff; font-size: 12px; line-height: 20px; text-align: center; font-weight: 800; box-shadow: 0 0 0 2px var(--bg, #000); }
+.sq-n[hidden] { display: none; }
+.nt-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel-2); margin: 8px 0; }
+.nt-main { display: flex; align-items: center; gap: 10px; flex: 1 1 200px; min-width: 0; }
+.nt-av:empty { display: none; }
+.nt-av { flex: none; display: inline-flex; width: 34px; height: 34px; }
+.nt-tx { min-width: 0; display: flex; flex-direction: column; }
+.nt-tx b { overflow-wrap: anywhere; }
+.nt-tx small { color: var(--muted, #9aa); }
+.nt-btns { display: flex; gap: 6px; flex: none; margin-left: auto; }
 .sq:hover, .sq:focus-visible { border-color: var(--accent); }
 .sq:active { transform: translateY(1px); }
 .sq-av { font-size: 30px; line-height: 1; }
@@ -1611,6 +1621,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       <div class="menu-top-l">
         <button type="button" class="sq" id="btnSettings" data-i18n-aria="menu.settings" data-i18n-title="menu.settings"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
         <button type="button" class="sq" id="btnLang" data-i18n-aria="menu.language"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg><span class="sq-tag" id="langTag"></span></button>
+        <button type="button" class="sq" id="btnNotif" data-i18n-title="nt.title"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15z"/><path d="M10 21h4"/></svg><b class="sq-n" id="ntBadge" hidden></b></button>
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
@@ -2109,6 +2120,16 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
   <div class="modal dlg" role="alertdialog" aria-modal="true" aria-labelledby="dlgMsg">
     <p id="dlgMsg"></p>
     <div class="dlg-btns"><button type="button" class="btn" id="dlgNo"></button><button type="button" class="btn primary" id="dlgYes"></button></div>
+  </div>
+</div>
+
+<!-- Notificaciones -->
+<div class="overlay screen" id="notifOverlay">
+  <div class="screen-body">
+    <h2 data-i18n="nt.title"></h2>
+    <p class="sub" data-i18n="nt.sub"></p>
+    <div id="ntList"></div>
+    <div class="btns"><button class="btn" id="ntClear" hidden data-i18n="nt.clear"></button><button class="btn primary" id="btnNotifBack" data-i18n="menu.back"></button></div>
   </div>
 </div>
 
@@ -5698,6 +5719,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'rooms.play': 'Jugar',
       'rooms.watch': 'Mirar',
       'rooms.back': 'Volver a tu partida',
+      'nt.title': 'Notificaciones', 'nt.sub': 'Retos, amistades e invitaciones a torneos quedan acá hasta que los borres o dejen de estar disponibles.', 'nt.empty': 'No tenés nada pendiente.', 'nt.friend': 'Quiere ser tu amigo/a', 'nt.seek': '{name} busca rival', 'nt.join': 'Unirme', 'nt.view': 'Ver torneo', 'nt.dismiss': 'Borrar', 'nt.clear': 'Borrar todo', 'nt.now': 'recién', 'nt.min': 'hace {n} min', 'nt.hr': 'hace {n} h',
       'rooms.backRoom': 'Volver a tu sala',
       'spec.badge': 'Mirando la sala {code} · {n} mirando',
       'spec.watchers': '👁 {n} mirando: {names}',
@@ -6033,6 +6055,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'rooms.play': 'Play',
       'rooms.watch': 'Watch',
       'rooms.back': 'Back to your game',
+      'nt.title': 'Notifications', 'nt.sub': 'Challenges, friend requests and tournament invites stay here until you delete them or they are no longer available.', 'nt.empty': 'Nothing pending.', 'nt.friend': 'Wants to be your friend', 'nt.seek': '{name} is looking for an opponent', 'nt.join': 'Join', 'nt.view': 'View tournament', 'nt.dismiss': 'Delete', 'nt.clear': 'Delete all', 'nt.now': 'just now', 'nt.min': '{n} min ago', 'nt.hr': '{n} h ago',
       'rooms.backRoom': 'Back to your room',
       'spec.badge': 'Watching room {code} · {n} watching',
       'spec.watchers': '👁 {n} watching: {names}',
@@ -13216,6 +13239,7 @@ window.NEON_BREAK = {
   function onNetError(m) {
     online.awaiting = false;
     var txt = t(m.code === 'ILLEGAL' ? 'err.' + m.detail : 'err.' + m.code);
+    if (online.intent && online.intent.t === 'join' && (m.code === 'ROOM_NOT_FOUND' || m.code === 'ROOM_FULL' || m.code === 'ROOM_OWN')) ntDelCode(online.intent.code);
     if (online.lastTry && (m.code === 'BAD_TOKEN' || m.code === 'ROOM_NOT_FOUND')) { setLastGame(null); online.lastTry = false; }
     if (rooms.open && (m.code === 'CHAT_RATE' || m.code === 'LINK_BLOCKED')) { lobbyNote(txt); return; }
     if (m.code === 'CHAT_RATE') { chatNote(txt); return; }
@@ -13486,14 +13510,16 @@ window.NEON_BREAK = {
     var url = serverUrl(), ok = !!(socialOk() && url);
     if (!ok) { if (inv.net) { inv.net.close(); inv.net = null; } return; }
     if (inv.net) return;
-    inv.net = window.PenteNet.connect(url, { onState: function () {}, onOpen: inviteHi, onMessage: onInviteMessage });
+    inv.net = window.PenteNet.connect(url, { onState: function () {}, onOpen: function () { inviteHi(); setTimeout(ntCheck, 800); }, onMessage: onInviteMessage });
   }
   setInterval(inviteSync, 20000); setTimeout(inviteSync, 4000);
   function invRules(o) { o = o || {}; var mode = o.bullet ? 'bullet' : o.blitz ? 'blitz' : o.variant || 'classic'; return t('mode.' + mode) + ' · ' + (o.size || 13) + '×' + (o.size || 13); }
   function onInviteMessage(m) {
+    if (m && m.t === 'chkRes') { ntOnCheck(m); return; }
     if (m && m.t === 'looking') { onLooking(m); return; }
     if (m && m.t === 'tinvite') { onTInvite(m); return; }
     if (!m || m.t !== 'invite' || !m.code || !m.from) return;
+    ntAdd('invite', m);
     if (online.active || daily.active || tut.active || lab.active) { if (inv.net) inv.net.send({ t: 'inviteNo', code: m.code, name: myName(), reason: 'busy' }); return; }
     inv.cur = m;
     $('invTitle').innerHTML = (m.from.avatar ? avInline(m.from.avatar, 28) + ' ' : '') + (flagText(m.from.country) ? '<span class="flag">' + flagText(m.from.country) + '</span>' : '') + esc(t('inv.title', { name: m.from.name }));
@@ -13501,12 +13527,94 @@ window.NEON_BREAK = {
     $('inviteOverlay').classList.add('open'); $('invYes').focus();
     try { sfx('levelup'); } catch (e) {}
   }
-  $('invNo').addEventListener('click', function () { $('inviteOverlay').classList.remove('open'); if (inv.cur && inv.cur.t === 'tinvite') { inv.cur = null; return; } if (inv.cur && inv.net) inv.net.send({ t: 'inviteNo', code: inv.cur.code, name: myName() }); inv.cur = null; });
+  $('invNo').addEventListener('click', function () { $('inviteOverlay').classList.remove('open'); if (inv.cur) ntDelCode(inv.cur.code); if (inv.cur && inv.cur.t === 'tinvite') { inv.cur = null; return; } if (inv.cur && inv.net) inv.net.send({ t: 'inviteNo', code: inv.cur.code, name: myName() }); inv.cur = null; });
   $('invYes').addEventListener('click', function () {
-    $('inviteOverlay').classList.remove('open'); var m = inv.cur; inv.cur = null; if (!m) return;
+    $('inviteOverlay').classList.remove('open'); var m = inv.cur; inv.cur = null; if (!m) return; ntDelCode(m.code);
     if (m.t === 'tinvite') { tnoJoinCode(m.code); return; }
     $('btnSpectateOffer').hidden = true; startOnline({ t: 'join', code: m.code });
   });
+
+  /* ---------- Casilla de notificaciones ----------
+   * Retos, búsquedas de rival e invitaciones a torneos aparecen arriba como siempre y además quedan guardados acá hasta que los borres
+   * o hasta que la sala deje de estar disponible. Las solicitudes de amistad pendientes se leen en vivo de la lista de amigos. */
+  var NT_KEY = 'pente.inbox', nt = { list: [], pend: 0 };
+  function ntLoad() { try { var a = JSON.parse(localStorage.getItem(NT_KEY) || '[]'); nt.list = Array.isArray(a) ? a.filter(function (x) { return x && x.id && x.k && x.m && x.m.code; }) : []; } catch (e) { nt.list = []; } }
+  function ntSave() { try { localStorage.setItem(NT_KEY, JSON.stringify(nt.list)); } catch (e) {} }
+  function ntLive() {
+    var now = Date.now(), n0 = nt.list.length;
+    nt.list = nt.list.filter(function (x) { return now - x.at < (x.k === 'tinvite' ? 12 : 3) * 3600 * 1000; });
+    if (nt.list.length !== n0) ntSave(); return nt.list;
+  }
+  function ntBadge() {
+    var n = ntLive().length + (socialOk() ? nt.pend : 0), b = $('ntBadge'); if (!b) return;
+    b.hidden = !n; b.textContent = n > 9 ? '9+' : String(n);
+    $('btnNotif').setAttribute('aria-label', t('nt.title') + (n ? ' (' + n + ')' : ''));
+  }
+  function ntAdd(k, m) {
+    if (!m || !m.code || !m.from) return;
+    var id = k + ':' + m.code; nt.list = nt.list.filter(function (x) { return x.id !== id; });
+    nt.list.unshift({ id: id, k: k, at: Date.now(), m: { code: m.code, from: m.from, opts: m.opts || null, watch: !!m.watch, name: m.name || '', cfg: m.cfg || null, game: m.game || null } });
+    nt.list = nt.list.slice(0, 30); ntSave(); ntBadge(); if ($('notifOverlay').classList.contains('open')) ntRender();
+  }
+  function ntDelCode(code) { var n0 = nt.list.length; nt.list = nt.list.filter(function (x) { return x.m.code !== code; }); if (nt.list.length !== n0) { ntSave(); ntBadge(); if ($('notifOverlay').classList.contains('open')) ntRender(); } }
+  function ntCheck() {
+    var codes = ntLive().filter(function (x) { return x.k !== 'tinvite'; }).map(function (x) { return x.m.code; });
+    if (codes.length && inv.net && inv.net.isOpen()) inv.net.send({ t: 'chk', codes: codes });
+  }
+  function ntOnCheck(m) {
+    var open = Array.isArray(m.open) ? m.open : [], n0 = nt.list.length;
+    nt.list = nt.list.filter(function (x) { return x.k === 'tinvite' || open.indexOf(x.m.code) >= 0; });
+    if (nt.list.length !== n0) { ntSave(); ntBadge(); if ($('notifOverlay').classList.contains('open')) ntRender(); }
+  }
+  setInterval(function () { ntLive(); ntBadge(); ntCheck(); }, 30000);
+  function ntAgo(at) { var m = Math.floor((Date.now() - at) / 60000); return m < 1 ? t('nt.now') : m < 60 ? t('nt.min', { n: m }) : t('nt.hr', { n: Math.floor(m / 60) }); }
+  function ntRow(av, title, sub, buttons) {
+    var row = document.createElement('div'); row.className = 'nt-row';
+    var h = document.createElement('div'); h.className = 'nt-main';
+    var a = document.createElement('span'); a.className = 'nt-av'; if (av) { try { setAv(a, av, 34); } catch (e) {} } h.appendChild(a);
+    var tx = document.createElement('div'); tx.className = 'nt-tx';
+    var tt = document.createElement('b'); tt.textContent = title; var ss = document.createElement('small'); ss.textContent = sub; tx.appendChild(tt); tx.appendChild(ss); h.appendChild(tx); row.appendChild(h);
+    var bx = document.createElement('div'); bx.className = 'nt-btns';
+    buttons.forEach(function (b) { var x = document.createElement('button'); x.type = 'button'; x.className = 'btn small' + (b.cls ? ' ' + b.cls : ''); x.textContent = b.label; x.addEventListener('click', b.fn); bx.appendChild(x); });
+    row.appendChild(bx); return row;
+  }
+  function ntGo(x) {
+    var m = x.m, go = function () { ntDelCode(m.code); closeAll(); $('btnSpectateOffer').hidden = true; startOnline({ t: 'join', code: m.code }); };
+    if (x.k === 'tinvite') { ntDelCode(m.code); tnoJoinCode(m.code); return; }
+    if (online.active && !online.spectator) { ask(t('seek.leaveGame'), t('seek.join'), function () { leaveOnline(true); go(); }); return; }
+    if (state && !isOver() && !online.active) { ask(t('seek.leaveGame'), t('seek.join'), go); return; }
+    go();
+  }
+  function ntRender() {
+    var box = $('ntList'); box.innerHTML = '';
+    var any = false;
+    var inc = socialOk() && social.ov && social.ov.list ? social.ov.list.filter(function (x) { return x.status === 'pending' && x.dir === 'in'; }) : [];
+    var reload = function () { Auth.friendsOverview().then(function (o) { social.ov = o && typeof o === 'object' ? o : social.ov; nt.pend = ((social.ov && social.ov.list) || []).filter(function (x) { return x.status === 'pending' && x.dir === 'in'; }).length; ntBadge(); ntRender(); }, function () {}); };
+    inc.forEach(function (p) {
+      any = true;
+      box.appendChild(ntRow(p.avatar, p.name, t('nt.friend'), [
+        { label: t('fr.accept'), cls: 'primary', fn: function () { Auth.friendRespond(p.id, true).then(reload, reload); } },
+        { label: t('fr.reject'), cls: 'ghost', fn: function () { Auth.friendRemove(p.id).then(reload, reload); } }]));
+    });
+    ntLive().forEach(function (x) {
+      any = true; var m = x.m, nm = m.from.name || '…', title, sub;
+      if (x.k === 'tinvite') { title = t('tno.invTitle', { name: nm }); sub = (m.name ? m.name + ' · ' : '') + ntAgo(x.at); }
+      else if (x.k === 'seek') { title = t('nt.seek', { name: nm }); sub = invRules(m.opts) + ' · ' + ntAgo(x.at); }
+      else { title = t('inv.title', { name: nm }); sub = invRules(m.opts) + ' · ' + ntAgo(x.at); }
+      box.appendChild(ntRow(m.from.avatar, title, sub, [
+        { label: t(x.k === 'tinvite' ? 'nt.view' : 'nt.join'), cls: 'primary', fn: function () { ntGo(x); } },
+        { label: t('nt.dismiss'), cls: 'ghost', fn: function () { ntDelCode(m.code); } }]));
+    });
+    if (!any) { var p = document.createElement('p'); p.className = 'hint'; p.textContent = t('nt.empty'); box.appendChild(p); }
+    $('ntClear').hidden = !ntLive().length;
+  }
+  $('btnNotif').addEventListener('click', function () {
+    open('notifOverlay'); ntRender(); ntCheck();
+    if (socialOk()) Auth.friendsOverview().then(function (o) { social.ov = o && typeof o === 'object' ? o : social.ov; nt.pend = ((social.ov && social.ov.list) || []).filter(function (x) { return x.status === 'pending' && x.dir === 'in'; }).length; ntBadge(); if ($('notifOverlay').classList.contains('open')) ntRender(); }, function () {});
+  });
+  $('btnNotifBack').addEventListener('click', function () { open('menuOverlay'); });
+  $('ntClear').addEventListener('click', function () { nt.list = []; ntSave(); ntBadge(); ntRender(); });
+  ntLoad(); setTimeout(function () { ntBadge(); if (socialOk()) frBadgeRefresh(true); }, 1500);
   function challengeOpen(p) {
     if (!p || !p.id) return; ch = { id: p.id, name: p.name };
     $('chTitle').textContent = t('ch.title', { name: p.name });
@@ -13524,6 +13632,7 @@ window.NEON_BREAK = {
   function seekHide() { clearTimeout(seekT); $('seekToast').hidden = true; seekCur = null; }
   function onLooking(m) {
     if (!m || !m.code || !m.from || !cfg.seekAlerts) return;
+    ntAdd('seek', m);
     if (online.active || daily.active || tut.active || lab.active) return;
     seekCur = m;
     var txt = t('seek.toast', { name: m.from.name, rules: invRules(m.opts) });
@@ -13533,7 +13642,7 @@ window.NEON_BREAK = {
   }
   $('seekX').addEventListener('click', seekHide);
   $('seekYes').addEventListener('click', function () {
-    var m = seekCur; seekHide(); if (!m) return;
+    var m = seekCur; seekHide(); if (!m) return; ntDelCode(m.code);
     var go = function () { $('btnSpectateOffer').hidden = true; startOnline({ t: 'join', code: m.code }); };
     if (state && !isOver() && !online.active) ask(t('seek.leaveGame'), t('seek.join'), go); else go();
   });
@@ -14431,13 +14540,13 @@ window.NEON_BREAK = {
   var frBadgeAt = 0;
   function frBadgeSet(n) { var b = $('frBadge'); b.hidden = !n; b.textContent = n ? String(n) : ''; }
   function frBadgeRefresh(force) {
-    if (!socialOk()) { frBadgeSet(0); return; }
+    if (!socialOk()) { nt.pend = 0; ntBadge(); frBadgeSet(0); return; }
     if (!force && Date.now() - frBadgeAt < 60000) return;
     frBadgeAt = Date.now();
     Auth.friendsOverview().then(function (o) {
       social.ov = o && typeof o === 'object' ? o : social.ov;
       var pend = ((o && o.list) || []).filter(function (x) { return x.status === 'pending' && x.dir === 'in'; }).length;
-      frBadgeSet(pend + dmUnreadTotal());
+      nt.pend = pend; ntBadge(); frBadgeSet(pend + dmUnreadTotal());
       dmUnreadLoad(function () { frBadgeSet(pend + dmUnreadTotal()); });
     }, function () {});
   }
@@ -16083,6 +16192,7 @@ window.NEON_BREAK = {
   /* invitación recibida por la conexión de presencia */
   function onTInvite(m) {
     if (!m.code || !m.from) return;
+    ntAdd('tinvite', m);
     if (online.active || daily.active || tut.active || lab.active || (tno.code && tno.token)) return;
     inv.cur = { t: 'tinvite', code: m.code };
     $('invTitle').innerHTML = (m.from.avatar ? avInline(m.from.avatar, 28) + ' ' : '') + (flagText(m.from.country) ? '<span class="flag">' + flagText(m.from.country) + '</span>' : '') + esc(t('tno.invTitle', { name: m.from.name }));
