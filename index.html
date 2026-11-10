@@ -929,7 +929,7 @@ html[data-theme="papel"] #menuBg { opacity: 1; }
 #hwSpider[hidden], #hwSpiderHit[hidden] { display: none; }
 /* Menú en Halloween: fondo con el arte de Ro y el título en lavanda */
 html[data-theme="halloween"] #menuBg { opacity: 1; -webkit-mask-image: none; mask-image: none; }
-html[data-theme="halloween"] #menuOverlay .brand h1 { position: relative; z-index: 2; font-weight: 900; background: linear-gradient(180deg, #ffffff 10%, #cdbbf2 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; -webkit-text-stroke: 1px rgba(60,20,110,.55); filter: drop-shadow(0 0 16px rgba(150,90,255,.5)) drop-shadow(0 4px 0 rgba(30,8,60,.8)); }
+html[data-theme="halloween"] #menuOverlay .brand h1 { position: relative; z-index: 2; font-weight: 900; color: #e9ddff; background: none; -webkit-text-stroke: 1px rgba(60,20,110,.55); text-shadow: 0 4px 0 rgba(30,8,60,.8), 0 0 16px rgba(150,90,255,.55); }   /* sin degradado recortado en el texto ni filtros: en Android dejaba rayas */
 html[data-theme="halloween"] #menuOverlay .brand .sub, html[data-theme="halloween"] #menuOverlay .brand .ver { color: #c9b8ee; }
 html[data-theme="playa"] #menuBg { opacity: 1; -webkit-mask-image: none; mask-image: none; }
 html[data-theme="playa"] #menuOverlay { --bg: #e9d9a8; --panel: #f6ecc9; --panel-2: #f3e4b8; --text: #3a2812; --muted: #6a5330; --line: #b99a5c; --accent: #2fb0bf; --accent-ink: #042126; color: var(--text); }
@@ -944,7 +944,7 @@ html[data-theme="playa"] #menuOverlay .xpbar { background: rgba(58,40,18,.18); }
 
 /* Menú en Jardín: fondo con el arte de Ro (enredaderas, rosas, piedras), título crema y botones verdes translúcidos */
 html[data-theme="jardin"] #menuBg { opacity: 1; -webkit-mask-image: none; mask-image: none; }
-html[data-theme="jardin"] #menuOverlay .brand h1 { font-weight: 900; background: linear-gradient(180deg, #fffdf2 20%, #eadfc2 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; -webkit-text-stroke: 2px rgba(255,250,232,.9); filter: drop-shadow(0 4px 0 rgba(120,100,60,.55)) drop-shadow(0 8px 14px rgba(0,0,0,.45)); }
+html[data-theme="jardin"] #menuOverlay .brand h1 { font-weight: 900; color: #f6eed6; background: none; -webkit-text-stroke: 2px rgba(255,250,232,.9); text-shadow: 0 4px 0 rgba(120,100,60,.55), 0 8px 14px rgba(0,0,0,.45); }
 html[data-theme="jardin"] #menuOverlay .brand .sub { color: #d6f5b0; font-weight: 600; text-shadow: 0 1px 6px rgba(0,0,0,.6); }
 html[data-theme="jardin"] #menuOverlay .brand .ver { color: #b8d9a0; text-shadow: 0 1px 4px rgba(0,0,0,.6); }
 html[data-theme="jardin"] #menuOverlay .btns .btn:not(.primary) { background: rgba(14,48,28,.78); border: 1.5px solid #3f7a4a; box-shadow: 0 3px 10px rgba(0,0,0,.35); color: #e8f5dc; }
@@ -1461,6 +1461,27 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
 #localOverlay #btnStart { border-radius: 999px; background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 92%, #fff), var(--accent)); color: var(--accent-ink); filter: none; }
 #localOverlay #btnStart::before { content: ""; display: inline-block; width: 18px; height: 18px; margin-right: 10px; vertical-align: -3px; background: var(--accent-ink); -webkit-mask: var(--i-play) center / contain no-repeat; mask: var(--i-play) center / contain no-repeat; filter: none; }
 #localOverlay .rules-card .oc-size { background: transparent; border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--line)); }
+
+/* Celular en horizontal: tablero a la izquierda ocupando TODO el alto; jugadores, estado y botones en una columna a la derecha. */
+@media (orientation: landscape) and (max-height: 559px) and (max-width: 1099px) {
+  .app { height: 100vh; height: 100dvh; min-height: 0; max-width: none; display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, 340px); grid-template-rows: auto auto auto auto auto 1fr; align-content: stretch; gap: 6px 12px; padding: 6px max(10px, env(safe-area-inset-right)) 6px max(10px, env(safe-area-inset-left)); }
+  .stage { grid-column: 1; grid-row: 1 / 7; min-height: 0; }
+  .board-wrap { container-type: size; }
+  #board { width: min(100cqw, 100cqh, 1400px); max-width: none; }
+  .hud, .specbar, .status, .actions { grid-column: 2; }
+  html[data-theme="jardin"] #board { width: min(100cqw, 90cqh, 1400px); }          /* el marco del Jardín sobresale: se achica un poco para que no se corte arriba y abajo */
+  .hud:not(.ffa) { height: auto; grid-template-columns: 1fr; gap: 6px; min-height: 0; }
+  .player { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 12px; padding: 5px 10px; }
+  .player[hidden] { display: none; }
+  .player .clock, .player .caps { margin-top: 0; }
+  .hud .turnclock { display: none; }
+  .hud:has(.turnclock:not([hidden])) #player1 { padding-right: 10px; }
+  .hud:has(.turnclock:not([hidden])) #player2 { padding-left: 10px; }
+  .status { height: auto; min-height: 30px; font-size: 14px; }
+  .actions { grid-row: 5; align-self: start; gap: 6px; min-height: 0; }
+  .actions .btn { padding: 8px 12px; min-height: 40px; }
+  .sidebar-row { grid-column: 2; grid-row: 6; align-self: end; }
+}
 </style>
 </head>
 <body>
@@ -1625,7 +1646,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v138</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v165</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -5462,6 +5483,9 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       feedbackSend: function (kind, body, info, imgs) { return authed('POST', '/rest/v1/rpc/feedback_send', { k: String(kind || 'other'), b: String(body == null ? '' : body), i: String(info || ''), m: Array.isArray(imgs) ? imgs.slice(0, 3) : [] }).then(function (r) { return typeof r === 'string' ? r : ''; }); },
       feedbackList: function (all) { return authed('POST', '/rest/v1/rpc/feedback_list', { only_open: !all }).then(function (r) { return Array.isArray(r) ? r : []; }); },
       feedbackDone: function (id, v) { return authed('POST', '/rest/v1/rpc/feedback_done', { p: Number(id), v: !!v }); },
+      feedbackNotify: function (id, msg) { return authed('POST', '/rest/v1/rpc/feedback_notify', { p: Number(id), msg: String(msg || '').slice(0, 500) }); },
+      feedbackMine: function () { return authed('POST', '/rest/v1/rpc/feedback_mine', {}).then(function (r) { return Array.isArray(r) ? r : []; }); },
+      feedbackSeen: function (id) { return authed('POST', '/rest/v1/rpc/feedback_seen', { p: Number(id) }); },
       feedbackDelete: function (id) { return authed('POST', '/rest/v1/rpc/feedback_delete', { p: Number(id) }); },
       pairStats: function (name) { return authed('POST', '/rest/v1/rpc/pair_stats', { p: String(name == null ? '' : name) }); },
       profileView: function (name) { return authed('POST', '/rest/v1/rpc/profile_view', { p: String(name == null ? '' : name) }); },
@@ -5719,6 +5743,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'rooms.play': 'Jugar',
       'rooms.watch': 'Mirar',
       'rooms.back': 'Volver a tu partida',
+      'nt.fbTitle': 'Revisamos tu comentario', 'nt.fbDefault': 'Ya lo vimos y lo tuvimos en cuenta. ¡Gracias por avisar!', 'nt.fbOk': 'Listo', 'fb.notify': 'Avisar', 'fb.notifyPh': 'Mensaje para el usuario (opcional)', 'fb.notifySend': 'Marcar y avisar', 'fb.cancel': 'Cancelar', 'fb.notified': 'Listo: se marcó como resuelto y se le avisó.',
       'nt.title': 'Notificaciones', 'nt.sub': 'Retos, amistades e invitaciones a torneos quedan acá hasta que los borres o dejen de estar disponibles.', 'nt.empty': 'No tenés nada pendiente.', 'nt.friend': 'Quiere ser tu amigo/a', 'nt.seek': '{name} busca rival', 'nt.join': 'Unirme', 'nt.view': 'Ver torneo', 'nt.dismiss': 'Borrar', 'nt.clear': 'Borrar todo', 'nt.now': 'recién', 'nt.min': 'hace {n} min', 'nt.hr': 'hace {n} h',
       'rooms.backRoom': 'Volver a tu sala',
       'spec.badge': 'Mirando la sala {code} · {n} mirando',
@@ -6055,6 +6080,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'rooms.play': 'Play',
       'rooms.watch': 'Watch',
       'rooms.back': 'Back to your game',
+      'nt.fbTitle': 'We reviewed your feedback', 'nt.fbDefault': 'We saw it and took it into account. Thanks for letting us know!', 'nt.fbOk': 'Got it', 'fb.notify': 'Notify', 'fb.notifyPh': 'Message for the user (optional)', 'fb.notifySend': 'Resolve and notify', 'fb.cancel': 'Cancel', 'fb.notified': 'Done: marked as resolved and the user was notified.',
       'nt.title': 'Notifications', 'nt.sub': 'Challenges, friend requests and tournament invites stay here until you delete them or they are no longer available.', 'nt.empty': 'Nothing pending.', 'nt.friend': 'Wants to be your friend', 'nt.seek': '{name} is looking for an opponent', 'nt.join': 'Join', 'nt.view': 'View tournament', 'nt.dismiss': 'Delete', 'nt.clear': 'Delete all', 'nt.now': 'just now', 'nt.min': '{n} min ago', 'nt.hr': '{n} h ago',
       'rooms.backRoom': 'Back to your room',
       'spec.badge': 'Watching room {code} · {n} watching',
@@ -13537,7 +13563,7 @@ window.NEON_BREAK = {
   /* ---------- Casilla de notificaciones ----------
    * Retos, búsquedas de rival e invitaciones a torneos aparecen arriba como siempre y además quedan guardados acá hasta que los borres
    * o hasta que la sala deje de estar disponible. Las solicitudes de amistad pendientes se leen en vivo de la lista de amigos. */
-  var NT_KEY = 'pente.inbox', nt = { list: [], pend: 0 };
+  var NT_KEY = 'pente.inbox', nt = { list: [], pend: 0, fb: [] };
   function ntLoad() { try { var a = JSON.parse(localStorage.getItem(NT_KEY) || '[]'); nt.list = Array.isArray(a) ? a.filter(function (x) { return x && x.id && x.k && x.m && x.m.code; }) : []; } catch (e) { nt.list = []; } }
   function ntSave() { try { localStorage.setItem(NT_KEY, JSON.stringify(nt.list)); } catch (e) {} }
   function ntLive() {
@@ -13546,7 +13572,7 @@ window.NEON_BREAK = {
     if (nt.list.length !== n0) ntSave(); return nt.list;
   }
   function ntBadge() {
-    var n = ntLive().length + (socialOk() ? nt.pend : 0), b = $('ntBadge'); if (!b) return;
+    var n = ntLive().length + (socialOk() ? nt.pend + nt.fb.length : 0), b = $('ntBadge'); if (!b) return;
     b.hidden = !n; b.textContent = n > 9 ? '9+' : String(n);
     $('btnNotif').setAttribute('aria-label', t('nt.title') + (n ? ' (' + n + ')' : ''));
   }
@@ -13588,6 +13614,11 @@ window.NEON_BREAK = {
   function ntRender() {
     var box = $('ntList'); box.innerHTML = '';
     var any = false;
+    var fbDone = function (id) { return function () { Auth.feedbackSeen(id).then(ntFbLoad, ntFbLoad); }; };
+    (socialOk() ? nt.fb : []).forEach(function (f) {
+      any = true;
+      box.appendChild(ntRow(null, t('nt.fbTitle'), (f.reply ? f.reply : t('nt.fbDefault')) + ' · «' + String(f.body || '').slice(0, 80) + '»', [{ label: t('nt.fbOk'), cls: 'primary', fn: fbDone(f.id) }]));
+    });
     var inc = socialOk() && social.ov && social.ov.list ? social.ov.list.filter(function (x) { return x.status === 'pending' && x.dir === 'in'; }) : [];
     var reload = function () { Auth.friendsOverview().then(function (o) { social.ov = o && typeof o === 'object' ? o : social.ov; nt.pend = ((social.ov && social.ov.list) || []).filter(function (x) { return x.status === 'pending' && x.dir === 'in'; }).length; ntBadge(); ntRender(); }, function () {}); };
     inc.forEach(function (p) {
@@ -13609,12 +13640,17 @@ window.NEON_BREAK = {
     $('ntClear').hidden = !ntLive().length;
   }
   $('btnNotif').addEventListener('click', function () {
-    open('notifOverlay'); ntRender(); ntCheck();
+    open('notifOverlay'); ntRender(); ntCheck(); ntFbLoad();
     if (socialOk()) Auth.friendsOverview().then(function (o) { social.ov = o && typeof o === 'object' ? o : social.ov; nt.pend = ((social.ov && social.ov.list) || []).filter(function (x) { return x.status === 'pending' && x.dir === 'in'; }).length; ntBadge(); if ($('notifOverlay').classList.contains('open')) ntRender(); }, function () {});
   });
   $('btnNotifBack').addEventListener('click', function () { open('menuOverlay'); });
   $('ntClear').addEventListener('click', function () { nt.list = []; ntSave(); ntBadge(); ntRender(); });
-  ntLoad(); setTimeout(function () { ntBadge(); if (socialOk()) frBadgeRefresh(true); }, 1500);
+  function ntFbLoad() {
+    if (!socialOk()) { nt.fb = []; ntBadge(); return; }
+    Auth.feedbackMine().then(function (rows) { nt.fb = rows || []; ntBadge(); if ($('notifOverlay').classList.contains('open')) ntRender(); }, function () {});     // si todavía no se corrió feedback_reply.sql, no pasa nada
+  }
+  setInterval(ntFbLoad, 300000); document.addEventListener('visibilitychange', function () { if (!document.hidden) setTimeout(ntFbLoad, 1500); });
+  ntLoad(); setTimeout(ntFbLoad, 2500); setTimeout(function () { ntBadge(); if (socialOk()) frBadgeRefresh(true); }, 1500);
   function challengeOpen(p) {
     if (!p || !p.id) return; ch = { id: p.id, name: p.name };
     $('chTitle').textContent = t('ch.title', { name: p.name });
@@ -14322,7 +14358,15 @@ window.NEON_BREAK = {
         b1.addEventListener('click', function () { Auth.feedbackDone(r.id, !r.done).then(fbLoad, function (e) { fbMsg(frErr(e), true); }); });
         var b2 = el('button', 'btn ghost', t('fb.del')); b2.type = 'button';
         b2.addEventListener('click', function () { Auth.feedbackDelete(r.id).then(fbLoad, function (e) { fbMsg(frErr(e), true); }); });
-        bt.appendChild(b1); bt.appendChild(b2); card.appendChild(bt); box.appendChild(card);
+        var b3 = el('button', 'btn primary', t('fb.notify')); b3.type = 'button';
+        var nbox = el('div', 'fb-notify'); nbox.hidden = true;
+        var ta = el('textarea', 'fb-text'); ta.rows = 3; ta.maxLength = 500; ta.placeholder = t('fb.notifyPh');
+        var nb = el('div', 'btns'), ns = el('button', 'btn primary', t('fb.notifySend')), nc = el('button', 'btn ghost', t('fb.cancel')); ns.type = nc.type = 'button';
+        ns.addEventListener('click', function () { ns.disabled = true; Auth.feedbackNotify(r.id, ta.value).then(function () { fbMsg(t('fb.notified')); fbLoad(); }, function (e) { ns.disabled = false; fbMsg(frErr(e), true); }); });
+        nc.addEventListener('click', function () { nbox.hidden = true; });
+        b3.addEventListener('click', function () { nbox.hidden = !nbox.hidden; if (!nbox.hidden) ta.focus(); });
+        nb.appendChild(ns); nb.appendChild(nc); nbox.appendChild(ta); nbox.appendChild(nb);
+        bt.appendChild(b3); bt.appendChild(b1); bt.appendChild(b2); card.appendChild(bt); card.appendChild(nbox); box.appendChild(card);
       });
     }, function (e) { box.textContent = ''; fbMsg(frErr(e), true); });
   }
@@ -15579,6 +15623,12 @@ window.NEON_BREAK = {
     });
   });
   window.addEventListener('resize', resize);
+  /* Imagen en blanco: Android a veces libera la memoria del lienzo cuando la app queda en segundo plano o se rota la pantalla; al volver hay que redibujar todo desde cero. */
+  function repaintAll() { try { baseCache.ver++; resize(); } catch (e) {} }
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) { setTimeout(repaintAll, 60); setTimeout(repaintAll, 600); } });
+  window.addEventListener('pageshow', function () { setTimeout(repaintAll, 60); });
+  window.addEventListener('orientationchange', function () { setTimeout(repaintAll, 350); });
+  window.addEventListener('focus', function () { setTimeout(repaintAll, 120); });
   if (window.ResizeObserver) new ResizeObserver(resize).observe(canvas);
   canvas.addEventListener('focus', render); canvas.addEventListener('blur', render);
 
