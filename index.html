@@ -5655,6 +5655,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'end.winForfeit': '{loser} se desconectó. Ganó {name}.',
       'err.ROOM_NOT_FOUND': 'No existe esa sala. Revisá el código.',
       'err.ROOM_FULL': 'La sala está llena: ya tiene dos jugadores.',
+      'err.ROOM_OWN': 'Esa sala es tuya: estás esperando a un rival. Si querés jugar con otra persona, pasale el código o cerrá la sala.',
       'err.BAD_TOKEN': 'No se pudo recuperar tu lugar en la sala.',
       'err.SERVER_BUSY': 'El servidor está lleno. Probá en un rato.',
       'err.WAITING_FOR_RIVAL': 'Todavía no entró tu rival.',
@@ -5696,6 +5697,8 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'rooms.watching': '{n} mirando',
       'rooms.play': 'Jugar',
       'rooms.watch': 'Mirar',
+      'rooms.back': 'Volver a tu partida',
+      'rooms.backRoom': 'Volver a tu sala',
       'spec.badge': 'Mirando la sala {code} · {n} mirando',
       'spec.watchers': '👁 {n} mirando: {names}',
       'spec.leave': 'Salir',
@@ -5987,6 +5990,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'end.winForfeit': '{loser} disconnected. {name} wins.',
       'err.ROOM_NOT_FOUND': 'That room doesn\'t exist. Check the code.',
       'err.ROOM_FULL': 'The room is full: it already has two players.',
+      'err.ROOM_OWN': 'That room is yours: you are waiting for an opponent. Share the code or close the room.',
       'err.BAD_TOKEN': 'Couldn\'t recover your seat in the room.',
       'err.SERVER_BUSY': 'The server is full. Try again in a bit.',
       'err.WAITING_FOR_RIVAL': 'Your rival hasn\'t joined yet.',
@@ -6028,6 +6032,8 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'rooms.watching': '{n} watching',
       'rooms.play': 'Play',
       'rooms.watch': 'Watch',
+      'rooms.back': 'Back to your game',
+      'rooms.backRoom': 'Back to your room',
       'spec.badge': 'Watching room {code} · {n} watching',
       'spec.watchers': '👁 {n} watching: {names}',
       'spec.leave': 'Leave',
@@ -12963,6 +12969,10 @@ window.NEON_BREAK = {
   }
   function loadSession() { try { var v = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); return v && v.code && v.token ? v : null; } catch (e) { return null; } }
   function clearSession() { try { localStorage.removeItem(SESSION_KEY); } catch (e) {} }
+  /* Partida en juego que dejaste sin rendirte (o se te cortó): se guarda el asiento para poder volver como jugador, no como espectador. */
+  var LAST_KEY = 'pente.lastGame';
+  function lastGame() { try { var v = JSON.parse(localStorage.getItem(LAST_KEY) || 'null'); return v && v.code && v.token && Date.now() - (v.at || 0) < 6 * 3600 * 1000 && v.url === serverUrl() ? v : null; } catch (e) { return null; } }
+  function setLastGame(v) { try { if (v) localStorage.setItem(LAST_KEY, JSON.stringify(v)); else localStorage.removeItem(LAST_KEY); } catch (e) {} }
   function onlineMsg(txt) { $('onlineMsg').textContent = txt || ''; }
   function guestName() { try { var g = localStorage.getItem('pente.guest'); if (!/^Invitado \d{3,4}$/.test(g || '')) { g = 'Invitado ' + (100 + Math.floor(Math.random() * 9900)); localStorage.setItem('pente.guest', g); } return g; } catch (e) { return 'Invitado'; } }
   function myName() { var n = ($('onName').value || '').trim() || guestName(); try { if (n) localStorage.setItem('pente.name', n); } catch (e) {} return n; }
@@ -13004,6 +13014,8 @@ window.NEON_BREAK = {
     tutStop(); aiStop(); localOver = null; videoDiscard(); endSeen = recorded = false;
     var url = serverUrl();
     if (!url) { onlineMsg(t('online.noServer')); return; }
+    var lg = (intent.t === 'join' || intent.t === 'spectate') ? lastGame() : null;
+    if (lg && lg.code === String(intent.code || '').toUpperCase()) { intent = { t: 'rejoin', code: lg.code, token: lg.token }; online.lastTry = true; }        // esa partida era tuya: volvés como jugador
     intent.name = myName(); if (intent.t === 'create' || intent.t === 'join') intent.dev = devId();
     if (intent.t === 'create' || intent.t === 'join' || intent.t === 'rejoin') { intent.avatar = profile.avatar; intent.title = curTitle(); }
     online.intent = intent; online.token = ''; online.code = '';
@@ -13017,8 +13029,13 @@ window.NEON_BREAK = {
   }
 
   function leaveOnline(resign) {
-    var wasActive = online.active, net = online.net;
+    var wasActive = online.active, net = online.net, keepHeld = false;
+    if (wasActive && !online.spectator && !online.tourney && online.code && online.token) {
+      if (!resign && state && !isOver() && onlineFull()) setLastGame({ code: online.code, token: online.token, url: online.url || serverUrl(), at: Date.now() });
+      else setLastGame(null);
+    }
     if (net) {
+      if (online.mine && !online.noHold && !online.spectator && online.code && online.token && !onlineFull()) { try { localStorage.setItem(SESSION_KEY, JSON.stringify({ code: online.code, token: online.token, url: online.url || serverUrl(), mine: true, held: true })); keepHeld = true; } catch (e) {} }         // volver atrás no cierra tu sala: queda en pausa y la ves en «ver salas»
       if (resign && wasActive && !online.spectator && state && !isOver() && onlineFull() && net.isOpen()) net.send({ t: 'resign' });
       net.close();
     }
@@ -13027,7 +13044,7 @@ window.NEON_BREAK = {
     online.spectator = false; online.specN = 0; online.specList = []; online.cid = ''; online.avatars = {}; online.titles = {}; online.pids = {}; chatReset(); stopRooms(); fx.length = 0; $('btnSpectateOffer').hidden = true;
     online.intent = null; online.specT = null; online.invite = null; online.seek = false; online.rejoining = false; online.mine = false; online.tourney = false; online.over = null; online.score = null; online.awaiting = false; online.rivalLeftAt = 0;
     online.connected = { 1: true, 2: true, 3: true, 4: true }; online.rematch = { 1: false, 2: false, 3: false, 4: false }; online.seat = 0; online.players = 2; online.bots = {}; online.mode = 'classic'; online.ffa = false; seatNames = {};
-    clearSession(); updateOnlineButtons(); updateRematchUi();
+    online.noHold = false; if (!keepHeld) clearSession(); updateOnlineButtons(); updateRematchUi();
     if (wasActive) { videoDiscard(); state = null; clk = null; hover = pending = null; setStatus(''); render(); }
     updateHud();
   }
@@ -13045,7 +13062,7 @@ window.NEON_BREAK = {
         break;
       case 'roomClosed': {
         var waitOpen = $('waitOverlay').classList.contains('open');
-        clearTimeout(online.closeTimer); var toTn = m.why === 'tourney' && !!tno.code; leaveOnline(false);
+        clearTimeout(online.closeTimer); var toTn = m.why === 'tourney' && !!tno.code; online.noHold = true; leaveOnline(false);
         if (toTn) { tno.inGame = ''; tnoConnect(); tnoOpen(); tnoNote(t('tno.gameClosed'), false); break; }
         onlineMsg(t(m.why === 'replaced' ? 'online.roomReplaced' : m.why === 'gone' ? 'online.roomGone' : m.why === 'private' ? 'online.roomPrivate' : 'online.roomClosed')); renderHeld();
         if (waitOpen) open('playOverlay');
@@ -13199,10 +13216,11 @@ window.NEON_BREAK = {
   function onNetError(m) {
     online.awaiting = false;
     var txt = t(m.code === 'ILLEGAL' ? 'err.' + m.detail : 'err.' + m.code);
+    if (online.lastTry && (m.code === 'BAD_TOKEN' || m.code === 'ROOM_NOT_FOUND')) { setLastGame(null); online.lastTry = false; }
     if (rooms.open && (m.code === 'CHAT_RATE' || m.code === 'LINK_BLOCKED')) { lobbyNote(txt); return; }
     if (m.code === 'CHAT_RATE') { chatNote(txt); return; }
     if ((m.code === 'ROOM_NOT_FOUND' || m.code === 'BAD_TOKEN') && online.rejoining) {
-      var wasActive = online.active;                 // la sala vieja ya no existe (el servidor se reinició o venció)
+      online.noHold = true; var wasActive = online.active;                 // la sala vieja ya no existe (el servidor se reinició o venció)
       leaveOnline(false);
       if (wasActive) { onlineMsg(t('online.roomGone')); open('onlineOverlay'); } else if (rooms.open) roomsMsg(txt); else { onlineMsg(t('online.roomGone')); renderHeld(); }
       return;
@@ -13608,9 +13626,9 @@ window.NEON_BREAK = {
   $('onCode').addEventListener('keydown', function (e) { if (e.key === 'Enter') joinFromInput(); });
   $('btnWaitCancel').addEventListener('click', function () {
     if (online.mine && online.net && online.net.isOpen() && online.code && online.token) {       // cerrar la sala a mano: el servidor confirma con roomClosed (si no contesta, se sale igual)
-      online.net.send({ t: 'closeRoom', code: online.code, token: online.token });
+      online.net.send({ t: 'closeRoom', code: online.code, token: online.token }); online.noHold = true;
       clearTimeout(online.closeTimer); online.closeTimer = setTimeout(function () { leaveOnline(false); renderHeld(); open('playOverlay'); }, 1500);
-    } else { leaveOnline(false); open('playOverlay'); }
+    } else { online.noHold = true; leaveOnline(false); open('playOverlay'); }
   });
   $('btnWaitHold').addEventListener('click', holdRoom);
   $('btnHeldBack').addEventListener('click', function () {
@@ -13920,7 +13938,7 @@ window.NEON_BREAK = {
     if (online.net.send({ t: 'lchat', text: txt, name: myName() })) $('lobbyInput').value = '';
   });
   function stopRooms() { if (rooms.open && online.net && online.net.isOpen()) online.net.send({ t: 'lobby', on: false }); rooms.open = false; clearInterval(rooms.timer); rooms.timer = 0; }
-  function requestRooms() { if (rooms.open && online.net && online.net.isOpen() && !online.active) online.net.send({ t: 'list' }); }
+  function requestRooms() { if (rooms.open && online.net && online.net.isOpen() && !online.active) online.net.send({ t: 'list', dev: devId() }); }
   function startRooms() {
     var url = serverUrl();
     open('roomsOverlay');
@@ -13950,9 +13968,11 @@ window.NEON_BREAK = {
       meta.textContent = (r.players === 4 ? t('four.badge') + ' · ' : '') + (r.bullet ? t('mode.bullet') + ' · ' : r.blitz ? t('mode.blitz') + ' · ' : r.variant && r.variant !== 'classic' ? t('mode.' + r.variant) + ' · ' : '') + r.size + '×' + r.size + ' · ' + st + (r.spectators ? ' · ' + t('rooms.watching', { n: r.spectators }) : '');
       info.appendChild(who); info.appendChild(meta);
       var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'btn' + (r.status === 'waiting' ? ' primary' : '');
-      btn.textContent = t(r.status === 'waiting' ? 'rooms.play' : 'rooms.watch');
+      var mineLg = r.mine || (lastGame() && lastGame().code === r.code);
+      btn.textContent = t(r.mine ? 'rooms.backRoom' : mineLg ? 'rooms.back' : r.status === 'waiting' ? 'rooms.play' : 'rooms.watch'); if (mineLg) btn.className = 'btn primary';
       btn.dataset.act = r.status === 'waiting' ? 'join' : 'spectate';
       btn.addEventListener('click', function () {
+        if (r.mine) { if (heldRoom()) { $('btnHeldBack').click(); } else roomsMsg(t('online.roomGone')); return; }
         roomsMsg(t('online.connecting')); $('onName').value = $('rName').value;
         startOnline({ t: r.status === 'waiting' ? 'join' : 'spectate', code: r.code });
       });
