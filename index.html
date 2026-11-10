@@ -1647,7 +1647,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v172</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v173</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -9041,6 +9041,9 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
     lose:    function () { [392, 330, 262].forEach(function (f, i) { tone(f, 0, 0.3, 'triangle', 0.26, i * 0.14); }); },
     error:   function () { tone(150, 110, 0.12, 'square', 0.12); },
     // subir de nivel: dos notas de campanita, bajitas y cortas (sin onda cuadrada ni acordes largos para que no canse)
+    // alerta del reloj: cada segundo cuando al que juega le quedan 10 s o menos (más agudo y doble con 5 s o menos)
+    tick:  function () { tone(1180, 0, 0.07, 'triangle', 0.2, 0); },
+    tick2: function () { tone(1760, 0, 0.09, 'triangle', 0.26, 0); tone(1760, 0, 0.09, 'triangle', 0.22, 0.12); },
     notify: function () { tone(988, 0, 0.22, 'sine', 0.13, 0); tone(1319, 0, 0.45, 'sine', 0.13, 0.11); tone(1976, 0, 0.3, 'sine', 0.03, 0.11); },
     levelup: function () { tone(784, 0, 0.5, 'sine', 0.16, 0); tone(1175, 0, 0.7, 'sine', 0.15, 0.13); tone(1568, 0, 0.6, 'sine', 0.05, 0.13); tone(2349, 0, 0.35, 'sine', 0.025, 0.26); }
   };
@@ -10705,6 +10708,16 @@ window.NEON_BREAK = {
   }
   function clockFreeze() { if (!clk || clk.frozen) return; var l = clockLive(); Object.keys(clk.rem).forEach(function (k) { clk.rem[k] = l[k]; }); clk.frozen = true; }
   function fmtClock(ms) { var s = Math.ceil(ms / 1000), m = Math.floor(s / 60); s = s % 60; return m + ':' + (s < 10 ? '0' : '') + s; }
+  var beepSec = -1;
+  function clockBeep(l) {                                  // suena cada segundo con 10 s o menos, solo para quien juega en este aparato
+    var mine = !!l && !clk.frozen && !clk.wait && !tut.active && !isOver() && state.status === 'playing' && !online.spectator && !(state.ffa && state.out && state.out[clk.current]) &&
+      (online.active ? clk.current === online.seat : (ai.active ? clk.current === ai.human : true)) && !(document.body.classList.contains('in-screen') && !online.active);
+    if (!mine) { beepSec = -1; return; }
+    var r = Math.min(l[clk.current], clk.turnMs ? l.turn : Infinity);
+    if (!(r > 0 && r <= 10000)) { beepSec = -1; return; }
+    var sec = Math.ceil(r / 1000);
+    if (sec !== beepSec) { beepSec = sec; sfx(sec <= 5 ? 'tick2' : 'tick'); }
+  }
   function renderClocks() {
     var l = (state && clk) ? clockLive() : null, shared = !!(l && !clk.blitz && clk.turnMs && state.players !== 4);   // 2 jugadores con reloj normal: el minuto de la jugada va en el medio
     [1, 2, 3, 4].forEach(function (p) {
@@ -10718,6 +10731,7 @@ window.NEON_BREAK = {
       el.title = t(clk.blitz ? 'mode.blitzClock' : 'clock.title');
     });
     renderTurnClock(shared ? l : null);
+    clockBeep(l);
   }
   /* Temporizador compartido (en el medio, entre los dos jugadores): el minuto de la jugada del que tiene el turno. Cada uno conserva además su tiempo total (10 min) en su tarjeta.
    * Con 10 s o menos se pone rojo y cada segundo más; con 5 s o menos late como un corazón. */
