@@ -11407,7 +11407,8 @@ window.NEON_BREAK = {
   function achTitle(id) { return t('ach.' + id); }
   /* Título del perfil: uno de los logros ya ganados. Se guarda en el aparato y con las preferencias de la cuenta. */
   function titleOk(id) { return !!(id && ACH.IDS[id] && ACH.clean(profile.stats && profile.stats.ach).u.indexOf(id) >= 0); }
-  function curTitle() { var c = ACH.clean(profile.stats && profile.stats.ach); return c.ti || ''; }
+  function bestTitle(c) { var b = '', r = -1; (c.u || []).forEach(function (id) { if (ACH.IDS[id] && ACH.rank(id) > r) { r = ACH.rank(id); b = id; } }); return b; }
+  function curTitle() { var c = ACH.clean(profile.stats && profile.stats.ach); return c.ti || (c.ts ? '' : bestTitle(c)); }   // si nunca elegiste, se usa tu mejor título
   function titleChip(id, tag) { var c = document.createElement(tag || 'span'); c.className = 'ttl-chip rk' + ACH.rank(id); c.textContent = achTitle(id); return c; }
   function setTitle(id) {
     id = titleOk(id) ? id : ''; if (id === curTitle()) return;
@@ -12796,7 +12797,7 @@ window.NEON_BREAK = {
       el.classList.toggle('offline', online.active && seatsOf(p).some(function (x) { return !online.connected[x]; }));
       var mine = !tut.active && !lab.active && ((ai.active && p === ai.human) || (online.active && !online.spectator && p === online.me));
       var pav = tut.active || lab.active ? '' : mine ? profile.avatar : ((online.active || online.spectator) && online.players !== 4 && online.avatars ? online.avatars[p] : '');
-      $('pname' + p).innerHTML = (pav ? avInline(pav, 24) + ' ' : '') + esc((names[p] || '…') + (online.active && online.me === p && online.players !== 4 ? ' ' + t('online.you') : '')) + (mine && curTitle() ? '<small class="plvl ttl rk' + ACH.rank(curTitle()) + '">' + esc(achTitle(curTitle())) + '</small>' : '') + (ai.active && !ai.four && !online.active && p === ai.bot && ai.level && ai.level !== 'goody' && !tut.active && !lab.active ? '<small class="plvl">' + esc(t('ai.' + ai.level)) + '</small>' : '');
+      $('pname' + p).innerHTML = (pav ? avInline(pav, 24) + ' ' : '') + esc((names[p] || '…') + (online.active && online.me === p && online.players !== 4 ? ' ' + t('online.you') : '')) + (function (ti) { return ti && ACH.IDS[ti] ? '<small class="plvl ttl rk' + ACH.rank(ti) + '">' + esc(achTitle(ti)) + '</small>' : ''; })(tut.active || lab.active ? '' : mine ? curTitle() : ((online.active || online.spectator) && online.players !== 4 && online.titles ? online.titles[p] : '')) + (ai.active && !ai.four && !online.active && p === ai.bot && ai.level && ai.level !== 'goody' && !tut.active && !lab.active ? '<small class="plvl">' + esc(t('ai.' + ai.level)) + '</small>' : '');
       var tw = state.options.capturesToWin;
       $('caps' + p).innerHTML = tw > 20 ? '' : pips(state.captures[p], tw) + '<span>' + state.captures[p] + '/' + tw + '</span>';   // gomoku: sin capturas
     });
@@ -12990,7 +12991,7 @@ window.NEON_BREAK = {
       },
       onOpen: function () {
         online.quiet = false;
-        if (online.token && online.code) { online.rejoining = true; online.net.send({ t: 'rejoin', code: online.code, token: online.token, avatar: profile.avatar }); }
+        if (online.token && online.code) { online.rejoining = true; online.net.send({ t: 'rejoin', code: online.code, token: online.token, avatar: profile.avatar, title: curTitle() }); }
         else if (online.spectator && online.code) { online.rejoining = true; online.net.send({ t: 'spectate', code: online.code, tcode: online.specT ? online.specT.tcode : undefined, ttoken: online.specT ? online.specT.ttoken || undefined : undefined, name: (online.intent && online.intent.name) || myName() }); }   // se cortó la conexión: vuelve a mirar (con su nombre)
         else if (online.intent) online.net.send(online.intent);
         else if (rooms.open) { requestRooms(); lobbyJoin(); }
@@ -13004,7 +13005,7 @@ window.NEON_BREAK = {
     var url = serverUrl();
     if (!url) { onlineMsg(t('online.noServer')); return; }
     intent.name = myName(); if (intent.t === 'create' || intent.t === 'join') intent.dev = devId();
-    if (intent.t === 'create' || intent.t === 'join' || intent.t === 'rejoin') intent.avatar = profile.avatar;
+    if (intent.t === 'create' || intent.t === 'join' || intent.t === 'rejoin') { intent.avatar = profile.avatar; intent.title = curTitle(); }
     online.intent = intent; online.token = ''; online.code = '';
     onlineMsg(t('online.connecting'));
     var go = function () { if (online.intent !== intent) return; if (!online.net) ensureNet(url); else if (online.net.isOpen()) online.net.send(intent); };
@@ -13023,7 +13024,7 @@ window.NEON_BREAK = {
     }
     clearTimeout(online.awaitTimer); clearClaim();
     online.net = null; online.active = false; online.conn = 'closed'; online.code = ''; online.token = ''; online.me = 0;
-    online.spectator = false; online.specN = 0; online.specList = []; online.cid = ''; online.avatars = {}; online.pids = {}; chatReset(); stopRooms(); fx.length = 0; $('btnSpectateOffer').hidden = true;
+    online.spectator = false; online.specN = 0; online.specList = []; online.cid = ''; online.avatars = {}; online.titles = {}; online.pids = {}; chatReset(); stopRooms(); fx.length = 0; $('btnSpectateOffer').hidden = true;
     online.intent = null; online.specT = null; online.invite = null; online.seek = false; online.rejoining = false; online.mine = false; online.tourney = false; online.over = null; online.score = null; online.awaiting = false; online.rivalLeftAt = 0;
     online.connected = { 1: true, 2: true, 3: true, 4: true }; online.rematch = { 1: false, 2: false, 3: false, 4: false }; online.seat = 0; online.players = 2; online.bots = {}; online.mode = 'classic'; online.ffa = false; seatNames = {};
     clearSession(); updateOnlineButtons(); updateRematchUi();
@@ -13100,7 +13101,7 @@ window.NEON_BREAK = {
     online.players = (m.opts && m.opts.players === 4) ? 4 : 2; online.bots = m.bots || {}; online.ffa = !!(m.opts && m.opts.ffa);
     online.mode = m.opts && m.opts.bullet ? 'bullet' : m.opts && m.opts.blitz ? 'blitz' : (m.opts && m.opts.variant) || 'classic';
     online.rematch = m.rematch || { 1: false, 2: false }; online.awaiting = false;
-    online.avatars = m.avatars || {}; online.pids = m.pids || {}; online.score = m.score || null;
+    online.avatars = m.avatars || {}; online.titles = m.titles || {}; online.pids = m.pids || {}; online.score = m.score || null;
     if (!online.spectator && m.you && online.pids[m.you]) online.cid = online.pids[m.you];         // mi identidad en el chat no cambia aunque la revancha me cambie de asiento
     seatNames = {}; for (var si = 1; si <= nSeats(); si++) seatNames[si] = (m.names && m.names[si]) || '';
     names[1] = teamName(1) || t('player.1'); names[2] = teamName(2);
