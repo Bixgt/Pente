@@ -618,12 +618,13 @@ html[data-theme="galaxia"] { --spr: hue-rotate(151deg); }
 .sq-n { position: absolute; top: -7px; right: -7px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--danger); color: #fff; font-size: 12px; line-height: 20px; text-align: center; font-weight: 800; box-shadow: 0 0 0 2px var(--bg, #000); }
 .sq-n[hidden] { display: none; }
 .nt-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel-2); margin: 8px 0; }
-.nt-main { display: flex; align-items: center; gap: 10px; flex: 1 1 200px; min-width: 0; }
+.nt-main { display: flex; align-items: center; gap: 10px; flex: 1 1 200px; min-width: 0; max-width: 100%; }
 .nt-av:empty { display: none; }
 .nt-av { flex: none; display: inline-flex; width: 34px; height: 34px; }
-.nt-tx { min-width: 0; display: flex; flex-direction: column; }
+.nt-tx { min-width: 0; flex: 1 1 0; display: flex; flex-direction: column; }
 .nt-tx b { overflow-wrap: anywhere; }
-.nt-tx small { color: var(--muted, #9aa); }
+.nt-tx small { color: var(--muted, #9aa); overflow-wrap: anywhere; word-break: break-word; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.nt-row { overflow: hidden; }
 .nt-btns { display: flex; gap: 6px; flex: none; margin-left: auto; }
 .sq:hover, .sq:focus-visible { border-color: var(--accent); }
 .sq:active { transform: translateY(1px); }
@@ -1646,7 +1647,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v170</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v171</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -9027,6 +9028,7 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
     lose:    function () { [392, 330, 262].forEach(function (f, i) { tone(f, 0, 0.3, 'triangle', 0.26, i * 0.14); }); },
     error:   function () { tone(150, 110, 0.12, 'square', 0.12); },
     // subir de nivel: dos notas de campanita, bajitas y cortas (sin onda cuadrada ni acordes largos para que no canse)
+    notify: function () { tone(988, 0, 0.22, 'sine', 0.13, 0); tone(1319, 0, 0.45, 'sine', 0.13, 0.11); tone(1976, 0, 0.3, 'sine', 0.03, 0.11); },
     levelup: function () { tone(784, 0, 0.5, 'sine', 0.16, 0); tone(1175, 0, 0.7, 'sine', 0.15, 0.13); tone(1568, 0, 0.6, 'sine', 0.05, 0.13); tone(2349, 0, 0.35, 'sine', 0.025, 0.26); }
   };
 
@@ -13585,7 +13587,7 @@ window.NEON_BREAK = {
     if (nt.list.length !== n0) ntSave(); return nt.list;
   }
   function ntBadge() {
-    var n = ntLive().length + (socialOk() ? nt.pend + nt.fb.length : 0), b = $('ntBadge'); if (!b) return;
+    var n = ntLive().length + nt.pend + nt.fb.length, b = $('ntBadge'); if (!b) return;
     b.hidden = !n; b.textContent = n > 9 ? '9+' : String(n);
     $('btnNotif').setAttribute('aria-label', t('nt.title') + (n ? ' (' + n + ')' : ''));
   }
@@ -13653,17 +13655,26 @@ window.NEON_BREAK = {
     $('ntClear').hidden = !ntLive().length;
   }
   $('btnNotif').addEventListener('click', function () {
+    try { if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission(); } catch (e) {}
     open('notifOverlay'); ntRender(); ntCheck(); ntFbLoad();
     if (socialOk()) Auth.friendsOverview().then(function (o) { social.ov = o && typeof o === 'object' ? o : social.ov; nt.pend = ((social.ov && social.ov.list) || []).filter(function (x) { return x.status === 'pending' && x.dir === 'in'; }).length; ntBadge(); if ($('notifOverlay').classList.contains('open')) ntRender(); }, function () {});
   });
   $('btnNotifBack').addEventListener('click', function () { open('menuOverlay'); });
   $('ntClear').addEventListener('click', function () { nt.list = []; ntSave(); ntBadge(); ntRender(); });
+  function ntAlert(txt) {                                          // aviso nuevo: suena y, si la app está en segundo plano, sale un aviso del sistema
+    try { sfx('notify'); buzz([40, 60, 40]); } catch (e) {}
+    try { if (document.hidden && 'Notification' in window && Notification.permission === 'granted') { var n = new Notification('Pente', { body: txt, tag: 'pente-nt' }); n.onclick = function () { try { window.focus(); } catch (e) {} n.close(); }; } } catch (e) {}
+  }
+  function ntCacheSave() { try { localStorage.setItem('pente.ntCache', JSON.stringify({ fb: nt.fb, pend: nt.pend })); } catch (e) {} }
   function ntFbLoad() {
-    if (!socialOk()) { nt.fb = []; ntBadge(); return; }
-    Auth.feedbackMine().then(function (rows) { nt.fb = rows || []; ntBadge(); if ($('notifOverlay').classList.contains('open')) ntRender(); }, function () {});     // si todavía no se corrió feedback_reply.sql, no pasa nada
+    if (!socialOk()) return;
+    Auth.feedbackMine().then(function (rows) { rows = rows || []; var old = nt.fb.map(function (x) { return x.id; }), fresh = rows.filter(function (x) { return old.indexOf(x.id) < 0; }); nt.fb = rows; ntCacheSave(); if (fresh.length) ntAlert(t('nt.fbTitle')); ntBadge(); if ($('notifOverlay').classList.contains('open')) ntRender(); }, function () {});     // si todavía no se corrió feedback_reply.sql, no pasa nada
   }
   setInterval(ntFbLoad, 300000); document.addEventListener('visibilitychange', function () { if (!document.hidden) setTimeout(ntFbLoad, 1500); });
-  ntLoad(); setTimeout(ntFbLoad, 2500); setTimeout(function () { ntBadge(); if (socialOk()) frBadgeRefresh(true); }, 1500);
+  ntLoad();
+  try { var nc = JSON.parse(localStorage.getItem('pente.ntCache') || 'null'); if (nc) { nt.fb = Array.isArray(nc.fb) ? nc.fb : []; nt.pend = Math.min(99, Number(nc.pend) || 0); nt.pendKnown = true; } } catch (e) {}      // el numerito aparece al instante con lo último que se sabía; después se actualiza
+  ntBadge();
+  (function () { var tries = 0, iv = setInterval(function () { tries++; if (socialOk()) { clearInterval(iv); ntFbLoad(); frBadgeRefresh(true); } else if (tries > 25) { clearInterval(iv); nt.fb = []; nt.pend = 0; ntCacheSave(); ntBadge(); } }, 1500); })();
   function challengeOpen(p) {
     if (!p || !p.id) return; ch = { id: p.id, name: p.name };
     $('chTitle').textContent = t('ch.title', { name: p.name });
@@ -14597,13 +14608,13 @@ window.NEON_BREAK = {
   var frBadgeAt = 0;
   function frBadgeSet(n) { var b = $('frBadge'); b.hidden = !n; b.textContent = n ? String(n) : ''; }
   function frBadgeRefresh(force) {
-    if (!socialOk()) { nt.pend = 0; ntBadge(); frBadgeSet(0); return; }
+    if (!socialOk()) { frBadgeSet(0); return; }
     if (!force && Date.now() - frBadgeAt < 60000) return;
     frBadgeAt = Date.now();
     Auth.friendsOverview().then(function (o) {
       social.ov = o && typeof o === 'object' ? o : social.ov;
       var pend = ((o && o.list) || []).filter(function (x) { return x.status === 'pending' && x.dir === 'in'; }).length;
-      nt.pend = pend; ntBadge(); frBadgeSet(pend + dmUnreadTotal());
+      if (pend > nt.pend && nt.pendKnown) ntAlert(t('nt.friend')); nt.pend = pend; nt.pendKnown = true; ntCacheSave(); ntBadge(); frBadgeSet(pend + dmUnreadTotal());
       dmUnreadLoad(function () { frBadgeSet(pend + dmUnreadTotal()); });
     }, function () {});
   }
