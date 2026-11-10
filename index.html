@@ -540,6 +540,27 @@ html[data-theme="papel"] .tn-p.l span:first-child { text-decoration: line-throug
   #localOverlay .rules-card .check:nth-of-type(1) { grid-column: 1; grid-row: 2; } #localOverlay .rules-card .check:nth-of-type(2) { grid-column: 1; grid-row: 3; } #localOverlay .rules-card .check:nth-of-type(3) { grid-column: 2; grid-row: 2; }
   #localOverlay .rules-card .oc-size { grid-column: 3; grid-row: 2 / span 3; }
 }
+/* ---- sprites propios en lugar de emojis ---- */
+#localOverlay .oc-players > .lbl::before, #localOverlay .oc-modes > .lbl::before, #localOverlay .oc-comp > .lbl::before, #localOverlay .oc-bot > .lbl::before, #localOverlay .oc-title::before, #localOverlay .rules-card .oc-size > .lbl::before { content: ''; display: inline-block; flex: none; width: 34px; height: 34px; filter: none; background: center / contain no-repeat; }
+#localOverlay .oc-players > .lbl::before { background-image: url(ui/players.webp); } #localOverlay .oc-modes > .lbl::before { background-image: url(ui/gamepad.webp); }
+#localOverlay .oc-comp > .lbl::before { background-image: url(ui/robot.webp); } #localOverlay .oc-bot > .lbl::before { background-image: url(ui/target.webp); }
+#localOverlay .oc-title::before { background-image: url(ui/sliders.webp); } #localOverlay .rules-card .oc-size > .lbl::before { background-image: url(ui/timer.webp); width: 46px; height: 46px; }
+#localOverlay .opt-gear { font-size: 0; width: 66px; height: 66px; flex: none; background: url(ui/gear.webp) center / contain no-repeat; -webkit-background-clip: border-box; background-clip: border-box; color: transparent; }
+#localOverlay #localPlayers .seg-opt::before { content: ''; display: block; width: 74px; height: 44px; font-size: 0; background: center / contain no-repeat; }
+#localOverlay #localPlayers [data-pl="2"]::before { background-image: url(ui/players.webp); }
+#localOverlay #localPlayers [data-pl="4"]::before { background-image: url(ui/players.webp), url(ui/players.webp); background-size: 46% 100%, 46% 100%; background-position: left center, right center; width: 96px; }
+#localOverlay #localPlayers [data-pl="5"]::before { background-image: url(ui/triples.webp); }
+#localOverlay .modePicker .seg-opt::before, #localOverlay #localMode .seg-opt::before { content: ''; flex: none; width: 28px; height: 28px; font-size: 0; background: center / contain no-repeat; }
+#localOverlay .modePicker [data-gm="classic"]::before { background-image: url(ui/trophy.webp); } #localOverlay .modePicker [data-gm="triples"]::before { background-image: url(ui/triples.webp); }
+#localOverlay .modePicker [data-gm="gomoku"]::before { background-image: url(ui/hash.webp); } #localOverlay .modePicker [data-gm="blitz"]::before { background-image: url(ui/bolt.webp); } #localOverlay .modePicker [data-gm="bullet"]::before { background-image: url(ui/timer.webp); }
+#localOverlay #localMode [data-val="person"]::before { background-image: url(ui/person.webp); } #localOverlay #localMode [data-val="ai"]::before { background-image: url(ui/robot.webp); }
+#localOverlay .rules-card .check input { border: 1.5px solid color-mix(in srgb, var(--accent) 60%, var(--line)); }
+#localOverlay .rules-card .check input:checked { background: url(ui/check.webp) center / contain no-repeat; border-color: transparent; }
+#localOverlay .rules-card .check input:checked::after { content: none; }
+#localOverlay #btnStart::before { content: ''; display: inline-block; width: 22px; height: 22px; margin-right: 12px; vertical-align: -4px; background: url(ui/play.webp) center / contain no-repeat; font-size: 0; }
+#localOverlay::before { width: 170px; height: 250px; opacity: .8; background: url(ui/leafR.webp) no-repeat right top / contain; transform: none; top: 0; right: 10px; bottom: auto; left: auto; }
+#localOverlay::after { width: 220px; height: 200px; opacity: .8; background: url(ui/leafL.webp) no-repeat left bottom / contain; transform: none; bottom: 0; left: 10px; top: auto; right: auto; }
+@media (max-width: 899px) { #localOverlay::before, #localOverlay::after { display: none; } }
 #localOverlay .btns { display: flex; width: 100%; }
 @media (min-width: 900px) { #localOverlay #btnLocalBack { display: none; } }
 @media (max-width: 899px) { #localOverlay .rules-card .oc-size { order: 9; margin-top: 8px; } }
@@ -6604,9 +6625,9 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     "theme.halloween": "Halloween",
     "theme.galaxia": "Galaxia",
     "theme.playa": "Playa",
-    "mode.bullet": "Bullet 🚀",
+    "mode.bullet": "Bullet",
     "mode.hint.bullet": "Pente clásico con 1 minuto por jugador en total y sin tiempo por jugada. Si se te acaba el reloj, perdés.",
-    "mode.blitz": "Blitz ⚡",
+    "mode.blitz": "Blitz",
     "mode.hint.classic": "El Pente de siempre: capturás pares; ganás con 5 en línea o 5 pares.",
     "mode.hint.pairs3": "Se capturan pares (1 punto) y tríos (2 puntos). Ganás con 5 puntos o 5 en línea.",
     "mode.hint.triples": "Solo se capturan tríos (X O O O X). Ganás con 3 tríos capturados o 5 en línea. Los pares no se tocan.",
@@ -6873,9 +6894,9 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     "theme.halloween": "Halloween",
     "theme.galaxia": "Galaxy",
     "theme.playa": "Beach",
-    "mode.bullet": "Bullet 🚀",
+    "mode.bullet": "Bullet",
     "mode.hint.bullet": "Classic Pente with 1 minute per player in total and no per-move time. If your clock runs out, you lose.",
-    "mode.blitz": "Blitz ⚡",
+    "mode.blitz": "Blitz",
     "mode.hint.classic": "Regular Pente: capture pairs; win with 5 in a row or 5 pairs.",
     "mode.hint.pairs3": "Pairs (1 point) and triples (2 points) can be captured. Win with 5 points or 5 in a row.",
     "mode.hint.triples": "Only triples are captured (X O O O X). Win with 3 captured triples or 5 in a row. Pairs are safe.",
