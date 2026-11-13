@@ -1702,7 +1702,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span><b class="newb" id="nwProfile" hidden></b></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v179</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v180</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -3828,7 +3828,7 @@ window.GALAXY_GAME = {
     var rng = mulberry(hash('pente-daily:' + key)), lo = 3, hi = SIZE - 4, tries = 0;
     for (;;) {
       tries++;
-      var s = P.createGame({ size: SIZE, tournamentRule: false }), setup = [], seen = {}, ok = true;
+      var s = P.createGame({ size: SIZE, tournamentRule: false, exactFive: true }), setup = [], seen = {}, ok = true;
       while (setup.length < SETUP_STONES) {
         var x = lo + Math.floor(rng() * (hi - lo + 1)), y = lo + Math.floor(rng() * (hi - lo + 1)), k = x + ',' + y;
         if (seen[k]) continue;
@@ -3844,7 +3844,7 @@ window.GALAXY_GAME = {
     }
   }
   function startState(sp) {                                              // partida lista para jugar desde la posición del día
-    var s = P.createGame({ size: sp.size, tournamentRule: false });
+    var s = P.createGame({ size: sp.size, tournamentRule: false, exactFive: true });
     sp.setup.forEach(function (m) { s = P.playMove(s, m[0], m[1], s.current).state; });
     return s;
   }
@@ -11382,7 +11382,7 @@ window.NEON_BREAK = {
   function dailyApplyView(m) {                                 // reconstruye la partida del servidor: posición del día + jugadas hechas
     tutStop(); aiStop(); videoDiscard(); endSeen = recorded = false;
     if (online.net) leaveOnline(false);
-    var s2 = P.createGame({ size: m.size, tournamentRule: false });
+    var s2 = P.createGame({ size: m.size, tournamentRule: false, exactFive: true });
     m.setup.forEach(function (c) { s2 = P.playMove(s2, c[0], c[1], s2.current).state; });
     m.moves.forEach(function (c) { var r2 = P.playMove(s2, c[0], c[1], c[2]); if (r2.ok) s2 = r2.state; });
     gameMode = 'classic'; state = s2; localOver = null; daily.info = m; daily.result = null; daily.wantPlay = false;
@@ -11812,7 +11812,7 @@ window.NEON_BREAK = {
   }
   /* ---------- Logros (reglas en achievements.js) ---------- */
   var achTimer = 0, achQueue = [];
-  function achCtx() { return { stats: profile.stats || {}, level: XP.levelOf(myXp().t).level }; }      // el nivel REAL (el modo "todo desbloqueado" no regala logros)
+  function achCtx() { return { stats: ownStats(), level: XP.levelOf(myXp().t).level }; }      // el nivel REAL (el modo "todo desbloqueado" no regala logros)
   function achCount() { return ACH.clean(profile.stats && profile.stats.ach).u.filter(function (i) { return !ACH.isHidden(i); }).length; }
   function achSave(next) { profile.stats = Object.assign({}, profile.stats, { ach: next }); saveProfile(); scheduleSync(2500); }
   function achCheck() {
@@ -15438,9 +15438,10 @@ window.NEON_BREAK = {
       if (cur.prefsAt !== snap.prefsAt) { np.prefsAt = cur.prefsAt; sync.dirty = true; }
       np.email = Auth.user.email;
       profile = PP.normalize(np); saveProfile();
+      try { achCheck(); } catch (e) {}                                       // con lo verificado recién llegado puede haber logros online pendientes (Primera sangre…)
       Auth.myUnlock().then(function (v) { if (v !== cloudUnlock && Auth.user && Auth.user.id === uid) { cloudUnlock = v; levelsChanged(); } }, function () {});
       if (m.prefs && cur.prefsAt === snap.prefsAt) applyRemotePrefs(m.prefs);
-      applyProfileName();
+      applyProfileName(); try { if (tno.token && tno.code && tno.net && tno.net.isOpen()) tnoRejoin(); } catch (e) {}
       if (profile.name !== oldName) { try { localStorage.setItem('pente.name', profile.name); } catch (e) {} }
       renderProfileBtn();
       if (JSON.stringify(profile.stats && profile.stats.xp) !== xpBefore) levelsChanged();      // el nivel llegó de la nube: se destraban los tableros, fichas y temas sin tener que recargar
@@ -16638,6 +16639,7 @@ window.NEON_BREAK = {
   function tnoLoadSess() { try { var x = JSON.parse(localStorage.getItem(TNO_KEY) || 'null'); if (x && /^[A-Z0-9]{5}$/.test(x.code) && /^[0-9a-f]{32}$/.test(x.token)) { tno.code = x.code; tno.token = x.token; } } catch (e) {} }
   function tnoNote(txt, bad) { var n = $('tnoMsg'); n.textContent = txt || ''; n.classList.toggle('err', !!bad); var l = $('tnoListMsg'); if (l) { l.textContent = txt || ''; l.classList.toggle('err', !!bad); } }
   function tnoErrText(m) { var k = 'tno.err.' + m.code; var x = t(k); if (x === k) x = t('tno.err.other'); return x + (m.code === 'TN_INVALID' && m.detail ? m.detail : ''); }
+  function tnoRejoin() { tnoWithJwt({ t: 'trejoin', code: tno.code, token: tno.token, name: Auth && Auth.user ? profile.name || '' : '' }, function (o) { if (tno.net) tno.net.send(o); }); }      // con sesión, el servidor pasa tu lugar a tu cuenta y tu nombre real
   function tnoWithJwt(o, cb) { if (Auth && Auth.user) Auth.accessToken().then(function (tk) { if (tk) o.jwt = tk; cb(o); }, function () { cb(o); }); else cb(o); }
   function tnoSend(o) { if (!tno.net || !tno.net.isOpen()) return false; if (!o.code) o.code = tno.code; if (!o.token) o.token = tno.token; return tno.net.send(o); }
   function tnoConnect() {
@@ -16646,7 +16648,7 @@ window.NEON_BREAK = {
     tno.net = window.PenteNet.connect(url, {
       onState: function (s) { tno.conn = s; tnoRender(); },
       onOpen: function () {
-        if (tno.token && tno.code) tno.net.send({ t: 'trejoin', code: tno.code, token: tno.token });
+        if (tno.token && tno.code) tnoRejoin();
         else if (tno.view && tno.code) tno.net.send({ t: 'tspectate', code: tno.code });
         else if (tno.intent) tnoWithJwt(JSON.parse(JSON.stringify(tno.intent)), function (o) { if (tno.net) tno.net.send(o); });
       },
@@ -16716,7 +16718,7 @@ window.NEON_BREAK = {
       open('tnoOverlay'); tnoNote(t('tno.err.other'), true);
     }, 10000);
   }
-  function tnoOpen() { tnoRender(); open('tnoOverlay'); tnoLoadFriends(); if (tno.token && tno.code && tno.net && tno.net.isOpen()) tno.net.send({ t: 'trejoin', code: tno.code, token: tno.token }); }      // pide la foto al día por si se perdió algo
+  function tnoOpen() { tnoRender(); open('tnoOverlay'); tnoLoadFriends(); if (tno.token && tno.code && tno.net && tno.net.isOpen()) tnoRejoin(); }      // pide la foto al día por si se perdió algo
   function tnoRules(g) { return invRules(g); }
   /* --- lista de torneos: "volver a mi torneo" --- */
   function tnoRenderLive() {
