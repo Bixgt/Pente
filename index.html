@@ -1702,7 +1702,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span><b class="newb" id="nwProfile" hidden></b></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v184</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v185</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -1801,6 +1801,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
     <div id="tnoRun">
       <div class="tn-tabs" id="tnoTabs"><button type="button" data-t="fx" aria-pressed="true" data-i18n="tn.fixture"></button><button type="button" data-t="st" aria-pressed="false" data-i18n="tn.table"></button></div>
       <div id="tnoBody"></div>
+      <div class="tn-row"><button type="button" class="btn small primary" id="tnoPng" data-i18n="tn.png"></button></div>
     </div>
     <div id="tnoChatBox" class="tno-chat" hidden>
       <h3 class="tn-h" data-i18n="tno.chat"></h3>
@@ -16647,8 +16648,8 @@ window.NEON_BREAK = {
     g.textAlign = 'right'; g.fillStyle = C.muted; g.font = '400 11px ' + FONT; g.fillText('Pente', W - 6, H - 7);
     return cv;
   }
-  function tnDownloadPng() {
-    var S = tnGet(); if (!S) return;
+  function tnDownloadPng(S0) {
+    var S = S0 && S0.cfg ? S0 : tnGet(); if (!S) return;
     var go = function () {
       var cv = tnDrawPng(S), slug = S.cfg.name.toLowerCase().replace(/[^a-z0-9áéíóúñü]+/gi, '-').replace(/^-|-$/g, '') || 'torneo';
       var save = function (blob) {
@@ -16660,7 +16661,8 @@ window.NEON_BREAK = {
     if (document.fonts && document.fonts.load) Promise.all([document.fonts.load("400 17px PenteSans"), document.fonts.load("700 17px PenteSans")]).then(go, go); else go();
   }
   window.__tnPng = function (n) { var S = tnGet(); return S ? tnDrawPng(S).toDataURL('image/png') : null; };
-  $('tnPng').addEventListener('click', tnDownloadPng);
+  $('tnPng').addEventListener('click', function () { tnDownloadPng(); });
+  $('tnoPng').addEventListener('click', function () { if (tno.snap && tno.snap.S) tnDownloadPng(tno.snap.S); });
   $('tnUndo').addEventListener('click', function () { tnApply(function (st) { return PT.undo(st); }); });
   $('tnWdBtn').addEventListener('click', function () {
     var id = $('tnWd').value, S = tnGet(); if (!id || !S) return;
