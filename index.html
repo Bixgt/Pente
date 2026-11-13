@@ -1227,6 +1227,44 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
 .ach-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .ach-chip { font-size: 11.5px; padding: 3px 9px; border-radius: 99px; border: 1px solid var(--line); opacity: .6; }
 .ach-chip.on { opacity: 1; border-color: var(--accent); }
+/* Sala de trofeos (v177): galería con medallas dibujadas por código; el color de cada medalla sigue la rareza (Musgo, Mar, Brasa, Orquídea, Eclipse) igual que los títulos */
+#achOverlay .screen-body { width: min(100%, 1120px); }
+.tr-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.tr-head h2 { margin: 0; }
+.tr-count { text-align: right; line-height: 1.05; font-variant-numeric: tabular-nums; } .tr-count b { font-size: 30px; } .tr-count small { display: block; color: var(--muted); font-size: 12px; }
+.tr-tools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 4px 0 6px; }
+.tr-f { padding: 7px 13px; border-radius: 99px; border: 1px solid var(--line); background: var(--panel); color: inherit; font: inherit; font-size: 13px; cursor: pointer; }
+.tr-f[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 20%, var(--panel)); font-weight: 700; }
+.tr-sort { margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.tr-sort select { font: inherit; font-size: 13px; color: inherit; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 6px 8px; }
+.tr-h { margin: 22px 0 10px; font-size: 15px; letter-spacing: .02em; opacity: .9; }
+.tr-soon { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 12px; }
+.tr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; }
+.tr-card { position: relative; display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 16px; border: 1px solid var(--line); background: var(--panel); overflow: hidden; }
+.tr-card.has { border-color: color-mix(in srgb, var(--rk, var(--accent)) 45%, var(--line)); }
+.tr-card.full { border-color: var(--rk); background: linear-gradient(160deg, color-mix(in srgb, var(--rk) 12%, var(--panel)), var(--panel)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--rk) 35%, transparent), 0 8px 24px -10px var(--rk); }
+.tr-card.locked .tr-top, .tr-card.locked .tr-meta { opacity: .62; }
+.tr-top { display: flex; gap: 14px; align-items: center; }
+.tr-tx { min-width: 0; display: flex; flex-direction: column; gap: 3px; } .tr-tx b { font-size: 15.5px; line-height: 1.2; } .tr-tx small { opacity: .75; line-height: 1.3; }
+.tr-bar { height: 8px; margin: 0; } .tr-bar i { display: block; height: 100%; }
+.tr-meta { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; opacity: .85; font-variant-numeric: tabular-nums; }
+.tr-tiers { display: flex; gap: 6px; align-items: center; margin-top: 2px; } .tr-tiers .mdl { cursor: help; }
+.tr-card.soon { align-items: center; text-align: center; background: linear-gradient(165deg, color-mix(in srgb, var(--rk) 16%, var(--panel)), var(--panel)); border-color: color-mix(in srgb, var(--rk) 40%, var(--line)); }
+.tr-card.soon .tr-tx { align-items: center; } .tr-card.soon .tr-bar, .tr-card.soon .tr-meta { width: 100%; }
+.tr-leg { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin: 22px 0 4px; font-size: 12.5px; color: var(--muted); } .tr-leg span { display: inline-flex; align-items: center; gap: 6px; }
+.tr-none { padding: 26px 8px; text-align: center; color: var(--muted); }
+.mdl { position: relative; width: var(--s, 64px); height: var(--s, 64px); flex: none; display: inline-grid; place-items: center; }
+.mdl svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.mdl i { position: relative; font-style: normal; font-size: calc(var(--s, 64px) * .4); line-height: 1; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .55)); }
+.mdl.on { filter: drop-shadow(0 0 7px color-mix(in srgb, var(--rk) 50%, transparent)); }
+.mdl.lock svg { filter: grayscale(1) brightness(.42); } .mdl.lock i { opacity: .3; filter: grayscale(1); }
+.mdl.lock::after { content: '🔒'; position: absolute; right: -3px; bottom: -3px; font-size: calc(var(--s, 64px) * .3); }
+.mdl.sm { --s: 30px; } .mdl.sm.lock::after { content: none; }
+@media (prefers-reduced-motion: no-preference) { .mdl.r5.on svg { animation: mdlGlow 3.4s ease-in-out infinite; } }
+@keyframes mdlGlow { 50% { filter: brightness(1.22) saturate(1.15); } }
+@keyframes mdlPop { 0% { transform: scale(.15) rotate(-30deg); opacity: 0; } 55% { transform: scale(1.3) rotate(10deg); opacity: 1; } 100% { transform: none; } }
+.ach-toast { display: flex; align-items: center; gap: 12px; } .ach-toast .mdl { animation: mdlPop .9s cubic-bezier(.2, 1.3, .4, 1) both; }
+
 
 /* Neón: fondo arcade / cyberpunk del menú (neon-menu.js) */
 html[data-theme="glow"] #menuBg { opacity: 1; -webkit-mask-image: none; mask-image: none; }
@@ -1648,7 +1686,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v176</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v177</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -7284,9 +7322,12 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     "ttl.label": "Título", "ttl.none": "Sin título", "ttl.hint": "Elegí uno de los que ganaste con tus logros: aparece en tu perfil y debajo de tu nombre al jugar.", "ttl.empty": "Todavía no ganaste logros. Cada logro que consigas te da un título para usar.",
     "ach.sub": "Se ganan jugando. Cada tablero, cada jugada y cada día suman.",
     "ach.count": "{a} de {b} logros",
-    "ach.new1": "🏅 Logro nuevo: {name}",
-    "ach.newN": "🏅 {n} logros nuevos",
+    "ach.new1": "Logro nuevo: {name}",
+    "ach.newN": "{n} logros nuevos",
     "ach.next": "Próximo: {name}",
+    "ach.f.all": "Todos", "ach.f.prog": "En progreso", "ach.f.done": "Completados", "ach.f.board": "Por tablero",
+    "ach.sort": "Ordenar:", "ach.s.near": "Más cerca de lograrse", "ach.s.cat": "Por categoría",
+    "ach.soon": "Estás a punto de conseguir", "ach.none": "Nada por acá todavía. Jugá una partida y volvé.", "ach.left": "Te faltan {n}",
     "ach.all": "¡Completo!",
     "ach.note": "Se guardan en tu perfil y viajan con tu cuenta. Sirven para motivar, no para competir. Los contadores de jugadas arrancan desde que se instaló esta versión.",
     "ach.g.board": "Tableros",
@@ -7389,9 +7430,12 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     "ttl.label": "Title", "ttl.none": "No title", "ttl.hint": "Pick one you earned with your achievements: it shows on your profile and under your name when you play.", "ttl.empty": "You haven't earned any achievements yet. Each one you get unlocks a title to use.",
     "ach.sub": "Earned by playing. Every board, every move and every day counts.",
     "ach.count": "{a} of {b} achievements",
-    "ach.new1": "🏅 New achievement: {name}",
-    "ach.newN": "🏅 {n} new achievements",
+    "ach.new1": "New achievement: {name}",
+    "ach.newN": "{n} new achievements",
     "ach.next": "Next: {name}",
+    "ach.f.all": "All", "ach.f.prog": "In progress", "ach.f.done": "Completed", "ach.f.board": "By board",
+    "ach.sort": "Sort:", "ach.s.near": "Closest to unlocking", "ach.s.cat": "By category",
+    "ach.soon": "You're about to unlock", "ach.none": "Nothing here yet. Play a game and come back.", "ach.left": "{n} to go",
     "ach.all": "Complete!",
     "ach.note": "Saved to your profile and synced with your account. For motivation, not competition. Move counters start from when this version was installed.",
     "ach.g.board": "Boards",
@@ -11522,9 +11566,11 @@ window.NEON_BREAK = {
     $('profTitleHint').textContent = u.length ? t('ttl.hint') : t('ttl.empty');
   }
   function achToast(ids) {
-    var el = $('achToast'); if (!el) { el = document.createElement('div'); el.id = 'achToast'; el.className = 'xptoast ach-toast'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
-    el.textContent = ids.length === 1 ? t('ach.new1', { name: achTitle(ids[0]) }) : t('ach.newN', { n: ids.length });
-    el.classList.add('show'); clearTimeout(achTimer); achTimer = setTimeout(function () { el.classList.remove('show'); }, 4200);
+    var el0 = $('achToast'); if (!el0) { el0 = document.createElement('div'); el0.id = 'achToast'; el0.className = 'xptoast ach-toast'; el0.setAttribute('role', 'status'); document.body.appendChild(el0); }
+    el0.innerHTML = ''; var f0 = ACH.IDS[ids[0]];
+    el0.appendChild(mdl(ACH.rank(ids[0]), f0 ? f0.fam.id : '', { size: 46 }));
+    var tx = document.createElement('span'); tx.textContent = ids.length === 1 ? t('ach.new1', { name: achTitle(ids[0]) }) : t('ach.newN', { n: ids.length }); el0.appendChild(tx);
+    el0.classList.add('show'); clearTimeout(achTimer); achTimer = setTimeout(function () { el0.classList.remove('show'); }, 4600);
     sfx('levelup'); buzz([10, 40, 10]);
   }
   function achGame(me, mode) {                                     // al terminar una partida: tablero usado y jugadas que hizo `me`
@@ -11546,30 +11592,77 @@ window.NEON_BREAK = {
     achAdd({}, ev);
   }
   var ACH_GROUP_THEME = { ga: 'galaxia', ha: 'halloween', ja: 'jardin', pl: 'playa', pa: 'papel', ne: 'glow' };
+  var ACH_VIEW = { f: 'all', s: 'near' };
+  var ACH_GLYPH = { ga: '🪐', ha: '🎃', ja: '🌷', pl: '🌊', pa: '📜', ne: '⚡', l6: '🎯', cp: '⚔️', tr: '🔺', db: '✌️', cb: '🔄', fs: '⏱️', a1: '🌱', a2: '🙂', a3: '🧠', a4: '🔥', gy: '👑', on: '🌐', tp: '🎟️', td: '🥊', tg: '🏆', fr: '🤝', ds: '📅', lv: '⭐', co: '🎨', mo: '🎮' };
+  var MDL_SHAPE = {1:'<circle cx="32" cy="32" r="29" fill="url(#mg1)" stroke="#2c4a22" stroke-width="1.5"/>',2:'<circle cx="32" cy="32" r="29" fill="url(#mg2)" stroke="#124852" stroke-width="1.5"/>',3:'<polygon points="32.0,2.0 37.9,6.1 45.0,5.0 48.6,11.2 55.5,13.3 56.0,20.5 61.2,25.3 58.6,32.0 61.2,38.7 56.0,43.5 55.5,50.7 48.6,52.8 45.0,59.0 37.9,57.9 32.0,62.0 26.1,57.9 19.0,59.0 15.4,52.8 8.5,50.7 8.0,43.5 2.8,38.7 5.4,32.0 2.8,25.3 8.0,20.5 8.5,13.3 15.4,11.2 19.0,5.0 26.1,6.1" fill="url(#mg3)" stroke="#6b3510" stroke-width="1.2" stroke-linejoin="round"/>',4:'<polygon points="32.0,2.0 58.0,17.0 58.0,47.0 32.0,62.0 6.0,47.0 6.0,17.0" fill="url(#mg4)" stroke="#40185f" stroke-width="1.5" stroke-linejoin="round"/>',5:'<polygon points="32.0,1.0 38.8,11.1 50.2,6.9 49.8,19.1 61.5,22.4 54.0,32.0 61.5,41.6 49.8,44.9 50.2,57.1 38.8,52.9 32.0,63.0 25.2,52.9 13.8,57.1 14.2,44.9 2.5,41.6 10.0,32.0 2.5,22.4 14.2,19.1 13.8,6.9 25.2,11.1" fill="url(#mg5)" stroke="#6e4a08" stroke-width="1.2" stroke-linejoin="round"/>'}, MDL_INNER = {1:'#223b1a',2:'#0f3a43',3:'#4a2410',4:'#2e1247',5:'#1a1030'}, MDL_RIM = {1:'#cfe9bf',2:'#a8e6ef',3:'#ffd0a0',4:'#ecc4ff',5:'#fff3b8'};
+  function mdlDefs() {                                             // degradés de los metales: se definen una sola vez para todas las medallas
+    if ($('mdlDefs')) return;
+    var C = { 1: ['#cfe9bf', '#8fc27a', '#4a7a3a'], 2: ['#c3f0f6', '#43b8c8', '#1d6f7c'], 3: ['#ffd9b0', '#f09a45', '#a8561a'], 4: ['#f0cfff', '#c068f0', '#6b2a9a'], 5: ['#fff6c4', '#ffcf5a', '#b57d12'] }, h = '';
+    for (var r = 1; r <= 5; r++) h += '<linearGradient id="mg' + r + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + C[r][0] + '"/><stop offset=".5" stop-color="' + C[r][1] + '"/><stop offset="1" stop-color="' + C[r][2] + '"/></linearGradient>';
+    h += '<radialGradient id="mgIn" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></radialGradient>';
+    var d = document.createElement('div'); d.id = 'mdlDefs'; d.setAttribute('aria-hidden', 'true'); d.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
+    d.innerHTML = '<svg width="0" height="0"><defs>' + h + '</defs></svg>'; document.body.appendChild(d);
+  }
+  function mdl(rank, fam, o) {                                     // medalla: la forma y el metal dependen de la rareza (1-5); el dibujo del centro, del logro
+    o = o || {}; mdlDefs(); rank = Math.max(1, Math.min(5, rank | 0 || 1));
+    var m = document.createElement('span'); m.className = 'mdl rk' + rank + ' r' + rank + (o.lock ? ' lock' : ' on') + (o.sm ? ' sm' : '');
+    if (o.size) m.style.setProperty('--s', o.size + 'px');
+    m.innerHTML = '<svg viewBox="0 0 64 64" aria-hidden="true">' + MDL_SHAPE[rank] + '<circle cx="32" cy="32" r="19.5" fill="' + MDL_INNER[rank] + '" stroke="' + MDL_RIM[rank] + '" stroke-width="1.4" stroke-opacity=".8"/><circle cx="32" cy="32" r="19.5" fill="url(#mgIn)"/><path d="M15 26a19 19 0 0 1 14-11" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="2" stroke-linecap="round"/></svg>' + (o.sm ? '' : '<i aria-hidden="true">' + (ACH_GLYPH[fam] || '🏅') + '</i>');
+    if (o.title) { m.title = o.title; m.setAttribute('role', 'img'); m.setAttribute('aria-label', o.title); }
+    return m;
+  }
+  function achFam(f) {                                             // lo que hace falta para dibujar una familia de logros
+    var done = f.tiers.filter(function (x) { return x.done; }), next = f.tiers.filter(function (x) { return !x.done; })[0], top = done.length ? done[done.length - 1] : null, shown = next || f.tiers[f.tiers.length - 1];
+    var frac = next ? Math.min(1, f.value / next.n) : 1;
+    return { f: f, done: done, next: next, top: top, shown: shown, frac: frac, full: !next, started: !!(done.length || f.value > 0) };
+  }
+  function achCard(a, soon) {
+    var f = a.f, rk = ACH.rank(a.shown.id), medalRk = a.top ? ACH.rank(a.top.id) : rk;
+    var card = el('div', 'tr-card' + (a.full ? ' full' : '') + (a.done.length ? ' has' : '') + (a.started ? '' : ' locked') + (soon ? ' soon' : '')); card.className += ' rk' + rk;
+    var top = el('div', 'tr-top'); top.appendChild(mdl(a.top ? medalRk : rk, f.id, { size: soon ? 78 : 66, lock: !a.top }));
+    var tx = el('div', 'tr-tx'), desc = t('ach.d.' + (f.group === 'board' ? 'board' : f.id), { n: a.shown.n, board: f.theme ? t('theme.' + f.theme) : '' });
+    tx.appendChild(el('b', '', achTitle(a.shown.id))); tx.appendChild(el('small', '', desc)); top.appendChild(tx); card.appendChild(top);
+    var bar = el('div', 'xpbar tr-bar'), fill = el('i'); fill.style.width = Math.round(100 * a.frac) + '%'; bar.appendChild(fill); card.appendChild(bar);
+    var meta = el('div', 'tr-meta');
+    if (a.next) { meta.appendChild(el('span', '', Math.min(f.value, a.next.n) + ' / ' + a.next.n)); meta.appendChild(el('span', '', soon ? t('ach.left', { n: Math.max(0, a.next.n - f.value) }) : Math.round(100 * a.frac) + '%')); }
+    else { meta.appendChild(el('span', '', t('ach.all'))); meta.appendChild(el('span', '', '100%')); }
+    card.appendChild(meta);
+    if (!soon && f.tiers.length > 1) {                              // los escalones de la familia, como medallitas (con el nombre al apoyar el dedo o el mouse)
+      var ti = el('div', 'tr-tiers'); f.tiers.forEach(function (x) { ti.appendChild(mdl(ACH.rank(x.id), f.id, { sm: true, lock: !x.done, title: achTitle(x.id) + (x.done ? ' ✓' : '') })); }); card.appendChild(ti);
+    }
+    return card;
+  }
   function achRender() {
-    var cur = ACH.clean(profile.stats && profile.stats.ach), prog = ACH.progress(cur, achCtx()), got = cur.u.length, tot = ACH.total();
-    $('achSub').textContent = t('ach.count', { a: got, b: tot }); $('achFill').style.width = Math.round(100 * got / tot) + '%';
+    mdlDefs();
+    var cur = ACH.clean(profile.stats && profile.stats.ach), prog = ACH.progress(cur, achCtx()), got = cur.u.length, tot = ACH.total(), host = $('achOverlay'), keep = host ? host.scrollTop : 0;
+    $('achSub').textContent = t('ach.count', { a: got, b: tot });
+    $('achFill').style.width = Math.round(100 * got / tot) + '%';
     var box = $('achBody'); box.innerHTML = '';
-    var lg = el('div', 'ach-legend'); lg.appendChild(el('small', '', t('ach.legend'))); var lgr = el('div', 'ttl-list'); for (var rk = 1; rk <= 5; rk++) { var lc = el('span', 'ttl-chip rk' + rk, t('ach.rar.' + rk)); lgr.appendChild(lc); } lg.appendChild(lgr); box.appendChild(lg);
-    ACH.GROUPS.forEach(function (g) {
-      var fams = prog.filter(function (f) { return f.group === g; }); if (!fams.length) return;
-      var sec = el('section', 'ach-grp'); sec.appendChild(el('h3', 'ach-h', t('ach.g.' + g)));
-      fams.forEach(function (f) {
-        var done = f.tiers.filter(function (x) { return x.done; }), next = f.tiers.filter(function (x) { return !x.done; })[0], card = el('div', 'ach-card' + (next ? '' : ' full') + (done.length ? ' has' : ''));
-        var top = done.length ? done[done.length - 1] : f.tiers[0];
-        var head = el('div', 'ach-top'); head.appendChild(el('span', 'ach-medal' + (done.length ? ' rk' + ACH.rank(top.id) : ''), done.length ? '🏅' : '🔒'));
-        var tx = el('div', 'ach-tx'); tx.appendChild(el('b', '', achTitle(top.id)));
-        var sh = next || f.tiers[f.tiers.length - 1], desc = t('ach.d.' + (f.group === 'board' ? 'board' : f.id), { n: sh.n, board: f.theme ? t('theme.' + f.theme) : '' });
-        tx.appendChild(el('small', '', desc)); head.appendChild(tx); card.appendChild(head);
-        if (next) {
-          var bar = el('div', 'xpbar ach-bar'), fill = el('i'); fill.style.width = Math.min(100, Math.round(100 * f.value / next.n)) + '%'; bar.appendChild(fill); card.appendChild(bar);
-          card.appendChild(el('div', 'ach-prog', Math.min(f.value, next.n) + ' / ' + next.n + (f.tiers.length > 1 && done.length ? '  ·  ' + t('ach.next', { name: achTitle(next.id) }) : '')));
-        } else card.appendChild(el('div', 'ach-prog', t('ach.all')));
-        if (f.tiers.length > 1) { var chips = el('div', 'ach-chips'); f.tiers.forEach(function (x) { chips.appendChild(el('span', 'ach-chip rk' + ACH.rank(x.id) + (x.done ? ' on' : ''), (x.done ? '✓ ' : '') + achTitle(x.id))); }); card.appendChild(chips); }
-        sec.appendChild(card);
-      });
-      box.appendChild(sec);
+    var fams = prog.map(achFam);
+    var tools = el('div', 'tr-tools'); tools.setAttribute('role', 'group');
+    [['all', 'ach.f.all'], ['prog', 'ach.f.prog'], ['done', 'ach.f.done'], ['board', 'ach.f.board']].forEach(function (p) {
+      var b = el('button', 'tr-f', t(p[1])); b.type = 'button'; b.setAttribute('aria-pressed', String(ACH_VIEW.f === p[0])); b.addEventListener('click', function () { ACH_VIEW.f = p[0]; achRender(); }); tools.appendChild(b);
     });
+    var sw = el('label', 'tr-sort', t('ach.sort') + ' '), sel = el('select'); [['near', 'ach.s.near'], ['cat', 'ach.s.cat']].forEach(function (p) { var o = el('option', '', t(p[1])); o.value = p[0]; sel.appendChild(o); }); sel.value = ACH_VIEW.s;
+    sel.addEventListener('change', function () { ACH_VIEW.s = sel.value; achRender(); }); sw.appendChild(sel); tools.appendChild(sw); box.appendChild(tools);
+    var soon = fams.filter(function (a) { return a.next && a.f.value > 0; }).sort(function (a, b) { return b.frac - a.frac || ACH.rank(a.next.id) - ACH.rank(b.next.id); }).slice(0, 3);
+    if (soon.length && ACH_VIEW.f !== 'done') {
+      box.appendChild(el('h3', 'tr-h', t('ach.soon'))); var sg = el('div', 'tr-soon'); soon.forEach(function (a) { sg.appendChild(achCard(a, true)); }); box.appendChild(sg);
+    }
+    var list = fams.filter(function (a) { return ACH_VIEW.f === 'prog' ? (a.next && a.started) : ACH_VIEW.f === 'done' ? a.full : ACH_VIEW.f === 'board' ? a.f.group === 'board' : true; });
+    if (ACH_VIEW.f === 'all' && ACH_VIEW.s === 'near') list = list.filter(function (a) { return soon.indexOf(a) < 0; });   // ya están arriba
+    if (!list.length) box.appendChild(el('p', 'tr-none', t('ach.none')));
+    else if (ACH_VIEW.s === 'near') {                               // más cerca de conseguirse primero; los completos al final
+      list.sort(function (a, b) { return (a.full - b.full) || (b.frac - a.frac) || (b.started - a.started) || ACH.rank(a.shown.id) - ACH.rank(b.shown.id); });
+      box.appendChild(el('h3', 'tr-h', t(ACH_VIEW.f === 'board' ? 'ach.g.board' : 'ach.f.' + ACH_VIEW.f))); var g1 = el('div', 'tr-grid'); list.forEach(function (a) { g1.appendChild(achCard(a)); }); box.appendChild(g1);
+    } else {
+      ACH.GROUPS.forEach(function (g) {
+        var inG = list.filter(function (a) { return a.f.group === g; }); if (!inG.length) return;
+        box.appendChild(el('h3', 'tr-h', t('ach.g.' + g))); var gg = el('div', 'tr-grid'); inG.forEach(function (a) { gg.appendChild(achCard(a)); }); box.appendChild(gg);
+      });
+    }
+    var lg = el('div', 'tr-leg'); lg.appendChild(el('span', '', t('ach.legend'))); for (var rk = 1; rk <= 5; rk++) { var sp = el('span', ''); sp.appendChild(mdl(rk, '', { sm: true })); sp.appendChild(document.createTextNode(t('ach.rar.' + rk))); lg.appendChild(sp); } box.appendChild(lg);
+    if (host) host.scrollTop = keep;
   }
   // Nivel VERIFICADO (lo da el servidor) como globito: el que ven los demás
   /* País y bandera. Las banderas se dibujan con una letra aparte (Twemoji Country Flags) porque Windows no muestra banderas emoji. */
