@@ -1702,7 +1702,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span><b class="newb" id="nwProfile" hidden></b></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v182</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v183</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -1737,6 +1737,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
   <div class="screen-body">
     <h2 data-i18n="tn.title"></h2>
     <p class="sub" data-i18n="tn.sub"></p>
+    <div class="roomlist" id="tnoEvent"></div>
     <div class="roomlist" id="tnoLive"></div>
     <div class="btns"><button class="btn primary" id="tnoCreate" data-i18n="tno.createOnline"></button></div>
     <p class="hint" data-i18n="tno.createOnlineSub"></p>
@@ -8583,7 +8584,13 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     'tno.closed.left': 'Saliste del torneo.',
     'tno.closed.kicked': 'El organizador te sacó del torneo.',
     'tno.closed.replaced': 'Se cerró porque creaste otro torneo desde este aparato.',
-    'tno.closed.gone': 'Ese torneo ya no existe.'
+    'tno.closed.gone': 'Ese torneo ya no existe.',
+    'tno.closed.noplayers': 'El evento se canceló: no se anotaron al menos 4 jugadores. ¡La próxima!',
+    'tno.ev.soon': '{day} · la inscripción abre a las {open} (hora Argentina)',
+    'tno.ev.open': 'Inscripción abierta · {n} anotados (mínimo {min}) · arranca a las {start}',
+    'tno.ev.running': 'En juego · {n} jugadores · termina a las {end}',
+    'tno.ev.join': 'Anotarme',
+    'tno.ev.watch': 'Mirar'
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -8723,7 +8730,13 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     'tno.closed.left': 'You left the tournament.',
     'tno.closed.kicked': 'The organizer removed you from the tournament.',
     'tno.closed.replaced': 'It was closed because you created another tournament from this device.',
-    'tno.closed.gone': 'That tournament no longer exists.'
+    'tno.closed.gone': 'That tournament no longer exists.',
+    'tno.closed.noplayers': 'The event was cancelled: fewer than 4 players signed up. Next time!',
+    'tno.ev.soon': '{day} · sign-up opens at {open} (Argentina time)',
+    'tno.ev.open': 'Sign-up open · {n} joined (min {min}) · starts at {start}',
+    'tno.ev.running': 'In progress · {n} players · ends at {end}',
+    'tno.ev.join': 'Join',
+    'tno.ev.watch': 'Watch'
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -13552,6 +13565,7 @@ window.NEON_BREAK = {
   function closeAll() { if (window.HwSpider) window.HwSpider.sync(false); if (window.GxShip) window.GxShip.sync(false); tipsStop(); stopRooms(); document.querySelectorAll('.overlay').forEach(function (o) { o.classList.remove('open'); }); document.body.classList.remove('in-screen'); musicScene(); }
   function open(id) {
     closeAll();
+    if (id === 'tnOverlay' && typeof tnoEvLoad === 'function') setTimeout(tnoEvLoad, 0);
     if (id === 'menuOverlay') $('btnResume').hidden = !(state && !isOver());
     if (id === 'playOverlay') $('btnTutorial').classList.toggle('primary', !tutDone());
     if (id === 'playOverlay' || id === 'menuOverlay') renderHero();
@@ -16747,8 +16761,40 @@ window.NEON_BREAK = {
   function tnoOpen() { tnoRender(); open('tnoOverlay'); tnoLoadFriends(); if (tno.token && tno.code && tno.net && tno.net.isOpen()) tnoRejoin(); }      // pide la foto al día por si se perdió algo
   function tnoRules(g) { return invRules(g); }
   /* --- lista de torneos: "volver a mi torneo" --- */
+  /* Eventos fijos de viernes y sábado: tarjeta con el próximo (o el que está en curso). Pregunta al servidor con una conexión corta. */
+  var tnoEvAt = 0, tnoEvData = null, tnoEvNet = null;
+  function tnoEvFmt(ms) {
+    try { return new Intl.DateTimeFormat(document.documentElement.lang || 'es', { weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date(ms)); } catch (e) { return ''; }
+  }
+  function tnoEvRender() {
+    var box = $('tnoEvent'); if (!box) return; box.innerHTML = '';
+    var e = tnoEvData; if (!e || e.status === 'finished') return;
+    var skew = e.now - Date.now(), now = Date.now() + skew, hhmm = function (ms) { return tnoEvFmt(ms).replace(/^\S+\s/, ''); };
+    var row = el('div', 'room'), info = el('div', 'info'), meta, label = '', go = true;
+    if (e.status === 'running') { meta = t('tno.ev.running', { n: e.players, end: hhmm(e.endAt) }); label = t('tno.ev.watch'); }
+    else if (now < e.openAt) { meta = t('tno.ev.soon', { day: tnoEvFmt(e.startAt), open: hhmm(e.openAt) }); go = false; }
+    else { meta = t('tno.ev.open', { n: e.players, min: e.min, start: hhmm(e.startAt) }); label = t('tno.ev.join'); }
+    info.appendChild(el('div', 'who', '★ ' + e.name)); info.appendChild(el('div', 'meta', meta)); row.appendChild(info);
+    if (go) {
+      var b = el('button', 'btn primary', label); b.type = 'button';
+      b.addEventListener('click', function () { if (e.status === 'running' && !(tno.code === e.code && tno.token)) { tnoJoinNow(e.code, 'watch', ''); } else tnoJoinCode(e.code); });
+      row.appendChild(b);
+    }
+    box.appendChild(row);
+  }
+  function tnoEvLoad() {
+    var now = Date.now(); if (now - tnoEvAt < 15000) return; tnoEvAt = now;
+    var url = serverUrl(); if (!url || !window.PenteNet) return;
+    try { if (tnoEvNet) tnoEvNet.close(); } catch (e) {}
+    try { fetch(window.PenteNet.httpBase(url) + '/health', { mode: 'no-cors' }).catch(function () {}); } catch (e) {}
+    var net = tnoEvNet = window.PenteNet.connect(url, {
+      onState: function () {}, onOpen: function () { try { net.send({ t: 'tevents' }); } catch (e) {} },
+      onMessage: function (m) { if (m && m.t === 'tevents') { tnoEvData = m.ev || null; tnoEvRender(); try { net.close(); } catch (e) {} if (tnoEvNet === net) tnoEvNet = null; } }
+    });
+  }
   function tnoRenderLive() {
     var box = $('tnoLive'); if (!box) return; box.innerHTML = '';
+    tnoEvRender();
     if (!tno.code || !tno.token) return;
     var m = tno.snap, row = el('div', 'room'), info = el('div', 'info');
     info.appendChild(el('div', 'who', m ? m.name : tno.code)); info.appendChild(el('div', 'meta', t('tno.live') + ' · ' + tno.code));
