@@ -201,6 +201,11 @@ body.in-screen .app { visibility: hidden; }
 .movelist .mv[data-p="4"]::before { background: radial-gradient(circle at 35% 30%, var(--s4a), var(--s4b)); }
 .movelist .cap { color: var(--accent); font-size: 12px; font-weight: 700; }
 .movelist .empty { display: block; color: var(--muted); }
+.badge.nw, .newb { background: #ffd23f; color: #2a1c00; font-weight: 800; box-shadow: 0 0 0 0 rgba(255, 210, 63, .7); animation: nwPulse 1.8s ease-out infinite; }
+.newb { position: absolute; top: -7px; right: -7px; z-index: 2; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; font-size: 12px; line-height: 22px; text-align: center; pointer-events: none; }
+.newb[hidden], .badge.nw[hidden] { display: none; }
+@keyframes nwPulse { 70% { box-shadow: 0 0 0 9px rgba(255, 210, 63, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 210, 63, 0); } }
+@media (prefers-reduced-motion: reduce) { .badge.nw, .newb { animation: none; } }
 .badge { display: inline-block; min-width: 18px; padding: 0 5px; margin-left: 6px; border-radius: 9px; background: var(--danger); color: #fff; font-size: 12px; line-height: 18px; text-align: center; }
 .people { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { min-height: 30px; padding: 2px 10px; border-radius: 15px; border: 1px solid var(--line); background: var(--bg); font-size: 13px; }
@@ -244,18 +249,18 @@ body.in-screen .app { visibility: hidden; }
   .sidebar-row { display: none; }
 }
 @media (max-width: 1099px) {
-  .side { position: fixed; left: 0; right: 0; bottom: 0; z-index: 15; height: var(--sideh, auto); max-height: var(--sideh, 72vh); display: none; background: var(--bg); border-top: 2px solid var(--line); border-radius: 18px 18px 0 0; padding: 10px var(--gutter) calc(10px + env(safe-area-inset-bottom)); box-shadow: 0 -12px 40px rgba(0,0,0,.55); }
+  .side { position: fixed; left: 0; right: 0; bottom: 0; z-index: 15; height: var(--sideh, auto); bottom: var(--kb, 0px); max-height: min(var(--sideh, 72vh), calc(var(--vvh, 100vh) - 14px)); display: none; background: var(--bg); border-top: 2px solid var(--line); border-radius: 18px 18px 0 0; padding: 10px var(--gutter) calc(10px + env(safe-area-inset-bottom)); box-shadow: 0 -12px 40px rgba(0,0,0,.55); }
   .side.open { display: block; }
-  .side-inner { height: var(--sideh-in, auto); max-height: calc(var(--sideh, 72vh) - 34px); }
+  .side-inner { height: var(--sideh-in, auto); max-height: calc(min(var(--sideh, 72vh), var(--vvh, 100vh) - 14px) - 34px); }
   .side-inner > .box { flex: 1 1 auto; }
-  .side-head { display: flex; align-items: center; gap: 8px; }
+  .side-head { display: flex; align-items: center; gap: 8px; position: sticky; top: 0; z-index: 3; background: var(--bg); }
   .side-tabs { display: flex; gap: 8px; flex: 1; }
   .side-tabs .tab { flex: 1; }
   .btn.x { min-height: 44px; min-width: 44px; padding: 0; }
   .side[data-tab="moves"] #chatBox, .side[data-tab="moves"] #btnChatShow { display: none; }
   .side[data-tab="chat"] #movesBox { display: none; }
   .side .box { overflow: hidden; }
-  .movelist, .chatlog { max-height: calc(var(--sideh, 72vh) - 210px); min-height: 90px; }
+  .movelist, .chatlog { max-height: calc(min(var(--sideh, 72vh), var(--vvh, 100vh) - 14px) - 210px); min-height: 70px; }
 }
 [data-mode][hidden] { display: none; }
 
@@ -1695,9 +1700,9 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
         <button type="button" class="sq" id="btnLang" data-i18n-aria="menu.language"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg><span class="sq-tag" id="langTag"></span></button>
         <button type="button" class="sq" id="btnNotif" data-i18n-title="nt.title"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15z"/><path d="M10 21h4"/></svg><b class="sq-n" id="ntBadge" hidden></b></button>
       </div>
-      <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span></button>
+      <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span><b class="newb" id="nwProfile" hidden></b></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v178</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v179</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -1707,7 +1712,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       <button class="btn" id="btnFriends"><svg class="mi" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14a4 4 0 0 1 4 4v2"/></svg><span class="ml" data-i18n="fr.btn"></span><b class="badge" id="frBadge" hidden></b><svg class="mc" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="btn" id="btnStats"><svg class="mi" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20V12"/><path d="M12 20V5"/><path d="M19 20v-9"/></svg><span class="ml" data-i18n="prof.stats"></span><svg class="mc" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="btn" id="btnAch"><svg class="mi" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="5.5"/><path d="M8.5 13.5L7 21l5-2.5 5 2.5-1.5-7.5"/></svg><span class="ml" data-i18n="ach.title"></span><span class="ach-n" id="achMenuN"></span><svg class="mc" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
-      <button class="btn" id="btnCustomize"><svg class="mi" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 3l3 3-9 9-3-3z"/><path d="M9 12c-2.5 0-4 1.6-4 4 0 1.5-.8 2.6-2 3 3.5 1 8 .5 8-3.5"/></svg><span class="ml" data-i18n="cz.title"></span><svg class="mc" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="btn" id="btnCustomize"><svg class="mi" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 3l3 3-9 9-3-3z"/><path d="M9 12c-2.5 0-4 1.6-4 4 0 1.5-.8 2.6-2 3 3.5 1 8 .5 8-3.5"/></svg><span class="ml" data-i18n="cz.title"></span><b class="badge nw" id="nwCust" hidden></b><svg class="mc" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="btn" id="btnFeedback"><svg class="mi" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/></svg><span class="ml" data-i18n="fb.btn"></span><svg class="mc" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="btn" id="btnInstall" hidden><svg class="mi" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg><span class="ml" data-i18n="inst.btn"></span><svg class="mc" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
     </div>
@@ -2374,7 +2379,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
     <h2 data-i18n="prof.title"></h2>
     <p class="sub" data-i18n="prof.sub"></p>
     <div class="field"><span class="lbl" data-i18n="av.mine"></span>
-      <div class="char-row"><span class="char-prev" id="profChar"></span><span class="flag flag-big" id="profFlag" hidden></span><button type="button" class="btn primary" id="btnCustom" data-i18n="av.btn"></button></div></div>
+      <div class="char-row"><span class="char-prev" id="profChar"></span><span class="flag flag-big" id="profFlag" hidden></span><button type="button" class="btn primary" id="btnCustom" data-i18n="av.btn"></button><b class="badge nw" id="nwParts" hidden></b></div></div>
     <div class="field"><label class="lbl" for="profName" data-i18n="prof.name"></label><input type="text" id="profName" maxlength="20" autocomplete="off" data-i18n-ph="prof.namePh"></div>
     <div class="field" id="nameClaim" hidden><label class="lbl" for="claimName" data-i18n="name.label"></label>
       <div class="claim-row"><input type="text" id="claimName" maxlength="20" autocomplete="off" data-i18n-ph="name.ph"><button class="btn primary" id="btnNameOk" disabled data-i18n="name.btn"></button></div>
@@ -11574,7 +11579,7 @@ window.NEON_BREAK = {
     var g = cv.getContext('2d'), i, N = w < 600 ? 9 : 15;
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
     if (t >= mth.next && mth.ps.length < N) {                                        // nace uno nuevo cada ratito, en un lugar libre (no detrás de los botones)
-      mth.next = t + 0.35 + Math.random() * 0.5;
+      mth.next = t + 0.26 + Math.random() * 0.38;
       var boxes = [].slice.call(document.querySelectorAll('#menuOverlay .btns, #menuOverlay .brand, #menuOverlay .menu-top button, #menuOverlay .chip, #menuOverlay .xpmini, #menuTip')).map(function (e) { return e.getBoundingClientRect(); });
       if (!mth.deck.length) { for (i = 0; i < window.MATH_SYMS.length; i++) mth.deck.push(i); for (i = mth.deck.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), q = mth.deck[i]; mth.deck[i] = mth.deck[j]; mth.deck[j] = q; } }
       var k = mth.deck.pop(), S = window.MATH_SYMS[k], im = mth.imgs[k];
@@ -11586,7 +11591,7 @@ window.NEON_BREAK = {
           for (i = 0; ok && i < mth.ps.length; i++) { var o = mth.ps[i]; if (Math.abs(o.x - x) < (o.w + dw) / 2 + 8 && Math.abs(o.y - y) < (o.h + dh) / 2 + 8) ok = false; }
           if (ok) break;
         }
-        if (ok) mth.ps.push({ k: k, x: x, y: y, w: dw, h: dh, t0: t, life: 5 + Math.random() * 3.5, rot: (Math.random() - 0.5) * 0.5, vx: (Math.random() - 0.5) * 5, vy: -2 - Math.random() * 4, a: 0.55 + Math.random() * 0.25 });
+        if (ok) mth.ps.push({ k: k, x: x, y: y, w: dw, h: dh, t0: t, life: 3.7 + Math.random() * 2.6, rot: (Math.random() - 0.5) * 0.5, vx: (Math.random() - 0.5) * 5, vy: -2 - Math.random() * 4, a: 0.55 + Math.random() * 0.25 });
       }
     }
     for (i = mth.ps.length - 1; i >= 0; i--) {
@@ -12066,6 +12071,23 @@ window.NEON_BREAK = {
     $('mxTxt').textContent = lv.max ? 'MAX' : lv.into + '/' + lv.need;
     $('menuXp').title = xpTitle(lv.level);
     var an = $('achMenuN'); if (an) an.textContent = achCount() + '/' + ACH.total();
+    newRender();
+  }
+  /* Avisos amarillos "+N": premios que ganaste por subir de nivel y todavía no viste (fichas y tableros en Personalizar, piezas en el editor de avatar). Se borran al entrar a mirarlos. */
+  var NW_KEY = 'pente.seen';
+  function nwLoad() { var v = null; try { v = JSON.parse(localStorage.getItem(NW_KEY) || 'null'); } catch (e) {} return v && typeof v === 'object' ? v : null; }
+  function nwSave(v) { try { localStorage.setItem(NW_KEY, JSON.stringify(v)); } catch (e) {} }
+  function nwLevel() { return XP.levelOf(myXp().t).level; }
+  function nwCounts() {
+    var lv = nwLevel(), s = nwLoad(), cz = 0, pa = 0, l; if (!s) { s = { c: lv, p: lv }; nwSave(s); }        // la primera vez no se avisa de todo lo anterior
+    for (l = (s.c | 0) + 1; l <= lv; l++) cz += XP.unlocksAt(l).length;
+    for (l = (s.p | 0) + 1; l <= lv; l++) pa += XP.partsAt(l).length;
+    return { cz: cz, pa: pa };
+  }
+  function nwSeen(k) { var s = nwLoad() || { c: nwLevel(), p: nwLevel() }; s[k] = nwLevel(); nwSave(s); newRender(); }
+  function newRender() {
+    var n = nwCounts(), set = function (id, v) { var e = $(id); if (!e) return; e.hidden = !v; if (v) e.textContent = '+' + v; };
+    set('nwCust', n.cz); set('nwParts', n.pa); set('nwProfile', n.pa);
   }
   function renderProfXp() {
     var lv = myLevel(), nx = XP.nextUnlock(lv.level);
@@ -12285,6 +12307,12 @@ window.NEON_BREAK = {
   });
 
   /* ---------- Dibujo ---------- */
+  function haloOf(c) {                                                        // color de contraste para un color CSS (#rgb, #rrggbb, rgb[a]())
+    var r = 128, g = 128, b = 128, m;
+    if ((m = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(String(c || '')))) { var h = m[1].length === 3 ? m[1].replace(/./g, '$&$&') : m[1]; r = parseInt(h.slice(0, 2), 16); g = parseInt(h.slice(2, 4), 16); b = parseInt(h.slice(4, 6), 16); }
+    else if ((m = /rgba?\((\d+)[ ,]+(\d+)[ ,]+(\d+)/.exec(String(c || '')))) { r = +m[1]; g = +m[2]; b = +m[3]; }
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.55 ? 'rgba(12,6,24,.85)' : 'rgba(255,255,255,.9)';
+  }
   function resize() {
     var cssW = canvas.clientWidth || 600, dpr = Math.min(2, window.devicePixelRatio || 1);       // tope 2: en celulares de 3x el tablero tenía 2,25 veces más píxeles de los necesarios y se trababa
     canvas.width = Math.round(cssW * dpr); canvas.height = Math.round(cssW * dpr);
@@ -13192,10 +13220,12 @@ window.NEON_BREAK = {
     if (ink) drawInk(nowI);
     if (state.lastMove && cfg.lastMove && !ink) {
       var lm = state.lastMove, lv = P.get(state, lm.x, lm.y);
-      ctx.fillStyle = th.last.dot[lv];
-      ctx.beginPath(); ctx.arc(px(lm.x), px(lm.y), metrics.cell * 0.12, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = th.last.ring; ctx.lineWidth = Math.max(2, metrics.cell * 0.07);
-      ctx.beginPath(); ctx.arc(px(lm.x), px(lm.y), metrics.cell * 0.2, 0, Math.PI * 2); ctx.stroke();
+      var lcx = px(lm.x), lcy = px(lm.y), lcell = metrics.cell, lw = Math.max(2, lcell * 0.075), dc = th.last.dot[lv], rc = th.last.ring;
+      ctx.save();                                                                       // halo de color opuesto: el círculo se ve aunque la ficha o el tablero sean del mismo color
+      ctx.strokeStyle = haloOf(rc); ctx.lineWidth = lw + Math.max(2.5, lcell * 0.07); ctx.beginPath(); ctx.arc(lcx, lcy, lcell * 0.21, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = rc; ctx.lineWidth = lw; ctx.beginPath(); ctx.arc(lcx, lcy, lcell * 0.21, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = dc; ctx.strokeStyle = haloOf(dc); ctx.lineWidth = Math.max(1.6, lcell * 0.045); ctx.beginPath(); ctx.arc(lcx, lcy, lcell * 0.12, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.restore();
     }
     // previsualización (mouse, o ficha pendiente del dedo)
     var holding = !!(drag && drag.lifted), showPrev = !holding && !settle;
@@ -14039,6 +14069,11 @@ window.NEON_BREAK = {
   function chatWMax() { return clampN(Math.round(window.innerWidth * 0.46), CHAT_W.min, CHAT_W.max); }
   function setChatW(v, save) { v = clampN(Math.round(v), CHAT_W.min, chatWMax()); document.documentElement.style.setProperty('--chatw', v + 'px'); if (save) try { localStorage.setItem('pente.chatw', String(v)); } catch (e) {} return v; }
   function setSideH(v, save) { v = clampN(Math.round(v), SIDE_H.min, SIDE_H.max); document.documentElement.style.setProperty('--sideh', v + 'vh'); document.documentElement.style.setProperty('--sideh-in', 'calc(' + v + 'vh - 34px)'); if (save) try { localStorage.setItem('pente.sideh', String(v)); } catch (e) {} return v; }
+  function sideFit() {                                                       // el panel nunca es más alto que la parte visible: así la X y el campo de escribir siempre se alcanzan
+    var vv = window.visualViewport, h = vv ? vv.height : window.innerHeight, kb = vv ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0, r = document.documentElement.style;
+    r.setProperty('--vvh', Math.round(h) + 'px'); r.setProperty('--kb', Math.round(kb) + 'px');
+  }
+  sideFit(); window.addEventListener('resize', sideFit); window.addEventListener('orientationchange', sideFit); if (window.visualViewport) { window.visualViewport.addEventListener('resize', sideFit); window.visualViewport.addEventListener('scroll', sideFit); }
   var chatWNow = CHAT_W.def, sideHNow = SIDE_H.def;
   try { var sw0 = parseInt(localStorage.getItem('pente.chatw'), 10); if (sw0) chatWNow = setChatW(sw0); else setChatW(chatWNow); var sh0 = parseInt(localStorage.getItem('pente.sideh'), 10); if (sh0) sideHNow = setSideH(sh0); } catch (e) { setChatW(chatWNow); }
   function wireGrip(el, onMove, onKey, onReset) {
@@ -14916,7 +14951,7 @@ window.NEON_BREAK = {
   }
   var AVK = ['color', 'face', 'hair', 'hairColor'], cust = { spec: null, tab: 'body' };
   function avList(k) { return k === 'face' ? AV.FACES : k === 'hair' ? AV.HAIRS : k === 'hairColor' ? AV.HAIR_COLORS : AV.COLORS; }
-  function custOpen() { cust.spec = AV.normalize(avSpec(profile.avatar) || { color: 'blanco', face: 'feliz' }); cust.tab = 'color'; $('custNote').textContent = ''; renderCust(); open('customOverlay'); }
+  function custOpen() { nwSeen('p'); cust.spec = AV.normalize(avSpec(profile.avatar) || { color: 'blanco', face: 'feliz' }); cust.tab = 'color'; $('custNote').textContent = ''; renderCust(); open('customOverlay'); }
   function renderCust() {
     var lv = myLevel().level, tabs = $('custTabs'), grid = $('custGrid');
     $('custPrev').innerHTML = AV.render(cust.spec, { size: 190 });
@@ -16282,7 +16317,7 @@ window.NEON_BREAK = {
   $('btnSettings').addEventListener('click', function () { openCfg(false); });
   $('btnGameCfg').addEventListener('click', function () { openCfg(true); });
   var czFrom = 'menuOverlay';
-  function openCustomize(from) { czFrom = from; syncCfgUi(); open('customizeOverlay'); }
+  function openCustomize(from) { nwSeen('c'); czFrom = from; syncCfgUi(); open('customizeOverlay'); }
   $('btnCustomize').addEventListener('click', function () { openCustomize('menuOverlay'); });
   $('btnToCustom').addEventListener('click', function () { openCustomize('settingsOverlay'); });
   $('btnCustomizeBack').addEventListener('click', function () { open(czFrom); });
