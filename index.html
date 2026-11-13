@@ -1702,7 +1702,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span><b class="newb" id="nwProfile" hidden></b></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v183</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v184</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -8590,7 +8590,10 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     'tno.ev.open': 'Inscripción abierta · {n} anotados (mínimo {min}) · arranca a las {start}',
     'tno.ev.running': 'En juego · {n} jugadores · termina a las {end}',
     'tno.ev.join': 'Anotarme',
-    'tno.ev.watch': 'Mirar'
+    'tno.ev.watch': 'Mirar',
+    'tno.ev.wait': 'El evento arranca solo a las {start} (hora Argentina) si hay al menos {min} jugadores. No cierres esta pantalla.',
+    'tno.ev.deadline': 'Tocá «Jugar» antes de las {time}: si no te presentás, perdés el duelo.',
+    'tno.err.TN_WAIT_ROUND': 'Todavía hay duelos de la fecha anterior sin terminar. Esperá a que termine.'
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -8736,7 +8739,10 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     'tno.ev.open': 'Sign-up open · {n} joined (min {min}) · starts at {start}',
     'tno.ev.running': 'In progress · {n} players · ends at {end}',
     'tno.ev.join': 'Join',
-    'tno.ev.watch': 'Watch'
+    'tno.ev.watch': 'Watch',
+    'tno.ev.wait': 'The event starts by itself at {start} (Argentina time) if at least {min} players joined. Keep this screen open.',
+    'tno.ev.deadline': 'Tap “Play” before {time}: if you don’t show up, you lose the duel.',
+    'tno.err.TN_WAIT_ROUND': 'Duels from the previous round are still unfinished. Please wait.'
   });
 })(typeof self !== 'undefined' ? self : this);
 </script>
@@ -16721,7 +16727,7 @@ window.NEON_BREAK = {
       case 'tcall': tnoCall(m); break;
       case 'tcfg': tnoCall({ text: t('tno.cfgChanged', { fmt: tnFmt(m.cfg.format), b: m.cfg.bestOf, n: m.cfg.minDuels }) }); break;
       case 'tgame': tnoCall({ text: t('tno.rulesChanged', { rules: tnoRules(m.game) }) }); break;
-      case 'tsnap': tno.snap = m; achTourney(m); tno.chat = m.chat || []; tnoRender(); tnoRenderChat(); tnoCheckGo(m); tnoRenderLive(); break;
+      case 'tsnap': m.__at = Date.now(); tno.snap = m; achTourney(m); tno.chat = m.chat || []; tnoRender(); tnoRenderChat(); tnoCheckGo(m); tnoRenderLive(); break;
       case 'terror': {
         if ((m.code === 'BAD_TOKEN' || m.code === 'TN_NOT_FOUND') && (tno.snap || tno.token)) { tnoReset(); tnoNote(t(m.code === 'TN_NOT_FOUND' ? 'tno.closed.gone' : 'tno.err.BAD_TOKEN'), true); if ($('tnoOverlay').classList.contains('open')) { tnRenderList(); tnoRenderLive(); open('tnOverlay'); } break; }
         if (m.code === 'TN_STARTED' && tno.intent && tno.intent.t === 'tjoin' && tno.net) { tno.intent = { t: 'tspectate', code: tno.intent.code }; tno.net.send(tno.intent); tnoNote('', false); break; }      // ya empezó: se puede mirar con el link
@@ -16969,7 +16975,8 @@ window.NEON_BREAK = {
       if (!pv.ok) { ck.appendChild(el('div', 'tn-err', t('tno.invalid'))); pv.errors.forEach(function (e) { ck.appendChild(el('div', 'tn-err', '✗ ' + e.msg)); }); $('tnoStart').disabled = true;
         if (pv.suggestions && pv.suggestions.length) { ck.appendChild(el('div', 'hint', t('tn.options'))); pv.suggestions.forEach(function (sg) { var bs = el('button', 'btn tn-sug', '→ ' + sg.label); bs.type = 'button'; bs.addEventListener('click', function () { tnoSend({ t: 'tcfg', cfg: sg.cfg }); }); ck.appendChild(bs); }); } }
       else { pv.lines.forEach(function (l) { ck.appendChild(el('div', 'tn-line', l)); }); $('tnoStart').disabled = false; }
-    } else if (isOpen) ck.appendChild(el('p', 'hint', t('tno.waitOrg')));
+    } else if (isOpen && m.ev) ck.appendChild(el('p', 'hint', t('tno.ev.wait', { start: tnoEvFmt(m.ev.startAt).replace(/^\S+\s/, ''), min: 4 })));
+    else if (isOpen) ck.appendChild(el('p', 'hint', t('tno.waitOrg')));
     // mi duelo
     me.innerHTML = '';
     if (!isOpen && S && m.you && !meSpec) tnoMyDuel(m, me);
@@ -17007,6 +17014,7 @@ window.NEON_BREAK = {
       if (S.cfg.bestOf > 1) card.appendChild(el('div', 'tn-meta', t('tno.score', { a: d.a === pid ? d.score.a : d.score.b, b: d.a === pid ? d.score.b : d.score.a }) + ' · ' + t('tn.need', { n: (S.cfg.bestOf + 1) / 2 })));
       var first = PT.opener(d, d.games.length);
       card.appendChild(el('div', 'tn-meta', first === pid ? t('tno.opensYou') : t('tno.opensHim', { name: tnName(S, first) })));
+      if (m.ev && m.ev.dl && m.ev.dl[d.id] && !playing) { var left = m.ev.dl[d.id] - m.ev.now + (Date.now() - (m.__at || Date.now())); card.appendChild(el('p', 'hint tno-dl', t('tno.ev.deadline', { time: tnoEvFmt(Date.now() + left).replace(/^\S+\s/, '') }))); }
       var btns = el('div', 'btns');
       if (playing) {
         card.appendChild(el('p', '', t('tno.inGame')));
