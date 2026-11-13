@@ -1702,7 +1702,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span><b class="newb" id="nwProfile" hidden></b></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v180</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v182</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -1767,7 +1767,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       <p class="hint modeHint"></p></div>
     <div class="field"><span class="lbl" data-i18n="menu.size"></span><div class="seg sizePicker" role="group"><div class="size-col"><button type="button" class="seg-opt" data-size="13" data-i18n="menu.size13"></button><small class="size-sub" data-i18n="size.sub13"></small></div><div class="size-col"><button type="button" class="seg-opt" data-size="19" data-i18n="menu.size19"></button><small class="size-sub" data-i18n="size.sub19"></small></div></div></div>
     </div>
-    <div id="tnoInvNew" class="tno-invcfg"><label class="check"><input type="checkbox" id="tnInvAll"><span data-i18n="tno.invAll"></span></label><label class="check"><input type="checkbox" id="tnInvAcct" checked><span data-i18n="tno.invAcct"></span></label><label class="check"><input type="checkbox" id="tnInvOnly"><span data-i18n="tno.invOnly"></span></label><p class="hint" data-i18n="tno.invOnlyHint"></p></div>
+    <div id="tnoInvNew" class="tno-invcfg"><label class="check"><input type="checkbox" id="tnOrgPlays" checked><span><span data-i18n="tno.orgPlays"></span><small data-i18n="tno.orgPlaysHint"></small></span></label><label class="check"><input type="checkbox" id="tnInvAll"><span data-i18n="tno.invAll"></span></label><label class="check"><input type="checkbox" id="tnInvAcct" checked><span data-i18n="tno.invAcct"></span></label><label class="check"><input type="checkbox" id="tnInvOnly"><span data-i18n="tno.invOnly"></span></label><p class="hint" data-i18n="tno.invOnlyHint"></p></div>
     <p class="hint" id="tnoNewNote" hidden></p>
     <div class="field" id="tnPlayersBox"><label class="lbl" for="tnPlayers" data-i18n="tn.players"></label><textarea id="tnPlayers" rows="7" autocomplete="off" spellcheck="false"></textarea>
       <div class="tn-row"><span class="hint" id="tnCount"></span><button type="button" class="btn small" id="tnShuffle" data-i18n="tn.shuffle"></button></div></div>
@@ -2278,6 +2278,21 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
     <p class="hint" id="chRules"></p>
     <label class="check"><input type="checkbox" id="chWatch"><span><span data-i18n="ch.watch"></span><small data-i18n="ch.watchHint"></small></span></label>
     <div class="dlg-btns"><button type="button" class="btn" id="chNo" data-i18n="dlg.cancel"></button><button type="button" class="btn primary" id="chGo" data-i18n="ch.send"></button></div>
+  </div>
+</div>
+
+<div class="overlay dialog" id="tnoRoleOverlay">
+  <div class="modal dlg" role="alertdialog" aria-modal="true" aria-labelledby="trTitle">
+    <h3 id="trTitle"></h3>
+    <p class="hint" data-i18n="tno.role.sub"></p>
+    <div class="field" id="trNameBox" hidden>
+      <label class="lbl" for="trName" data-i18n="tno.role.name"></label>
+      <input type="text" id="trName" maxlength="18" autocomplete="off" autocapitalize="words" spellcheck="false">
+      <small class="hint" data-i18n="tno.role.nameHint"></small>
+    </div>
+    <p class="msg bad" id="trMsg" role="alert" hidden></p>
+    <div class="dlg-btns"><button type="button" class="btn" id="trWatch" data-i18n="tno.role.watch"></button><button type="button" class="btn primary" id="trPlay" data-i18n="tno.role.play"></button></div>
+    <div class="dlg-btns" style="margin-top:8px"><button type="button" class="btn ghost" id="trCancel" data-i18n="dlg.cancel"></button></div>
   </div>
 </div>
 
@@ -8474,6 +8489,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     'tno.players': 'Participantes · {n}',
     'tno.you': 'vos',
     'tno.orgTag': 'organizador',
+    'tno.orgPlays': 'Yo también juego', 'tno.orgPlaysHint': 'Si lo apagás, solo organizás y mirás: no entrás al sorteo ni a los cruces.', 'tno.noPlay': 'no juega', 'tno.orgOnly': 'Sos el organizador y no jugás: administrás el torneo y podés mirar las partidas.',
     'tno.kick': 'Sacar',
     'tno.kickConfirm': '¿Sacar a {name} del torneo?',
     'tno.invite': 'Invitar amigos',
@@ -8546,7 +8562,10 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     'tno.invTitle': '{name} te invita a un torneo',
     'tno.invText': '«{tn}» · {format} · {rules}',
     'tno.err.TN_NOT_FOUND': 'No existe un torneo con ese código (o ya se cerró).',
-    'tno.err.TN_NAME': 'Ya hay alguien con ese nombre en el torneo. Cambialo en tu perfil o en Online y probá de nuevo.',
+    'tno.err.TN_NAME': 'Ya hay alguien con ese nombre en el torneo. Probá con otro.',
+    'tno.err.TN_NEED_NAME': 'Poné un nombre tuyo para este torneo (no vale «Invitado»).',
+    'tno.role.title': 'Unirte al torneo {code}', 'tno.role.sub': '¿Querés jugar o solo mirar?', 'tno.role.name': 'Tu nombre en este torneo',
+    'tno.role.nameHint': 'Sin cuenta, elegí un nombre que te distinga (no vale «Invitado»). Solo se usa en este torneo.', 'tno.role.play': 'Participar', 'tno.role.watch': 'Mirar',
     'tno.err.TN_FULL': 'El torneo está lleno.',
     'tno.err.TN_STARTED': 'El torneo ya empezó: no se puede entrar.',
     'tno.err.BAD_TOKEN': 'Ya no estás en ese torneo.',
@@ -8610,6 +8629,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     'tno.players': 'Participants · {n}',
     'tno.you': 'you',
     'tno.orgTag': 'organizer',
+    'tno.orgPlays': 'I play too', 'tno.orgPlaysHint': 'If you turn it off, you only organize and watch: you are not in the draw or the matches.', 'tno.noPlay': 'not playing', 'tno.orgOnly': 'You are the organizer and not playing: you run the tournament and can watch the games.',
     'tno.kick': 'Remove',
     'tno.kickConfirm': 'Remove {name} from the tournament?',
     'tno.invite': 'Invite friends',
@@ -8682,7 +8702,10 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     'tno.invTitle': '{name} invites you to a tournament',
     'tno.invText': '"{tn}" · {format} · {rules}',
     'tno.err.TN_NOT_FOUND': 'There is no tournament with that code (or it was closed).',
-    'tno.err.TN_NAME': 'Someone with that name is already in the tournament. Change yours in your profile or in Online and try again.',
+    'tno.err.TN_NAME': 'Someone with that name is already in the tournament. Try another one.',
+    'tno.err.TN_NEED_NAME': 'Enter a name of your own for this tournament ("Guest" is not allowed).',
+    'tno.role.title': 'Join tournament {code}', 'tno.role.sub': 'Do you want to play or just watch?', 'tno.role.name': 'Your name in this tournament',
+    'tno.role.nameHint': 'Without an account, pick a name that tells you apart (not "Guest"). It is only used in this tournament.', 'tno.role.play': 'Play', 'tno.role.watch': 'Watch',
     'tno.err.TN_FULL': 'The tournament is full.',
     'tno.err.TN_STARTED': 'The tournament has already started: you cannot join.',
     'tno.err.BAD_TOKEN': 'You are no longer in that tournament.',
@@ -14180,7 +14203,7 @@ window.NEON_BREAK = {
   $('invNo').addEventListener('click', function () { $('inviteOverlay').classList.remove('open'); if (inv.cur) ntDelCode(inv.cur.code); if (inv.cur && inv.cur.t === 'tinvite') { inv.cur = null; return; } if (inv.cur && inv.net) { inv.net.send({ t: 'inviteNo', code: inv.cur.code, name: myName() }); achAdd({ x_as: 1 }); } inv.cur = null; });
   $('invYes').addEventListener('click', function () {
     $('inviteOverlay').classList.remove('open'); var m = inv.cur; inv.cur = null; if (!m) return; ntDelCode(m.code);
-    if (m.t === 'tinvite') { tnoJoinCode(m.code); return; }
+    if (m.t === 'tinvite') { tnoJoinCode(m.code, true); return; }
     $('btnSpectateOffer').hidden = true; startOnline({ t: 'join', code: m.code });
   });
 
@@ -14230,7 +14253,7 @@ window.NEON_BREAK = {
   }
   function ntGo(x) {
     var m = x.m, go = function () { ntDelCode(m.code); closeAll(); $('btnSpectateOffer').hidden = true; startOnline({ t: 'join', code: m.code }); };
-    if (x.k === 'tinvite') { ntDelCode(m.code); tnoJoinCode(m.code); return; }
+    if (x.k === 'tinvite') { ntDelCode(m.code); tnoJoinCode(m.code, true); return; }
     if (online.active && !online.spectator) { ask(t('seek.leaveGame'), t('seek.join'), function () { leaveOnline(true); go(); }); return; }
     if (state && !isOver() && !online.active) { ask(t('seek.leaveGame'), t('seek.join'), go); return; }
     go();
@@ -14431,7 +14454,7 @@ window.NEON_BREAK = {
     guard();
     function backAction() {
       var dlg = document.querySelector('.overlay.dialog.open');
-      if (dlg) { var c = { inviteOverlay: 'invNo', challengeOverlay: 'chNo', dlgOverlay: 'dlgNo', whoOverlay: 'whoClose', installOverlay: 'instClose', pauseOverlay: 'pauseResume' }[dlg.id]; if (c && $(c)) $(c).click(); return; }
+      if (dlg) { var c = { tnoRoleOverlay: 'trCancel', inviteOverlay: 'invNo', challengeOverlay: 'chNo', dlgOverlay: 'dlgNo', whoOverlay: 'whoClose', installOverlay: 'instClose', pauseOverlay: 'pauseResume' }[dlg.id]; if (c && $(c)) $(c).click(); return; }
       var scr = document.querySelector('.overlay.screen.open');
       if (scr) { var ar = scr.querySelector('.backarrow'); if (ar) ar.click(); return; }       // el menú principal es la raíz: se queda
       if ($('endOverlay').classList.contains('open')) { $('btnEndBoard').click(); return; }
@@ -16688,6 +16711,9 @@ window.NEON_BREAK = {
       case 'terror': {
         if ((m.code === 'BAD_TOKEN' || m.code === 'TN_NOT_FOUND') && (tno.snap || tno.token)) { tnoReset(); tnoNote(t(m.code === 'TN_NOT_FOUND' ? 'tno.closed.gone' : 'tno.err.BAD_TOKEN'), true); if ($('tnoOverlay').classList.contains('open')) { tnRenderList(); tnoRenderLive(); open('tnOverlay'); } break; }
         if (m.code === 'TN_STARTED' && tno.intent && tno.intent.t === 'tjoin' && tno.net) { tno.intent = { t: 'tspectate', code: tno.intent.code }; tno.net.send(tno.intent); tnoNote('', false); break; }      // ya empezó: se puede mirar con el link
+        if ((m.code === 'TN_NAME' || m.code === 'TN_NEED_NAME') && tno.intent && tno.intent.t === 'tjoin' && !tno.token && !(typeof Auth !== 'undefined' && Auth && Auth.user)) {      // sin cuenta: se vuelve a pedir el nombre
+          var cd = tno.intent.code; tno.intent = null; if (tno.net) { tno.net.close(); tno.net = null; } tnoAskRole(cd, tnoErrText(m)); break;
+        }
         if (!tno.snap) { var it = tno.intent; tno.intent = null; if (!tno.token && tno.net) { tno.net.close(); tno.net = null; } if (it && !$('tnoOverlay').classList.contains('open')) tnoNote(tnoErrText(m), true); else tnoNote(tnoErrText(m), true); break; }
         tnoNote(tnoErrText(m), true); break;
       }
@@ -16735,19 +16761,45 @@ window.NEON_BREAK = {
     var cfgv = tnCfg(), g = { variant: modeVariant(settings.mode), blitz: settings.mode === 'blitz', bullet: settings.mode === 'bullet', tournamentRule: settings.tournamentRule, exactFive: settings.exactFive, size: settings.size, timer: settings.timer };
     if (tno.view) tnoReset();
     if (tno.code && tno.token) { tnoNote(t('tno.err.ALREADY_IN_TOURNEY'), true); tnRenderList(); tnoRenderLive(); open('tnOverlay'); return; }
-    tno.snap = null; tno.intent = { t: 'tcreate', inv: { all: $('tnInvAll').checked, only: $('tnInvOnly').checked, acct: $('tnInvAcct').checked }, name: cfgv.name, cfg: cfgv, game: g, pname: myName(), dev: devId() }; tno.code = tno.token = '';
+    tno.snap = null; tno.intent = { t: 'tcreate', orgPlays: $('tnOrgPlays').checked, inv: { all: $('tnInvAll').checked, only: $('tnInvOnly').checked, acct: $('tnInvAcct').checked }, name: cfgv.name, cfg: cfgv, game: g, pname: myName(), dev: devId() }; tno.code = tno.token = '';
     tnoNote('', false); if (!tnoConnect()) { open('tnOverlay'); return; } tnoOpen();
     if (tno.net.isOpen()) tnoWithJwt(JSON.parse(JSON.stringify(tno.intent)), function (o) { tno.net.send(o); });
   }
-  function tnoJoinCode(code) {
+  function tnoJoinCode(code, quick) {
     code = String(code || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5);
     if (code.length !== 5) { tnoNote(t('tno.err.TN_NOT_FOUND'), true); return; }
     if (tno.view) { if (tno.code === code) { tnoOpen(); return; } tnoReset(); }
     if (tno.code && tno.token) { if (tno.code === code) { tnoConnect(); tnoOpen(); return; } tnoNote(t('tno.err.ALREADY_IN_TOURNEY'), true); tnRenderList(); tnoRenderLive(); open('tnOverlay'); return; }
-    tno.snap = null; tno.intent = { t: 'tjoin', code: code, name: myName() }; tnoNote('', false);
+    if (!quick) { tnoAskRole(code); return; }                          // por link o por código: primero elige si juega o mira (y, sin cuenta, con qué nombre)
+    tnoJoinNow(code, 'play', '');
+  }
+  function tnoJoinNow(code, role, name) {
+    tno.snap = null; tno.intent = role === 'watch' ? { t: 'tspectate', code: code } : { t: 'tjoin', code: code, name: name || myName() }; tnoNote('', false);
     if (!tnoConnect()) return;
     if (tno.net.isOpen()) tnoWithJwt(JSON.parse(JSON.stringify(tno.intent)), function (o) { tno.net.send(o); });
   }
+  var TN_NAME_KEY = 'pente.tnname', trCode = '';
+  function tnoGenericName(v) { return /^invitado\s*\d*$/i.test(String(v || '').trim()); }
+  function tnoAskRole(code, msg) {
+    trCode = code; var guest = !(typeof Auth !== 'undefined' && Auth && Auth.user);
+    $('trTitle').textContent = t('tno.role.title', { code: code }); $('trNameBox').hidden = !guest;
+    if (guest) { var v = ''; try { v = localStorage.getItem(TN_NAME_KEY) || ''; } catch (e) {} $('trName').value = tnoGenericName(v) ? '' : v; }
+    $('trMsg').hidden = !msg; $('trMsg').textContent = msg || '';
+    $('tnoRoleOverlay').classList.add('open'); if (guest) setTimeout(function () { try { $('trName').focus(); } catch (e) {} }, 60);
+  }
+  function tnoRoleClose() { $('tnoRoleOverlay').classList.remove('open'); }
+  $('trCancel').addEventListener('click', tnoRoleClose);
+  $('trWatch').addEventListener('click', function () { tnoRoleClose(); tnoJoinNow(trCode, 'watch', ''); });
+  $('trPlay').addEventListener('click', function () {
+    var guest = !$('trNameBox').hidden, nm = '';
+    if (guest) {
+      nm = $('trName').value.replace(/\s+/g, ' ').trim();
+      if (nm.length < 2 || tnoGenericName(nm)) { $('trMsg').hidden = false; $('trMsg').textContent = t('tno.err.TN_NEED_NAME'); $('trName').focus(); return; }
+      try { localStorage.setItem(TN_NAME_KEY, nm); } catch (e) {}
+    }
+    tnoRoleClose(); tnoJoinNow(trCode, 'play', nm);
+  });
+  $('trName').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); $('trPlay').click(); } });
   $('tnoCreate').addEventListener('click', function () { tnoNote('', false); if (tno.code && tno.token) { tnoNote(t('tno.err.ALREADY_IN_TOURNEY'), true); return; } tnOpenNew(true); });
   $('tnoJoin').addEventListener('click', function () { tnoJoinCode($('tnoCodeIn').value); });
   $('tnoCodeIn').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); tnoJoinCode($('tnoCodeIn').value); } });
@@ -16836,16 +16888,17 @@ window.NEON_BREAK = {
     if (!m) { $('tnoTitle').textContent = t(tno.conn === 'reconnecting' ? 'tno.reconnecting' : 'tno.conn'); $('tnoInfo').textContent = ''; lobby.hidden = run.hidden = true; me.innerHTML = ''; $('tnoChamp').innerHTML = ''; $('tnoLeave').hidden = !tno.token; $('tnoLeave').textContent = t('tno.leave'); return; }
     var org = !!(m.you && m.you.org), S = m.S, pid = m.you && m.you.pid, isOpen = m.status === 'open';
     $('tnoTitle').textContent = m.name;
-    $('tnoInfo').textContent = t('tno.info', { format: tnFmt(m.cfg.format), b: m.cfg.bestOf, n: m.players.length }) + (tno.conn === 'reconnecting' ? ' · ' + t('tno.reconnecting') : '');
+    var plr = m.players.filter(function (x) { return !x.spec; }), meSpec = m.players.some(function (x) { return x.pid === pid && x.spec; });      // el organizador que solo gestiona no cuenta como jugador
+    $('tnoInfo').textContent = t('tno.info', { format: tnFmt(m.cfg.format), b: m.cfg.bestOf, n: plr.length }) + (tno.conn === 'reconnecting' ? ' · ' + t('tno.reconnecting') : '');
     tnoRenderRules(m, org);
     $('tnoLeave').hidden = false; $('tnoLeave').textContent = t(org ? 'tno.close' : tno.view ? 'tno.exitView' : 'tno.leave'); $('tnoLeave').classList.toggle('danger', true);
     lobby.hidden = !isOpen; run.hidden = isOpen;
     $('tnoChamp').innerHTML = ''; if (m.status === 'finished' && S) $('tnoChamp').appendChild(tnPodiumEl(S));
     // participantes
-    var pb = $('tnoPlayers'); pb.innerHTML = ''; $('tnoPlayersH').textContent = t('tno.players', { n: m.players.length });
+    var pb = $('tnoPlayers'); pb.innerHTML = ''; $('tnoPlayersH').textContent = t('tno.players', { n: plr.length });
     m.players.forEach(function (p) {
       var row = el('div', 'fr-row tno-pl'), nm = el('span', 'tno-nm', p.name); row.appendChild(el('span', 'tno-dot' + (p.online ? ' on' : ''), '●'));
-      row.appendChild(nm); if (p.pid === m.org) nm.appendChild(el('small', 'tno-tag', ' · ' + t('tno.orgTag'))); if (p.pid === pid) nm.appendChild(el('small', 'tno-tag', ' · ' + t('tno.you')));
+      row.appendChild(nm); if (p.pid === m.org) nm.appendChild(el('small', 'tno-tag', ' · ' + t('tno.orgTag') + (p.spec ? ' (' + t('tno.noPlay') + ')' : ''))); if (p.pid === pid) nm.appendChild(el('small', 'tno-tag', ' · ' + t('tno.you')));
       if (org && p.pid !== pid) { var k = el('button', 'btn small ghost', t('tno.kick')); k.type = 'button'; k.addEventListener('click', function () { ask(t('tno.kickConfirm', { name: p.name }), t('tno.kick'), function () { tnoSend({ t: 'twithdraw', pid: p.pid }); }); }); row.appendChild(k); }
       pb.appendChild(row);
     });
@@ -16866,15 +16919,15 @@ window.NEON_BREAK = {
     }
     var ck = $('tnoCheck'); ck.innerHTML = '';
     if (isOpen && org) {
-      var pv = PT.preview(m.cfg, m.players.map(function (x) { return x.name; }));
+      var pv = PT.preview(m.cfg, plr.map(function (x) { return x.name; }));
       if (!pv.ok) { ck.appendChild(el('div', 'tn-err', t('tno.invalid'))); pv.errors.forEach(function (e) { ck.appendChild(el('div', 'tn-err', '✗ ' + e.msg)); }); $('tnoStart').disabled = true;
         if (pv.suggestions && pv.suggestions.length) { ck.appendChild(el('div', 'hint', t('tn.options'))); pv.suggestions.forEach(function (sg) { var bs = el('button', 'btn tn-sug', '→ ' + sg.label); bs.type = 'button'; bs.addEventListener('click', function () { tnoSend({ t: 'tcfg', cfg: sg.cfg }); }); ck.appendChild(bs); }); } }
       else { pv.lines.forEach(function (l) { ck.appendChild(el('div', 'tn-line', l)); }); $('tnoStart').disabled = false; }
     } else if (isOpen) ck.appendChild(el('p', 'hint', t('tno.waitOrg')));
     // mi duelo
     me.innerHTML = '';
-    if (!isOpen && S && m.you) tnoMyDuel(m, me);
-    if (!m.you) me.appendChild(el('p', 'hint', t('tno.viewing')));
+    if (!isOpen && S && m.you && !meSpec) tnoMyDuel(m, me);
+    if (!m.you) me.appendChild(el('p', 'hint', t('tno.viewing'))); else if (meSpec) me.appendChild(el('p', 'hint', t('tno.orgOnly')));
     // fixture / tabla
     if (!isOpen && S) {
       Array.prototype.forEach.call($('tnoTabs').children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.t === tno.tab)); });
