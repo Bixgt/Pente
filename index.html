@@ -1702,7 +1702,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span><b class="newb" id="nwProfile" hidden></b></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v185</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v186</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -3714,6 +3714,15 @@ window.GALAXY_GAME = {
    * Las letras se cuentan desde la izquierda: en 19x19 el centro es K10; en 13x13 las columnas llegan hasta la N y el centro es G7. */
   var COLS = 'ABCDEFGHJKLMNOPQRST';
   function coordName(x, y) { return COLS.charAt(x) + (y + 1); }
+  /* Nombre que se MUESTRA: la fila 1 es la de ABAJO (como en Go o Pente de mesa). coordName/parseCoord (fila 1 arriba) quedan como notación interna. */
+  function label(x, y, size) { return COLS.charAt(x) + ((size || 19) - y); }
+  function unlabel(str, size) {
+    size = size || 19;
+    var m = /^([A-HJ-T])(\d{1,2})$/i.exec(String(str).trim());
+    if (!m) return null;
+    var x = COLS.indexOf(m[1].toUpperCase()), y = size - parseInt(m[2], 10);
+    return (x >= 0 && x < size && y >= 0 && y < size) ? { x: x, y: y } : null;
+  }
   function parseCoord(str, size) {
     size = size || 19;
     var m = /^([A-HJ-T])(\d{1,2})$/i.exec(String(str).trim());
@@ -3732,7 +3741,7 @@ window.GALAXY_GAME = {
     findCaptures: findCaptures, captureInfo: captureInfo, VARIANTS: VARIANTS, VARIANT_RULES: VARIANT_RULES, findLine: findLine, legalMoves: legalMoves,
     opponent: opponent, get: get, inBounds: inBounds, center: center,
     winsNeededForBestOf: winsNeededForBestOf,
-    COLS: COLS, coordName: coordName, parseCoord: parseCoord
+    COLS: COLS, coordName: coordName, parseCoord: parseCoord, label: label, unlabel: unlabel
   };
 });
 </script>
@@ -3763,7 +3772,7 @@ window.GALAXY_GAME = {
       if (bad) return;
       body = body.replace(/x\s*\[[^\]]*\]/gi, ' ');                      // lo capturado no es una jugada
       var re = new RegExp(COORD.source, 'gi'), m;
-      while ((m = re.exec(body))) { var c = P.parseCoord(m[1] + m[2], size); if (c) moves.push({ x: c.x, y: c.y }); else { bad = { ok: false, size: size, error: 'BAD_COORD', at: moves.length + 1, token: m[0] }; return; } }
+      while ((m = re.exec(body))) { var c = P.unlabel(m[1] + m[2], size); if (c) moves.push({ x: c.x, y: c.y }); else { bad = { ok: false, size: size, error: 'BAD_COORD', at: moves.length + 1, token: m[0] }; return; } }
     });
     if (bad) return bad;
     if (!moves.length) return { ok: false, size: size, error: 'EMPTY' };
@@ -3775,7 +3784,7 @@ window.GALAXY_GAME = {
     var s = P.createGame({ size: g.size, variant: g.variant, tournamentRule: false, exactFive: !!g.exactFive }), states = [s];
     for (var i = 0; i < g.moves.length; i++) {
       var r = P.playMove(s, g.moves[i].x, g.moves[i].y, s.current);
-      if (!r.ok) return { states: states, failedAt: i + 1, error: r.error, coord: P.coordName(g.moves[i].x, g.moves[i].y) };
+      if (!r.ok) return { states: states, failedAt: i + 1, error: r.error, coord: P.label(g.moves[i].x, g.moves[i].y, g.size) };
       s = r.state; states.push(s);
     }
     return { states: states };
@@ -10777,7 +10786,7 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
   /* ---- Explicación ampliada: qué pasa en la mesa antes de jugar, qué logra la jugada, qué pasa si no se juega y qué conviene aprender. ---- */
   function emptyCells(s) { var out = [], x, y; for (y = 0; y < s.size; y++) for (x = 0; x < s.size; x++) if (P.get(s, x, y) === P.EMPTY) out.push({ x: x, y: y }); return out; }
   function near(s, x, y, r) { for (var dy = -r; dy <= r; dy++) for (var dx = -r; dx <= r; dx++) { if (P.inBounds(s, x + dx, y + dy) && P.get(s, x + dx, y + dy) !== P.EMPTY) return true; } return false; }
-  function coords(list, max) { return list.slice(0, max || 4).map(function (c) { return P.coordName(c.x, c.y); }).join(', '); }
+  function coords(list, max) { return list.slice(0, max || 4).map(function (c) { return P.label(c.x, c.y, boardN()); }).join(', '); }
   /* Casillas donde `color` ganaría ya, donde armaría un cuatro abierto (= tiene un tres abierto) y donde capturaría. */
   function threatMap(s, color) {
     var res = { win: [], open4: [], four: [], cap: [] }, st = withTurn(s, color);
@@ -10806,7 +10815,7 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
     if (tMe.cap.length) out.before.push({ k: 'meCap', at: coords(tMe.cap), n: tMe.cap.reduce(function (a, c) { return a + c.n; }, 0) });
     if (!out.before.length) out.before.push({ k: 'quiet' });
     // 2) Qué logra la jugada (con coordenadas)
-    var tags = tagsFor(s, x, y, color), at = P.coordName(x, y), after = mine.state;
+    var tags = tagsFor(s, x, y, color), at = P.label(x, y, boardN()), after = mine.state;
     tags.forEach(function (tg) {
       if (tg.k === 'win') { out.why.push({ k: 'win' }); }
       else if (tg.k === 'blockWin') { out.why.push({ k: 'blockWin', at: at }); addTip('blockWin'); if (tOpp.win.length > 1) out.warn.push({ k: 'moreWins', at: coords(tOpp.win.filter(function (c) { return c.x !== x || c.y !== y; })) }); }
@@ -10861,7 +10870,7 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
   function describe(s, e, color) {
     var tags = tagsFor(s, e.x, e.y, color);
     if (!tags.length) tags.push({ k: s.board.some(function (v) { return v; }) ? 'develop' : 'center' });
-    return { x: e.x, y: e.y, coord: P.coordName(e.x, e.y), tags: tags };
+    return { x: e.x, y: e.y, coord: P.label(e.x, e.y, boardN()), tags: tags };
   }
 
   /* Arma el consejo a partir del ranking [{x,y,v}] (mejor primero) que devolvió el motor; `win` es el valor de "victoria" de ese motor. */
@@ -12241,7 +12250,7 @@ window.NEON_BREAK = {
     return state && P.inBounds(state, x, y) ? { x: x, y: y } : null;
   }
   function cellFromEvent(e) { var c = toCanvas(e); return snap(c.x, c.y, false); }
-  function coordLabel(c) { return P.coordName(c.x, c.y); }
+  function coordLabel(c) { return P.label(c.x, c.y, boardN()); }
   function easeOut(k) { return 1 - Math.pow(1 - k, 3); }
 
   /* Mouse y lápiz: previsualización al pasar y un clic coloca. */
@@ -12376,10 +12385,15 @@ window.NEON_BREAK = {
     var n = boardN(), art = artOf(theme());
     if (canvas === $('board')) {        // los tableros con marco se agrandan para que la GRILLA mida lo mismo que en el tablero simple (el marco sobresale un poco); sin pasarse del ancho/alto de la pantalla
       var sc = art ? Math.max(1, (cfg.coords ? (n - 1) / (n + 2.1) : (n - 1) / n) / (art.span[1] - art.span[0]) * (art.fit || 1)) : 1;      // sin tope: la grilla mide SIEMPRE lo mismo que en el tablero simple; lo que sobra es solo el marco, que puede salirse de la pantalla (letras y grilla quedan adentro)
+      var inLab = document.body.classList.contains('in-lab') && art && canvas.parentElement;
+      if (inLab) {                                         // tablero de práctica: el marco no puede pisar el panel ni las barras de jugadores, así que se achica hasta entrar en su lugar
+        var wr = canvas.parentElement.getBoundingClientRect(), cw0 = canvas.clientWidth || 600, ch0 = canvas.clientHeight || cw0;
+        if (wr.width > 50 && wr.height > 50) sc = Math.min(sc, wr.width / cw0, wr.height / ch0);
+      }
       var want = Math.round((canvas.clientWidth || 600) * Math.min(2, window.devicePixelRatio || 1) * sc);        // el lienzo tiene los píxeles del tamaño FINAL (con la ampliación): si no, el navegador lo estira y las fichas se ven borrosas
       if (want > 4 && canvas.width !== want) { canvas.width = canvas.height = want; metrics.w = want; }
-      canvas.style.transformOrigin = window.innerWidth >= 1100 ? '0% 50%' : '';        // en pantalla ancha el marco sobresale hacia la derecha (donde hay lugar), no sobre el panel
-      canvas.style.transform = sc > 1.005 ? 'scale(' + sc.toFixed(4) + ')' : '';
+      canvas.style.transformOrigin = inLab ? '50% 50%' : window.innerWidth >= 1100 ? '0% 50%' : '';        // en pantalla ancha el marco sobresale hacia la derecha (donde hay lugar), no sobre el panel
+      canvas.style.transform = Math.abs(sc - 1) > 0.005 ? 'scale(' + sc.toFixed(4) + ')' : '';
     }
     if (art) { metrics.cell = (art.span[1] - art.span[0]) * metrics.w / (n - 1); metrics.off = art.span[0] * metrics.w; return; }     // tablero con marco: la grilla ocupa el campo del dibujo
     if (cfg.coords) { metrics.cell = metrics.w / (n + 2.1); metrics.off = metrics.cell * 1.55; }     // margen parejo en los 4 lados: letras arriba y abajo, números a izquierda y derecha
@@ -13125,7 +13139,7 @@ window.NEON_BREAK = {
       lbl(P.COLS.charAt(i), px(i), metrics.off * lpT, hiX); lbl(P.COLS.charAt(i), px(i), farB, hiX);
       ctx.font = (hiY ? '800 ' : '600 ') + Math.round(c * (th.board.paper ? 0.56 : th.board.labelSize || 0.5)) + 'px ' + uiFont();
       ctx.fillStyle = hiY ? th.board.labelHi : th.board.label;
-      lbl(String(i + 1), metrics.off * lp, px(i), hiY); lbl(String(i + 1), far, px(i), hiY);
+      lbl(String(boardN() - i), metrics.off * lp, px(i), hiY); lbl(String(boardN() - i), far, px(i), hiY);
     }
     ctx.restore();
   }
@@ -13264,10 +13278,9 @@ window.NEON_BREAK = {
     if (state.lastMove && cfg.lastMove && !ink) {
       var lm = state.lastMove, lv = P.get(state, lm.x, lm.y);
       var lcx = px(lm.x), lcy = px(lm.y), lcell = metrics.cell, lw = Math.max(2, lcell * 0.075), dc = th.last.dot[lv], rc = th.last.ring;
-      ctx.save();                                                                       // halo de color opuesto: el círculo se ve aunque la ficha o el tablero sean del mismo color
-      ctx.strokeStyle = haloOf(rc); ctx.lineWidth = lw + Math.max(2.5, lcell * 0.07); ctx.beginPath(); ctx.arc(lcx, lcy, lcell * 0.21, 0, Math.PI * 2); ctx.stroke();
+      ctx.save();
       ctx.strokeStyle = rc; ctx.lineWidth = lw; ctx.beginPath(); ctx.arc(lcx, lcy, lcell * 0.21, 0, Math.PI * 2); ctx.stroke();
-      ctx.fillStyle = dc; ctx.strokeStyle = haloOf(dc); ctx.lineWidth = Math.max(1.6, lcell * 0.045); ctx.beginPath(); ctx.arc(lcx, lcy, lcell * 0.12, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = dc; ctx.beginPath(); ctx.arc(lcx, lcy, lcell * 0.12, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
     }
     // previsualización (mouse, o ficha pendiente del dedo)
@@ -13535,7 +13548,7 @@ window.NEON_BREAK = {
   function parseTyped(str) {
     var s = String(str || '').replace(/\s+/g, ''), m = /^([a-z])(\d{1,2})$/i.exec(s), n = /^(\d{1,2})([a-z])$/i.exec(s);
     var coord = m ? m[1] + m[2] : n ? n[2] + n[1] : '';
-    return coord ? P.parseCoord(coord, boardN()) : null;           // ojo: en Pente no existe la letra I
+    return coord ? P.unlabel(coord, boardN()) : null;           // ojo: en Pente no existe la letra I
   }
   function submitTyped() {
     var inp = $('coordIn'), txt = inp.value.trim();
@@ -13977,7 +13990,7 @@ window.NEON_BREAK = {
   }
   function setSideOpen(v) { side.open = v; $('side').classList.toggle('open', v); if (v && side.tab === 'chat') side.unread = 0; updateSide(); }
 
-  function moveToken(m) { return P.coordName(m.x, m.y); }
+  function moveToken(m) { return P.label(m.x, m.y, boardN()); }
   function renderMoves() {
     var ol = $('movesList'); ol.innerHTML = '';
     var mv = state ? state.moves : [];
@@ -15933,14 +15946,14 @@ window.NEON_BREAK = {
     pzSay(t('pz.sol.start'), 'hint'); pzRenderCard(); render();
     p.pv.forEach(function (m, i) {
       tutLater(function () {
-        var mine = i % 2 === 0, last = i === p.pv.length - 1, cn = P.coordName(m[0], m[1]), hold = 0;
+        var mine = i % 2 === 0, last = i === p.pv.length - 1, cn = P.label(m[0], m[1], boardN()), hold = 0;
         if (!mine && PS) hold = PS.fromState(state).holdReplies(1).length;          // cuántas respuestas tenía el rival que no perdían enseguida
         var w = P.playMove(state, m[0], m[1], state.current); if (!w.ok) return;
         state = w.state; tut.marks = []; spawnFx(w.captured, mine ? 2 : 1); moveFeedback(w.captured, state.status !== 'playing', state.winner);
         var txt = '', kind = 'hint';
         if (last) { txt = t('pz.sol.win', { c: cn }); kind = 'good'; }
         else if (mine) {
-          var cells = PS ? PS.fromState(state).winCellsOf(1) : [], nm = cells.map(function (c) { return P.coordName(c.x, c.y); }).join(' / ');
+          var cells = PS ? PS.fromState(state).winCellsOf(1) : [], nm = cells.map(function (c) { return P.label(c.x, c.y, boardN()); }).join(' / ');
           txt = cells.length >= 2 ? t('pz.sol.double', { c: cn, a: nm }) : cells.length === 1 ? t('pz.sol.single', { c: cn, a: nm }) : t('pz.sol.quiet', { c: cn });
           tut.marks = tutMarks(cells.map(function (c) { return [c.x, c.y]; }), 'hl');
         } else txt = t(hold === 1 ? 'pz.sol.forced' : 'pz.sol.free', { c: cn });
@@ -16353,16 +16366,18 @@ window.NEON_BREAK = {
   }
   document.querySelectorAll('#cfgTabs .tab').forEach(function (b) { b.addEventListener('click', function () { showTab(b.dataset.tab); }); });
   var cfgFromGame = false;                                    // la configuración se abrió desde la partida: al volver se retoma la partida
+  var SIB = { settingsOverlay: 1, customizeOverlay: 1 };
   var cfgBack = 'menuOverlay';                                // a qué pantalla vuelve «Volver» de los ajustes (menú, o Personalización si vinieron de ahí)
   function openCfg(fromGame, back) {
     var tab = 'sound'; try { tab = sessionStorage.getItem('pente.tab') || 'sound'; } catch (e) {}
     if (!document.getElementById('tab-' + tab)) tab = 'sound';
+    if (back === 'customizeOverlay') back = SIB[czFrom] ? 'menuOverlay' : czFrom;               // viene de Personalización: «Volver» va a donde empezó Personalización (volver a Personalización era un bucle)
     cfgFromGame = !!fromGame; cfgBack = back || 'menuOverlay'; syncCfgUi(); showTab(tab); open('settingsOverlay');
   }
   $('btnSettings').addEventListener('click', function () { openCfg(false); });
   $('btnGameCfg').addEventListener('click', function () { openCfg(true); });
   var czFrom = 'menuOverlay';
-  function openCustomize(from) { nwSeen('c'); czFrom = from; syncCfgUi(); open('customizeOverlay'); }
+  function openCustomize(from) { nwSeen('c'); if (from === 'settingsOverlay' && !cfgFromGame) from = SIB[cfgBack] ? 'menuOverlay' : cfgBack; czFrom = from; syncCfgUi(); open('customizeOverlay'); }
   $('btnCustomize').addEventListener('click', function () { openCustomize('menuOverlay'); });
   $('btnToCustom').addEventListener('click', function () { openCustomize('settingsOverlay'); });
   $('btnCustomizeBack').addEventListener('click', function () { open(czFrom); });
