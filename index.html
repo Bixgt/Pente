@@ -215,6 +215,21 @@ body.in-screen .app { visibility: hidden; }
 .ol-av { flex: none; width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; background: rgba(255,255,255,.07); font-size: 26px; overflow: hidden; }
 .ol-me-f { flex: 1; min-width: 0; }
 .ol-me-f .lbl { display: block; margin-bottom: 2px; font-size: 12px; }
+.cl-card { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; margin-bottom: 8px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); color: var(--text); text-align: left; font: inherit; }
+button.cl-card { cursor: pointer; } button.cl-card:hover { border-color: var(--accent); }
+.cl-em { flex: none; width: 46px; height: 46px; display: grid; place-items: center; font-size: 26px; border-radius: 12px; background: var(--panel-2); }
+.cl-tx { flex: 1; min-width: 0; } .cl-tx b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .cl-tx small { color: var(--muted); }
+.cl-chip { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.cl-chip.leader { color: #ffc933; border-color: rgba(255,201,51,.5); } .cl-chip.officer { color: #35d07f; border-color: rgba(53,208,127,.5); }
+.cl-dot { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--line); } .cl-dot.on { background: #35d07f; } .cl-dot.busy { background: #ffc933; }
+.cl-sec { margin: 16px 0 8px; font-weight: 800; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.cl-mem { flex-wrap: wrap; } .cl-mem .cl-acts { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; padding-left: 22px; }
+.cl-mem .cl-acts .btn { padding: 6px 10px; min-height: 34px; font-size: 13px; }
+.cl-code { font-size: 26px; font-weight: 800; letter-spacing: .3em; text-align: center; padding: 10px; border: 1px dashed var(--line); border-radius: 14px; margin: 6px 0; user-select: all; }
+.cl-emojis { display: flex; flex-wrap: wrap; gap: 6px; } .cl-emojis button { width: 44px; height: 44px; font-size: 22px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); cursor: pointer; } .cl-emojis button.on { border-color: var(--accent); background: var(--panel-2); }
+.cl-row2 { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; } .cl-row2 > * { flex: 1; min-width: 120px; }
+.cl-sel { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font: inherit; }
+.cl-empty { text-align: center; color: var(--muted); padding: 18px 8px; border: 2px dashed var(--line); border-radius: 14px; margin-bottom: 8px; }
 .ol-me-f.field { margin: 0; }
 .ol-me-f input { width: 100%; }
 @media (max-width: 600px) {
@@ -821,6 +836,7 @@ html[data-theme="galaxia"] { --spr: hue-rotate(151deg); }
 .quick-opts .btn { min-height: 0; padding: 6px 12px; font-size: 13px; }
 .tiles { display: flex; flex-direction: column; gap: 10px; margin-bottom: 6px; }
 .tile { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 16px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); text-align: left; color: var(--text); }
+.tile[hidden] { display: none; }
 .tile:hover { border-color: var(--accent); }
 .tile.primary { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--panel)); color: var(--text); }
 .tile-ic { flex: none; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 12px; background: var(--panel-2); color: var(--accent); }
@@ -1764,7 +1780,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span><b class="newb" id="nwProfile" hidden></b></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v189</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v190</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -1923,11 +1939,22 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       <button type="button" class="tile" id="btnLocal"><span class="tile-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="5"/><circle cx="15" cy="15" r="5"/></svg></span><span class="tile-tx"><span class="tile-t" data-i18n="menu.local"></span><span class="tile-s" data-i18n="play.localSub"></span></span></button>
       <button type="button" class="tile" id="btnOnline"><span class="tile-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z"/></svg></span><span class="tile-tx"><span class="tile-t" data-i18n="menu.online"></span><span class="tile-s" data-i18n="play.onlineSub"></span></span></button>
       <button type="button" class="tile" id="btnSeek"><span class="tile-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span><span class="tile-tx"><span class="tile-t" data-i18n="seek.btn"></span><span class="tile-s" data-i18n="seek.sub"></span></span></button>
+      <button type="button" class="tile" id="btnClubs" hidden><span class="tile-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm6.5 0a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM9 13c-2.7 0-8 1.3-8 4v2h16v-2c0-2.7-5.3-4-8-4zm6.5.2c-.4 0-.8 0-1.2.1 1.4.9 2.7 2.3 2.7 3.7v2H23v-2c0-2.2-4.1-3.8-7.5-3.8z"/></svg></span><span class="tile-tx"><span class="tile-t" data-i18n="cl.title"></span><span class="tile-s" data-i18n="cl.tileSub"></span></span></button>
       <button type="button" class="tile" id="btnTutorial"><span class="tile-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4z"/><path d="M7 9.5V15c0 1.5 2.2 3 5 3s5-1.5 5-3V9.5"/></svg></span><span class="tile-tx"><span class="tile-t" data-i18n="menu.tutorial"></span><span class="tile-s" data-i18n="play.tutorialSub"></span></span></button>
       <button type="button" class="tile" id="btnPuzzles"><span class="tile-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h7v7H4z"/><path d="M13 4h7v7h-7z" /><path d="M4 13h7v7H4z"/><circle cx="16.5" cy="16.5" r="3.5"/></svg></span><span class="tile-tx"><span class="tile-t" data-i18n="pz.btn"></span><span class="tile-s" data-i18n="pz.sub"></span></span></button>
       <button type="button" class="tile" id="btnLab"><span class="tile-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></span><span class="tile-tx"><span class="tile-t" data-i18n="lab.menu"></span><span class="tile-s" data-i18n="lab.menuSub"></span></span></button>
     </div>
     <div class="btns"><button class="btn" id="btnPlayBack" data-i18n="menu.back"></button></div>
+  </div>
+</div>
+
+<!-- Clubes -->
+<div class="overlay screen" id="clubOverlay">
+  <div class="screen-body">
+    <h2 id="clTitle" data-i18n="cl.title"></h2>
+    <p class="online-msg" id="clMsg" role="status" aria-live="polite"></p>
+    <div id="clBody"></div>
+    <div class="btns"><button class="btn" id="btnClBack" data-i18n="menu.back"></button></div>
   </div>
 </div>
 
@@ -6013,6 +6040,19 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'ol.tabWait': 'Salas', 'ol.tabPlay': 'En juego', 'ol.host': 'Anfitrión', 'ol.join': 'Unirse',
       'ol.create': 'Crear partida', 'ol.code': 'Unirme con un código', 'ol.profile': 'Tu perfil',
       'ol.emptyPlay': 'No hay partidas en curso en este momento.', 'ol.lvl': 'Nivel {n} · {title}',
+      'cl.title': 'Clubes', 'cl.tileSub': 'Tu grupo, tus partidas, tus reglas.', 'cl.none': 'Todavía no estás en ningún club.', 'cl.create': 'Crear club', 'cl.join': 'Unirme con código',
+      'cl.members': '{n} socios · {on} conectados', 'cl.role.leader': 'Líder', 'cl.role.officer': 'Oficial', 'cl.role.member': 'Socio', 'cl.name': 'Nombre del club', 'cl.emoji': 'Ícono',
+      'cl.createGo': 'Crear', 'cl.joinSub': 'Pegá el código que te pasó el club.', 'cl.joinGo': 'Entrar al club', 'cl.invite': 'Código de invitación', 'cl.copyLink': 'Copiar link', 'cl.newCode': 'Cambiar código',
+      'cl.newCodeAsk': 'El código anterior deja de funcionar. ¿Cambiarlo?', 'cl.membersH': 'Socios', 'cl.online': 'Conectado', 'cl.offline': 'Desconectado', 'cl.busy': 'En partida', 'cl.promote': 'Hacer oficial', 'cl.demote': 'Quitar oficial',
+      'cl.transfer': 'Pasar liderazgo', 'cl.transferAsk': 'Vas a dejar de ser líder (quedás como oficial). ¿Seguro?', 'cl.kick': 'Echar', 'cl.kickAsk': '¿Echar a {name} del club?', 'cl.presets': 'Configuraciones', 'cl.presetNew': '+ Nueva',
+      'cl.presetName': 'Nombre de la configuración', 'cl.time': 'Tiempo', 'cl.timeNormal': 'Sin reloj', 'cl.size': 'Tablero', 'cl.presetSave': 'Guardar', 'cl.cancel': 'Cancelar', 'cl.edit': 'Editar', 'cl.delete': 'Borrar',
+      'cl.presetsNone': 'El club todavía no guardó configuraciones.', 'cl.presetsNoneOff': 'Guardá reglas para que los socios las elijan al retar.', 'cl.presetDelAsk': '¿Borrar esta configuración?',
+      'cl.rename': 'Renombrar', 'cl.renameAsk': 'Nuevo nombre del club', 'cl.deleteClub': 'Borrar club', 'cl.deleteAsk': '¿Borrar «{name}» para todos los socios? No se puede deshacer.', 'cl.leave': 'Salir del club', 'cl.leaveAsk': '¿Salir de «{name}»?',
+      'cl.loading': 'Cargando…', 'cl.kicked': 'Ya no sos parte de ese club.',
+      'cl.err.OFFLINE': 'Sin conexión con el servidor. Probá en unos segundos.', 'cl.err.LOGIN': 'Iniciá sesión para usar Clubes.', 'cl.err.DISABLED': 'Clubes todavía no está disponible para tu cuenta.', 'cl.err.NO_CLUB': 'No encontré ese club. Revisá el código.',
+      'cl.err.BAD_NAME': 'Poné un nombre de al menos 3 letras.', 'cl.err.TOO_MANY_JOINED': 'Ya estás en el máximo de clubes (5).', 'cl.err.TOO_MANY_OWNED': 'Ya sos líder de 2 clubes, el máximo.', 'cl.err.CLUB_FULL': 'El club está completo.',
+      'cl.err.FORBIDDEN': 'No tenés permiso para eso.', 'cl.err.LEADER_MUST_TRANSFER': 'Sos la líder: pasale el liderazgo a otro socio antes de salir, o borrá el club.', 'cl.err.TOO_MANY_PRESETS': 'Ya hay 10 configuraciones, el máximo.',
+      'cl.err.BAD_TARGET': 'Esa persona ya no está en el club.', 'cl.err.RATE': 'Más despacio, probá de nuevo.', 'cl.err.ERROR': 'Algo salió mal. Probá de nuevo.', 'cl.err.FULL': 'No se pudo generar un código, probá de nuevo.',
       'rooms.title': 'Salas',
       'rooms.sub': 'Partidas públicas que hay ahora. Se actualiza solo.',
       'rooms.refresh': 'Actualizar',
@@ -6356,6 +6396,19 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'ol.tabWait': 'Rooms', 'ol.tabPlay': 'In play', 'ol.host': 'Host', 'ol.join': 'Join',
       'ol.create': 'Create game', 'ol.code': 'Join with a code', 'ol.profile': 'Your profile',
       'ol.emptyPlay': 'No games in progress right now.', 'ol.lvl': 'Level {n} · {title}',
+      'cl.title': 'Clubs', 'cl.tileSub': 'Your group, your games, your rules.', 'cl.none': "You're not in any club yet.", 'cl.create': 'Create club', 'cl.join': 'Join with a code',
+      'cl.members': '{n} members · {on} online', 'cl.role.leader': 'Leader', 'cl.role.officer': 'Officer', 'cl.role.member': 'Member', 'cl.name': 'Club name', 'cl.emoji': 'Icon',
+      'cl.createGo': 'Create', 'cl.joinSub': 'Paste the code the club gave you.', 'cl.joinGo': 'Join club', 'cl.invite': 'Invite code', 'cl.copyLink': 'Copy link', 'cl.newCode': 'Change code',
+      'cl.newCodeAsk': 'The old code will stop working. Change it?', 'cl.membersH': 'Members', 'cl.online': 'Online', 'cl.offline': 'Offline', 'cl.busy': 'In a game', 'cl.promote': 'Make officer', 'cl.demote': 'Remove officer',
+      'cl.transfer': 'Hand over leadership', 'cl.transferAsk': "You'll stop being the leader (you become an officer). Sure?", 'cl.kick': 'Remove', 'cl.kickAsk': 'Remove {name} from the club?', 'cl.presets': 'Saved setups', 'cl.presetNew': '+ New',
+      'cl.presetName': 'Setup name', 'cl.time': 'Time', 'cl.timeNormal': 'No clock', 'cl.size': 'Board', 'cl.presetSave': 'Save', 'cl.cancel': 'Cancel', 'cl.edit': 'Edit', 'cl.delete': 'Delete',
+      'cl.presetsNone': "The club hasn't saved any setups yet.", 'cl.presetsNoneOff': 'Save rules so members can pick them when challenging.', 'cl.presetDelAsk': 'Delete this setup?',
+      'cl.rename': 'Rename', 'cl.renameAsk': 'New club name', 'cl.deleteClub': 'Delete club', 'cl.deleteAsk': 'Delete "{name}" for all members? This cannot be undone.', 'cl.leave': 'Leave club', 'cl.leaveAsk': 'Leave "{name}"?',
+      'cl.loading': 'Loading…', 'cl.kicked': "You're no longer in that club.",
+      'cl.err.OFFLINE': 'No connection to the server. Try again in a few seconds.', 'cl.err.LOGIN': 'Sign in to use Clubs.', 'cl.err.DISABLED': 'Clubs is not available for your account yet.', 'cl.err.NO_CLUB': "I couldn't find that club. Check the code.",
+      'cl.err.BAD_NAME': 'Use a name with at least 3 letters.', 'cl.err.TOO_MANY_JOINED': "You're already in the maximum number of clubs (5).", 'cl.err.TOO_MANY_OWNED': "You already lead 2 clubs, the maximum.", 'cl.err.CLUB_FULL': 'The club is full.',
+      'cl.err.FORBIDDEN': "You don't have permission for that.", 'cl.err.LEADER_MUST_TRANSFER': 'You are the leader: hand leadership to another member before leaving, or delete the club.', 'cl.err.TOO_MANY_PRESETS': 'There are already 10 setups, the maximum.',
+      'cl.err.BAD_TARGET': 'That person is no longer in the club.', 'cl.err.RATE': 'Slow down, try again.', 'cl.err.ERROR': 'Something went wrong. Try again.', 'cl.err.FULL': "Couldn't generate a code, try again.",
       'rooms.title': 'Rooms',
       'rooms.sub': 'Public games happening right now. Updates by itself.',
       'rooms.refresh': 'Refresh',
@@ -14317,12 +14370,96 @@ window.NEON_BREAK = {
     var url = serverUrl(), ok = !!(socialOk() && url);
     if (!ok) { if (inv.net) { inv.net.close(); inv.net = null; } return; }
     if (inv.net) return;
-    inv.net = window.PenteNet.connect(url, { onState: function () {}, onOpen: function () { inviteHi(); setTimeout(ntCheck, 800); }, onMessage: onInviteMessage });
+    inv.net = window.PenteNet.connect(url, { onState: function () {}, onOpen: function () { inviteHi(); setTimeout(clStatus, 500); setTimeout(ntCheck, 800); }, onMessage: onInviteMessage });
   }
+
+  /* ---------- Clubes ----------
+   * Todo pasa por la conexión de presencia (inv.net) con el jwt de la cuenta. El servidor decide si Clubes está activo para esta cuenta (cstatus). */
+  var cl = { enabled: false, view: 'home', list: [], cur: null, edit: null, emoji: '♟️', pendingCode: '', timer: 0 };
+  var CL_EMOJIS = ['♟️', '🏆', '🔥', '⚡', '🌟', '🐉', '🦊', '🇦🇷', '🎯', '👑'];
+  function clSend(m) {
+    return Auth && Auth.user ? Auth.accessToken().then(function (tk) { if (!tk || !inv.net || !inv.net.isOpen()) { clMsg(t('cl.err.OFFLINE'), true); return; } inv.net.send(Object.assign({ jwt: tk }, m)); }) : Promise.resolve();
+  }
+  function clMsg(txt, bad) { var m = $('clMsg'); m.textContent = txt || ''; m.classList.toggle('bad', !!bad); }
+  function clOpenEl() { return $('clubOverlay').classList.contains('open'); }
+  function clStatus() { clSend({ t: 'cstatus' }); }
+  function clGo(view) { cl.view = view; cl.edit = null; clMsg(''); clRender(); if (view === 'home') clSend({ t: 'clist' }); }
+  function clRefresh() { clearTimeout(cl.timer); cl.timer = setTimeout(function () { if (!clOpenEl()) return; if (cl.view === 'club' && cl.cur) clSend({ t: 'cview', id: cl.cur.id }); else if (cl.view === 'home') clSend({ t: 'clist' }); }, 300); }
+  function clOnMsg(m) {
+    if (m.t === 'cstatus') { cl.enabled = !!m.enabled; $('btnClubs').hidden = !cl.enabled; if (cl.enabled && cl.pendingCode) { var c = cl.pendingCode; cl.pendingCode = ''; $('btnClubs').click(); cl.view = 'join'; cl.code = c; clRender(); } return; }
+    if (m.t === 'clist') { cl.list = m.clubs || []; if (cl.view === 'home') clRender(); return; }
+    if (m.t === 'cview') { cl.cur = m.club; if (cl.view !== 'club' && (cl.view === 'join' || cl.view === 'create')) cl.view = 'club'; if (cl.view === 'club') clRender(); return; }
+    if (m.t === 'cdirty') { if (m.kicked && cl.cur && cl.cur.id === m.id) { cl.cur = null; if (clOpenEl()) { clGo('home'); clMsg(t('cl.kicked'), true); } return; } clRefresh(); return; }
+    if (m.t === 'cres') {
+      if (!m.ok) { clMsg(t('cl.err.' + m.reason) === 'cl.err.' + m.reason ? t('cl.err.ERROR') : t('cl.err.' + m.reason), true); return; }
+      clMsg('');
+      if (m.op === 'cleave' || m.op === 'cdelete') { cl.cur = null; clGo('home'); return; }
+      if (m.op !== 'ccreate' && m.op !== 'cjoin' && cl.cur) { cl.edit = null; clSend({ t: 'cview', id: cl.cur.id }); }
+    }
+  }
+  function clModeLabel(o) { o = o || {}; var v = t('mode.' + (o.variant || 'classic')), tm = o.bullet ? ' · ' + t('mode.bullet') : o.blitz ? ' · ' + t('mode.blitz') : ''; return v + tm + ' · ' + (o.size || 19) + '×' + (o.size || 19); }
+  function clRender() {
+    var b = $('clBody'), h = '', c = cl.cur;
+    $('clTitle').textContent = cl.view === 'club' && c ? c.emoji + ' ' + c.name : t('cl.title');
+    if (cl.view === 'home') {
+      h += cl.list.length ? cl.list.map(function (x) { return '<button type="button" class="cl-card" data-a="open" data-id="' + esc(x.id) + '"><span class="cl-em">' + esc(x.emoji) + '</span><span class="cl-tx"><b>' + esc(x.name) + '</b><small>' + esc(t('cl.members', { n: x.n, on: x.online })) + '</small></span><span class="cl-chip ' + esc(x.role) + '">' + esc(t('cl.role.' + x.role)) + '</span></button>'; }).join('') : '<div class="cl-empty">' + esc(t('cl.none')) + '</div>';
+      h += '<div class="cl-row2"><button type="button" class="btn primary" data-a="new">' + esc(t('cl.create')) + '</button><button type="button" class="btn" data-a="joinv">' + esc(t('cl.join')) + '</button></div>';
+    } else if (cl.view === 'create') {
+      h += '<div class="field"><label class="lbl" for="clName">' + esc(t('cl.name')) + '</label><input type="text" id="clName" maxlength="24" autocomplete="off"></div><div class="field"><span class="lbl">' + esc(t('cl.emoji')) + '</span><div class="cl-emojis">' + CL_EMOJIS.map(function (e) { return '<button type="button" data-a="emoji" data-e="' + e + '" class="' + (e === cl.emoji ? 'on' : '') + '">' + e + '</button>'; }).join('') + '</div></div><div class="cl-row2"><button type="button" class="btn primary" data-a="docreate">' + esc(t('cl.createGo')) + '</button></div>';
+    } else if (cl.view === 'join') {
+      h += '<p class="sub">' + esc(t('cl.joinSub')) + '</p><div class="field"><input type="text" id="clCode" class="code-input" maxlength="8" autocomplete="off" value="' + esc(cl.code || '') + '"></div><div class="cl-row2"><button type="button" class="btn primary" data-a="dojoin">' + esc(t('cl.joinGo')) + '</button></div>';
+    } else if (c) {
+      var lead = c.role === 'leader', off = c.role === 'officer' || lead, on = c.members.filter(function (m) { return m.online; }).length;
+      h += '<p class="sub">' + esc(t('cl.members', { n: c.members.length, on: on })) + ' · ' + esc(t('cl.role.' + c.role)) + '</p>';
+      if (off && c.code) h += '<div class="cl-sec"><span>' + esc(t('cl.invite')) + '</span></div><div class="cl-code">' + esc(c.code) + '</div><div class="cl-row2"><button type="button" class="btn" data-a="link">' + esc(t('cl.copyLink')) + '</button><button type="button" class="btn" data-a="newcode">' + esc(t('cl.newCode')) + '</button></div>';
+      h += '<div class="cl-sec"><span>' + esc(t('cl.membersH')) + '</span></div>';
+      c.members.forEach(function (m) {
+        var acts = '';
+        if (lead && m.role !== 'leader') acts += '<button type="button" class="btn" data-a="role" data-u="' + m.uid + '" data-r="' + (m.role === 'officer' ? 'member' : 'officer') + '">' + esc(t(m.role === 'officer' ? 'cl.demote' : 'cl.promote')) + '</button><button type="button" class="btn" data-a="transfer" data-u="' + m.uid + '">' + esc(t('cl.transfer')) + '</button>';
+        if (off && m.role !== 'leader' && (lead || m.role === 'member')) acts += '<button type="button" class="btn" data-a="kick" data-u="' + m.uid + '" data-n="' + esc(m.name) + '">' + esc(t('cl.kick')) + '</button>';
+        h += '<div class="cl-card cl-mem"><span class="cl-dot ' + (m.online ? (m.busy ? 'busy' : 'on') : '') + '" title="' + esc(t(m.online ? (m.busy ? 'cl.busy' : 'cl.online') : 'cl.offline')) + '"></span><span class="cl-tx"><b>' + esc(m.name) + '</b>' + (m.busy ? '<small>' + esc(t('cl.busy')) + '</small>' : '') + '</span>' + (m.role !== 'member' ? '<span class="cl-chip ' + m.role + '">' + esc(t('cl.role.' + m.role)) + '</span>' : '') + (acts ? '<div class="cl-acts">' + acts + '</div>' : '') + '</div>';
+      });
+      h += '<div class="cl-sec"><span>' + esc(t('cl.presets')) + '</span>' + (off && !cl.edit && c.presets.length < 10 ? '<button type="button" class="btn" data-a="pnew">' + esc(t('cl.presetNew')) + '</button>' : '') + '</div>';
+      if (cl.edit) {
+        var e = cl.edit;
+        h += '<div class="cl-card" style="display:block"><div class="field"><label class="lbl" for="clPName">' + esc(t('cl.presetName')) + '</label><input type="text" id="clPName" maxlength="24" autocomplete="off" value="' + esc(e.name) + '"></div><div class="cl-row2"><select class="cl-sel" id="clPVar" aria-label="' + esc(t('mode.pick')) + '">' + ['classic', 'pairs3', 'triples', 'gomoku'].map(function (v) { return '<option value="' + v + '"' + (e.variant === v ? ' selected' : '') + '>' + esc(t('mode.' + v)) + '</option>'; }).join('') + '</select><select class="cl-sel" id="clPTime" aria-label="' + esc(t('cl.time')) + '">' + ['normal', 'blitz', 'bullet'].map(function (v) { return '<option value="' + v + '"' + (e.time === v ? ' selected' : '') + '>' + esc(v === 'normal' ? t('cl.timeNormal') : t('mode.' + v)) + '</option>'; }).join('') + '</select><select class="cl-sel" id="clPSize" aria-label="' + esc(t('cl.size')) + '">' + [9, 13, 15, 19].map(function (v) { return '<option value="' + v + '"' + (e.size === v ? ' selected' : '') + '>' + v + '×' + v + '</option>'; }).join('') + '</select></div><div class="cl-row2"><button type="button" class="btn primary" data-a="psave">' + esc(t('cl.presetSave')) + '</button><button type="button" class="btn" data-a="pcancel">' + esc(t('cl.cancel')) + '</button></div></div>';
+      } else if (!c.presets.length) h += '<div class="cl-empty">' + esc(t(off ? 'cl.presetsNoneOff' : 'cl.presetsNone')) + '</div>';
+      else c.presets.forEach(function (p) { h += '<div class="cl-card cl-mem"><span class="cl-tx"><b>' + esc(p.name) + '</b><small>' + esc(clModeLabel(p.opts)) + '</small></span>' + (off ? '<div class="cl-acts"><button type="button" class="btn" data-a="pedit" data-p="' + p.id + '">' + esc(t('cl.edit')) + '</button><button type="button" class="btn" data-a="pdel" data-p="' + p.id + '">' + esc(t('cl.delete')) + '</button></div>' : '') + '</div>'; });
+      h += '<div class="cl-sec"></div><div class="cl-row2">' + (lead ? '<button type="button" class="btn" data-a="rename">' + esc(t('cl.rename')) + '</button><button type="button" class="btn" data-a="delete">' + esc(t('cl.deleteClub')) + '</button>' : '') + '<button type="button" class="btn" data-a="leave">' + esc(t('cl.leave')) + '</button></div>';
+    }
+    b.innerHTML = h;
+  }
+  $('clBody').addEventListener('click', function (ev) {
+    var el = ev.target.closest('[data-a]'); if (!el) return; var a = el.dataset.a, c = cl.cur, id = c && c.id;
+    if (a === 'open') { clSend({ t: 'cview', id: el.dataset.id }); cl.view = 'club'; cl.cur = null; clMsg(t('cl.loading')); return; }
+    if (a === 'new') { cl.emoji = CL_EMOJIS[0]; clGo('create'); return; }
+    if (a === 'joinv') { cl.code = ''; clGo('join'); return; }
+    if (a === 'emoji') { cl.emoji = el.dataset.e; var nm = $('clName').value; clRender(); $('clName').value = nm; return; }
+    if (a === 'docreate') { clMsg(''); clSend({ t: 'ccreate', name: $('clName').value, emoji: cl.emoji }); return; }
+    if (a === 'dojoin') { clMsg(''); clSend({ t: 'cjoin', code: $('clCode').value }); return; }
+    if (!c) return;
+    if (a === 'link') { copyText(location.origin + location.pathname + '?club=' + c.code, el); return; }
+    if (a === 'newcode') { if (confirm(t('cl.newCodeAsk'))) clSend({ t: 'ccode', id: id }); return; }
+    if (a === 'role') { clSend({ t: 'crole', id: id, uid: el.dataset.u, role: el.dataset.r }); return; }
+    if (a === 'transfer') { if (confirm(t('cl.transferAsk'))) clSend({ t: 'ctransfer', id: id, uid: el.dataset.u }); return; }
+    if (a === 'kick') { if (confirm(t('cl.kickAsk', { name: el.dataset.n }))) clSend({ t: 'ckick', id: id, uid: el.dataset.u }); return; }
+    if (a === 'pnew') { cl.edit = { pid: '', name: '', variant: 'classic', time: 'normal', size: 19 }; clRender(); return; }
+    if (a === 'pedit') { var p = c.presets.filter(function (x) { return x.id === el.dataset.p; })[0]; if (!p) return; cl.edit = { pid: p.id, name: p.name, variant: p.opts.variant || 'classic', time: p.opts.bullet ? 'bullet' : p.opts.blitz ? 'blitz' : 'normal', size: p.opts.size || 19 }; clRender(); return; }
+    if (a === 'pcancel') { cl.edit = null; clRender(); return; }
+    if (a === 'psave') { var tm = $('clPTime').value; clSend({ t: 'cpreset', id: id, pid: cl.edit && cl.edit.pid, name: $('clPName').value, opts: { variant: $('clPVar').value, blitz: tm === 'blitz', bullet: tm === 'bullet', size: Number($('clPSize').value) } }); return; }
+    if (a === 'pdel') { if (confirm(t('cl.presetDelAsk'))) clSend({ t: 'cpresetdel', id: id, pid: el.dataset.p }); return; }
+    if (a === 'rename') { var nn = prompt(t('cl.renameAsk'), c.name); if (nn) clSend({ t: 'crename', id: id, name: nn }); return; }
+    if (a === 'delete') { if (confirm(t('cl.deleteAsk', { name: c.name }))) clSend({ t: 'cdelete', id: id }); return; }
+    if (a === 'leave') { if (confirm(t('cl.leaveAsk', { name: c.name }))) clSend({ t: 'cleave', id: id }); return; }
+  });
+  $('btnClubs').addEventListener('click', function () { cl.view = 'home'; cl.cur = null; clMsg(''); open('clubOverlay'); clRender(); clSend({ t: 'clist' }); });
+  $('btnClBack').addEventListener('click', function () { if (cl.view !== 'home') { cl.cur = null; clGo('home'); return; } open('playOverlay'); });
+  (function () { try { var q = new URLSearchParams(location.search).get('club'); if (q) { cl.pendingCode = String(q).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8); history.replaceState(null, '', location.pathname + location.hash); } } catch (e) {} })();
   setInterval(inviteSync, 20000); setTimeout(inviteSync, 4000);
   function invRules(o) { o = o || {}; var mode = o.bullet ? 'bullet' : o.blitz ? 'blitz' : o.variant || 'classic'; return t('mode.' + mode) + ' · ' + (o.size || 13) + '×' + (o.size || 13); }
   function onInviteMessage(m) {
     if (m && m.t === 'chkRes') { ntOnCheck(m); return; }
+    if (m && /^c(status|list|view|res|dirty)$/.test(m.t)) { clOnMsg(m); return; }
     if (m && (m.t === 'pushKey' || m.t === 'pushRes')) { pushOnMsg(m); return; }
     if (m && m.t === 'looking') { onLooking(m); return; }
     if (m && m.t === 'tinvite') { onTInvite(m); return; }
