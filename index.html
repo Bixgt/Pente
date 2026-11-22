@@ -232,12 +232,12 @@ button.cl-card { cursor: pointer; } button.cl-card:hover { border-color: var(--a
 .cl-empty { text-align: center; color: var(--muted); padding: 18px 8px; border: 2px dashed var(--line); border-radius: 14px; margin-bottom: 8px; }
 .screen-body.cl-wide { width: min(100%, 1180px); }
 .cl-hero { display: flex; align-items: center; gap: 16px; padding: 14px 18px; margin-bottom: 14px; border: 1px solid var(--line); border-radius: 20px; background: linear-gradient(100deg, var(--panel) 40%, transparent 75%), repeating-linear-gradient(0deg, rgba(255,255,255,.06) 0 1px, transparent 1px 26px), repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 1px, transparent 1px 26px), var(--panel-2); position: relative; overflow: hidden; }
-.cl-hero::after { content: ''; position: absolute; right: 8%; top: 30%; width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #666, #111); box-shadow: -90px 28px 0 -4px #eee, -40px -6px 0 -6px #e6e6e6; opacity: .9; pointer-events: none; }
-.cl-shield { flex: none; width: 64px; height: 72px; display: grid; place-items: center; font-size: 32px; background: linear-gradient(160deg, var(--accent), var(--panel-2)); clip-path: polygon(50% 0, 100% 12%, 100% 62%, 50% 100%, 0 62%, 0 12%); }
+.cl-shield { flex: none; display: grid; place-items: center; font-size: 40px; } .cl-ico { display: block; height: 76px; width: auto; filter: drop-shadow(0 3px 6px rgba(0,0,0,.45)); } .cl-em .cl-ico { height: 44px; filter: none; } .cl-em { background: none !important; }
+.cl-icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 8px; } .cl-icons button { padding: 8px 4px; border-radius: 14px; border: 2px solid transparent; background: var(--panel); cursor: pointer; display: grid; place-items: center; } .cl-icons button.on { border-color: var(--accent); background: var(--panel-2); } .cl-icons .cl-ico { height: 52px; filter: none; }
 .cl-hero-t { min-width: 0; position: relative; z-index: 1; } .cl-hero-t b { font-size: 26px; font-weight: 800; margin-right: 8px; } .cl-hero-t small { display: block; margin-top: 2px; color: var(--muted); }
 .cl-pen { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); color: var(--text); cursor: pointer; font-size: 15px; }
 .cl-layout { display: grid; grid-template-columns: 1fr; gap: 14px; }
-@media (max-width: 899px) { .cl-hero::after { display: none; } .cl-hero-t b { font-size: 22px; } }
+@media (max-width: 899px) { .cl-hero-t b { font-size: 22px; } }
 .cl-nav { display: flex; gap: 6px; overflow-x: auto; } .cl-tab { flex: 1; min-height: 44px; padding: 8px 14px; border-radius: 12px; border: 1px solid var(--line); background: transparent; color: var(--muted); font: inherit; font-weight: 700; cursor: pointer; white-space: nowrap; }
 .cl-tab.on { background: var(--accent); color: #111; border-color: var(--accent); } .cl-un { font-style: normal; background: #e5484d; color: #fff; border-radius: 999px; padding: 1px 7px; font-size: 12px; margin-left: 4px; }
 .cl-main { min-width: 0; } .cl-aside { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
@@ -1808,7 +1808,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span><b class="newb" id="nwProfile" hidden></b></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v193</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v194</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -6068,21 +6068,21 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'ol.tabWait': 'Salas', 'ol.tabPlay': 'En juego', 'ol.host': 'Anfitrión', 'ol.join': 'Unirse',
       'ol.create': 'Crear partida', 'ol.code': 'Unirme con un código', 'ol.profile': 'Tu perfil',
       'ol.emptyPlay': 'No hay partidas en curso en este momento.', 'ol.lvl': 'Nivel {n} · {title}',
-      'cl.today': 'Hoy, {t}', 'cl.tab.chat': 'Chat', 'cl.tab.members': 'Socios', 'cl.tab.games': 'Partidas', 'cl.tab.settings': 'Ajustes', 'cl.onlineN': '{n} conectados', 'cl.seeAll': 'Ver todos', 'cl.activity': 'Actividad reciente', 'cl.playWith': 'Jugar con un socio',
-      'cl.chatNone': 'Todavía no hay mensajes. ¡Rompé el hielo!', 'cl.chatPh': 'Escribí un mensaje…', 'cl.membersSub': 'Retá a un socio conectado: elegís las reglas y le llega la invitación.',
+      'cl.today': 'Hoy, {t}', 'cl.tab.chat': 'Chat', 'cl.tab.members': 'Miembros', 'cl.tab.games': 'Partidas', 'cl.tab.settings': 'Ajustes', 'cl.onlineN': '{n} conectados', 'cl.seeAll': 'Ver todos', 'cl.activity': 'Actividad reciente', 'cl.playWith': 'Jugar con un miembro',
+      'cl.chatNone': 'Todavía no hay mensajes. ¡Rompé el hielo!', 'cl.chatPh': 'Escribí un mensaje…', 'cl.membersSub': 'Retá a un miembro conectado: elegís las reglas y le llega la invitación.',
       'cl.log.created': 'Se creó el club ({name}).', 'cl.log.join': '{name} entró al club.', 'cl.log.leave': '{name} salió del club.', 'cl.log.kick': '{name} fue sacado del club.', 'cl.log.game': 'Empezó {name}.',
       'cl.title': 'Clubes', 'cl.tileSub': 'Tu grupo, tus partidas, tus reglas.', 'cl.none': 'Todavía no estás en ningún club.', 'cl.create': 'Crear club', 'cl.join': 'Unirme con código',
-      'cl.members': '{n} socios · {on} conectados', 'cl.role.leader': 'Líder', 'cl.role.officer': 'Oficial', 'cl.role.member': 'Socio', 'cl.name': 'Nombre del club', 'cl.emoji': 'Ícono',
+      'cl.members': '{n} miembros · {on} conectados', 'cl.icon': 'Ícono del club', 'cl.role.leader': 'Líder', 'cl.role.officer': 'Oficial', 'cl.role.member': 'Miembro', 'cl.name': 'Nombre del club', 'cl.emoji': 'Ícono',
       'cl.createGo': 'Crear', 'cl.joinSub': 'Pegá el código que te pasó el club.', 'cl.joinGo': 'Entrar al club', 'cl.invite': 'Código de invitación', 'cl.copyLink': 'Copiar link', 'cl.newCode': 'Cambiar código',
-      'cl.newCodeAsk': 'El código anterior deja de funcionar. ¿Cambiarlo?', 'cl.membersH': 'Socios', 'cl.online': 'Conectado', 'cl.offline': 'Desconectado', 'cl.busy': 'En partida', 'cl.promote': 'Hacer oficial', 'cl.demote': 'Quitar oficial',
+      'cl.newCodeAsk': 'El código anterior deja de funcionar. ¿Cambiarlo?', 'cl.membersH': 'Miembros', 'cl.online': 'Conectado', 'cl.offline': 'Desconectado', 'cl.busy': 'En partida', 'cl.promote': 'Hacer oficial', 'cl.demote': 'Quitar oficial',
       'cl.transfer': 'Pasar liderazgo', 'cl.transferAsk': 'Vas a dejar de ser líder (quedás como oficial). ¿Seguro?', 'cl.kick': 'Echar', 'cl.kickAsk': '¿Echar a {name} del club?', 'cl.presets': 'Configuraciones', 'cl.presetNew': '+ Nueva',
       'cl.presetName': 'Nombre de la configuración', 'cl.time': 'Tiempo', 'cl.timeNormal': 'Sin reloj', 'cl.size': 'Tablero', 'cl.presetSave': 'Guardar', 'cl.cancel': 'Cancelar', 'cl.edit': 'Editar', 'cl.delete': 'Borrar',
-      'cl.presetsNone': 'El club todavía no guardó configuraciones.', 'cl.presetsNoneOff': 'Guardá reglas para que los socios las elijan al retar.', 'cl.presetDelAsk': '¿Borrar esta configuración?',
-      'cl.rename': 'Renombrar', 'cl.renameAsk': 'Nuevo nombre del club', 'cl.deleteClub': 'Borrar club', 'cl.deleteAsk': '¿Borrar «{name}» para todos los socios? No se puede deshacer.', 'cl.leave': 'Salir del club', 'cl.leaveAsk': '¿Salir de «{name}»?',
+      'cl.presetsNone': 'El club todavía no guardó configuraciones.', 'cl.presetsNoneOff': 'Guardá reglas para que los miembros las elijan al retar.', 'cl.presetDelAsk': '¿Borrar esta configuración?',
+      'cl.rename': 'Renombrar', 'cl.renameAsk': 'Nuevo nombre del club', 'cl.deleteClub': 'Borrar club', 'cl.deleteAsk': '¿Borrar «{name}» para todos los miembros? No se puede deshacer.', 'cl.leave': 'Salir del club', 'cl.leaveAsk': '¿Salir de «{name}»?',
       'cl.loading': 'Cargando…', 'cl.games': 'Partidas en curso', 'cl.gamesNone': 'No hay partidas del club en este momento.', 'cl.moves': '{n} jugadas', 'cl.challenge': 'Retar', 'cl.pickRules': 'Elegí las reglas:', 'cl.myRules': 'Mis reglas', 'cl.kicked': 'Ya no sos parte de ese club.',
       'cl.err.OFFLINE': 'Sin conexión con el servidor. Probá en unos segundos.', 'cl.err.LOGIN': 'Iniciá sesión para usar Clubes.', 'cl.err.DISABLED': 'Clubes todavía no está disponible para tu cuenta.', 'cl.err.NO_CLUB': 'No encontré ese club. Revisá el código.',
       'cl.err.BAD_NAME': 'Poné un nombre de al menos 3 letras.', 'cl.err.TOO_MANY_JOINED': 'Ya estás en el máximo de clubes (5).', 'cl.err.TOO_MANY_OWNED': 'Ya sos líder de 2 clubes, el máximo.', 'cl.err.CLUB_FULL': 'El club está completo.',
-      'cl.err.FORBIDDEN': 'No tenés permiso para eso.', 'cl.err.LEADER_MUST_TRANSFER': 'Sos la líder: pasale el liderazgo a otro socio antes de salir, o borrá el club.', 'cl.err.TOO_MANY_PRESETS': 'Ya hay 10 configuraciones, el máximo.',
+      'cl.err.FORBIDDEN': 'No tenés permiso para eso.', 'cl.err.LEADER_MUST_TRANSFER': 'Sos la líder: pasale el liderazgo a otro miembro antes de salir, o borrá el club.', 'cl.err.TOO_MANY_PRESETS': 'Ya hay 10 configuraciones, el máximo.',
       'cl.err.BAD_TARGET': 'Esa persona ya no está en el club.', 'cl.err.RATE': 'Más despacio, probá de nuevo.', 'cl.err.ERROR': 'Algo salió mal. Probá de nuevo.', 'cl.err.FULL': 'No se pudo generar un código, probá de nuevo.',
       'rooms.title': 'Salas',
       'rooms.sub': 'Partidas públicas que hay ahora. Se actualiza solo.',
@@ -6427,7 +6427,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'ol.tabWait': 'Rooms', 'ol.tabPlay': 'In play', 'ol.host': 'Host', 'ol.join': 'Join',
       'ol.create': 'Create game', 'ol.code': 'Join with a code', 'ol.profile': 'Your profile',
       'ol.emptyPlay': 'No games in progress right now.', 'ol.lvl': 'Level {n} · {title}',
-      'cl.today': 'Today, {t}', 'cl.tab.chat': 'Chat', 'cl.tab.members': 'Members', 'cl.tab.games': 'Games', 'cl.tab.settings': 'Settings', 'cl.onlineN': '{n} online', 'cl.seeAll': 'See all', 'cl.activity': 'Recent activity', 'cl.playWith': 'Play with a member',
+      'cl.today': 'Today, {t}', 'cl.tab.chat': 'Chat', 'cl.tab.members': 'Members', 'cl.tab.games': 'Games', 'cl.tab.settings': 'Settings', 'cl.onlineN': '{n} online', 'cl.seeAll': 'See all', 'cl.activity': 'Recent activity', 'cl.playWith': 'Play with a member', 'cl.icon': 'Club icon',
       'cl.chatNone': 'No messages yet. Break the ice!', 'cl.chatPh': 'Write a message…', 'cl.membersSub': 'Challenge an online member: pick the rules and they get the invite.',
       'cl.log.created': 'Club created ({name}).', 'cl.log.join': '{name} joined the club.', 'cl.log.leave': '{name} left the club.', 'cl.log.kick': '{name} was removed from the club.', 'cl.log.game': '{name} started.',
       'cl.title': 'Clubs', 'cl.tileSub': 'Your group, your games, your rules.', 'cl.none': "You're not in any club yet.", 'cl.create': 'Create club', 'cl.join': 'Join with a code',
@@ -14411,8 +14411,8 @@ window.NEON_BREAK = {
 
   /* ---------- Clubes ----------
    * Todo pasa por la conexión de presencia (inv.net) con el jwt de la cuenta. El servidor decide si Clubes está activo para esta cuenta (cstatus). */
-  var cl = { tab: 'chat', chat: [], chatId: '', unread: 0, pick: null, enabled: false, view: 'home', list: [], cur: null, edit: null, emoji: '♟️', pendingCode: '', timer: 0 };
-  var CL_EMOJIS = ['♟️', '🏆', '🔥', '⚡', '🌟', '🐉', '🦊', '🇦🇷', '🎯', '👑'];
+  var cl = { tab: 'chat', chat: [], chatId: '', unread: 0, pick: null, enabled: false, view: 'home', list: [], cur: null, edit: null, emoji: 's01', pendingCode: '', timer: 0 };
+  
   function clSend(m) {
     return Auth && Auth.user ? Auth.accessToken().then(function (tk) { if (!tk || !inv.net || !inv.net.isOpen()) { clMsg(t('cl.err.OFFLINE'), true); return; } inv.net.send(Object.assign({ jwt: tk }, m)); }) : Promise.resolve();
   }
@@ -14445,12 +14445,15 @@ window.NEON_BREAK = {
     }
   }
   function clModeLabel(o) { o = o || {}; var v = t('mode.' + (o.variant || 'classic')), tm = o.bullet ? ' · ' + t('mode.bullet') : o.blitz ? ' · ' + t('mode.blitz') : ''; return v + tm + ' · ' + (o.size || 19) + '×' + (o.size || 19); }
+  var CL_ICONS = []; for (var ci = 1; ci <= 24; ci++) CL_ICONS.push('s' + (ci < 10 ? '0' : '') + ci);
+  function clIco(e) { return /^s\d\d$/.test(e) ? '<img class="cl-ico" src="clubs/' + e + '.webp" alt="" decoding="async">' : esc(e); }
+  function clIconGrid(cur, act) { return '<div class="cl-icons">' + CL_ICONS.map(function (e) { return '<button type="button" data-a="' + act + '" data-e="' + e + '" class="' + (e === cur ? 'on' : '') + '" aria-label="' + e + '">' + clIco(e) + '</button>'; }).join('') + '</div>'; }
   function clAv(m, px) { return m && m.avatar ? avInline(m.avatar, px || 28) : '<span class="av-inline">🙂</span>'; }
   function clTime(at) { var d = new Date(at), hm = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2), n = new Date(); return d.toDateString() === n.toDateString() ? t('cl.today', { t: hm }) : d.getDate() + '/' + (d.getMonth() + 1) + ', ' + hm; }
   function clLogTxt(e) { return t('cl.log.' + e.k, { name: e.n }); }
   function clHero(c) {
     var on = c.members.filter(function (m) { return m.online; }).length;
-    return '<div class="cl-hero"><div class="cl-shield"><span>' + esc(c.emoji) + '</span></div><div class="cl-hero-t"><b>' + esc(c.name) + '</b>' + (c.role === 'leader' ? '<button type="button" class="cl-pen" data-a="rename" aria-label="' + esc(t('cl.rename')) + '">✎</button>' : '') + '<small>' + esc(t('cl.members', { n: c.members.length, on: on })) + ' · ' + esc(t('cl.role.' + c.role)) + '</small></div></div>';
+    return '<div class="cl-hero"><div class="cl-shield">' + clIco(c.emoji) + '</div><div class="cl-hero-t"><b>' + esc(c.name) + '</b>' + (c.role === 'leader' ? '<button type="button" class="cl-pen" data-a="rename" aria-label="' + esc(t('cl.rename')) + '">✎</button>' : '') + '<small>' + esc(t('cl.members', { n: c.members.length, on: on })) + ' · ' + esc(t('cl.role.' + c.role)) + '</small></div></div>';
   }
   function clAside(c) {
     var off = c.role === 'officer' || c.role === 'leader', h = '';
@@ -14503,6 +14506,7 @@ window.NEON_BREAK = {
       else c.presets.forEach(function (p) { h += '<div class="cl-card cl-mem"><span class="cl-tx"><b>' + esc(p.name) + '</b><small>' + esc(clModeLabel(p.opts)) + '</small></span>' + (off ? '<div class="cl-acts"><button type="button" class="btn" data-a="pedit" data-p="' + p.id + '">' + esc(t('cl.edit')) + '</button><button type="button" class="btn" data-a="pdel" data-p="' + p.id + '">' + esc(t('cl.delete')) + '</button></div>' : '') + '</div>'; });
       return h;
     }
+    if (lead) h += '<div class="cl-sec"><span>' + esc(t('cl.icon')) + '</span></div>' + clIconGrid(c.emoji, 'seticon') + '<div class="cl-sec"></div>';
     h += '<div class="cl-row2">' + (lead ? '<button type="button" class="btn" data-a="rename">' + esc(t('cl.rename')) + '</button><button type="button" class="btn" data-a="delete">' + esc(t('cl.deleteClub')) + '</button>' : '') + '<button type="button" class="btn" data-a="leave">' + esc(t('cl.leave')) + '</button></div>';
     return h;
   }
@@ -14514,10 +14518,10 @@ window.NEON_BREAK = {
     var b = $('clBody'), h = '', c = cl.cur, body = document.querySelector('#clubOverlay .screen-body');
     body.classList.toggle('cl-wide', cl.view === 'club' && !!c); $('clTitle').hidden = cl.view === 'club' && !!c; if (cl.view === 'club' && c) $('clTitle').textContent = c.name; else $('clTitle').textContent = t('cl.title');
     if (cl.view === 'home') {
-      h += cl.list.length ? cl.list.map(function (x) { return '<button type="button" class="cl-card" data-a="open" data-id="' + esc(x.id) + '"><span class="cl-em">' + esc(x.emoji) + '</span><span class="cl-tx"><b>' + esc(x.name) + '</b><small>' + esc(t('cl.members', { n: x.n, on: x.online })) + '</small></span><span class="cl-chip ' + esc(x.role) + '">' + esc(t('cl.role.' + x.role)) + '</span></button>'; }).join('') : '<div class="cl-empty">' + esc(t('cl.none')) + '</div>';
+      h += cl.list.length ? cl.list.map(function (x) { return '<button type="button" class="cl-card" data-a="open" data-id="' + esc(x.id) + '"><span class="cl-em">' + clIco(x.emoji) + '</span><span class="cl-tx"><b>' + esc(x.name) + '</b><small>' + esc(t('cl.members', { n: x.n, on: x.online })) + '</small></span><span class="cl-chip ' + esc(x.role) + '">' + esc(t('cl.role.' + x.role)) + '</span></button>'; }).join('') : '<div class="cl-empty">' + esc(t('cl.none')) + '</div>';
       h += '<div class="cl-row2"><button type="button" class="btn primary" data-a="new">' + esc(t('cl.create')) + '</button><button type="button" class="btn" data-a="joinv">' + esc(t('cl.join')) + '</button></div>';
     } else if (cl.view === 'create') {
-      h += '<div class="field"><label class="lbl" for="clName">' + esc(t('cl.name')) + '</label><input type="text" id="clName" maxlength="24" autocomplete="off"></div><div class="field"><span class="lbl">' + esc(t('cl.emoji')) + '</span><div class="cl-emojis">' + CL_EMOJIS.map(function (e) { return '<button type="button" data-a="emoji" data-e="' + e + '" class="' + (e === cl.emoji ? 'on' : '') + '">' + e + '</button>'; }).join('') + '</div></div><div class="cl-row2"><button type="button" class="btn primary" data-a="docreate">' + esc(t('cl.createGo')) + '</button></div>';
+      h += '<div class="field"><label class="lbl" for="clName">' + esc(t('cl.name')) + '</label><input type="text" id="clName" maxlength="24" autocomplete="off"></div><div class="field"><span class="lbl">' + esc(t('cl.emoji')) + '</span>' + clIconGrid(cl.emoji, 'emoji') + '</div><div class="cl-row2"><button type="button" class="btn primary" data-a="docreate">' + esc(t('cl.createGo')) + '</button></div>';
     } else if (cl.view === 'join') {
       h += '<p class="sub">' + esc(t('cl.joinSub')) + '</p><div class="field"><input type="text" id="clCode" class="code-input" maxlength="8" autocomplete="off" value="' + esc(cl.code || '') + '"></div><div class="cl-row2"><button type="button" class="btn primary" data-a="dojoin">' + esc(t('cl.joinGo')) + '</button></div>';
     } else if (c) {
@@ -14537,8 +14541,9 @@ window.NEON_BREAK = {
   $('clBody').addEventListener('click', function (ev) {
     var el = ev.target.closest('[data-a]'); if (!el) return; var a = el.dataset.a, c = cl.cur, id = c && c.id;
     if (a === 'open') { clSend({ t: 'cview', id: el.dataset.id }); cl.view = 'club'; cl.cur = null; clMsg(t('cl.loading')); return; }
-    if (a === 'new') { cl.emoji = CL_EMOJIS[0]; clGo('create'); return; }
+    if (a === 'new') { cl.emoji = 's01'; clGo('create'); return; }
     if (a === 'joinv') { cl.code = ''; clGo('join'); return; }
+    if (a === 'seticon') { clSend({ t: 'crename', id: id, name: c.name, emoji: el.dataset.e }); return; }
     if (a === 'emoji') { cl.emoji = el.dataset.e; var nm = $('clName').value; clRender(); $('clName').value = nm; return; }
     if (a === 'docreate') { clMsg(''); clSend({ t: 'ccreate', name: $('clName').value, emoji: cl.emoji }); return; }
     if (a === 'dojoin') { clMsg(''); clSend({ t: 'cjoin', code: $('clCode').value }); return; }
