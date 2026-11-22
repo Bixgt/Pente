@@ -230,6 +230,34 @@ button.cl-card { cursor: pointer; } button.cl-card:hover { border-color: var(--a
 .cl-row2 { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; } .cl-row2 > * { flex: 1; min-width: 120px; }
 .cl-sel { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font: inherit; }
 .cl-empty { text-align: center; color: var(--muted); padding: 18px 8px; border: 2px dashed var(--line); border-radius: 14px; margin-bottom: 8px; }
+.screen-body.cl-wide { width: min(100%, 1180px); }
+.cl-hero { display: flex; align-items: center; gap: 16px; padding: 14px 18px; margin-bottom: 14px; border: 1px solid var(--line); border-radius: 20px; background: linear-gradient(100deg, var(--panel) 40%, transparent 75%), repeating-linear-gradient(0deg, rgba(255,255,255,.06) 0 1px, transparent 1px 26px), repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 1px, transparent 1px 26px), var(--panel-2); position: relative; overflow: hidden; }
+.cl-hero::after { content: ''; position: absolute; right: 8%; top: 30%; width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #666, #111); box-shadow: -90px 28px 0 -4px #eee, -40px -6px 0 -6px #e6e6e6; opacity: .9; pointer-events: none; }
+.cl-shield { flex: none; width: 64px; height: 72px; display: grid; place-items: center; font-size: 32px; background: linear-gradient(160deg, var(--accent), var(--panel-2)); clip-path: polygon(50% 0, 100% 12%, 100% 62%, 50% 100%, 0 62%, 0 12%); }
+.cl-hero-t { min-width: 0; position: relative; z-index: 1; } .cl-hero-t b { font-size: 26px; font-weight: 800; margin-right: 8px; } .cl-hero-t small { display: block; margin-top: 2px; color: var(--muted); }
+.cl-pen { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); color: var(--text); cursor: pointer; font-size: 15px; }
+.cl-layout { display: grid; grid-template-columns: 1fr; gap: 14px; }
+@media (max-width: 899px) { .cl-hero::after { display: none; } .cl-hero-t b { font-size: 22px; } }
+.cl-nav { display: flex; gap: 6px; overflow-x: auto; } .cl-tab { flex: 1; min-height: 44px; padding: 8px 14px; border-radius: 12px; border: 1px solid var(--line); background: transparent; color: var(--muted); font: inherit; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.cl-tab.on { background: var(--accent); color: #111; border-color: var(--accent); } .cl-un { font-style: normal; background: #e5484d; color: #fff; border-radius: 999px; padding: 1px 7px; font-size: 12px; margin-left: 4px; }
+.cl-main { min-width: 0; } .cl-aside { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.cl-box { padding: 12px 14px; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); } .cl-box-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 800; margin-bottom: 8px; }
+.cl-mini { display: flex; align-items: center; gap: 8px; padding: 6px 0; } .cl-mini b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.cl-more { background: none; border: 0; color: var(--muted); text-decoration: underline; font: inherit; cursor: pointer; padding: 6px 0; }
+.cl-act { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-top: 1px solid var(--line); font-size: 14px; } .cl-act:first-of-type { border-top: 0; } .cl-act small { color: var(--muted); white-space: nowrap; }
+.cl-play { width: 100%; min-height: 54px; font-size: 18px; font-weight: 800; }
+.cl-chat { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); overflow: hidden; }
+.cl-msgs { height: min(56vh, 460px); overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.cl-msg { display: flex; gap: 10px; align-items: flex-start; } .cl-bub { position: relative; flex: 1; min-width: 0; padding: 8px 12px 8px; border-radius: 14px; background: var(--panel-2); }
+.cl-bub b { font-size: 14px; } .cl-bub p { margin: 2px 0 0; overflow-wrap: anywhere; padding-right: 44px; } .cl-bub time { position: absolute; right: 10px; bottom: 6px; font-size: 12px; color: var(--muted); }
+.cl-crown { color: #ffc933; } .cl-msg.mine .cl-bub { border: 1px solid var(--accent); }
+.cl-chatform { display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--line); } .cl-chatform input { flex: 1; min-width: 0; padding: 12px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font: inherit; }
+.cl-mem .av-inline, .cl-mini .av-inline, .cl-mav .av-inline { flex: none; }
+@media (min-width: 900px) {
+  .cl-layout { grid-template-columns: 160px minmax(0, 1fr) 340px; align-items: start; gap: 18px; }
+  .cl-nav { flex-direction: column; overflow: visible; } .cl-tab { flex: none; text-align: left; }
+  .cl-msgs { height: 480px; }
+}
 .ol-me-f.field { margin: 0; }
 .ol-me-f input { width: 100%; }
 @media (max-width: 600px) {
@@ -1780,7 +1808,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span><b class="newb" id="nwProfile" hidden></b></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v192</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v193</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -6040,6 +6068,9 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'ol.tabWait': 'Salas', 'ol.tabPlay': 'En juego', 'ol.host': 'Anfitrión', 'ol.join': 'Unirse',
       'ol.create': 'Crear partida', 'ol.code': 'Unirme con un código', 'ol.profile': 'Tu perfil',
       'ol.emptyPlay': 'No hay partidas en curso en este momento.', 'ol.lvl': 'Nivel {n} · {title}',
+      'cl.today': 'Hoy, {t}', 'cl.tab.chat': 'Chat', 'cl.tab.members': 'Socios', 'cl.tab.games': 'Partidas', 'cl.tab.settings': 'Ajustes', 'cl.onlineN': '{n} conectados', 'cl.seeAll': 'Ver todos', 'cl.activity': 'Actividad reciente', 'cl.playWith': 'Jugar con un socio',
+      'cl.chatNone': 'Todavía no hay mensajes. ¡Rompé el hielo!', 'cl.chatPh': 'Escribí un mensaje…', 'cl.membersSub': 'Retá a un socio conectado: elegís las reglas y le llega la invitación.',
+      'cl.log.created': 'Se creó el club ({name}).', 'cl.log.join': '{name} entró al club.', 'cl.log.leave': '{name} salió del club.', 'cl.log.kick': '{name} fue sacado del club.', 'cl.log.game': 'Empezó {name}.',
       'cl.title': 'Clubes', 'cl.tileSub': 'Tu grupo, tus partidas, tus reglas.', 'cl.none': 'Todavía no estás en ningún club.', 'cl.create': 'Crear club', 'cl.join': 'Unirme con código',
       'cl.members': '{n} socios · {on} conectados', 'cl.role.leader': 'Líder', 'cl.role.officer': 'Oficial', 'cl.role.member': 'Socio', 'cl.name': 'Nombre del club', 'cl.emoji': 'Ícono',
       'cl.createGo': 'Crear', 'cl.joinSub': 'Pegá el código que te pasó el club.', 'cl.joinGo': 'Entrar al club', 'cl.invite': 'Código de invitación', 'cl.copyLink': 'Copiar link', 'cl.newCode': 'Cambiar código',
@@ -6396,6 +6427,9 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'ol.tabWait': 'Rooms', 'ol.tabPlay': 'In play', 'ol.host': 'Host', 'ol.join': 'Join',
       'ol.create': 'Create game', 'ol.code': 'Join with a code', 'ol.profile': 'Your profile',
       'ol.emptyPlay': 'No games in progress right now.', 'ol.lvl': 'Level {n} · {title}',
+      'cl.today': 'Today, {t}', 'cl.tab.chat': 'Chat', 'cl.tab.members': 'Members', 'cl.tab.games': 'Games', 'cl.tab.settings': 'Settings', 'cl.onlineN': '{n} online', 'cl.seeAll': 'See all', 'cl.activity': 'Recent activity', 'cl.playWith': 'Play with a member',
+      'cl.chatNone': 'No messages yet. Break the ice!', 'cl.chatPh': 'Write a message…', 'cl.membersSub': 'Challenge an online member: pick the rules and they get the invite.',
+      'cl.log.created': 'Club created ({name}).', 'cl.log.join': '{name} joined the club.', 'cl.log.leave': '{name} left the club.', 'cl.log.kick': '{name} was removed from the club.', 'cl.log.game': '{name} started.',
       'cl.title': 'Clubs', 'cl.tileSub': 'Your group, your games, your rules.', 'cl.none': "You're not in any club yet.", 'cl.create': 'Create club', 'cl.join': 'Join with a code',
       'cl.members': '{n} members · {on} online', 'cl.role.leader': 'Leader', 'cl.role.officer': 'Officer', 'cl.role.member': 'Member', 'cl.name': 'Club name', 'cl.emoji': 'Icon',
       'cl.createGo': 'Create', 'cl.joinSub': 'Paste the code the club gave you.', 'cl.joinGo': 'Join club', 'cl.invite': 'Invite code', 'cl.copyLink': 'Copy link', 'cl.newCode': 'Change code',
@@ -14377,7 +14411,7 @@ window.NEON_BREAK = {
 
   /* ---------- Clubes ----------
    * Todo pasa por la conexión de presencia (inv.net) con el jwt de la cuenta. El servidor decide si Clubes está activo para esta cuenta (cstatus). */
-  var cl = { pick: null, enabled: false, view: 'home', list: [], cur: null, edit: null, emoji: '♟️', pendingCode: '', timer: 0 };
+  var cl = { tab: 'chat', chat: [], chatId: '', unread: 0, pick: null, enabled: false, view: 'home', list: [], cur: null, edit: null, emoji: '♟️', pendingCode: '', timer: 0 };
   var CL_EMOJIS = ['♟️', '🏆', '🔥', '⚡', '🌟', '🐉', '🦊', '🇦🇷', '🎯', '👑'];
   function clSend(m) {
     return Auth && Auth.user ? Auth.accessToken().then(function (tk) { if (!tk || !inv.net || !inv.net.isOpen()) { clMsg(t('cl.err.OFFLINE'), true); return; } inv.net.send(Object.assign({ jwt: tk }, m)); }) : Promise.resolve();
@@ -14390,39 +14424,74 @@ window.NEON_BREAK = {
   function clOnMsg(m) {
     if (m.t === 'cstatus') { cl.enabled = !!m.enabled; $('btnClubs').hidden = !cl.enabled; if (cl.enabled && cl.pendingCode) { var c = cl.pendingCode; cl.pendingCode = ''; $('btnClubs').click(); cl.view = 'join'; cl.code = c; clRender(); } return; }
     if (m.t === 'clist') { cl.list = m.clubs || []; if (cl.view === 'home') clRender(); return; }
-    if (m.t === 'cview') { cl.cur = m.club; if (cl.view !== 'club' && (cl.view === 'join' || cl.view === 'create')) cl.view = 'club'; if (cl.view === 'club') clRender(); return; }
+    if (m.t === 'cview') {
+      var first = !cl.cur || cl.cur.id !== m.club.id; cl.cur = m.club; if (cl.view !== 'club' && (cl.view === 'join' || cl.view === 'create')) cl.view = 'club';
+      if (first) { cl.tab = 'chat'; cl.unread = 0; cl.chat = []; cl.chatId = m.club.id; clSend({ t: 'cchatlog', id: m.club.id }); }
+      if (cl.view === 'club') clRender(!first); return;
+    }
+    if (m.t === 'cchatlog') { if (cl.cur && cl.cur.id === m.id) { cl.chat = m.msgs || []; if (cl.view === 'club' && cl.tab === 'chat') clChatDraw(true); } return; }
+    if (m.t === 'cchat') {
+      if (!cl.cur || cl.cur.id !== m.id) return; cl.chat.push(m.m); if (cl.chat.length > 50) cl.chat.shift();
+      if (clOpenEl() && cl.view === 'club' && cl.tab === 'chat') clChatDraw(m.m.u === cl.cur.me); else if (m.m.u !== cl.cur.me) { cl.unread++; if ($('clNav')) $('clNav').innerHTML = clNav(cl.cur); }
+      return;
+    }
     if (m.t === 'cdirty') { if (m.kicked && cl.cur && cl.cur.id === m.id) { cl.cur = null; if (clOpenEl()) { clGo('home'); clMsg(t('cl.kicked'), true); } return; } clRefresh(); return; }
     if (m.t === 'cres') {
       if (!m.ok) { clMsg(t('cl.err.' + m.reason) === 'cl.err.' + m.reason ? t('cl.err.ERROR') : t('cl.err.' + m.reason), true); return; }
       clMsg('');
+      if (m.op === 'cchat') return;
       if (m.op === 'cleave' || m.op === 'cdelete') { cl.cur = null; clGo('home'); return; }
       if (m.op !== 'ccreate' && m.op !== 'cjoin' && cl.cur) { cl.edit = null; clSend({ t: 'cview', id: cl.cur.id }); }
     }
   }
   function clModeLabel(o) { o = o || {}; var v = t('mode.' + (o.variant || 'classic')), tm = o.bullet ? ' · ' + t('mode.bullet') : o.blitz ? ' · ' + t('mode.blitz') : ''; return v + tm + ' · ' + (o.size || 19) + '×' + (o.size || 19); }
-  function clRender() {
-    var b = $('clBody'), h = '', c = cl.cur;
-    $('clTitle').textContent = cl.view === 'club' && c ? c.emoji + ' ' + c.name : t('cl.title');
-    if (cl.view === 'home') {
-      h += cl.list.length ? cl.list.map(function (x) { return '<button type="button" class="cl-card" data-a="open" data-id="' + esc(x.id) + '"><span class="cl-em">' + esc(x.emoji) + '</span><span class="cl-tx"><b>' + esc(x.name) + '</b><small>' + esc(t('cl.members', { n: x.n, on: x.online })) + '</small></span><span class="cl-chip ' + esc(x.role) + '">' + esc(t('cl.role.' + x.role)) + '</span></button>'; }).join('') : '<div class="cl-empty">' + esc(t('cl.none')) + '</div>';
-      h += '<div class="cl-row2"><button type="button" class="btn primary" data-a="new">' + esc(t('cl.create')) + '</button><button type="button" class="btn" data-a="joinv">' + esc(t('cl.join')) + '</button></div>';
-    } else if (cl.view === 'create') {
-      h += '<div class="field"><label class="lbl" for="clName">' + esc(t('cl.name')) + '</label><input type="text" id="clName" maxlength="24" autocomplete="off"></div><div class="field"><span class="lbl">' + esc(t('cl.emoji')) + '</span><div class="cl-emojis">' + CL_EMOJIS.map(function (e) { return '<button type="button" data-a="emoji" data-e="' + e + '" class="' + (e === cl.emoji ? 'on' : '') + '">' + e + '</button>'; }).join('') + '</div></div><div class="cl-row2"><button type="button" class="btn primary" data-a="docreate">' + esc(t('cl.createGo')) + '</button></div>';
-    } else if (cl.view === 'join') {
-      h += '<p class="sub">' + esc(t('cl.joinSub')) + '</p><div class="field"><input type="text" id="clCode" class="code-input" maxlength="8" autocomplete="off" value="' + esc(cl.code || '') + '"></div><div class="cl-row2"><button type="button" class="btn primary" data-a="dojoin">' + esc(t('cl.joinGo')) + '</button></div>';
-    } else if (c) {
-      var lead = c.role === 'leader', off = c.role === 'officer' || lead, on = c.members.filter(function (m) { return m.online; }).length;
-      h += '<p class="sub">' + esc(t('cl.members', { n: c.members.length, on: on })) + ' · ' + esc(t('cl.role.' + c.role)) + '</p>';
-      if (off && c.code) h += '<div class="cl-sec"><span>' + esc(t('cl.invite')) + '</span></div><div class="cl-code">' + esc(c.code) + '</div><div class="cl-row2"><button type="button" class="btn" data-a="link">' + esc(t('cl.copyLink')) + '</button><button type="button" class="btn" data-a="newcode">' + esc(t('cl.newCode')) + '</button></div>';
-      h += '<div class="cl-sec"><span>' + esc(t('cl.membersH')) + '</span></div>';
+  function clAv(m, px) { return m && m.avatar ? avInline(m.avatar, px || 28) : '<span class="av-inline">🙂</span>'; }
+  function clTime(at) { var d = new Date(at), hm = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2), n = new Date(); return d.toDateString() === n.toDateString() ? t('cl.today', { t: hm }) : d.getDate() + '/' + (d.getMonth() + 1) + ', ' + hm; }
+  function clLogTxt(e) { return t('cl.log.' + e.k, { name: e.n }); }
+  function clHero(c) {
+    var on = c.members.filter(function (m) { return m.online; }).length;
+    return '<div class="cl-hero"><div class="cl-shield"><span>' + esc(c.emoji) + '</span></div><div class="cl-hero-t"><b>' + esc(c.name) + '</b>' + (c.role === 'leader' ? '<button type="button" class="cl-pen" data-a="rename" aria-label="' + esc(t('cl.rename')) + '">✎</button>' : '') + '<small>' + esc(t('cl.members', { n: c.members.length, on: on })) + ' · ' + esc(t('cl.role.' + c.role)) + '</small></div></div>';
+  }
+  function clAside(c) {
+    var off = c.role === 'officer' || c.role === 'leader', h = '';
+    if (off && c.code) h += '<div class="cl-box"><div class="cl-box-h">' + esc(t('cl.invite')) + '</div><div class="cl-code">' + esc(c.code) + '</div><div class="cl-row2"><button type="button" class="btn" data-a="link">' + esc(t('cl.copyLink')) + '</button><button type="button" class="btn" data-a="newcode">' + esc(t('cl.newCode')) + '</button></div></div>';
+    var on = c.members.filter(function (m) { return m.online; }).length;
+    h += '<div class="cl-box"><div class="cl-box-h"><span>' + esc(t('cl.membersH')) + ' (' + c.members.length + ')</span><span class="cl-chip leader" style="color:#35d07f;border-color:rgba(53,208,127,.5)">' + esc(t('cl.onlineN', { n: on })) + '</span></div>';
+    c.members.slice(0, 6).forEach(function (m) { h += '<div class="cl-mini"><span class="cl-dot ' + (m.online ? (m.busy ? 'busy' : 'on') : '') + '"></span>' + clAv(m, 26) + '<b>' + esc(m.name) + '</b>' + (m.role !== 'member' ? '<span class="cl-chip ' + m.role + '">' + esc(t('cl.role.' + m.role)) + '</span>' : '') + '</div>'; });
+    if (c.members.length > 6) h += '<button type="button" class="cl-more" data-a="tab" data-tab="members">' + esc(t('cl.seeAll')) + '</button>';
+    h += '</div><div class="cl-box"><div class="cl-box-h">' + esc(t('cl.activity')) + '</div>';
+    h += (c.log || []).length ? c.log.map(function (e) { return '<div class="cl-act"><span>' + esc(clLogTxt(e)) + '</span><small>' + esc(clTime(e.at)) + '</small></div>'; }).join('') : '<div class="cl-act"><small>—</small></div>';
+    return h + '</div><button type="button" class="btn primary cl-play" data-a="tab" data-tab="members">▶ ' + esc(t('cl.playWith')) + '</button>';
+  }
+  function clMsgHtml(m, c) {
+    var mem = c.members.filter(function (x) { return x.uid === m.u; })[0], crown = mem && mem.role !== 'member' ? '<span class="cl-crown" aria-hidden="true">♛</span> ' : '';
+    var d = new Date(m.at), hm = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+    return '<div class="cl-msg' + (m.u === c.me ? ' mine' : '') + '"><span class="cl-mav">' + clAv(mem, 34) + '</span><div class="cl-bub"><b>' + crown + esc(m.n || (mem && mem.name) || '') + '</b><p>' + esc(m.x) + '</p><time>' + hm + '</time></div></div>';
+  }
+  function clChatDraw(stick) {
+    var box = $('clMsgs'), c = cl.cur; if (!box || !c) return;
+    var near = stick || box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+    box.innerHTML = cl.chat.length ? cl.chat.map(function (m) { return clMsgHtml(m, c); }).join('') : '<div class="cl-empty">' + esc(t('cl.chatNone')) + '</div>';
+    if (near) box.scrollTop = box.scrollHeight;
+  }
+  function clMain(c) {
+    var off = c.role === 'officer' || c.role === 'leader', lead = c.role === 'leader', h = '';
+    if (cl.tab === 'chat') {
+      return '<div class="cl-chat"><div class="cl-msgs" id="clMsgs"></div><form class="cl-chatform" id="clChatForm" autocomplete="off"><input type="text" id="clChatIn" maxlength="200" placeholder="' + esc(t('cl.chatPh')) + '" enterkeyhint="send"><button type="submit" class="btn primary">' + esc(t('chat.send')) + '</button></form></div>';
+    }
+    if (cl.tab === 'members') {
+      h += '<p class="sub">' + esc(t('cl.membersSub')) + '</p>';
       c.members.forEach(function (m) {
         var acts = '';
         if (m.online && !m.busy && m.uid !== c.me) acts += '<button type="button" class="btn primary" data-a="chal" data-u="' + m.uid + '" data-n="' + esc(m.name) + '">' + esc(t('cl.challenge')) + '</button>';
-        if (cl.pick && cl.pick.uid === m.uid) acts = '<span class="sub" style="width:100%">' + esc(t('cl.pickRules')) + '</span>' + (c.presets.length ? c.presets.map(function (p) { return '<button type="button" class="btn primary" data-a="chalgo" data-p="' + p.id + '">' + esc(p.name) + '</button>'; }).join('') : '') + '<button type="button" class="btn" data-a="chalgo" data-p="">' + esc(t('cl.myRules')) + '</button><button type="button" class="btn" data-a="chalno">' + esc(t('cl.cancel')) + '</button>';
+        if (cl.pick && cl.pick.uid === m.uid) acts = '<span class="sub" style="width:100%">' + esc(t('cl.pickRules')) + '</span>' + c.presets.map(function (p) { return '<button type="button" class="btn primary" data-a="chalgo" data-p="' + p.id + '">' + esc(p.name) + '</button>'; }).join('') + '<button type="button" class="btn" data-a="chalgo" data-p="">' + esc(t('cl.myRules')) + '</button><button type="button" class="btn" data-a="chalno">' + esc(t('cl.cancel')) + '</button>';
         else if (lead && m.role !== 'leader') acts += '<button type="button" class="btn" data-a="role" data-u="' + m.uid + '" data-r="' + (m.role === 'officer' ? 'member' : 'officer') + '">' + esc(t(m.role === 'officer' ? 'cl.demote' : 'cl.promote')) + '</button><button type="button" class="btn" data-a="transfer" data-u="' + m.uid + '">' + esc(t('cl.transfer')) + '</button>';
-        if (off && m.role !== 'leader' && (lead || m.role === 'member')) acts += '<button type="button" class="btn" data-a="kick" data-u="' + m.uid + '" data-n="' + esc(m.name) + '">' + esc(t('cl.kick')) + '</button>';
-        h += '<div class="cl-card cl-mem"><span class="cl-dot ' + (m.online ? (m.busy ? 'busy' : 'on') : '') + '" title="' + esc(t(m.online ? (m.busy ? 'cl.busy' : 'cl.online') : 'cl.offline')) + '"></span><span class="cl-tx"><b>' + esc(m.name) + '</b>' + (m.busy ? '<small>' + esc(t('cl.busy')) + '</small>' : '') + '</span>' + (m.role !== 'member' ? '<span class="cl-chip ' + m.role + '">' + esc(t('cl.role.' + m.role)) + '</span>' : '') + (acts ? '<div class="cl-acts">' + acts + '</div>' : '') + '</div>';
+        if (off && m.role !== 'leader' && (lead || m.role === 'member') && !(cl.pick && cl.pick.uid === m.uid)) acts += '<button type="button" class="btn" data-a="kick" data-u="' + m.uid + '" data-n="' + esc(m.name) + '">' + esc(t('cl.kick')) + '</button>';
+        h += '<div class="cl-card cl-mem"><span class="cl-dot ' + (m.online ? (m.busy ? 'busy' : 'on') : '') + '" title="' + esc(t(m.online ? (m.busy ? 'cl.busy' : 'cl.online') : 'cl.offline')) + '"></span>' + clAv(m, 32) + '<span class="cl-tx"><b>' + esc(m.name) + '</b>' + (m.busy ? '<small>' + esc(t('cl.busy')) + '</small>' : '') + '</span>' + (m.role !== 'member' ? '<span class="cl-chip ' + m.role + '">' + esc(t('cl.role.' + m.role)) + '</span>' : '') + (acts ? '<div class="cl-acts">' + acts + '</div>' : '') + '</div>';
       });
+      return h;
+    }
+    if (cl.tab === 'games') {
       h += '<div class="cl-sec"><span>' + esc(t('cl.games')) + '</span></div>';
       if (!(c.games || []).length) h += '<div class="cl-empty">' + esc(t('cl.gamesNone')) + '</div>';
       else c.games.forEach(function (g) { h += '<div class="cl-card cl-mem"><span class="cl-tx"><b>' + esc(t('rooms.vs', { a: g.names[0] || '…', b: g.names[1] || '…' })) + '</b><small>' + esc(clModeLabel({ variant: g.variant, bullet: g.bullet, blitz: g.blitz, size: g.size }) + ' · ' + t('cl.moves', { n: g.moves }) + (g.spectators ? ' · ' + t('rooms.watching', { n: g.spectators }) : '')) + '</small></span><button type="button" class="btn primary" data-a="watch" data-code="' + esc(g.code) + '">' + esc(t('rooms.watch')) + '</button></div>'; });
@@ -14432,7 +14501,36 @@ window.NEON_BREAK = {
         h += '<div class="cl-card" style="display:block"><div class="field"><label class="lbl" for="clPName">' + esc(t('cl.presetName')) + '</label><input type="text" id="clPName" maxlength="24" autocomplete="off" value="' + esc(e.name) + '"></div><div class="cl-row2"><select class="cl-sel" id="clPVar" aria-label="' + esc(t('mode.pick')) + '">' + ['classic', 'pairs3', 'triples', 'gomoku'].map(function (v) { return '<option value="' + v + '"' + (e.variant === v ? ' selected' : '') + '>' + esc(t('mode.' + v)) + '</option>'; }).join('') + '</select><select class="cl-sel" id="clPTime" aria-label="' + esc(t('cl.time')) + '">' + ['normal', 'blitz', 'bullet'].map(function (v) { return '<option value="' + v + '"' + (e.time === v ? ' selected' : '') + '>' + esc(v === 'normal' ? t('cl.timeNormal') : t('mode.' + v)) + '</option>'; }).join('') + '</select><select class="cl-sel" id="clPSize" aria-label="' + esc(t('cl.size')) + '">' + [9, 13, 15, 19].map(function (v) { return '<option value="' + v + '"' + (e.size === v ? ' selected' : '') + '>' + v + '×' + v + '</option>'; }).join('') + '</select></div><div class="cl-row2"><button type="button" class="btn primary" data-a="psave">' + esc(t('cl.presetSave')) + '</button><button type="button" class="btn" data-a="pcancel">' + esc(t('cl.cancel')) + '</button></div></div>';
       } else if (!c.presets.length) h += '<div class="cl-empty">' + esc(t(off ? 'cl.presetsNoneOff' : 'cl.presetsNone')) + '</div>';
       else c.presets.forEach(function (p) { h += '<div class="cl-card cl-mem"><span class="cl-tx"><b>' + esc(p.name) + '</b><small>' + esc(clModeLabel(p.opts)) + '</small></span>' + (off ? '<div class="cl-acts"><button type="button" class="btn" data-a="pedit" data-p="' + p.id + '">' + esc(t('cl.edit')) + '</button><button type="button" class="btn" data-a="pdel" data-p="' + p.id + '">' + esc(t('cl.delete')) + '</button></div>' : '') + '</div>'; });
-      h += '<div class="cl-sec"></div><div class="cl-row2">' + (lead ? '<button type="button" class="btn" data-a="rename">' + esc(t('cl.rename')) + '</button><button type="button" class="btn" data-a="delete">' + esc(t('cl.deleteClub')) + '</button>' : '') + '<button type="button" class="btn" data-a="leave">' + esc(t('cl.leave')) + '</button></div>';
+      return h;
+    }
+    h += '<div class="cl-row2">' + (lead ? '<button type="button" class="btn" data-a="rename">' + esc(t('cl.rename')) + '</button><button type="button" class="btn" data-a="delete">' + esc(t('cl.deleteClub')) + '</button>' : '') + '<button type="button" class="btn" data-a="leave">' + esc(t('cl.leave')) + '</button></div>';
+    return h;
+  }
+  function clNav(c) {
+    var tabs = [['chat', 'cl.tab.chat'], ['members', 'cl.tab.members'], ['games', 'cl.tab.games'], ['settings', 'cl.tab.settings']];
+    return tabs.map(function (x) { return '<button type="button" class="cl-tab' + (cl.tab === x[0] ? ' on' : '') + '" data-a="tab" data-tab="' + x[0] + '">' + esc(t(x[1])) + (x[0] === 'chat' && cl.unread ? ' <i class="cl-un">' + cl.unread + '</i>' : '') + '</button>'; }).join('');
+  }
+  function clRender(partial) {
+    var b = $('clBody'), h = '', c = cl.cur, body = document.querySelector('#clubOverlay .screen-body');
+    body.classList.toggle('cl-wide', cl.view === 'club' && !!c); $('clTitle').hidden = cl.view === 'club' && !!c; if (cl.view === 'club' && c) $('clTitle').textContent = c.name; else $('clTitle').textContent = t('cl.title');
+    if (cl.view === 'home') {
+      h += cl.list.length ? cl.list.map(function (x) { return '<button type="button" class="cl-card" data-a="open" data-id="' + esc(x.id) + '"><span class="cl-em">' + esc(x.emoji) + '</span><span class="cl-tx"><b>' + esc(x.name) + '</b><small>' + esc(t('cl.members', { n: x.n, on: x.online })) + '</small></span><span class="cl-chip ' + esc(x.role) + '">' + esc(t('cl.role.' + x.role)) + '</span></button>'; }).join('') : '<div class="cl-empty">' + esc(t('cl.none')) + '</div>';
+      h += '<div class="cl-row2"><button type="button" class="btn primary" data-a="new">' + esc(t('cl.create')) + '</button><button type="button" class="btn" data-a="joinv">' + esc(t('cl.join')) + '</button></div>';
+    } else if (cl.view === 'create') {
+      h += '<div class="field"><label class="lbl" for="clName">' + esc(t('cl.name')) + '</label><input type="text" id="clName" maxlength="24" autocomplete="off"></div><div class="field"><span class="lbl">' + esc(t('cl.emoji')) + '</span><div class="cl-emojis">' + CL_EMOJIS.map(function (e) { return '<button type="button" data-a="emoji" data-e="' + e + '" class="' + (e === cl.emoji ? 'on' : '') + '">' + e + '</button>'; }).join('') + '</div></div><div class="cl-row2"><button type="button" class="btn primary" data-a="docreate">' + esc(t('cl.createGo')) + '</button></div>';
+    } else if (cl.view === 'join') {
+      h += '<p class="sub">' + esc(t('cl.joinSub')) + '</p><div class="field"><input type="text" id="clCode" class="code-input" maxlength="8" autocomplete="off" value="' + esc(cl.code || '') + '"></div><div class="cl-row2"><button type="button" class="btn primary" data-a="dojoin">' + esc(t('cl.joinGo')) + '</button></div>';
+    } else if (c) {
+      var lay = $('clLay');
+      if (!lay || lay.dataset.id !== c.id) {                       // primera vez con este club: se arma el esqueleto
+        b.innerHTML = '<div id="clHero"></div><div class="cl-layout" id="clLay" data-id="' + esc(c.id) + '"><nav class="cl-nav" id="clNav"></nav><div class="cl-main" id="clMain"></div><aside class="cl-aside" id="clAside"></aside></div>'; partial = false;
+      }
+      $('clHero').innerHTML = clHero(c); $('clNav').innerHTML = clNav(c); $('clAside').innerHTML = clAside(c);
+      if (!(partial && (cl.edit || cl.tab === 'chat'))) {         // no se pisa lo que alguien está escribiendo
+        $('clMain').innerHTML = clMain(c);
+        if (cl.tab === 'chat') { clChatDraw(true); }
+      }
+      return;
     }
     b.innerHTML = h;
   }
@@ -14445,6 +14543,7 @@ window.NEON_BREAK = {
     if (a === 'docreate') { clMsg(''); clSend({ t: 'ccreate', name: $('clName').value, emoji: cl.emoji }); return; }
     if (a === 'dojoin') { clMsg(''); clSend({ t: 'cjoin', code: $('clCode').value }); return; }
     if (!c) return;
+    if (a === 'tab') { cl.tab = el.dataset.tab; if (cl.tab === 'chat') cl.unread = 0; cl.edit = null; cl.pick = null; clRender(); return; }
     if (a === 'watch') { clMsg(''); $('onName').value = $('onName').value || ($('rName') ? $('rName').value : ''); startOnline({ t: 'spectate', code: el.dataset.code, clubWatch: true }); return; }
     if (a === 'chal') { cl.pick = { uid: el.dataset.u, name: el.dataset.n }; clRender(); return; }
     if (a === 'chalno') { cl.pick = null; clRender(); return; }
@@ -14464,14 +14563,15 @@ window.NEON_BREAK = {
     if (a === 'leave') { if (confirm(t('cl.leaveAsk', { name: c.name }))) clSend({ t: 'cleave', id: id }); return; }
   });
   setInterval(function () { if (clOpenEl() && cl.view === 'club' && cl.cur && !document.hidden) clSend({ t: 'cview', id: cl.cur.id }); }, 8000);      // refresca socios y partidas en curso
+  $('clBody').addEventListener('submit', function (ev) { if (ev.target.id !== 'clChatForm') return; ev.preventDefault(); var i = $('clChatIn'), v = i.value.trim(); if (!v || !cl.cur) return; clSend({ t: 'cchat', id: cl.cur.id, text: v }); i.value = ''; i.focus(); });
   $('btnClubs').addEventListener('click', function () { cl.view = 'home'; cl.cur = null; clMsg(''); open('clubOverlay'); clRender(); clSend({ t: 'clist' }); });
-  $('btnClBack').addEventListener('click', function () { if (cl.view !== 'home') { cl.cur = null; clGo('home'); return; } open('playOverlay'); });
+  $('btnClBack').addEventListener('click', function () { if (cl.view !== 'home') { cl.cur = null; cl.chat = []; clGo('home'); return; } open('playOverlay'); });
   (function () { try { var q = new URLSearchParams(location.search).get('club'); if (q) { cl.pendingCode = String(q).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8); history.replaceState(null, '', location.pathname + location.hash); } } catch (e) {} })();
   setInterval(inviteSync, 20000); setTimeout(inviteSync, 4000);
   function invRules(o) { o = o || {}; var mode = o.bullet ? 'bullet' : o.blitz ? 'blitz' : o.variant || 'classic'; return t('mode.' + mode) + ' · ' + (o.size || 13) + '×' + (o.size || 13); }
   function onInviteMessage(m) {
     if (m && m.t === 'chkRes') { ntOnCheck(m); return; }
-    if (m && /^c(status|list|view|res|dirty)$/.test(m.t)) { clOnMsg(m); return; }
+    if (m && /^c(status|list|view|res|dirty|chat|chatlog)$/.test(m.t)) { clOnMsg(m); return; }
     if (m && (m.t === 'pushKey' || m.t === 'pushRes')) { pushOnMsg(m); return; }
     if (m && m.t === 'looking') { onLooking(m); return; }
     if (m && m.t === 'tinvite') { onTInvite(m); return; }
