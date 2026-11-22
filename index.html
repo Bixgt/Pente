@@ -1780,7 +1780,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span><b class="newb" id="nwProfile" hidden></b></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v190</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v191</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -6048,7 +6048,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'cl.presetName': 'Nombre de la configuración', 'cl.time': 'Tiempo', 'cl.timeNormal': 'Sin reloj', 'cl.size': 'Tablero', 'cl.presetSave': 'Guardar', 'cl.cancel': 'Cancelar', 'cl.edit': 'Editar', 'cl.delete': 'Borrar',
       'cl.presetsNone': 'El club todavía no guardó configuraciones.', 'cl.presetsNoneOff': 'Guardá reglas para que los socios las elijan al retar.', 'cl.presetDelAsk': '¿Borrar esta configuración?',
       'cl.rename': 'Renombrar', 'cl.renameAsk': 'Nuevo nombre del club', 'cl.deleteClub': 'Borrar club', 'cl.deleteAsk': '¿Borrar «{name}» para todos los socios? No se puede deshacer.', 'cl.leave': 'Salir del club', 'cl.leaveAsk': '¿Salir de «{name}»?',
-      'cl.loading': 'Cargando…', 'cl.kicked': 'Ya no sos parte de ese club.',
+      'cl.loading': 'Cargando…', 'cl.challenge': 'Retar', 'cl.pickRules': 'Elegí las reglas:', 'cl.myRules': 'Mis reglas', 'cl.kicked': 'Ya no sos parte de ese club.',
       'cl.err.OFFLINE': 'Sin conexión con el servidor. Probá en unos segundos.', 'cl.err.LOGIN': 'Iniciá sesión para usar Clubes.', 'cl.err.DISABLED': 'Clubes todavía no está disponible para tu cuenta.', 'cl.err.NO_CLUB': 'No encontré ese club. Revisá el código.',
       'cl.err.BAD_NAME': 'Poné un nombre de al menos 3 letras.', 'cl.err.TOO_MANY_JOINED': 'Ya estás en el máximo de clubes (5).', 'cl.err.TOO_MANY_OWNED': 'Ya sos líder de 2 clubes, el máximo.', 'cl.err.CLUB_FULL': 'El club está completo.',
       'cl.err.FORBIDDEN': 'No tenés permiso para eso.', 'cl.err.LEADER_MUST_TRANSFER': 'Sos la líder: pasale el liderazgo a otro socio antes de salir, o borrá el club.', 'cl.err.TOO_MANY_PRESETS': 'Ya hay 10 configuraciones, el máximo.',
@@ -6404,7 +6404,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'cl.presetName': 'Setup name', 'cl.time': 'Time', 'cl.timeNormal': 'No clock', 'cl.size': 'Board', 'cl.presetSave': 'Save', 'cl.cancel': 'Cancel', 'cl.edit': 'Edit', 'cl.delete': 'Delete',
       'cl.presetsNone': "The club hasn't saved any setups yet.", 'cl.presetsNoneOff': 'Save rules so members can pick them when challenging.', 'cl.presetDelAsk': 'Delete this setup?',
       'cl.rename': 'Rename', 'cl.renameAsk': 'New club name', 'cl.deleteClub': 'Delete club', 'cl.deleteAsk': 'Delete "{name}" for all members? This cannot be undone.', 'cl.leave': 'Leave club', 'cl.leaveAsk': 'Leave "{name}"?',
-      'cl.loading': 'Loading…', 'cl.kicked': "You're no longer in that club.",
+      'cl.loading': 'Loading…', 'cl.challenge': 'Challenge', 'cl.pickRules': 'Pick the rules:', 'cl.myRules': 'My rules', 'cl.kicked': "You're no longer in that club.",
       'cl.err.OFFLINE': 'No connection to the server. Try again in a few seconds.', 'cl.err.LOGIN': 'Sign in to use Clubs.', 'cl.err.DISABLED': 'Clubs is not available for your account yet.', 'cl.err.NO_CLUB': "I couldn't find that club. Check the code.",
       'cl.err.BAD_NAME': 'Use a name with at least 3 letters.', 'cl.err.TOO_MANY_JOINED': "You're already in the maximum number of clubs (5).", 'cl.err.TOO_MANY_OWNED': "You already lead 2 clubs, the maximum.", 'cl.err.CLUB_FULL': 'The club is full.',
       'cl.err.FORBIDDEN': "You don't have permission for that.", 'cl.err.LEADER_MUST_TRANSFER': 'You are the leader: hand leadership to another member before leaving, or delete the club.', 'cl.err.TOO_MANY_PRESETS': 'There are already 10 setups, the maximum.',
@@ -7290,6 +7290,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     "ch.btn": "Retar",
     "ch.title": "Retar a {name}",
     "ch.rules": "Reglas: {rules} (las que tenés elegidas en Jugar).",
+    "ch.rulesClub": "Reglas del club: {rules}.",
     "ch.watch": "Que se pueda mirar en las salas",
     "ch.watchHint": "Si no lo marcás, solo juegan ustedes dos y nadie puede mirar.",
     "ch.send": "Enviar reto",
@@ -7562,6 +7563,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     "ch.btn": "Challenge",
     "ch.title": "Challenge {name}",
     "ch.rules": "Rules: {rules} (the ones you picked in Play).",
+    "ch.rulesClub": "Club rules: {rules}.",
     "ch.watch": "Let others watch in the rooms",
     "ch.watchHint": "If you leave it off, only the two of you play and nobody can watch.",
     "ch.send": "Send challenge",
@@ -14375,7 +14377,7 @@ window.NEON_BREAK = {
 
   /* ---------- Clubes ----------
    * Todo pasa por la conexión de presencia (inv.net) con el jwt de la cuenta. El servidor decide si Clubes está activo para esta cuenta (cstatus). */
-  var cl = { enabled: false, view: 'home', list: [], cur: null, edit: null, emoji: '♟️', pendingCode: '', timer: 0 };
+  var cl = { pick: null, enabled: false, view: 'home', list: [], cur: null, edit: null, emoji: '♟️', pendingCode: '', timer: 0 };
   var CL_EMOJIS = ['♟️', '🏆', '🔥', '⚡', '🌟', '🐉', '🦊', '🇦🇷', '🎯', '👑'];
   function clSend(m) {
     return Auth && Auth.user ? Auth.accessToken().then(function (tk) { if (!tk || !inv.net || !inv.net.isOpen()) { clMsg(t('cl.err.OFFLINE'), true); return; } inv.net.send(Object.assign({ jwt: tk }, m)); }) : Promise.resolve();
@@ -14415,7 +14417,9 @@ window.NEON_BREAK = {
       h += '<div class="cl-sec"><span>' + esc(t('cl.membersH')) + '</span></div>';
       c.members.forEach(function (m) {
         var acts = '';
-        if (lead && m.role !== 'leader') acts += '<button type="button" class="btn" data-a="role" data-u="' + m.uid + '" data-r="' + (m.role === 'officer' ? 'member' : 'officer') + '">' + esc(t(m.role === 'officer' ? 'cl.demote' : 'cl.promote')) + '</button><button type="button" class="btn" data-a="transfer" data-u="' + m.uid + '">' + esc(t('cl.transfer')) + '</button>';
+        if (m.online && !m.busy && m.uid !== c.me) acts += '<button type="button" class="btn primary" data-a="chal" data-u="' + m.uid + '" data-n="' + esc(m.name) + '">' + esc(t('cl.challenge')) + '</button>';
+        if (cl.pick && cl.pick.uid === m.uid) acts = '<span class="sub" style="width:100%">' + esc(t('cl.pickRules')) + '</span>' + (c.presets.length ? c.presets.map(function (p) { return '<button type="button" class="btn primary" data-a="chalgo" data-p="' + p.id + '">' + esc(p.name) + '</button>'; }).join('') : '') + '<button type="button" class="btn" data-a="chalgo" data-p="">' + esc(t('cl.myRules')) + '</button><button type="button" class="btn" data-a="chalno">' + esc(t('cl.cancel')) + '</button>';
+        else if (lead && m.role !== 'leader') acts += '<button type="button" class="btn" data-a="role" data-u="' + m.uid + '" data-r="' + (m.role === 'officer' ? 'member' : 'officer') + '">' + esc(t(m.role === 'officer' ? 'cl.demote' : 'cl.promote')) + '</button><button type="button" class="btn" data-a="transfer" data-u="' + m.uid + '">' + esc(t('cl.transfer')) + '</button>';
         if (off && m.role !== 'leader' && (lead || m.role === 'member')) acts += '<button type="button" class="btn" data-a="kick" data-u="' + m.uid + '" data-n="' + esc(m.name) + '">' + esc(t('cl.kick')) + '</button>';
         h += '<div class="cl-card cl-mem"><span class="cl-dot ' + (m.online ? (m.busy ? 'busy' : 'on') : '') + '" title="' + esc(t(m.online ? (m.busy ? 'cl.busy' : 'cl.online') : 'cl.offline')) + '"></span><span class="cl-tx"><b>' + esc(m.name) + '</b>' + (m.busy ? '<small>' + esc(t('cl.busy')) + '</small>' : '') + '</span>' + (m.role !== 'member' ? '<span class="cl-chip ' + m.role + '">' + esc(t('cl.role.' + m.role)) + '</span>' : '') + (acts ? '<div class="cl-acts">' + acts + '</div>' : '') + '</div>';
       });
@@ -14438,6 +14442,9 @@ window.NEON_BREAK = {
     if (a === 'docreate') { clMsg(''); clSend({ t: 'ccreate', name: $('clName').value, emoji: cl.emoji }); return; }
     if (a === 'dojoin') { clMsg(''); clSend({ t: 'cjoin', code: $('clCode').value }); return; }
     if (!c) return;
+    if (a === 'chal') { cl.pick = { uid: el.dataset.u, name: el.dataset.n }; clRender(); return; }
+    if (a === 'chalno') { cl.pick = null; clRender(); return; }
+    if (a === 'chalgo') { var pk = cl.pick, pr = c.presets.filter(function (x) { return x.id === el.dataset.p; })[0]; cl.pick = null; clRender(); if (pk) challengeOpen({ id: pk.uid, name: pk.name }, pr ? pr.opts : null, c.id); return; }
     if (a === 'link') { copyText(location.origin + location.pathname + '?club=' + c.code, el); return; }
     if (a === 'newcode') { if (confirm(t('cl.newCodeAsk'))) clSend({ t: 'ccode', id: id }); return; }
     if (a === 'role') { clSend({ t: 'crole', id: id, uid: el.dataset.u, role: el.dataset.r }); return; }
@@ -14656,16 +14663,17 @@ window.NEON_BREAK = {
   }
   if ('serviceWorker' in navigator) { try { navigator.serviceWorker.addEventListener('message', function (e) { if (e.data && e.data.t === 'open' && e.data.url) pushDeep(e.data.url); }); } catch (e) {} }
   if (/[?&]notis=/.test(location.search)) { try { history.replaceState(null, '', location.href.replace(/([?&])notis=[^&#]*&?/, '$1').replace(/[?&]$/, '')); } catch (e) {} setTimeout(function () { $('btnNotif').click(); }, 900); }
-  function challengeOpen(p) {
-    if (!p || !p.id) return; ch = { id: p.id, name: p.name };
+  function challengeOpen(p, copts, club) {                          // copts/club: reglas guardadas de un club (si no, las del jugador)
+    if (!p || !p.id) return; ch = { id: p.id, name: p.name, opts: copts || null, club: club || '' };
     $('chTitle').textContent = t('ch.title', { name: p.name });
-    $('chRules').textContent = t('ch.rules', { rules: invRules({ variant: modeVariant(settings.mode), blitz: settings.mode === 'blitz', bullet: settings.mode === 'bullet', size: settings.size }) });
+    $('chRules').textContent = t(copts ? 'ch.rulesClub' : 'ch.rules', { rules: invRules(copts || { variant: modeVariant(settings.mode), blitz: settings.mode === 'blitz', bullet: settings.mode === 'bullet', size: settings.size }) });
     $('chWatch').checked = false; $('challengeOverlay').classList.add('open'); $('chGo').focus();
   }
   $('chNo').addEventListener('click', function () { $('challengeOverlay').classList.remove('open'); ch = null; });
   $('chGo').addEventListener('click', function () {
     $('challengeOverlay').classList.remove('open'); if (!ch) return;
-    var watch = $('chWatch').checked; online.invite = { to: ch.id, name: ch.name }; ch = null; online.isPublic = watch;
+    var watch = $('chWatch').checked, co = ch.opts; online.invite = { to: ch.id, name: ch.name, club: ch.club }; ch = null; online.isPublic = watch;
+    if (co) { startOnline({ t: 'create', opts: Object.assign({}, co, { players: 2, public: watch, hold: true }) }); return; }
     startOnline({ t: 'create', opts: { variant: modeVariant(settings.mode), blitz: settings.mode === 'blitz', bullet: settings.mode === 'bullet', tournamentRule: settings.tournamentRule, exactFive: settings.exactFive, size: settings.size, timer: settings.timer, players: 2, public: watch, hold: true } });
   });
   /* ---------- Buscar partida: avisa a las cuentas conectadas que alguien busca rival ---------- */
@@ -14700,7 +14708,7 @@ window.NEON_BREAK = {
   }
   function inviteSend(code) {
     var iv = online.invite; if (!iv || !online.net) return;
-    Auth.accessToken().then(function (tk) { if (online.net && online.invite === iv) online.net.send({ t: 'invite', to: iv.to, code: code, jwt: tk, avatar: profile.avatar, country: myCountry }); });
+    Auth.accessToken().then(function (tk) { if (online.net && online.invite === iv) online.net.send({ t: 'invite', to: iv.to, club: iv.club || undefined, code: code, jwt: tk, avatar: profile.avatar, country: myCountry }); });
   }
   function inviteResult(m) {
     var iv = online.invite; if (!iv) return; online.invite = null;
