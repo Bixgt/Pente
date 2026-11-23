@@ -60,6 +60,11 @@ html, body { overflow-x: clip; }     /* el marco de los tableros con arte puede 
 .player .name { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* marcador de la serie (partidas ganadas), estilo tablero de básquet: dígitos ámbar sobre fondo oscuro */
 .player .row .name { min-width: 0; }
+@media (max-width: 599px) {                                   /* celu: la ficha y el marcador arriba, y el nombre (con avatar y título) en su propia línea, con todo el ancho de la tarjeta */
+  .player .row { flex-wrap: wrap; row-gap: 4px; }
+  .player .row .name { order: 3; flex: 1 1 100%; }
+  .hud:not(.ffa) { height: 134px; }
+}
 .pts { margin-left: auto; flex: none; min-width: 30px; padding: 0 7px; border-radius: 6px; background: #0a0d12; color: #ffc933; font-weight: 800; font-size: 22px; line-height: 30px; text-align: center; font-variant-numeric: tabular-nums; letter-spacing: .02em; box-shadow: inset 0 0 0 1px rgba(255,201,51,.28), 0 0 8px rgba(255,201,51,.18); text-shadow: 0 0 6px rgba(255,201,51,.55); font-family: 'PenteSans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
 .pts[hidden] { display: none; }
 .endscore { margin: -4px 0 12px; font-weight: 800; font-size: 20px; color: #ffc933; text-shadow: 0 0 8px rgba(255,201,51,.45); font-variant-numeric: tabular-nums; }
@@ -948,6 +953,7 @@ html[data-theme="halloween"] .brand h1::before, html[data-theme="halloween"] .br
 .char-prev svg { width: 100%; height: 100%; display: block; }
 .cust-prev { width: 190px; height: 190px; margin: 6px auto 10px; border-radius: 22px; background: var(--panel-2); border: 1px solid var(--line); overflow: hidden; }
 .cust-prev svg { width: 100%; height: 100%; display: block; }
+.cust-tabs { padding-top: 10px !important; padding-right: 8px; } .cust-opt { position: relative; } .cust-opt .newb { top: 4px; right: 4px; font-size: 10px; min-width: 0; height: 18px; line-height: 18px; padding: 0 6px; } .cust-opt.is-new { border-color: #ffd23f; }
 .cust-tabs { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 8px; scrollbar-width: none; }
 .cust-tabs button { flex: none; padding: 8px 13px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel-2); color: var(--text); font-weight: 600; font-size: 13px; }
 .cust-tabs button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
@@ -1525,6 +1531,7 @@ html[data-theme="jardin"] .app .btn:disabled { background: rgba(14,32,20,.85); c
 /* Tableros con marco (Jardín, Papel): el dibujo se agranda y sobresale un poco del casillero; que no tape los botones, el encabezado ni los paneles */
 .board-wrap { position: relative; z-index: 1; }
 .actions, .status, .side { position: relative; z-index: 3; }
+@media (max-width: 1099px) { .side { position: fixed; z-index: 15; } }          /* en el celu el panel de jugadas y chat es una hoja fija abajo; la regla de arriba lo dejaba en el flujo y se salía de la pantalla */
 .app .player { position: relative; z-index: 3; }
 
 /* ---- Jugar: estilo "vitrina" (paneles oscuros con borde dorado, laureles y hojas) ---- */
@@ -1837,7 +1844,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span><b class="newb" id="nwProfile" hidden></b></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v1.102</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v2.05</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -2148,6 +2155,11 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       <h2 class="cz-h"><svg class="cz-hi" viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.2 0 1.7-.9 1.7-1.7 0-.5-.3-.9-.5-1.3-.3-.5-.1-1.2.8-1.2H16.5a4.5 4.5 0 0 0 4.5-4.5C21 6.9 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.1" fill="currentColor"/><circle cx="10.5" cy="7" r="1.1" fill="currentColor"/><circle cx="15" cy="7.5" r="1.1" fill="currentColor"/></svg><span data-i18n="cz.title"></span></h2>
       <p class="sub" data-i18n="cz.sub"></p>
       <section class="cz-panel" id="tab-graphics">
+        <div class="cz-card" id="czCharCard">
+          <h3 class="cz-t"><svg class="cz-ic" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg><span data-i18n="cz.char"></span></h3>
+          <p class="sub" data-i18n="cz.charSub"></p>
+          <div class="char-row"><span class="char-prev" id="czChar"></span><button type="button" class="btn primary" id="btnCzChar" data-i18n="av.btn"></button><b class="badge nw" id="nwPartsCz" hidden></b></div>
+        </div>
         <div class="cz-card">
           <h3 class="cz-t"><svg class="cz-ic" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><path d="M3.5 9.2h17M3.5 14.8h17M9.2 3.5v17M14.8 3.5v17"/></svg><span data-i18n="cfg.theme"></span></h3>
           <div class="themes" id="themePicker" role="group"></div>
@@ -7299,6 +7311,9 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     "av.title": "Tu personaje",
     "av.sub": "Elegí tu color, tu expresión y tu peinado. Lo ven tus amigos y aparece en el ranking.",
     "av.btn": "Personalizar",
+    "av.new": "NUEVO",
+    "cz.char": "Tu personaje",
+    "cz.charSub": "Elegí cómo te ven los demás: color, cara, peinado y más.",
     "av.random": "Al azar",
     "av.save": "Listo",
     "av.back": "Volver",
@@ -7579,6 +7594,9 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     "av.title": "Your character",
     "av.sub": "Pick your color, expression and hairstyle. Your friends see it and it shows on the leaderboard.",
     "av.btn": "Customize",
+    "av.new": "NEW",
+    "cz.char": "Your character",
+    "cz.charSub": "Choose how others see you: color, face, hair and more.",
     "av.random": "Random",
     "av.save": "Done",
     "av.back": "Back",
@@ -11688,17 +11706,15 @@ window.NEON_BREAK = {
     updateOnlineButtons(); closeAll(); render(); setStatus(''); aiMaybeMove();
   }
   /* Repetir el desafío ya jugado como partida de práctica (misma posición y misma máquina). No cuenta para el ranking ni la racha. */
-  function dailyPractice(info) {
-    var i = info || daily.info; if (!i || !i.setup) return;
-    tutStop(); aiStop(); videoDiscard(); endSeen = recorded = false;
-    if (online.net) leaveOnline(false);
-    var s2 = P.createGame({ size: i.size, tournamentRule: false, exactFive: true });
-    i.setup.forEach(function (c) { s2 = P.playMove(s2, c[0], c[1], s2.current).state; });
-    gameMode = 'classic'; state = s2; localOver = null; daily.active = false; daily.result = null; daily.wantPlay = false;
-    ai.active = true; ai.four = false; ai.botSeats = {}; ai.level = i.level; ai.human = 1; ai.bot = 2;
-    names[1] = ($('name1').value || '').trim() || t('ai.you'); names[2] = t('ai.name.' + i.level);
-    hover = pending = drag = settle = null; fx.length = 0; clockFresh(); clk = null; kbd = { x: centerIdx(), y: centerIdx() };
-    updateOnlineButtons(); closeAll(); render(); setStatus(t('daily.practiceOn')); aiMaybeMove();
+  function dailyPractice(info) {                                // práctica: la misma posición, en el tablero de práctica contra la máquina (no da XP, ni stats, ni logros)
+    var i = info && info.setup ? info : daily.info; if (!i || !i.setup) return;
+    labBegin();                                                  // corta el desafío/tutorial/partidas y abre el tablero de práctica
+    labFresh(i.size, 'classic');
+    var s2 = labCur().s;
+    i.setup.forEach(function (c) { var r = L.place(s2, c[0], c[1], s2.current, lab.cap); if (r.ok) s2 = r.state; });
+    labPush(s2, []);
+    lab.bot.on = true; lab.bot.paused = false; lab.bot.color = 2; lab.bot.level = i.level;
+    labNote(t('daily.practiceOn')); labUi(); render(); labBotKick();
   }
   function onDailyMessage(m) {
     if (m.t === 'daily') {
@@ -12086,7 +12102,7 @@ window.NEON_BREAK = {
   $('btnDailyPlay').addEventListener('click', function () { daily.wantPlay = true; dailyMsg(t('daily.connecting')); dailyConnect(); dailyHello(); });
   $('btnDailyLogin').addEventListener('click', function () { dailyClose(); $('btnProfile').click(); });
   $('btnDailyShare').addEventListener('click', dailyShare);
-  $('btnDailyRetry').addEventListener('click', dailyPractice); $('btnEndRetry').addEventListener('click', dailyPractice);
+  $('btnDailyRetry').addEventListener('click', function () { dailyPractice(); }); $('btnEndRetry').addEventListener('click', function () { dailyPractice(); });
   $('btnEndShare').addEventListener('click', dailyShare);
 
   /* ---------- XP y niveles (reglas en xp.js) ---------- */
@@ -12412,7 +12428,7 @@ window.NEON_BREAK = {
   function nwSeen(k) { var s = nwLoad() || { c: nwLevel(), p: nwLevel() }; s[k] = nwLevel(); nwSave(s); newRender(); }
   function newRender() {
     var n = nwCounts(), set = function (id, v) { var e = $(id); if (!e) return; e.hidden = !v; if (v) e.textContent = '+' + v; };
-    set('nwCust', n.cz); set('nwParts', n.pa); set('nwProfile', n.pa);
+    set('nwCust', n.cz); set('nwParts', n.pa); set('nwPartsCz', n.pa); set('nwProfile', n.pa);
   }
   function renderProfXp() {
     var lv = myLevel(), nx = XP.nextUnlock(lv.level);
@@ -14035,7 +14051,7 @@ window.NEON_BREAK = {
     if (!url) { onlineMsg(t('online.noServer')); return; }
     var lg = (intent.t === 'join' || intent.t === 'spectate') ? lastGame() : null;
     if (lg && lg.code === String(intent.code || '').toUpperCase()) { intent = { t: 'rejoin', code: lg.code, token: lg.token }; online.lastTry = true; }        // esa partida era tuya: volvés como jugador
-    intent.name = myName(); if (intent.t === 'create' || intent.t === 'join') intent.dev = devId();
+    intent.name = myName(); if (intent.t === 'create' || intent.t === 'join' || intent.t === 'spectate') intent.dev = devId();
     if (intent.t === 'create' || intent.t === 'join' || intent.t === 'rejoin') { intent.avatar = profile.avatar; intent.title = curTitle(); }
     online.intent = intent; online.token = ''; online.code = '';
     onlineMsg(t('online.connecting'));
@@ -14528,8 +14544,9 @@ window.NEON_BREAK = {
   /* ¿Clubes está abierto para todos? Se pregunta por HTTP (/health) para que el botón se vea también sin cuenta. */
   function clPubCheck(retry) {
     var url = serverUrl(); if (!url) return;
-    try { fetch(window.PenteNet.httpBase(url) + '/health').then(function (r) { return r.json(); }).then(function (j) { cl.pub = !!(j && j.clubs); $('btnClubs').hidden = !(cl.enabled || cl.pub); }).catch(function () { if (retry) setTimeout(function () { clPubCheck(false); }, 25000); }); } catch (e) {}
+    try { fetch(window.PenteNet.httpBase(url) + '/health').then(function (r) { return r.json(); }).then(function (j) { cl.pub = !!(j && j.clubs); try { if (cl.pub) localStorage.setItem('pente.clPub', '1'); else localStorage.removeItem('pente.clPub'); } catch (e) {} $('btnClubs').hidden = !(cl.enabled || cl.pub); }).catch(function () { if (retry) setTimeout(function () { clPubCheck(false); }, 25000); }); } catch (e) {}
   }
+  try { if (localStorage.getItem('pente.clPub') === '1') { cl.pub = true; $('btnClubs').hidden = false; } } catch (e) {}      // la última vez estaban abiertos al público: el botón aparece desde el primer momento (sin esperar a que el servidor despierte) y no se corre el menú
   setTimeout(function () { clPubCheck(true); }, 2500);
   function clGo(view) { cl.view = view; cl.edit = null; clMsg(''); clRender(); if (view === 'home') clSend({ t: 'clist' }); }
   function clRefresh() { clearTimeout(cl.timer); cl.timer = setTimeout(function () { if (!clOpenEl()) return; if (cl.view === 'club' && cl.cur) clSend({ t: 'cview', id: cl.cur.id }); else if (cl.view === 'home') clSend({ t: 'clist' }); }, 300); }
@@ -14941,7 +14958,7 @@ window.NEON_BREAK = {
   }
 
   /* ---------- Flecha de volver (arriba a la izquierda) y botón "atrás" del navegador/celu ---------- */
-  $('btnCustBack').addEventListener('click', function () { open('profileOverlay'); });
+  $('btnCustBack').addEventListener('click', function () { open(cust.from === 'cz' ? 'customizeOverlay' : 'profileOverlay'); });
   (function () {
     var arrow = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>';
     document.querySelectorAll('.overlay.screen').forEach(function (scr) {
@@ -15498,13 +15515,15 @@ window.NEON_BREAK = {
   }
   var AVK = ['color', 'face', 'hair', 'hairColor'], cust = { spec: null, tab: 'body' };
   function avList(k) { return k === 'face' ? AV.FACES : k === 'hair' ? AV.HAIRS : k === 'hairColor' ? AV.HAIR_COLORS : AV.COLORS; }
-  function custOpen() { nwSeen('p'); cust.spec = AV.normalize(avSpec(profile.avatar) || { color: 'blanco', face: 'feliz' }); cust.tab = 'color'; $('custNote').textContent = ''; renderCust(); open('customOverlay'); }
+  function custOpen() { var ns0 = nwLoad(); cust.since = ns0 && ns0.p != null ? ns0.p | 0 : nwLevel(); nwSeen('p');      // cust.since: hasta qué nivel ya habías visto las piezas (lo que se destrabó después se marca como NUEVO)
+    cust.spec = AV.normalize(avSpec(profile.avatar) || { color: 'blanco', face: 'feliz' }); cust.tab = 'color'; $('custNote').textContent = ''; renderCust(); open('customOverlay'); }
   function renderCust() {
     var lv = myLevel().level, tabs = $('custTabs'), grid = $('custGrid');
     $('custPrev').innerHTML = AV.render(cust.spec, { size: 190 });
     tabs.innerHTML = '';
     AVK.forEach(function (k) {
       var b = el('button', '', t('av.tab.' + k)); b.type = 'button'; b.setAttribute('aria-pressed', String(cust.tab === k));
+      var nNew = avList(k).filter(function (id) { return XP.partOk(k, id, lv) && XP.partLevel(k, id) > (cust.since | 0); }).length; if (nNew) { b.style.position = 'relative'; b.appendChild(el('span', 'newb', '+' + nNew)); }
       b.addEventListener('click', function () { cust.tab = k; $('custNote').textContent = ''; renderCust(); }); tabs.appendChild(b);
     });
     grid.innerHTML = '';
@@ -15515,6 +15534,7 @@ window.NEON_BREAK = {
       var tile = el('span', 'tile'); tile.innerHTML = AV.render(sp, Object.assign({ size: 90 }, zoom)); b.appendChild(tile);
       b.appendChild(document.createTextNode(t('av.' + cust.tab + '.' + id)));
       if (lock) { var lk = el('span', 'lk', t('av.lockedAt', { n: XP.partLevel(cust.tab, id) })); b.appendChild(lk); b.setAttribute('aria-disabled', 'true'); }
+      else if (XP.partLevel(cust.tab, id) > (cust.since | 0)) { b.classList.add('is-new'); b.appendChild(el('span', 'newb', t('av.new'))); }
       b.addEventListener('click', function () {
         if (lock) { $('custNote').textContent = t('av.lockedNote', { n: XP.partLevel(cust.tab, id) }); return; }
         $('custNote').textContent = ''; cust.spec[cust.tab] = id; renderCust();
@@ -15522,15 +15542,17 @@ window.NEON_BREAK = {
       grid.appendChild(b);
     });
   }
-  $('btnCustom').addEventListener('click', custOpen);
+  $('btnCustom').addEventListener('click', function () { cust.from = ''; custOpen(); });
+  $('btnCzChar').addEventListener('click', function () { cust.from = 'cz'; custOpen(); });
+  $('btnCustomize').addEventListener('click', function () { setAv($('czChar'), profile.avatar, 76, true); });
   $('btnCustRandom').addEventListener('click', function () {
     var lv = myLevel().level; AVK.forEach(function (k) { var ok = avList(k).filter(function (id) { return XP.partOk(k, id, lv); }); cust.spec[k] = ok[Math.floor(Math.random() * ok.length)]; }); renderCust();
   });
   $('btnCustSave').addEventListener('click', function () {
-    profile.avatar = AV.encode(cust.spec); profile.nameAt = Date.now(); saveProfile(); renderProfileBtn(); scheduleSync(1500); renderProfile(); open('profileOverlay');
+    profile.avatar = AV.encode(cust.spec); profile.nameAt = Date.now(); saveProfile(); renderProfileBtn(); scheduleSync(1500); renderProfile(); open(cust.from === 'cz' ? 'customizeOverlay' : 'profileOverlay');
   });
   function renderProfile() {
-    setAv($('profChar'), profile.avatar, 76, true);
+    setAv($('profChar'), profile.avatar, 76, true); setAv($('czChar'), profile.avatar, 76, true);
     var logged = !!(typeof Auth !== 'undefined' && Auth && Auth.user);
     $('profName').value = profile.name; $('profName').readOnly = logged; $('profName').classList.toggle('locked', logged);
     $('nameClaim').hidden = !(logged && !profile.nameSet);
