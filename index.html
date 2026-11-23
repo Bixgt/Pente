@@ -1341,6 +1341,7 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
 /* Tableros bloqueados por nivel */
 .theme-opt.locked .swatch > i, .theme-opt.locked .swatch > .real { filter: grayscale(1); opacity: .45; }
 .theme-opt.locked > span:last-child { opacity: .6; }
+.theme-opt .lk.maint { font-size: 9px; line-height: 1.15; text-align: center; padding: 0 4px; }
 .theme-opt .lk { position: absolute; inset: 0; display: grid; place-items: center; font-style: normal; font-weight: 700; font-size: 12px; color: #fff; background: rgba(0,0,0,.55); border-radius: inherit; z-index: 2; text-shadow: 0 1px 2px #000; }
 
 /* Casilla para escribir la jugada */
@@ -1844,7 +1845,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span><b class="newb" id="nwProfile" hidden></b></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v2.06</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v2.07</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -4434,7 +4435,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
   else root.PenteXP = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
-  var MAX_LEVEL = 60, MIN_MOVES = 10, CASUAL_CAP = 180, CAP = 10000000;
+  var MAX_LEVEL = 100, MIN_MOVES = 10, CASUAL_CAP = 180, CAP = 10000000;
   var TITLE_AT = [1, 4, 8, 13, 19, 26, 34, 43];                       // nivel desde el que rige cada título (xp.title.1 ... xp.title.8)
   var GEM_LEVEL = { oro: 6, neon: 9, coral: 12, obsidiana: 16, galaxia: 22 };                    // las 9 piedras de siempre son libres
   var BOARD_LEVEL = { glow: 2, papel: 4, playa: 7, jardin: 10, halloween: 13, galaxia: 17 };       // tableros: Simple y Tradicional son libres
@@ -4445,6 +4446,8 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     hair: { pinchudo: 5, raya: 7, melena: 9, gorro: 11, vincha: 13, despeinado: 15, cortina: 17, colita: 19, rodetes: 22, gorraAtras: 25 },
     hairColor: { pelirrojo: 3, gris: 9, rosa: 12, azul: 16, violeta: 21, verde: 26, blanco: 32 }
   };
+  var MAINT = { galaxia: 1 };                                         // tableros «En mantenimiento»: solo los ve quien tiene el modo «todo desbloqueado» (la administradora)
+  function inMaint(id) { return !!MAINT[id]; }
   var FIRSTS = { tutorial: 50, daily: 25 };                          // premio por única vez; 'mode:<modo>' vale 20
 
   /* Niveles configurables desde el menú de administrador (se guardan en Supabase, tabla app_config, clave 'levels'):
@@ -4522,7 +4525,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
   /* Tableros que se abren en una fecha (hora de Argentina, UTC-3), además del nivel. Halloween: desde el 31/10/2026 a las 00:00. */
   var DATE_LOCK = { halloween: Date.UTC(2026, 9, 31, 3, 0, 0) };
   function boardOpensAt(id) { return DATE_LOCK[id] || 0; }
-  function boardOk(id, level, now) { return level >= boardLevel(id) && (now == null ? Date.now() : now) >= boardOpensAt(id); }
+  function boardOk(id, level, now) { if (inMaint(id) && now !== Infinity) return false;  return level >= boardLevel(id) && (now == null ? Date.now() : now) >= boardOpensAt(id); }
   function partLevel(kind, id) { return (PART_LEVEL[kind] && PART_LEVEL[kind][id]) || 1; }
   function partOk(kind, id, level) { return level >= partLevel(kind, id); }
   function partsAt(level) {                                          // piezas de personaje que se destraban justo en ese nivel
@@ -4578,7 +4581,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
   }
   function onlineGain(win, day) { return (20 + (win ? 20 : 0)) * eventMult(day); }
 
-  return { ACH_XP: ACH_XP, ONLINE_DAILY_CAP: ONLINE_DAILY_CAP, dailyGain: dailyGain, onlineGain: onlineGain, MAX_LEVEL: MAX_LEVEL, MIN_MOVES: MIN_MOVES, CASUAL_CAP: CASUAL_CAP, ONLINE_MIN_MOVES: ONLINE_MIN_MOVES, AI_CAP: AI_CAP, GEM_LEVEL: GEM_LEVEL, BOARD_LEVEL: BOARD_LEVEL, boardOpensAt: boardOpensAt, DATE_LOCK: DATE_LOCK, applyLevels: applyLevels, cleanLevels: cleanLevels, levelsConfig: levelsConfig, defaultLevels: defaultLevels, boardLevel: boardLevel, boardOk: boardOk, need: need, cumulative: cumulative, levelOf: levelOf, titleIndex: titleIndex,
+  return { inMaint: inMaint, ACH_XP: ACH_XP, ONLINE_DAILY_CAP: ONLINE_DAILY_CAP, dailyGain: dailyGain, onlineGain: onlineGain, MAX_LEVEL: MAX_LEVEL, MIN_MOVES: MIN_MOVES, CASUAL_CAP: CASUAL_CAP, ONLINE_MIN_MOVES: ONLINE_MIN_MOVES, AI_CAP: AI_CAP, GEM_LEVEL: GEM_LEVEL, BOARD_LEVEL: BOARD_LEVEL, boardOpensAt: boardOpensAt, DATE_LOCK: DATE_LOCK, applyLevels: applyLevels, cleanLevels: cleanLevels, levelsConfig: levelsConfig, defaultLevels: defaultLevels, boardLevel: boardLevel, boardOk: boardOk, need: need, cumulative: cumulative, levelOf: levelOf, titleIndex: titleIndex,
     clean: clean, merge: merge, unlocksAt: unlocksAt, nextUnlock: nextUnlock, PART_LEVEL: PART_LEVEL, partLevel: partLevel, partOk: partOk, partsAt: partsAt, gemOk: gemOk, award: award, eventMult: eventMult };
 });
 </script>
@@ -7281,6 +7284,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     "xp.up": "¡Subiste al nivel {n}!",
     "xp.unlocked": "Desbloqueaste: {list}",
     "xp.unlockAt": "Se destraba en el nivel {n}",
+    "xp.maint": "En mantenimiento",
     "xp.next": "Próximo premio: {what}, en el nivel {n}",
     "xp.capped": "Llegaste al tope de XP de hoy contra la máquina. Mañana vuelve a sumar; el desafío y el online no tienen tope.",
     "xp.onShort": "Las partidas online de menos de 20 jugadas no dan XP.",
@@ -7564,6 +7568,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     "xp.up": "Level {n}!",
     "xp.unlocked": "Unlocked: {list}",
     "xp.unlockAt": "Unlocks at level {n}",
+    "xp.maint": "Under maintenance",
     "xp.next": "Next reward: {what}, at level {n}",
     "xp.capped": "You hit today's XP cap against the machine. It adds up again tomorrow; the challenge and online have no cap.",
     "xp.onShort": "Online games with fewer than 20 moves give no XP.",
@@ -13794,10 +13799,10 @@ window.NEON_BREAK = {
       [1, 2].forEach(function (p) { sw.appendChild(swatchStone(th, p)); });
       var lb = document.createElement('span'); lb.textContent = t('theme.' + th.id);
       b.appendChild(sw); b.appendChild(lb);
-      var blv = XP.boardLevel(th.id), blk = !boardAllowed(th.id), byDate = blk && !UNLOCK_ALL && !cloudUnlock && Date.now() < XP.boardOpensAt(th.id);
+      var blv = XP.boardLevel(th.id), blk = !boardAllowed(th.id), maint = blk && XP.inMaint(th.id), byDate = blk && !UNLOCK_ALL && !cloudUnlock && Date.now() < XP.boardOpensAt(th.id);
       if (blk) {
-        b.classList.add('locked'); b.setAttribute('aria-disabled', 'true'); b.title = t('xp.unlockAt', { n: blv });
-        var lk = document.createElement('em'); lk.className = 'lk'; lk.textContent = '🔒 ' + (byDate ? t('xp.opensOn', { d: fmtOpen(XP.boardOpensAt(th.id)) }) : t('xp.lvShort', { n: blv })); sw.appendChild(lk);
+        b.classList.add('locked'); b.setAttribute('aria-disabled', 'true'); b.title = maint ? t('xp.maint') : t('xp.unlockAt', { n: blv });
+        var lk = document.createElement('em'); lk.className = 'lk' + (maint ? ' maint' : ''); lk.textContent = maint ? '🔧 ' + t('xp.maint') : '🔒 ' + (byDate ? t('xp.opensOn', { d: fmtOpen(XP.boardOpensAt(th.id)) }) : t('xp.lvShort', { n: blv })); sw.appendChild(lk);
       }
       b.addEventListener('click', function () { if (blk) { sfx('error'); buzz([30]); return; } themeUserPicked = true; setTheme(th.id); markPrefs(); });
       box.appendChild(b);
