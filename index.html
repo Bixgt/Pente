@@ -1413,7 +1413,7 @@ html[data-theme="galaxia"] #menuOverlay .brand h1 { text-shadow: 0 2px 18px rgba
 @media (prefers-reduced-motion: no-preference) { .mdl.r5.on svg { animation: mdlGlow 3.4s ease-in-out infinite; } }
 @keyframes mdlGlow { 50% { filter: brightness(1.22) saturate(1.15); } }
 @keyframes mdlPop { 0% { transform: scale(.15) rotate(-30deg); opacity: 0; } 55% { transform: scale(1.3) rotate(10deg); opacity: 1; } 100% { transform: none; } }
-.ach-toast { display: flex; align-items: center; gap: 12px; } .ach-toast .mdl { animation: mdlPop .9s cubic-bezier(.2, 1.3, .4, 1) both; }
+.ach-toast { display: flex; align-items: center; gap: 12px; border-radius: 22px; width: max-content; min-width: min(90vw, 330px); max-width: min(92vw, 420px); text-align: left; } .ach-toast .ach-tx { display: flex; flex-direction: column; gap: 2px; min-width: 0; } .ach-toast .ach-tx b { font-weight: 800; } .ach-toast .ach-tx small { font-weight: 500; opacity: .85; font-size: 13px; line-height: 1.25; } .ach-toast .ach-tx em { font-style: normal; font-weight: 800; font-size: 13px; opacity: .95; } .ach-toast .mdl { animation: mdlPop .9s cubic-bezier(.2, 1.3, .4, 1) both; }
 
 
 /* Neón: fondo arcade / cyberpunk del menú (neon-menu.js) */
@@ -1812,6 +1812,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
     <button class="btn gamecfg" id="btnGameCfg" data-i18n-aria="menu.settings" data-i18n-title="menu.settings"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
     <button class="btn" id="btnPause" hidden data-i18n="pause.btn"></button>
     <button class="btn" id="btnVis" hidden></button>
+    <button class="btn" id="btnShareWatch" hidden data-i18n="share.watch"></button>
     <button class="btn" id="btnRestart" data-i18n="hud.restart"></button>
     <button class="btn" id="btnClaim" hidden data-i18n="online.claim"></button>
     <button class="btn primary" id="btnResult" hidden data-i18n="end.result"></button>
@@ -1836,7 +1837,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span><b class="newb" id="nwProfile" hidden></b></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v196</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v1.102</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -2042,7 +2043,9 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       <button class="btn primary" id="btnDailyPlay" data-i18n="daily.play"></button>
       <button class="btn primary" id="btnDailyLogin" hidden data-i18n="daily.login"></button>
       <button class="btn" id="btnDailyShare" hidden data-i18n="daily.share"></button>
+      <button class="btn" id="btnDailyRetry" hidden data-i18n="daily.retry"></button>
       <button class="btn" id="btnDailyBoard" data-i18n="daily.board"></button>
+      <button class="btn" id="btnDailyPast" data-i18n="daily.past"></button>
       <button class="btn" id="btnDailyBack" data-i18n="menu.back"></button>
     </div>
     <p class="hint" data-i18n="daily.ranking"></p>
@@ -2055,7 +2058,9 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
     <h2 data-i18n="daily.boardTitle"></h2>
     <div class="btns" id="boardTabs">
       <button class="btn primary" id="boardTabToday" data-i18n="daily.tabToday"></button>
+      <button class="btn" id="boardTabY" data-i18n="daily.tabY"></button>
       <button class="btn" id="boardTabWeek" data-i18n="daily.tabWeek"></button>
+      <button class="btn" id="boardTabPrev" data-i18n="daily.tabPrev"></button>
     </div>
     <p class="hint" id="boardRule"></p>
     <ol class="board" id="boardList"></ol>
@@ -2164,7 +2169,6 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
           </div>
           <div class="cz-rows">
             <label class="check cz-row"><input type="checkbox" data-cfg="coords"><svg class="cz-ic" viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="3"/><text x="12" y="15.2" font-size="8.5" text-anchor="middle" fill="currentColor" stroke="none" font-weight="700" font-family="sans-serif">A1</text></svg><span><span data-i18n="cfg.coords"></span><small data-i18n="cfg.coordsHint"></small></span></label>
-            <label class="check cz-row"><input type="checkbox" data-cfg="coordInput"><svg class="cz-ic" viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg><span><span data-i18n="cfg.coordInput"></span><small data-i18n="cfg.coordInputHint"></small></span></label>
             <label class="check cz-row"><input type="checkbox" data-cfg="randomBoard"><svg class="cz-ic" viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3.5"/><path d="M8.5 8.5h.01M15.5 8.5h.01M12 12h.01M8.5 15.5h.01M15.5 15.5h.01"/></svg><span><span data-i18n="cfg.randomBoard"></span><small data-i18n="cfg.randomBoardHint"></small></span></label>
             <label class="check cz-row"><input type="checkbox" data-cfg="lastMove"><svg class="cz-ic" viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l14 7.5-6.2 1.8L10.5 19z"/></svg><span><span data-i18n="cfg.lastMove"></span></span></label>
             <label class="check cz-row"><input type="checkbox" data-cfg="menuBg"><svg class="cz-ic" viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><path d="M3.5 9.2h17M3.5 14.8h17M9.2 3.5v17M14.8 3.5v17"/></svg><span><span data-i18n="cfg.menuBg"></span><small data-i18n="cfg.menuBgHint"></small></span></label>
@@ -2214,6 +2218,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
         <p class="hint" data-i18n="cfg.liftHint"></p></div>
       <label class="check"><input type="checkbox" data-cfg="guides"><span><span data-i18n="cfg.guides"></span></span></label>
       <label class="check"><input type="checkbox" data-cfg="loupe"><span><span data-i18n="cfg.loupe"></span><small data-i18n="cfg.loupeHint"></small></span></label>
+      <label class="check"><input type="checkbox" data-cfg="coordInput"><span><span data-i18n="cfg.coordInput"></span><small data-i18n="cfg.coordInputHint"></small></span></label>
     </section>
 
     <section class="tabpanel" id="tab-game" role="tabpanel" hidden>
@@ -2674,6 +2679,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       <button class="btn primary" id="btnRematch" data-i18n="end.rematch"></button>
       <button class="btn primary" id="btnEndShare" hidden data-i18n="daily.share"></button>
       <button class="btn" id="btnEndRank" hidden data-i18n="daily.board"></button>
+      <button class="btn" id="btnEndRetry" hidden data-i18n="daily.retry"></button>
       <button class="btn" id="btnEndBoard" data-i18n="end.viewBoard"></button>
       <button class="btn" id="btnEndVideo" hidden data-i18n="video.make"></button>
       <button class="btn" id="btnEndCopy" data-i18n="moves.copyAll"></button>
@@ -4524,6 +4530,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     var wd = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])).getUTCDay();   // 0 = domingo ... 5 = viernes, 6 = sábado
     return wd === 5 || wd === 6 ? 2 : 1;
   }
+  var ACH_XP = [0, 10, 20, 40, 80, 150];                             // XP por logro según dificultad
   function award(xp, ev, today) {
     var s = clean(xp), parts = [], cas = false, ms = ev.moves || 0, mult = eventMult(today);
     function add(k, n, casual) { if (n > 0) { var once = k.indexOf('first:') === 0; parts.push({ k: k, n: once ? n : n * mult, casual: !!casual, x2: !once && mult > 1 }); } }
@@ -4544,6 +4551,8 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
         }
         if (ev.mode && ev.k !== 'local') first('mode:' + ev.mode);
       }
+    } else if (ev.k === 'ach') {                                     // un logro nuevo: XP según su dificultad (1 fácil … 5 muy difícil), una sola vez porque solo cuentan los recién ganados
+      (ev.ranks || []).forEach(function (r) { add('ach', ACH_XP[Math.max(1, Math.min(5, r | 0))]); });
     } else if (ev.k === 'first') first(ev.id);
     var gained = parts.reduce(function (a, p) { return a + p.n; }, 0), from = levelOf(s.t), t1 = num(s.t + gained), to = levelOf(t1);
     s.t = t1;
@@ -4561,7 +4570,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
   }
   function onlineGain(win, day) { return (20 + (win ? 20 : 0)) * eventMult(day); }
 
-  return { ONLINE_DAILY_CAP: ONLINE_DAILY_CAP, dailyGain: dailyGain, onlineGain: onlineGain, MAX_LEVEL: MAX_LEVEL, MIN_MOVES: MIN_MOVES, CASUAL_CAP: CASUAL_CAP, ONLINE_MIN_MOVES: ONLINE_MIN_MOVES, AI_CAP: AI_CAP, GEM_LEVEL: GEM_LEVEL, BOARD_LEVEL: BOARD_LEVEL, boardOpensAt: boardOpensAt, DATE_LOCK: DATE_LOCK, applyLevels: applyLevels, cleanLevels: cleanLevels, levelsConfig: levelsConfig, defaultLevels: defaultLevels, boardLevel: boardLevel, boardOk: boardOk, need: need, cumulative: cumulative, levelOf: levelOf, titleIndex: titleIndex,
+  return { ACH_XP: ACH_XP, ONLINE_DAILY_CAP: ONLINE_DAILY_CAP, dailyGain: dailyGain, onlineGain: onlineGain, MAX_LEVEL: MAX_LEVEL, MIN_MOVES: MIN_MOVES, CASUAL_CAP: CASUAL_CAP, ONLINE_MIN_MOVES: ONLINE_MIN_MOVES, AI_CAP: AI_CAP, GEM_LEVEL: GEM_LEVEL, BOARD_LEVEL: BOARD_LEVEL, boardOpensAt: boardOpensAt, DATE_LOCK: DATE_LOCK, applyLevels: applyLevels, cleanLevels: cleanLevels, levelsConfig: levelsConfig, defaultLevels: defaultLevels, boardLevel: boardLevel, boardOk: boardOk, need: need, cumulative: cumulative, levelOf: levelOf, titleIndex: titleIndex,
     clean: clean, merge: merge, unlocksAt: unlocksAt, nextUnlock: nextUnlock, PART_LEVEL: PART_LEVEL, partLevel: partLevel, partOk: partOk, partsAt: partsAt, gemOk: gemOk, award: award, eventMult: eventMult };
 });
 </script>
@@ -5943,6 +5952,8 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'cfg.resetDone': 'Configuración restablecida',
       'menu.start': 'Jugar',
       'menu.online': 'Online',
+      'ach.xp': '+{n} XP',
+      'daily.retry': 'Repetir en práctica', 'daily.practiceOn': 'Práctica: misma posición del desafío. No cuenta para el ranking.',
       'menu.play': 'Jugar', 'menu.playSub': 'Partida rápida o con bot',
       'menu.back': 'Volver',
       'menu.rules': 'Cómo se juega',
@@ -6004,6 +6015,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'online.waitSub': 'Mandale este enlace a tu rival. La partida empieza apenas entre.',
       'online.copyLink': 'Copiar enlace',
       'online.copied': 'Enlace copiado',
+      'share.watch': '🔗 Compartir para mirar', 'share.watchText': 'Mirá esta partida de Pente en vivo', 'share.needPublic': 'Para que te puedan mirar, la partida tiene que ser pública (aparece en la lista de partidas). ¿Hacerla pública y compartir el link?',
       'online.copyFail': 'No se pudo copiar. Copialo a mano.',
       'online.share': 'Compartir',
       'online.hold': 'Salir y seguir esperando',
@@ -6310,6 +6322,8 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'cfg.resetDone': 'Settings reset',
       'menu.start': 'Play',
       'menu.online': 'Online',
+      'ach.xp': '+{n} XP',
+      'daily.retry': 'Replay in practice', 'daily.practiceOn': 'Practice: same position as the challenge. It does not count for the ranking.',
       'menu.play': 'Play', 'menu.playSub': 'Quick game or vs bot',
       'menu.back': 'Back',
       'menu.rules': 'How to play',
@@ -6371,6 +6385,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'online.waitSub': 'Send this link to your rival. The game starts as soon as they join.',
       'online.copyLink': 'Copy link',
       'online.copied': 'Link copied',
+      'share.watch': '🔗 Share to watch', 'share.watchText': 'Watch this Pente game live', 'share.needPublic': 'To let people watch, the game has to be public (it shows in the games list). Make it public and share the link?',
       'online.copyFail': 'Couldn\'t copy. Copy it by hand.',
       'online.share': 'Share',
       'online.hold': 'Leave and keep waiting',
@@ -7202,6 +7217,13 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     "daily.boardTitle": "Ranking del desafío",
     "daily.tabToday": "Hoy",
     "daily.tabWeek": "Semana",
+    "daily.tabPrev": "Sem. pasada",
+    "daily.tabY": "Ayer",
+    "daily.boardEmptyPast": "Ese día nadie terminó el desafío.",
+    "daily.past": "Jugar el de ayer (práctica)",
+    "daily.ydayRule": "Ranking del desafío del {date}.",
+    "daily.at": "jugado a las {time}",
+    "daily.prevRule": "Resultado final de la semana del {date}.",
     "daily.boardRule": "Gana quien ganó en menos jugadas; el tiempo desempata.",
     "daily.weekRule": "Semana del {date}. Cada día suma puntos según tu puesto: 10, 7, 5, 4, 3, 2… y 1 por cualquier victoria.",
     "daily.boardEmpty": "Todavía nadie terminó el desafío. Ponete primera.",
@@ -7475,6 +7497,13 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     "daily.boardTitle": "Challenge ranking",
     "daily.tabToday": "Today",
     "daily.tabWeek": "Week",
+    "daily.tabPrev": "Last wk",
+    "daily.tabY": "Yesterday",
+    "daily.boardEmptyPast": "Nobody finished the challenge that day.",
+    "daily.past": "Play yesterday's (practice)",
+    "daily.ydayRule": "Ranking for the {date} challenge.",
+    "daily.at": "played at {time}",
+    "daily.prevRule": "Final results for the week of {date}.",
     "daily.boardRule": "Fewest moves wins; time breaks ties.",
     "daily.weekRule": "Week of {date}. Each day gives points by place: 10, 7, 5, 4, 3, 2… and 1 for any win.",
     "daily.boardEmpty": "Nobody has finished the challenge yet. Be the first.",
@@ -8791,6 +8820,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     'tno.role.nameHint': 'Sin cuenta, elegí un nombre que te distinga (no vale «Invitado»). Solo se usa en este torneo.', 'tno.role.play': 'Participar', 'tno.role.watch': 'Mirar',
     'tno.err.TN_FULL': 'El torneo está lleno.',
     'tno.err.TN_STARTED': 'El torneo ya empezó: no se puede entrar.',
+    'tno.watchLogged': 'Entraste solo para mirar: con esta cuenta no figurás inscripta. Si te anotaste desde otro dispositivo, abrí sesión con la misma cuenta ahí también.',
     'tno.err.BAD_TOKEN': 'Ya no estás en ese torneo.',
     'tno.err.NOT_ORGANIZER': 'Eso lo puede hacer solo el organizador.',
     'tno.err.TN_INVALID': 'No se puede iniciar: ',
@@ -8940,6 +8970,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     'tno.role.nameHint': 'Without an account, pick a name that tells you apart (not "Guest"). It is only used in this tournament.', 'tno.role.play': 'Play', 'tno.role.watch': 'Watch',
     'tno.err.TN_FULL': 'The tournament is full.',
     'tno.err.TN_STARTED': 'The tournament has already started: you cannot join.',
+    'tno.watchLogged': 'You joined as a spectator only: this account is not registered. If you signed up on another device, sign in with the same account there too.',
     'tno.err.BAD_TOKEN': 'You are no longer in that tournament.',
     'tno.err.NOT_ORGANIZER': 'Only the organizer can do that.',
     'tno.err.TN_INVALID': 'It cannot start: ',
@@ -11640,7 +11671,7 @@ window.NEON_BREAK = {
     var play = $('btnDailyPlay'); play.hidden = !!r || need || !i;
     play.textContent = t(i && i.status === 'playing' && i.moves.length ? 'daily.resume' : 'daily.play');
     $('btnDailyLogin').hidden = !need || !!r || !i;
-    $('btnDailyShare').hidden = !r; cmtRender();
+    $('btnDailyShare').hidden = !r; $('btnDailyRetry').hidden = !(r && i); cmtRender();
     if (i && need && !r) dailyMsg(t('daily.needAccount')); else if (i && $('dailyMsg').textContent === t('daily.needAccount')) dailyMsg('');
   }
   function dailyApplyView(m) {                                 // reconstruye la partida del servidor: posición del día + jugadas hechas
@@ -11655,6 +11686,19 @@ window.NEON_BREAK = {
     daily.t0 = m.moves.length ? performance.now() - (m.elapsed || 0) : 0;
     hover = pending = drag = settle = null; fx.length = 0; clockFresh(); clk = null; kbd = { x: centerIdx(), y: centerIdx() };
     updateOnlineButtons(); closeAll(); render(); setStatus(''); aiMaybeMove();
+  }
+  /* Repetir el desafío ya jugado como partida de práctica (misma posición y misma máquina). No cuenta para el ranking ni la racha. */
+  function dailyPractice(info) {
+    var i = info || daily.info; if (!i || !i.setup) return;
+    tutStop(); aiStop(); videoDiscard(); endSeen = recorded = false;
+    if (online.net) leaveOnline(false);
+    var s2 = P.createGame({ size: i.size, tournamentRule: false, exactFive: true });
+    i.setup.forEach(function (c) { s2 = P.playMove(s2, c[0], c[1], s2.current).state; });
+    gameMode = 'classic'; state = s2; localOver = null; daily.active = false; daily.result = null; daily.wantPlay = false;
+    ai.active = true; ai.four = false; ai.botSeats = {}; ai.level = i.level; ai.human = 1; ai.bot = 2;
+    names[1] = ($('name1').value || '').trim() || t('ai.you'); names[2] = t('ai.name.' + i.level);
+    hover = pending = drag = settle = null; fx.length = 0; clockFresh(); clk = null; kbd = { x: centerIdx(), y: centerIdx() };
+    updateOnlineButtons(); closeAll(); render(); setStatus(t('daily.practiceOn')); aiMaybeMove();
   }
   function onDailyMessage(m) {
     if (m.t === 'daily') {
@@ -11673,8 +11717,10 @@ window.NEON_BREAK = {
       daily.wantPlay = false; dailyMsg(''); if ($('dailyOverlay').classList.contains('open')) renderDaily();
     } else if (m.t === 'dailyCommentOk') {
       daily.comment = m.text; cmtRender();
+    } else if (m.t === 'dailyPast') {
+      dailyPractice(m);
     } else if (m.t === 'dailyBoard') {
-      daily.board = m; if ($('boardOverlay').classList.contains('open')) renderBoard();
+      if (m.prev) daily.boardPrev = m; else if (m.yday) daily.boardY = m; else daily.board = m; if ($('boardOverlay').classList.contains('open')) renderBoard();
     } else if (m.t === 'dailyMove') {
       if (!daily.active) return;
       if (daily.info) dailyTried(daily.info.date);
@@ -11708,10 +11754,10 @@ window.NEON_BREAK = {
   }
   function dailyEnd() {
     recorded = endSeen = true; dailyGrant();
-    $('endText').textContent = dailyResultText(); updateRematchUi(); renderEndXp(); open('endOverlay');
+    $('endText').textContent = dailyResultText(); updateRematchUi(); renderEndXp(); cmtRender(); open('endOverlay');
     if (!daily.result) setTimeout(function () { if (daily.active && !daily.result && daily.net) dailyHello(); }, 2500);     // el resultado no llegó: se vuelve a pedir
   }
-  function dailyEndRefresh() { if ($('endOverlay').classList.contains('open')) { dailyGrant(); $('endText').textContent = dailyResultText(); updateRematchUi(); renderEndXp(); } }
+  function dailyEndRefresh() { if ($('endOverlay').classList.contains('open')) { dailyGrant(); $('endText').textContent = dailyResultText(); updateRematchUi(); renderEndXp(); cmtRender(); } }
   function dailyShare() {
     var r = daily.result || (daily.info && daily.info.result), i = daily.info; if (!r || !i) return;
     var a = { moves: r.moves, time: fmtMs(r.ms) };
@@ -11723,26 +11769,27 @@ window.NEON_BREAK = {
   }
   /* Ranking */
   function boardOpen(from) {
-    daily.boardOpen = true; daily.boardFrom = from; daily.board = null; daily.tab = 'today';
+    daily.boardOpen = true; daily.boardFrom = from; daily.board = null; daily.boardPrev = null; daily.boardY = null; daily.tab = 'today';
     renderBoard(); open('boardOverlay'); dailyConnect(); if (daily.net && daily.net.isOpen()) dailyHello();
   }
+  function atTime(iso) { var d = new Date(iso); if (isNaN(d)) return ''; return t('daily.at', { time: d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }); }
   function renderBoard() {
-    var b = daily.board, ls = $('boardList'), today = daily.tab === 'today';
-    $('boardTabToday').classList.toggle('primary', today); $('boardTabWeek').classList.toggle('primary', !today);
-    $('boardRule').textContent = today ? t('daily.boardRule') : (b ? t('daily.weekRule', { date: dailyDate(b.weekFrom) }) : '');
+    var prevTab = daily.tab === 'prev', yTab = daily.tab === 'yday', b = prevTab ? daily.boardPrev : yTab ? daily.boardY : daily.board, ls = $('boardList'), today = daily.tab === 'today' || yTab;
+    $('boardTabToday').classList.toggle('primary', daily.tab === 'today'); $('boardTabY').classList.toggle('primary', yTab); $('boardTabWeek').classList.toggle('primary', daily.tab === 'week'); $('boardTabPrev').classList.toggle('primary', prevTab);
+    $('boardRule').textContent = yTab ? t('daily.ydayRule', { date: b ? dailyDate(b.date) : '' }) : today ? t('daily.boardRule') : (b ? t(prevTab ? 'daily.prevRule' : 'daily.weekRule', { date: dailyDate(b.weekFrom) }) : '');
     ls.innerHTML = '';
     if (!b) { $('boardMsg').textContent = t('daily.boardLoading'); return; }
     $('boardMsg').textContent = '';
     var part = today ? b.today : b.week;
     if (today && b.commentsLocked) { var lk = document.createElement('li'); lk.className = 'gap'; lk.textContent = t('cmt.locked'); ls.appendChild(lk); }
-    if (!part.rows.length) { $('boardMsg').textContent = t('daily.boardEmpty'); return; }
+    if (!part.rows.length) { $('boardMsg').textContent = t(yTab || prevTab ? 'daily.boardEmptyPast' : 'daily.boardEmpty'); return; }
     function row(r) {
       var li = document.createElement('li'); if (r.me) li.className = 'me'; if (today && !r.win) li.className += ' none';
       var pos = document.createElement('span'); pos.className = 'pos'; pos.textContent = r.rank ? String(r.rank) : '–';
       var who = document.createElement('span'); who.className = 'who'; who.innerHTML = (r.avatar ? avInline(r.avatar, 24) + ' ' : '') + (flagText(r.country) ? '<span class="flag">' + flagText(r.country) + '</span>' : '') + esc(r.name + (r.me ? ' (' + t('daily.you') + ')' : ''));
       who.appendChild(lvChip(r.xp));
       var val = document.createElement('span'); val.className = 'val';
-      val.textContent = today ? (r.win ? t('daily.rowWin', { moves: r.moves, time: fmtMs(r.ms) }) : r.playing ? t('daily.rowPlaying', { moves: r.moves }) : t('daily.rowNoWin')) : t('daily.rowWeek', { points: r.points, wins: r.wins, played: r.played });
+      val.textContent = today ? (r.win ? t('daily.rowWin', { moves: r.moves, time: fmtMs(r.ms) }) + (r.at ? ' · ' + atTime(r.at) : '') : r.playing ? t('daily.rowPlaying', { moves: r.moves }) : t('daily.rowNoWin')) : t('daily.rowWeek', { points: r.points, wins: r.wins, played: r.played });
       li.appendChild(pos); li.appendChild(who); li.appendChild(val);
       if (today && r.comment) {
         var cm = el('div', 'cmt-row-txt' + (r.hidden ? ' hid' : ''), '“' + r.comment + '”' + (r.hidden ? '  ' + t('cmt.hidden') : ''));
@@ -11757,6 +11804,8 @@ window.NEON_BREAK = {
   }
   $('boardTabToday').addEventListener('click', function () { daily.tab = 'today'; renderBoard(); });
   $('boardTabWeek').addEventListener('click', function () { daily.tab = 'week'; renderBoard(); });
+  $('boardTabY').addEventListener('click', function () { daily.tab = 'yday'; renderBoard(); if (!daily.boardY) dailyToken(function (tk) { daily.net && daily.net.send({ t: 'dailyBoard', jwt: tk, yday: 1 }); }); });
+  $('boardTabPrev').addEventListener('click', function () { daily.tab = 'prev'; renderBoard(); if (!daily.boardPrev) dailyToken(function (tk) { daily.net && daily.net.send({ t: 'dailyBoard', jwt: tk, prev: 1 }); }); });
   $('btnBoardBack').addEventListener('click', function () {
     daily.boardOpen = false;
     if (daily.boardFrom === 'end' && daily.active) { open('endOverlay'); updateRematchUi(); return; }
@@ -11764,6 +11813,7 @@ window.NEON_BREAK = {
     daily.wantPlay = false; daily.info = null; renderDaily(); open('dailyOverlay'); dailyConnect();
   });
   $('btnDailyBoard').addEventListener('click', function () { boardOpen('daily'); });
+  $('btnDailyPast').addEventListener('click', function () { if (daily.net && daily.net.isOpen()) daily.net.send({ t: 'dailyInfo', past: 1 }); else dailyMsg(t('daily.boardLoading')); });
   $('btnEndRank').addEventListener('click', function () { boardOpen('end'); });
   /* Tarjeta del desafío en "Jugar" y chip en el menú: se arman con lo que hay en el dispositivo (sin pedir nada al servidor). */
   // Iconos dibujados (nada de emoji del teclado): tilde, cruz y llama en SVG que heredan el color del texto
@@ -12036,6 +12086,7 @@ window.NEON_BREAK = {
   $('btnDailyPlay').addEventListener('click', function () { daily.wantPlay = true; dailyMsg(t('daily.connecting')); dailyConnect(); dailyHello(); });
   $('btnDailyLogin').addEventListener('click', function () { dailyClose(); $('btnProfile').click(); });
   $('btnDailyShare').addEventListener('click', dailyShare);
+  $('btnDailyRetry').addEventListener('click', dailyPractice); $('btnEndRetry').addEventListener('click', dailyPractice);
   $('btnEndShare').addEventListener('click', dailyShare);
 
   /* ---------- XP y niveles (reglas en xp.js) ---------- */
@@ -12082,7 +12133,9 @@ window.NEON_BREAK = {
   function achCheck() {
     var cur = ACH.clean(profile.stats && profile.stats.ach), r = ACH.evaluate(cur, achCtx()), had = secOpen();
     if (!r.fresh.length) return;
-    achSave(r.state); var first = !had && secOpen(); if (first) { sxLoad().seen = false; sxSave(); } achToast(r.fresh, first); secSync();
+    achSave(r.state); var first = !had && secOpen(); if (first) { sxLoad().seen = false; sxSave(); }
+    var gx = 0; try { gx = grantXp({ k: 'ach', ranks: r.fresh.map(function (id) { return ACH.rank(id); }) }).gained || 0; renderXpMini(); } catch (e) {}
+    achToast(r.fresh, first, gx); secSync();
     var n = $('achMenuN'); if (n) n.textContent = achCount() + '/' + ACH.total();
   }
   function achAdd(d, ev) {                                         // suma contadores y revisa si se ganó algo
@@ -12109,12 +12162,20 @@ window.NEON_BREAK = {
     u.forEach(function (id) { var b = titleChip(id, 'button'); b.type = 'button'; b.setAttribute('aria-pressed', String(id === cur)); b.addEventListener('click', function () { setTitle(id); }); box.appendChild(b); });
     $('profTitleHint').textContent = u.length ? t('ttl.hint') : t('ttl.empty');
   }
-  function achToast(ids, first) {
+  function achDescOf(id) {                                         // descripción de un logro (la misma de la pantalla de Logros)
+    var d = ACH.IDS[id]; if (!d) return ''; var f = d.fam, k = 'ach.d.' + (f.group === 'board' ? 'board' : f.id), v = t(k, { n: d.target, board: f.theme ? t('theme.' + f.theme) : '' });
+    return v === k ? '' : v;
+  }
+  function achToast(ids, first, gx) {
     var el0 = $('achToast'); if (!el0) { el0 = document.createElement('div'); el0.id = 'achToast'; el0.className = 'xptoast ach-toast'; el0.setAttribute('role', 'status'); document.body.appendChild(el0); }
     el0.innerHTML = ''; var f0 = ACH.IDS[ids[0]];
     el0.appendChild(mdl(ACH.rank(ids[0]), f0 ? f0.fam.id : '', { size: 46 }));
-    var tx = document.createElement('span'); tx.textContent = first ? t('sec.first') : ids.length === 1 ? t('ach.new1', { name: achTitle(ids[0]) }) : t('ach.newN', { n: ids.length }); el0.appendChild(tx);
-    el0.classList.add('show'); clearTimeout(achTimer); achTimer = setTimeout(function () { el0.classList.remove('show'); }, first ? 7000 : 4600);
+    var tx = document.createElement('span'); tx.className = 'ach-tx';
+    var hd = document.createElement('b'); hd.textContent = first ? t('sec.first') : ids.length === 1 ? t('ach.new1', { name: achTitle(ids[0]) }) : t('ach.newN', { n: ids.length }); tx.appendChild(hd);
+    var ds = ids.length === 1 && !first ? achDescOf(ids[0]) : ''; if (ds) { var sm = document.createElement('small'); sm.textContent = ds; tx.appendChild(sm); }
+    if (gx) { var xp = document.createElement('em'); xp.textContent = t('ach.xp', { n: gx }); tx.appendChild(xp); }
+    el0.appendChild(tx);
+    el0.classList.add('show'); clearTimeout(achTimer); achTimer = setTimeout(function () { el0.classList.remove('show'); }, first ? 7000 : 6200);
     sfx('levelup'); buzz([10, 40, 10]);
   }
   /* ---------- Trofeos OCULTOS (v178) ----------
@@ -13865,7 +13926,7 @@ window.NEON_BREAK = {
   }
   function updateRematchUi() {
     var btn = $('btnRematch'), hint = $('endHint'), leave = $('btnEndMenu');
-    $('btnEndShare').hidden = !(daily.active && daily.result); $('btnEndRank').hidden = !(daily.active && daily.result);
+    $('btnEndShare').hidden = !(daily.active && daily.result); $('btnEndRank').hidden = !(daily.active && daily.result); $('btnEndRetry').hidden = !(daily.active && daily.result);
     if (daily.active) { btn.hidden = true; hint.textContent = daily.result ? t('daily.ranking') : ''; leave.textContent = t('end.toMenu'); return; }
     btn.hidden = !!online.spectator || !!online.tourney;
     if (online.tourney) { hint.textContent = ''; leave.textContent = t('tno.back'); return; }
@@ -13923,7 +13984,23 @@ window.NEON_BREAK = {
     if (q && serverUrl() === q) u += '&server=' + encodeURIComponent(q);
     return u;
   }
+  function watchLink() {                                           // link para MIRAR esta partida (entra directo como espectador)
+    var u = location.href.split(/[?#]/)[0] + '?mirar=' + online.code, q = qs('server');
+    if (q && serverUrl() === q) u += '&server=' + encodeURIComponent(q);
+    return u;
+  }
+  $('btnShareWatch').addEventListener('click', function () {
+    if (!online.code) return; var l = watchLink();
+    if (!online.isPublic) {                                        // una sala privada no se puede mirar: hay que hacerla pública (solo quien la creó)
+      if (!online.mine || !online.net) return;
+      if (!window.confirm(t('share.needPublic'))) return;
+      online.net.send({ t: 'setpublic', public: true });
+    }
+    if (navigator.share) { navigator.share({ title: 'Pente', text: t('share.watchText'), url: l }).catch(function () {}); return; }
+    copyText(l, $('btnShareWatch'));
+  });
   function visUi() {
+    $('btnShareWatch').hidden = !(online.active && online.code && !online.tourney && (online.isPublic || online.mine || online.spectator));
     var can = online.active && !online.spectator && !online.tourney && online.mine, txt = t(online.isPublic ? 'vis.makePrivate' : 'vis.makePublic');
     ['btnVis', 'btnWaitVis'].forEach(function (id) { var b = $(id); b.hidden = !can; b.textContent = (online.isPublic ? '🔒 ' : '🔓 ') + txt; });
     if ($('waitOverlay').classList.contains('open')) $('waitVis').textContent = t(online.isPublic ? 'online.waitPublic' : 'online.waitPrivate') + (online.mode !== 'classic' ? ' · ' + t('mode.' + online.mode) : '');
@@ -14184,6 +14261,7 @@ window.NEON_BREAK = {
     var tcode = qs('t'); if (tcode) { try { history.replaceState(null, '', location.href.replace(/([?&])t=[^&#]*&?/, '$1').replace(/[?&]$/, '')); } catch (e) {} }
     if (tno.code && tno.token && url) tnoConnect();                       // torneo online en curso: se vuelve a conectar solo
     if (tcode && url) { setTimeout(function () { open('tnOverlay'); tnoJoinCode(tcode); }, 300); }
+    var wcode = qs('mirar'); if (wcode) { try { history.replaceState(null, '', location.href.replace(/([?&])mirar=[^&#]*&?/, '$1').replace(/[?&]$/, '')); } catch (e) {} wcode = String(wcode).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5); if (wcode && url) { setTimeout(function () { startOnline({ t: 'spectate', code: wcode }); }, 400); return; } }
     var code = qs('sala'), ses = loadSession();
     if (code) { try { history.replaceState(null, '', location.href.replace(/([?&])sala=[^&#]*&?/, '$1').replace(/[?&]$/, '')); } catch (e) {} }
     code = code ? String(code).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5) : '';
@@ -17159,7 +17237,7 @@ window.NEON_BREAK = {
       case 'tsnap': m.__at = Date.now(); tno.snap = m; achTourney(m); tno.chat = m.chat || []; tnoRender(); tnoRenderChat(); tnoCheckGo(m); tnoRenderLive(); break;
       case 'terror': {
         if ((m.code === 'BAD_TOKEN' || m.code === 'TN_NOT_FOUND') && (tno.snap || tno.token)) { tnoReset(); tnoNote(t(m.code === 'TN_NOT_FOUND' ? 'tno.closed.gone' : 'tno.err.BAD_TOKEN'), true); if ($('tnoOverlay').classList.contains('open')) { tnRenderList(); tnoRenderLive(); open('tnOverlay'); } break; }
-        if (m.code === 'TN_STARTED' && tno.intent && tno.intent.t === 'tjoin' && tno.net) { tno.intent = { t: 'tspectate', code: tno.intent.code }; tno.net.send(tno.intent); tnoNote('', false); break; }      // ya empezó: se puede mirar con el link
+        if (m.code === 'TN_STARTED' && tno.intent && tno.intent.t === 'tjoin' && tno.net) { tno.intent = { t: 'tspectate', code: tno.intent.code }; tno.net.send(tno.intent); tnoNote(Auth && Auth.user ? t('tno.watchLogged') : '', false); break; }      // ya empezó: se puede mirar con el link
         if ((m.code === 'TN_NAME' || m.code === 'TN_NEED_NAME') && tno.intent && tno.intent.t === 'tjoin' && !tno.token && !(typeof Auth !== 'undefined' && Auth && Auth.user)) {      // sin cuenta: se vuelve a pedir el nombre
           var cd = tno.intent.code; tno.intent = null; if (tno.net) { tno.net.close(); tno.net = null; } tnoAskRole(cd, tnoErrText(m)); break;
         }
@@ -17505,7 +17583,7 @@ window.NEON_BREAK = {
   tnoLoadSess();
 
   applyI18n(); buildThemePicker(); syncSizePicker(); syncOpts(); syncMode(); syncVis(); resize(); open('menuOverlay'); initOnline(); updateSide(); preloadAll();
-  window.__pente = { tnoRender: tnoRender, get daily() { return daily; }, cmtRender: cmtRender, renderBoard: renderBoard, stoneImg: stoneImg, adminOpen: admOpen, get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, startAI: startAI, get ai() { return ai; }, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; }, get tut() { return tut; }, get profile() { return profile; }, get auth() { return Auth; }, get sync() { return sync; }, setChatW: setChatW, syncProfile: syncProfile, get tn() { return tn; }, get tno() { return tno; } };  // utilidad para pruebas manuales
+  window.__pente = { achAdd: achAdd, tnoRender: tnoRender, get daily() { return daily; }, cmtRender: cmtRender, renderBoard: renderBoard, stoneImg: stoneImg, adminOpen: admOpen, get state() { return state; }, get online() { return online; }, get pending() { return pending; }, get settings() { return settings; }, get cfg() { return cfg; }, tryMove: tryMove, startGame: startGame, startAI: startAI, get ai() { return ai; }, get chat() { return chat; }, get side() { return side; }, movesText: movesText, get metrics() { return metrics; }, get kbdOn() { return kbdOn; }, get fx() { return fx; }, get rooms() { return rooms; }, get tut() { return tut; }, get profile() { return profile; }, get auth() { return Auth; }, get sync() { return sync; }, setChatW: setChatW, syncProfile: syncProfile, get tn() { return tn; }, get tno() { return tno; } };  // utilidad para pruebas manuales
 })();
 </script>
 <script>
