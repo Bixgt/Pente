@@ -1568,7 +1568,12 @@ html[data-theme="steampunk"] { --qb: url(play-board-steampunk.webp); }
 #spGlow { position: absolute; pointer-events: none; z-index: 2; }
 #spGlow[hidden] { display: none; }
 #spGlow i { position: absolute; width: 9%; height: 17%; transform: translate(-50%, -50%); border-radius: 50%; mix-blend-mode: screen; opacity: .4; background: radial-gradient(closest-side, rgba(255,198,72,.8), rgba(255,150,30,.3) 55%, rgba(255,140,20,0) 100%); }
-#spGlow i.a { left: 6.1%; top: 43.9%; } #spGlow i.b { left: 93.8%; top: 44.8%; }
+#spGlow i.a { left: 6.8%; top: 44.7%; } #spGlow i.b { left: 93.4%; top: 44.3%; }
+#spGlow .gw { position: absolute; transform: translate(-50%, -50%); aspect-ratio: 1; }
+#spGlow .gw img { display: block; width: 100%; height: 100%; transform: rotate(var(--a)); will-change: transform; -webkit-user-drag: none; }
+#spGlow.still i { animation: none !important; opacity: .45; }
+@media (prefers-reduced-motion: no-preference) { #spGlow:not(.still) .gw img { animation: spSpin var(--T) linear infinite; } }
+@keyframes spSpin { from { transform: rotate(var(--a)); } to { transform: rotate(calc(var(--a) + 360deg * var(--d))); } }
 @media (prefers-reduced-motion: no-preference) { #spGlow i { animation: spPulse 2.8s ease-in-out infinite; } #spGlow i.b { animation-delay: -1.4s; } }
 @keyframes spPulse { 0%, 100% { opacity: .22; } 50% { opacity: .9; } }
 html[data-theme="jardin"] #playOverlay .hero.quick::after { content: ""; position: absolute; right: 150px; top: 14px; width: 46px; height: 44px; background: url(garden-flower.webp) center / contain no-repeat; pointer-events: none; }
@@ -1853,7 +1858,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span><b class="newb" id="nwProfile" hidden></b></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v2.09</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v2.10</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -9432,8 +9437,8 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       id: 'steampunk',
       css: { '--bg': '#1b0f07', '--panel': '#2b190d', '--panel-2': '#3b2412', '--line': '#80501f', '--accent-ink': '#1b0d02', '--accent': '#e3a23c', '--s1a': '#f6ead0', '--s1b': '#b09660', '--s2a': '#8ae6cc', '--s2b': '#14705c', '--s3a': '#c7d2dc', '--s3b': '#46525f', '--s4a': '#ff9a7a', '--s4b': '#a23418',
              '--board-shadow': '0 0 38px rgba(226,150,50,.28)' },
-      /* Steampunk (arte de Ro): marco de tuberías, engranajes, reloj y arena; la franja de bronce cepillado (con las letras y los números) está horneada en la imagen y la ventana de cuero es cuadrada. Los tubos de luz «respiran» con spGlowSync. */
-      board: { art: { img: 'steampunk-board.webp', span: [0.1975, 0.8025] }, labelPos: 0.777, labelSize: 0.42, labelStroke: 'rgba(40,20,4,.85)', bg: ['#6a2c0e', '#3a1606'], line: 'rgba(240,196,110,.55)', star: 'rgba(250,214,140,.95)', label: '#fbe7b5', labelHi: '#ffffff' },
+      /* Steampunk (arte de Ro): marco de tuberías con reloj, arena y manómetros; la franja de bronce cepillado (con las letras y los números) está horneada en la imagen y la ventana de cuero es cuadrada. Los 12 engranajes de los rincones y los halos de los tubos son el velo spGlowSync (no están en la imagen). */
+      board: { art: { img: 'steampunk-board.webp', span: [0.1727, 0.8273] }, labelPos: 0.727, labelSize: 0.42, labelStroke: 'rgba(40,20,4,.85)', bg: ['#6a2c0e', '#3a1606'], line: 'rgba(240,196,110,.55)', star: 'rgba(250,214,140,.95)', label: '#fbe7b5', labelHi: '#ffffff' },
       stones: { 1: { a: '#f6ead0', b: '#b09660', glow: null }, 2: { a: '#8ae6cc', b: '#14705c', glow: null }, 3: { a: '#c7d2dc', b: '#46525f', glow: null }, 4: { a: '#ff9a7a', b: '#a23418', glow: null } },
       last: { ring: '#ffffff', dot: { 1: '#4a2a10', 2: '#ffffff', 3: '#ffffff', 4: '#ffffff' } },
       zone: { fill: 'rgba(255,255,255,.07)', stroke: 'rgba(250,200,110,.55)' },
@@ -12700,12 +12705,23 @@ window.NEON_BREAK = {
     im.src = src; return null;
   }
   if (window.Deco) window.Deco.onReady = function () { baseCache.ver++; try { buildThemePicker(); } catch (e) {} if (typeof render === 'function') try { render(); } catch (e) {} try { if ($('menuOverlay').classList.contains('open')) renderMenuBg(); } catch (e) {} };      // fichas de Jardín/Halloween listas
-  /* Steampunk: los dos tubos de luz respiran. Es un velo HTML encima del lienzo con su mismo tamaño y su misma ampliación (así el tablero no se redibuja); se apaga con «Animaciones» desactivadas o con «reducir movimiento». */
+  /* Steampunk: velo HTML encima del lienzo (mismo tamaño y misma ampliación, así el tablero no se redibuja) con los engranajes que giran y los halos de los dos tubos de luz.
+   * Cada engranaje: [imagen, centro x %, centro y %, diámetro %, ángulo inicial °, segundos por vuelta, sentido (1 = horario)]. Los que encastran tienen el mismo paso de diente
+   * (se escalaron para eso), giran en sentidos opuestos y su tiempo por vuelta es proporcional a los dientes (ω₂ = −ω₁·Z₁/Z₂); el ángulo inicial los deja con el diente en el hueco.
+   * Se quedan quietos con «Animaciones» apagadas o con «reducir movimiento» del sistema. */
+  var SP_GEARS = [['g9',8.93,7.97,11.01,0.0,18.00,1],['g12',17.10,6.83,7.59,185.6,12.00,-1],['g17',23.01,7.45,6.55,145.7,9.60,1],['g5',91.07,7.97,11.10,20.0,18.00,-1],['g14',82.90,6.83,7.70,355.9,12.00,1],['g18',76.99,7.45,6.47,35.2,9.60,-1],['g5',8.93,92.03,11.10,40.0,18.00,-1],['g15',17.10,93.17,7.72,195.4,12.00,1],['g17',23.01,92.55,6.55,152.0,9.60,-1],['g9',91.07,92.03,11.01,10.0,18.00,1],['g14',82.90,93.17,7.70,5.9,12.00,-1],['g18',76.99,92.55,6.47,324.3,9.60,1]];
   function spGlowSync() {
     var wrap = canvas && canvas.parentElement; if (!wrap || canvas !== $('board')) return;
-    var on = theme().id === 'steampunk' && cfg.anim !== false, el = $('spGlow');
-    if (!el) { if (!on) return; el = document.createElement('div'); el.id = 'spGlow'; el.setAttribute('aria-hidden', 'true'); el.innerHTML = '<i class="a"></i><i class="b"></i>'; wrap.appendChild(el); }
+    var on = theme().id === 'steampunk', el = $('spGlow');
+    if (!el) {
+      if (!on) return;
+      el = document.createElement('div'); el.id = 'spGlow'; el.setAttribute('aria-hidden', 'true');
+      var h = '<i class="a"></i><i class="b"></i>';
+      SP_GEARS.forEach(function (g) { h += '<span class="gw" style="left:' + g[1] + '%;top:' + g[2] + '%;width:' + g[3] + '%"><img src="steampunk-' + g[0] + '.webp" alt="" draggable="false" decoding="async" style="--a:' + g[4] + 'deg;--T:' + g[5] + 's;--d:' + g[6] + '"></span>'; });
+      el.innerHTML = h; wrap.appendChild(el);
+    }
     el.hidden = !on; if (!on) return;
+    el.classList.toggle('still', cfg.anim === false);
     el.style.left = canvas.offsetLeft + 'px'; el.style.top = canvas.offsetTop + 'px'; el.style.width = canvas.clientWidth + 'px'; el.style.height = canvas.clientHeight + 'px';
     el.style.transformOrigin = canvas.style.transformOrigin; el.style.transform = canvas.style.transform;
   }
