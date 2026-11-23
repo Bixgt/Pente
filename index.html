@@ -1563,6 +1563,14 @@ html[data-theme="playa"] { --qb: url(play-board-playa.webp); }
 html[data-theme="jardin"] { --qb: url(play-board-jardin.webp); }
 html[data-theme="halloween"] { --qb: url(play-board-halloween.webp); }
 html[data-theme="galaxia"] { --qb: url(play-board-galaxia.webp); }
+html[data-theme="steampunk"] { --qb: url(play-board-steampunk.webp); }
+/* Steampunk: velo con los halos de los dos tubos de luz (se ubica y escala igual que el tablero: spGlowSync) */
+#spGlow { position: absolute; pointer-events: none; z-index: 2; }
+#spGlow[hidden] { display: none; }
+#spGlow i { position: absolute; width: 9%; height: 17%; transform: translate(-50%, -50%); border-radius: 50%; mix-blend-mode: screen; opacity: .4; background: radial-gradient(closest-side, rgba(255,198,72,.8), rgba(255,150,30,.3) 55%, rgba(255,140,20,0) 100%); }
+#spGlow i.a { left: 6.1%; top: 43.9%; } #spGlow i.b { left: 93.8%; top: 44.8%; }
+@media (prefers-reduced-motion: no-preference) { #spGlow i { animation: spPulse 2.8s ease-in-out infinite; } #spGlow i.b { animation-delay: -1.4s; } }
+@keyframes spPulse { 0%, 100% { opacity: .22; } 50% { opacity: .9; } }
 html[data-theme="jardin"] #playOverlay .hero.quick::after { content: ""; position: absolute; right: 150px; top: 14px; width: 46px; height: 44px; background: url(garden-flower.webp) center / contain no-repeat; pointer-events: none; }
 #playOverlay .hero.quick .hero-cta { background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 92%, #fff), var(--accent)); color: var(--accent-ink); padding: 11px 24px; font-size: 17px; box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 35%, transparent); }
 #playOverlay .hero.quick .hero-board { display: none; }
@@ -1845,7 +1853,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span><b class="newb" id="nwProfile" hidden></b></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v2.08</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v2.09</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
@@ -4438,7 +4446,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
   var MAX_LEVEL = 100, MIN_MOVES = 10, CASUAL_CAP = 180, CAP = 10000000;
   var TITLE_AT = [1, 4, 8, 13, 19, 26, 34, 43];                       // nivel desde el que rige cada título (xp.title.1 ... xp.title.8)
   var GEM_LEVEL = { oro: 6, neon: 9, coral: 12, obsidiana: 16, galaxia: 22 };                    // las 9 piedras de siempre son libres
-  var BOARD_LEVEL = { glow: 2, papel: 4, playa: 7, jardin: 10, halloween: 13, galaxia: 17 };       // tableros: Simple y Tradicional son libres
+  var BOARD_LEVEL = { glow: 2, papel: 4, playa: 7, jardin: 10, halloween: 13, galaxia: 17, steampunk: 60 };       // tableros: Simple y Tradicional son libres
   // Personalizar avatar: nivel desde el que se puede elegir cada pieza (lo que no figura es libre desde el nivel 1)
   var PART_LEVEL = {
     face: { enfadado: 3, sorprendido: 6, pensando: 10, seguro: 15 },
@@ -4446,7 +4454,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     hair: { pinchudo: 5, raya: 7, melena: 9, gorro: 11, vincha: 13, despeinado: 15, cortina: 17, colita: 19, rodetes: 22, gorraAtras: 25 },
     hairColor: { pelirrojo: 3, gris: 9, rosa: 12, azul: 16, violeta: 21, verde: 26, blanco: 32 }
   };
-  var MAINT = { galaxia: 1 };                                         // tableros «En mantenimiento»: solo los ve quien tiene el modo «todo desbloqueado» (la administradora)
+  var MAINT = { galaxia: 1, steampunk: 1 };                                         // tableros «En mantenimiento»: solo los ve quien tiene el modo «todo desbloqueado» (la administradora)
   function inMaint(id) { return !!MAINT[id]; }
   var FIRSTS = { tutorial: 50, daily: 25 };                          // premio por única vez; 'mode:<modo>' vale 20
 
@@ -7167,6 +7175,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     "theme.jardin": "Jardín",
     "theme.halloween": "Halloween",
     "theme.galaxia": "Galaxia",
+    "theme.steampunk": "Steampunk",
     "theme.playa": "Playa",
     "mode.bullet": "Bullet",
     "mode.hint.bullet": "Pente clásico con 1 minuto por jugador en total y sin tiempo por jugada. Si se te acaba el reloj, perdés.",
@@ -7451,6 +7460,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     "theme.jardin": "Garden",
     "theme.halloween": "Halloween",
     "theme.galaxia": "Galaxy",
+    "theme.steampunk": "Steampunk",
     "theme.playa": "Beach",
     "mode.bullet": "Bullet",
     "mode.hint.bullet": "Classic Pente with 1 minute per player in total and no per-move time. If your clock runs out, you lose.",
@@ -9418,6 +9428,17 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       zone: { fill: 'rgba(255,255,255,.07)', stroke: 'rgba(160,190,255,.55)' },
       win: '#ffffff', winStyle: 'ring', pendingRing: '#6fe3ff', kbd: '#ffffff'
     }
+    ,{
+      id: 'steampunk',
+      css: { '--bg': '#1b0f07', '--panel': '#2b190d', '--panel-2': '#3b2412', '--line': '#80501f', '--accent-ink': '#1b0d02', '--accent': '#e3a23c', '--s1a': '#f6ead0', '--s1b': '#b09660', '--s2a': '#8ae6cc', '--s2b': '#14705c', '--s3a': '#c7d2dc', '--s3b': '#46525f', '--s4a': '#ff9a7a', '--s4b': '#a23418',
+             '--board-shadow': '0 0 38px rgba(226,150,50,.28)' },
+      /* Steampunk (arte de Ro): marco de tuberías, engranajes, reloj y arena; la franja de bronce cepillado (con las letras y los números) está horneada en la imagen y la ventana de cuero es cuadrada. Los tubos de luz «respiran» con spGlowSync. */
+      board: { art: { img: 'steampunk-board.webp', span: [0.1975, 0.8025] }, labelPos: 0.777, labelSize: 0.42, labelStroke: 'rgba(40,20,4,.85)', bg: ['#6a2c0e', '#3a1606'], line: 'rgba(240,196,110,.55)', star: 'rgba(250,214,140,.95)', label: '#fbe7b5', labelHi: '#ffffff' },
+      stones: { 1: { a: '#f6ead0', b: '#b09660', glow: null }, 2: { a: '#8ae6cc', b: '#14705c', glow: null }, 3: { a: '#c7d2dc', b: '#46525f', glow: null }, 4: { a: '#ff9a7a', b: '#a23418', glow: null } },
+      last: { ring: '#ffffff', dot: { 1: '#4a2a10', 2: '#ffffff', 3: '#ffffff', 4: '#ffffff' } },
+      zone: { fill: 'rgba(255,255,255,.07)', stroke: 'rgba(250,200,110,.55)' },
+      win: '#ffd36a', winStyle: 'ring', pendingRing: '#e3a23c', kbd: '#ffffff'
+    }
   ];
   /* Fichas de Galaxia (arte de Ro): cada color tiene las 5 formas. Cada jugador elige su color en Personalización. */
   var gxColors = [      // las 15 lunas (el orden es el de la hoja de Ro)
@@ -9431,7 +9452,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
   var OTHER_GEMS = ['rojo', 'ambar', 'violeta', 'turquesa', 'rosa'];
   // todos contra todos: las piedras 3 y 4 del tablero Tradicional son las primeras de esta lista que no usen los dos jugadores 1 y 2
   function extraGems(g1, g2) { return OTHER_GEMS.filter(function (g) { return g !== g1 && g !== g2; }).slice(0, 2); }
-  var ORDER = ['clasico', 'tradicional', 'glow', 'papel', 'playa', 'jardin', 'halloween', 'galaxia'];       // orden en el selector
+  var ORDER = ['clasico', 'tradicional', 'glow', 'papel', 'playa', 'jardin', 'halloween', 'galaxia', 'steampunk'];       // orden en el selector
   list.sort(function (x, y) { return ORDER.indexOf(x.id) - ORDER.indexOf(y.id); });
   var byId = {};
   list.forEach(function (th) { byId[th.id] = th; });
@@ -12679,6 +12700,15 @@ window.NEON_BREAK = {
     im.src = src; return null;
   }
   if (window.Deco) window.Deco.onReady = function () { baseCache.ver++; try { buildThemePicker(); } catch (e) {} if (typeof render === 'function') try { render(); } catch (e) {} try { if ($('menuOverlay').classList.contains('open')) renderMenuBg(); } catch (e) {} };      // fichas de Jardín/Halloween listas
+  /* Steampunk: los dos tubos de luz respiran. Es un velo HTML encima del lienzo con su mismo tamaño y su misma ampliación (así el tablero no se redibuja); se apaga con «Animaciones» desactivadas o con «reducir movimiento». */
+  function spGlowSync() {
+    var wrap = canvas && canvas.parentElement; if (!wrap || canvas !== $('board')) return;
+    var on = theme().id === 'steampunk' && cfg.anim !== false, el = $('spGlow');
+    if (!el) { if (!on) return; el = document.createElement('div'); el.id = 'spGlow'; el.setAttribute('aria-hidden', 'true'); el.innerHTML = '<i class="a"></i><i class="b"></i>'; wrap.appendChild(el); }
+    el.hidden = !on; if (!on) return;
+    el.style.left = canvas.offsetLeft + 'px'; el.style.top = canvas.offsetTop + 'px'; el.style.width = canvas.clientWidth + 'px'; el.style.height = canvas.clientHeight + 'px';
+    el.style.transformOrigin = canvas.style.transformOrigin; el.style.transform = canvas.style.transform;
+  }
   function layout() {      // con coordenadas hay margen sup./izq. para letras y números; sin ellas el tablero aprovecha ese espacio
     var n = boardN(), art = artOf(theme());
     if (canvas === $('board')) {        // los tableros con marco se agrandan para que la GRILLA mida lo mismo que en el tablero simple (el marco sobresale un poco); sin pasarse del ancho/alto de la pantalla
@@ -12693,6 +12723,7 @@ window.NEON_BREAK = {
       canvas.style.transformOrigin = inLab ? '50% 50%' : window.innerWidth >= 1100 ? '0% 50%' : '';        // en pantalla ancha el marco sobresale hacia la derecha (donde hay lugar), no sobre el panel
       canvas.style.transform = Math.abs(sc - 1) > 0.005 ? 'scale(' + sc.toFixed(4) + ')' : '';
     }
+    try { spGlowSync(); } catch (e) {}
     if (art) { metrics.cell = (art.span[1] - art.span[0]) * metrics.w / (n - 1); metrics.off = art.span[0] * metrics.w; return; }     // tablero con marco: la grilla ocupa el campo del dibujo
     if (cfg.coords) { metrics.cell = metrics.w / (n + 2.1); metrics.off = metrics.cell * 1.55; }     // margen parejo en los 4 lados: letras arriba y abajo, números a izquierda y derecha
     else { metrics.cell = metrics.w / n; metrics.off = metrics.cell * 0.5; }
@@ -13774,7 +13805,7 @@ window.NEON_BREAK = {
     document.querySelectorAll('.theme-opt').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.id === id ? 'true' : 'false'); });
     $('gemField').hidden = id !== 'tradicional'; $('gxField').hidden = id !== 'galaxia'; buildGemPickers(); buildGxPickers();
     if ($('menuOverlay').classList.contains('open')) renderMenuBg();         // con el menú abierto el fondo se redibuja ya: si no, quedaba el fondo del tema viejo con los colores del nuevo
-    render(); musicScene();
+    render(); musicScene(); try { spGlowSync(); } catch (e) {}
   }
   // Ficha de muestra del selector de temas: la ficha REAL de cada tablero (concha, aro de neón, garabato) y no un círculo de color
   function swatchStone(th, p) {
