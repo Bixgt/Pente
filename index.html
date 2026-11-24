@@ -904,6 +904,7 @@ html[data-theme="halloween"] .brand h1::before, html[data-theme="halloween"] .br
 .tile-tx { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .tile-t { font-weight: 800; font-size: 17px; }
 .tile-s { font-size: 13px; color: var(--muted); line-height: 1.25; }
+.chip[hidden] { display: none; }
 .chip { display: block; margin: -10px auto 18px; padding: 7px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); }
 .chip.done { color: var(--muted); background: transparent; border-color: var(--line); }
 @media all { .hero, .tile { transition: transform .12s, border-color .15s; } }
@@ -1080,6 +1081,24 @@ html[data-theme="halloween"] #menuOverlay .brand h1 { position: relative; z-inde
 html[data-theme="halloween"] #menuOverlay .brand .sub, html[data-theme="halloween"] #menuOverlay .brand .ver { color: #c9b8ee; }
 html[data-theme="playa"] #menuBg { opacity: 1; -webkit-mask-image: none; mask-image: none; }
 html[data-theme="playa"] #menuOverlay { --bg: #e9d9a8; --panel: #f6ecc9; --panel-2: #f3e4b8; --text: #3a2812; --muted: #6a5330; --line: #b99a5c; --accent: #2fb0bf; --accent-ink: #042126; color: var(--text); }
+
+/* Moneda del sorteo */
+#coinOv { position: fixed; inset: 0; z-index: 9500; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; background: rgba(6,6,10,.82); overflow: hidden; color: #fff; text-align: center; padding: 20px; }
+#coinOv[hidden] { display: none; }
+.coin-title { font-size: 15px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #e8c66a; }
+.coin-stage { position: relative; width: 180px; height: 180px; perspective: 700px; margin: 40px 0; }
+.coin { position: absolute; inset: 0; transform-style: preserve-3d; will-change: transform; }
+.coin i { position: absolute; inset: 0; border-radius: 50%; background: #a47b34; }
+.coin b { position: absolute; inset: 0; border-radius: 50%; backface-visibility: hidden; -webkit-backface-visibility: hidden; background-size: 100% 100%; background-repeat: no-repeat; }
+.coin b.k { background-image: url(moneda-negra.webp); transform: translateZ(5px); }
+.coin b.w { background-image: url(moneda-blanca.webp); transform: rotateX(180deg) translateZ(5px); }
+.coin-shadow { position: absolute; left: 15%; right: 15%; bottom: -34px; height: 22px; border-radius: 50%; background: rgba(0,0,0,.55); filter: blur(7px); }
+.coin-res { min-height: 56px; font-size: 22px; font-weight: 800; line-height: 1.2; opacity: 0; transition: opacity .35s; }
+.coin-res.on { opacity: 1; }
+.coin-res small { display: block; font-size: 14px; font-weight: 600; opacity: .8; margin-top: 4px; }
+.coin-skip { font-size: 12px; opacity: .5; }
+#menuEvent { margin-top: -8px; }
+#menuEvent b { font-weight: 800; }
 html[data-theme="playa"] #menuOverlay .chip { color: #0b5560; background: rgba(246,236,201,.85); border-color: #2fb0bf; }
 /* Playa: los textos chicos caían sobre la grilla de la arena y no se leían → color más oscuro y una "chapa" de arena detrás */
 html[data-theme="playa"] #menuOverlay .brand .sub { color: #3a2812; font-weight: 600; display: inline-block; padding: 3px 12px; border-radius: 999px; background: rgba(246,236,201,.9); }
@@ -1858,8 +1877,9 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span><b class="newb" id="nwProfile" hidden></b></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v2.10</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v2.16</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
+    <button type="button" class="chip evchip" id="menuEvent" hidden></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
     <div class="btns">
       <button class="btn primary" id="btnResume" hidden><svg class="mi" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg><span class="ml" data-i18n="menu.resume"></span><svg class="mc" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
@@ -1874,6 +1894,14 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       <button class="btn" id="btnInstall" hidden><svg class="mi" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg><span class="ml" data-i18n="inst.btn"></span><svg class="mc" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
     </div>
   </div>
+</div>
+
+<!-- Moneda: sorteo de quién empieza la partida que decide un duelo -->
+<div id="coinOv" hidden role="status" aria-live="polite">
+  <div class="coin-title" id="coinTitle"></div>
+  <div class="coin-stage"><div class="coin-shadow" id="coinShadow"></div><div class="coin" id="coinEl"></div></div>
+  <div class="coin-res" id="coinRes"></div>
+  <div class="coin-skip" id="coinSkip"></div>
 </div>
 
 <!-- Personalizar el personaje -->
@@ -6168,6 +6196,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'spec.badge': 'Mirando la sala {code} · {n} mirando',
       'spec.watchers': '👁 {n} mirando: {names}',
       'spec.leave': 'Salir',
+      'spec.toClub': 'Volver al club',
       'spec.noPlay': 'Estás mirando: no podés jugar.',
       'spec.over': 'Ganó {name}.',
       'err.PRIVATE_ROOM': 'Esa sala es privada: no se puede mirar.',
@@ -6530,6 +6559,7 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
       'spec.badge': 'Watching room {code} · {n} watching',
       'spec.watchers': '👁 {n} watching: {names}',
       'spec.leave': 'Leave',
+      'spec.toClub': 'Back to the club',
       'spec.noPlay': 'You\'re watching: you can\'t play.',
       'spec.over': '{name} wins.',
       'err.PRIVATE_ROOM': 'That room is private: it can\'t be watched.',
@@ -8876,6 +8906,15 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     'tno.ev.open': 'Inscripción abierta · {n} anotados (mínimo {min}) · arranca a las {start}',
     'tno.ev.running': 'En juego · {n} jugadores · termina a las {end}',
     'tno.ev.join': 'Anotarme',
+    'coin.title': 'Partida decisiva · se sortea quién empieza',
+    'coin.black': 'Salen NEGRAS',
+    'coin.white': 'Salen BLANCAS',
+    'coin.you': 'Empezás vos',
+    'coin.rival': 'Empieza tu rival',
+    'coin.skip': 'Tocá para seguir',
+    'tno.ev.chipSoon': '★ Hoy hay evento · la inscripción abre a las {open}',
+    'tno.ev.chipOpen': '★ Hoy hay evento · anotate antes de las {start}',
+    'tno.ev.chipRun': '★ Evento en juego ahora · tocá para mirar',
     'tno.ev.watch': 'Mirar',
     'tno.ev.wait': 'El evento arranca solo a las {start} (hora Argentina) si hay al menos {min} jugadores. No cierres esta pantalla.',
     'tno.ev.deadline': 'Tocá «Jugar» antes de las {time}: si no te presentás, perdés el duelo.',
@@ -9026,6 +9065,15 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     'tno.ev.open': 'Sign-up open · {n} joined (min {min}) · starts at {start}',
     'tno.ev.running': 'In progress · {n} players · ends at {end}',
     'tno.ev.join': 'Join',
+    'coin.title': 'Deciding game · coin toss for who starts',
+    'coin.black': 'It’s BLACK',
+    'coin.white': 'It’s WHITE',
+    'coin.you': 'You start',
+    'coin.rival': 'Your opponent starts',
+    'coin.skip': 'Tap to continue',
+    'tno.ev.chipSoon': '★ Event today · sign-up opens at {open}',
+    'tno.ev.chipOpen': '★ Event today · sign up before {start}',
+    'tno.ev.chipRun': '★ Event in progress · tap to watch',
     'tno.ev.watch': 'Watch',
     'tno.ev.wait': 'The event starts by itself at {start} (Argentina time) if at least {min} players joined. Keep this screen open.',
     'tno.ev.deadline': 'Tap “Play” before {time}: if you don’t show up, you lose the duel.',
@@ -12148,17 +12196,6 @@ window.NEON_BREAK = {
   var cloudUnlock = false;       // el administrador le dio «todo desbloqueado» a esta cuenta (supabase/unlock.sql); se pregunta al iniciar sesión
   function boardAllowed(id) { return XP.boardOk(id, myLevel().level, UNLOCK_ALL || cloudUnlock ? Infinity : Date.now()); }
   function fmtOpen(ms) { var d = new Date(ms - 3 * 3600e3); return d.getUTCDate() + '/' + (d.getUTCMonth() + 1); }
-  /* Cartel del día que se abre el tablero de Halloween (31/10, hora argentina): una sola vez, desde el menú. */
-  function hwNotice() {
-    try {
-      if (UNLOCK_ALL || cloudUnlock || localStorage.getItem('pente.hwNotice') === '1' || Date.now() < XP.boardOpensAt('halloween')) return;
-      if (!$('menuOverlay').classList.contains('open') || $('dlgOverlay').classList.contains('open') || document.hidden) return;
-      if (myLevel().level < XP.boardLevel('halloween')) return;
-      localStorage.setItem('pente.hwNotice', '1');
-      ask(t('hw.opened'), t('hw.use'), function () { themeUserPicked = true; setTheme('halloween'); markPrefs(); });
-    } catch (e) {}
-  }
-  setInterval(hwNotice, 30000); setTimeout(hwNotice, 2500); document.addEventListener('visibilitychange', function () { if (!document.hidden) setTimeout(hwNotice, 600); });
   function myLevel() { return XP.levelOf(UNLOCK_ALL || cloudUnlock ? XP.cumulative(XP.MAX_LEVEL) : myXp().t); }
   function xpModeKey() { if (!state) return 'classic'; if (state.ffa) return 'ffa'; if (state.players === 4) return 'four'; return (online.active ? online.mode : gameMode) || 'classic'; }
   function grantXp(ev) {
@@ -13932,7 +13969,7 @@ window.NEON_BREAK = {
   function open(id) {
     closeAll();
     if (id === 'tnOverlay' && typeof tnoEvLoad === 'function') setTimeout(tnoEvLoad, 0);
-    if (id === 'menuOverlay') $('btnResume').hidden = !(state && !isOver());
+    if (id === 'menuOverlay') { $('btnResume').hidden = !(state && !isOver()); if (typeof menuEvRender === 'function') { menuEvRender(); setTimeout(tnoEvLoad, 0); } }
     if (id === 'playOverlay') $('btnTutorial').classList.toggle('primary', !tutDone());
     if (id === 'playOverlay' || id === 'menuOverlay') renderHero();
     if (id === 'playOverlay' && typeof quickRefresh === 'function') quickRefresh();
@@ -13995,15 +14032,15 @@ window.NEON_BREAK = {
     var btn = $('btnRematch'), hint = $('endHint'), leave = $('btnEndMenu');
     $('btnEndShare').hidden = !(daily.active && daily.result); $('btnEndRank').hidden = !(daily.active && daily.result); $('btnEndRetry').hidden = !(daily.active && daily.result);
     if (daily.active) { btn.hidden = true; hint.textContent = daily.result ? t('daily.ranking') : ''; leave.textContent = t('end.toMenu'); return; }
-    btn.hidden = !!online.spectator || !!online.tourney;
-    if (online.tourney) { hint.textContent = ''; leave.textContent = t('tno.back'); return; }
-    if (online.spectator) { hint.textContent = ''; leave.textContent = t('online.leave'); return; }
+    btn.hidden = !!online.spectator || (!!online.tourney && !online.tnext);          // en un torneo la revancha solo existe si el duelo sigue
+    if (online.tourney && !online.tnext) { hint.textContent = ''; leave.textContent = t('tno.back'); return; }
+    if (online.spectator) { hint.textContent = ''; leave.textContent = t(online.fromClub ? 'spec.toClub' : 'online.leave'); return; }
     if (!online.active) { btn.disabled = false; btn.textContent = t('end.rematch'); hint.textContent = ''; leave.textContent = t('end.toMenu'); return; }
     var me = online.seat, other = rematchOther();
     btn.disabled = !!online.rematch[me];
     btn.textContent = online.rematch[me] ? t('online.rematchWait') : t('end.rematch');
     hint.textContent = (!online.rematch[me] && other) ? t('online.rematchRival', { name: seatNames[other] }) : '';
-    leave.textContent = t('online.leave');
+    leave.textContent = online.tourney ? t('tno.back') : t('online.leave');
   }
   function rematch() {
     videoDiscard(); endSeen = recorded = false;
@@ -14058,22 +14095,22 @@ window.NEON_BREAK = {
   }
   $('btnShareWatch').addEventListener('click', function () {
     if (!online.code) return; var l = watchLink();
-    if (!online.isPublic) {                                        // una sala privada no se puede mirar: hay que hacerla pública (solo quien la creó)
+    if (!online.isPublic && !online.spectator) {                   // (quien ya está mirando no tiene el dato de «pública» y no hace falta: si puede mirar, se puede compartir) una sala privada no se puede mirar: hay que hacerla pública (solo quien la creó)
       if (!online.mine || !online.net) return;
       if (!window.confirm(t('share.needPublic'))) return;
       online.net.send({ t: 'setpublic', public: true });
     }
-    if (navigator.share) { navigator.share({ title: 'Pente', text: t('share.watchText'), url: l }).catch(function () {}); return; }
+    if (navigator.share) { navigator.share({ title: 'Pente', text: t('share.watchText'), url: l }).catch(function (e) { if (!e || e.name !== 'AbortError') copyText(l, $('btnShareWatch')); }); return; }      // si el sistema no deja compartir (pasa tras el aviso de «hacerla pública»), se copia el enlace; solo si cerrás el menú de compartir a propósito no se hace nada
     copyText(l, $('btnShareWatch'));
   });
   function visUi() {
-    $('btnShareWatch').hidden = !(online.active && online.code && !online.tourney && (online.isPublic || online.mine || online.spectator));
+    $('btnShareWatch').hidden = !(online.active && online.code && !online.tourney && !online.specT && (online.isPublic || online.mine || online.spectator));
     var can = online.active && !online.spectator && !online.tourney && online.mine, txt = t(online.isPublic ? 'vis.makePrivate' : 'vis.makePublic');
     ['btnVis', 'btnWaitVis'].forEach(function (id) { var b = $(id); b.hidden = !can; b.textContent = (online.isPublic ? '🔒 ' : '🔓 ') + txt; });
     if ($('waitOverlay').classList.contains('open')) $('waitVis').textContent = t(online.isPublic ? 'online.waitPublic' : 'online.waitPrivate') + (online.mode !== 'classic' ? ' · ' + t('mode.' + online.mode) : '');
   }
   ['btnVis', 'btnWaitVis'].forEach(function (id) { $(id).addEventListener('click', function () { if (online.net) online.net.send({ t: 'setpublic', public: !online.isPublic }); }); });
-  function updateOnlineButtons() { visUi(); $('btnMenu').hidden = !!online.spectator; $('btnRestart').textContent = online.spectator ? t('spec.leave') : (online.active || daily.active) ? t('hud.resign') : t('hud.restart'); }
+  function updateOnlineButtons() { visUi(); $('btnMenu').hidden = !!online.spectator; $('btnRestart').textContent = online.spectator ? t(online.fromClub ? 'spec.toClub' : 'spec.leave') : (online.active || daily.active) ? t('hud.resign') : t('hud.restart'); }
 
   function ensureNet(url) {
     if (online.net) return;
@@ -14128,7 +14165,7 @@ window.NEON_BREAK = {
     clearTimeout(online.awaitTimer); clearClaim();
     online.net = null; online.active = false; online.conn = 'closed'; online.code = ''; online.token = ''; online.me = 0;
     online.spectator = false; online.specN = 0; online.specList = []; online.cid = ''; online.avatars = {}; online.titles = {}; online.pids = {}; chatReset(); stopRooms(); fx.length = 0; $('btnSpectateOffer').hidden = true;
-    online.intent = null; online.specT = null; online.invite = null; online.seek = false; online.rejoining = false; online.mine = false; online.tourney = false; online.over = null; online.score = null; online.awaiting = false; online.rivalLeftAt = 0;
+    online.intent = null; online.specT = null; online.invite = null; online.seek = false; online.rejoining = false; online.mine = false; online.tourney = false; online.fromClub = false; online.tnext = false; online.over = null; online.score = null; online.awaiting = false; online.rivalLeftAt = 0;
     online.connected = { 1: true, 2: true, 3: true, 4: true }; online.rematch = { 1: false, 2: false, 3: false, 4: false }; online.seat = 0; online.players = 2; online.bots = {}; online.mode = 'classic'; online.ffa = false; seatNames = {};
     online.noHold = false; if (!keepHeld) clearSession(); updateOnlineButtons(); updateRematchUi();
     if (wasActive) { videoDiscard(); state = null; clk = null; hover = pending = null; setStatus(''); render(); }
@@ -14177,6 +14214,7 @@ window.NEON_BREAK = {
         if (m.clock) clockFromServer(m.clock); else clockFreeze();
         if (m.reason === 'resign' || m.reason === 'forfeit' || m.reason === 'timeout' || m.reason === 'last') sfx(online.spectator || m.winner === online.me ? 'win' : 'lose');   // si terminó por jugada, el sonido ya sonó
         render(); setTimeout(showEnd, 450); break;
+      case 'tnext': online.tnext = !!m.more; updateRematchUi(); break;
       case 'rematch': online.rematch = m.votes; updateRematchUi();
         if (isOver() && !online.spectator && !$('endOverlay').classList.contains('open') && !document.body.classList.contains('in-screen')) { var rv = rematchOther(); if (rv && !m.votes[online.seat]) setStatus(t('online.rematchRival', { name: seatNames[rv] }), true); }
         updateResultBtn(); break;
@@ -14203,7 +14241,7 @@ window.NEON_BREAK = {
     state = g; online.seat = m.you; online.me = m.you ? teamOfSeat(m.you) : 0; online.over = m.over || null; online.connected = m.connected;
     online.players = (m.opts && m.opts.players === 4) ? 4 : 2; online.bots = m.bots || {}; online.ffa = !!(m.opts && m.opts.ffa);
     online.mode = m.opts && m.opts.bullet ? 'bullet' : m.opts && m.opts.blitz ? 'blitz' : (m.opts && m.opts.variant) || 'classic';
-    online.rematch = m.rematch || { 1: false, 2: false }; online.awaiting = false;
+    online.rematch = m.rematch || { 1: false, 2: false }; online.tnext = !!m.tnext; online.awaiting = false;
     online.avatars = m.avatars || {}; online.titles = m.titles || {}; online.pids = m.pids || {}; online.score = m.score || null;
     if (!online.spectator && m.you && online.pids[m.you]) online.cid = online.pids[m.you];         // mi identidad en el chat no cambia aunque la revancha me cambie de asiento
     seatNames = {}; for (var si = 1; si <= nSeats(); si++) seatNames[si] = (m.names && m.names[si]) || '';
@@ -14734,7 +14772,7 @@ window.NEON_BREAK = {
     if (a === 'dojoin') { clMsg(''); clSend({ t: 'cjoin', code: $('clCode').value }); return; }
     if (!c) return;
     if (a === 'tab') { cl.tab = el.dataset.tab; if (cl.tab === 'chat') cl.unread = 0; cl.edit = null; cl.pick = null; clRender(); return; }
-    if (a === 'watch') { clMsg(''); $('onName').value = $('onName').value || ($('rName') ? $('rName').value : ''); startOnline({ t: 'spectate', code: el.dataset.code, clubWatch: true }); return; }
+    if (a === 'watch') { clMsg(''); $('onName').value = $('onName').value || ($('rName') ? $('rName').value : ''); startOnline({ t: 'spectate', code: el.dataset.code, clubWatch: true }); online.fromClub = true; updateOnlineButtons(); return; }
     if (a === 'chal') { cl.pick = { uid: el.dataset.u, name: el.dataset.n }; clRender(); return; }
     if (a === 'chalno') { cl.pick = null; clRender(); return; }
     if (a === 'chalgo') { var pk = cl.pick, pr = c.presets.filter(function (x) { return x.id === el.dataset.p; })[0]; cl.pick = null; clRender(); if (pk) challengeOpen({ id: pk.uid, name: pk.name }, pr ? pr.opts : null, c.id); return; }
@@ -15042,7 +15080,7 @@ window.NEON_BREAK = {
   $('btnRulesClose').addEventListener('click', function () { open(rulesFrom); });
   $('btnRestart').addEventListener('click', function () {
     if (daily.active) { if (!isOver()) ask(t('daily.resignConfirm'), t('hud.resign'), function () { if (!isOver() && daily.net) daily.net.send({ t: 'dailyResign' }); }); else open('dailyOverlay'); return; }
-    if (online.spectator) { var bt = !!online.tourney && !!tno.code; leaveOnline(false); if (bt) { tnoConnect(); tnoOpen(); } else open('menuOverlay'); return; }
+    if (online.spectator) { specBack(); return; }
     if (online.active) { if (!isOver() && online.net) ask(t('online.resignConfirm'), t('hud.resign'), function () { if (!isOver() && online.net) { sxQuit(); online.net.send({ t: 'resign' }); } }); return; }
     if (!state || state.moves.length === 0 || state.status !== 'playing') rematch(); else ask(t('confirm.restart'), t('dlg.restart'), function () { if (ai.active && !isOver()) sxQuit(); rematch(); });
   });
@@ -15050,7 +15088,15 @@ window.NEON_BREAK = {
     if (online.active) { if (online.net && online.net.send({ t: 'rematch' })) { online.rematch[online.seat] = true; updateRematchUi(); } return; }
     rematch();
   });
-  $('btnEndMenu').addEventListener('click', function () { var tourney = !!online.tourney && !!tno.code; if (online.active) leaveOnline(false); if (tourney) { tnoConnect(); tnoOpen(); } else open('menuOverlay'); });
+  /* Salir de mirar una partida: vuelve de donde vino (torneo, club o menú). */
+  function specBack() {
+    var bt = !!online.tourney && !!tno.code, fc = online.fromClub && cl.cur ? cl.cur.id : null;
+    leaveOnline(false);
+    if (bt) { tnoConnect(); tnoOpen(); }
+    else if (fc) { cl.view = 'club'; open('clubOverlay'); clRender(); clSend({ t: 'cview', id: fc }); }
+    else open('menuOverlay');
+  }
+  $('btnEndMenu').addEventListener('click', function () { if (online.spectator && online.fromClub) { specBack(); return; } var tourney = !!online.tourney && !!tno.code; if (online.active) leaveOnline(false); if (tourney) { tnoConnect(); tnoOpen(); } else open('menuOverlay'); });
   $('btnClaim').addEventListener('click', function () { if (online.net) online.net.send({ t: 'claimWin' }); });
   $('btnOnline').addEventListener('click', function () {
     function showOnlineMenu() { renderHeld(); accSummaries(); $('btnSpectateOffer').hidden = true; if (serverUrl()) { $('rName').value = $('onName').value; startRooms(); return; } onlineMsg(t('online.noServer')); open('onlineOverlay'); }
@@ -17329,6 +17375,36 @@ window.NEON_BREAK = {
       }
     }
   }
+  /* Moneda: la tira el servidor (tsnap.go.coin); acá solo se muestra. Negro = sala asiento 1 = empieza. */
+  var coinT = 0;
+  function coinHide() { clearTimeout(coinT); var o = $('coinOv'); if (o) o.hidden = true; }
+  function coinShow(youFirst) {
+    var o = $('coinOv'), c = $('coinEl'), sh = $('coinShadow'), res = $('coinRes'); if (!o) return;
+    clearTimeout(coinT); c.innerHTML = ''; for (var k = -4; k <= 4; k++) { var li = document.createElement('i'); li.style.transform = 'translateZ(' + k + 'px)'; c.appendChild(li); }
+    var fk = document.createElement('b'); fk.className = 'k'; var fw = document.createElement('b'); fw.className = 'w'; c.appendChild(fk); c.appendChild(fw);
+    $('coinTitle').textContent = t('coin.title'); $('coinSkip').textContent = t('coin.skip');
+    res.classList.remove('on'); res.innerHTML = '<span></span><small></small>';
+    res.firstChild.textContent = t(youFirst ? 'coin.black' : 'coin.white'); res.lastChild.textContent = t(youFirst ? 'coin.you' : 'coin.rival');
+    o.hidden = false;
+    var R = 360 * 5 + (youFirst ? 0 : 180), still = false;
+    try { still = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+    var fin = 'translate3d(0,0,0) rotateZ(0deg) rotateX(' + R + 'deg)', dur = 2300;
+    if (still || !c.animate) { c.style.transform = fin; res.classList.add('on'); dur = 600; }
+    else {
+      c.animate([
+        { offset: 0, transform: 'translate3d(0,330px,-650px) rotateZ(-14deg) rotateX(0deg)', easing: 'cubic-bezier(.2,.7,.3,1)' },
+        { offset: .46, transform: 'translate3d(0,-70px,340px) rotateZ(8deg) rotateX(' + (R * .62) + 'deg)', easing: 'cubic-bezier(.55,0,.8,.4)' },
+        { offset: .8, transform: 'translate3d(0,26px,50px) rotateZ(0deg) rotateX(' + (R * .98) + 'deg)', easing: 'ease-out' },
+        { offset: .9, transform: 'translate3d(0,-16px,70px) rotateZ(0deg) rotateX(' + R + 'deg)', easing: 'ease-in' },
+        { offset: 1, transform: fin }
+      ], { duration: dur, fill: 'forwards' });
+      sh.animate([{ offset: 0, opacity: .1, transform: 'scale(.3)' }, { offset: .46, opacity: .15, transform: 'scale(.55)' }, { offset: .8, opacity: .8, transform: 'scale(1)' }, { offset: .9, opacity: .5, transform: 'scale(.9)' }, { offset: 1, opacity: .8, transform: 'scale(1)' }], { duration: dur, fill: 'forwards' });
+      setTimeout(function () { res.classList.add('on'); }, dur - 150);
+    }
+    coinT = setTimeout(coinHide, dur + 2400);
+  }
+  $('coinOv').addEventListener('click', coinHide);
+  /*COIN_END*/
   /* si el servidor dice que hay una partida lista para mí, entro a la sala (otra conexión; esta sigue escuchando el torneo) */
   function tnoCheckGo(m) {
     if (!m.go || tno.inGame === m.go.code) return;
@@ -17339,6 +17415,7 @@ window.NEON_BREAK = {
     if (online.active || daily.active) { tnoNote(t('tno.inGame'), false); return; }
     var code = m.go.code; tno.inGame = code; closeAll(); $('btnSpectateOffer').hidden = true;
     startOnline({ t: 'rejoin', code: code, token: m.go.token }); online.tourney = true;
+    if (m.go.coin && tno.coinShown !== code) { tno.coinShown = code; coinShow(m.go.you === 1); }
     clearTimeout(tno.goTimer);
     tno.goTimer = setTimeout(function () {                                  // si en 10 s no entró (red, servidor dormido): se libera para que el próximo aviso o el botón reintenten
       if (online.active && online.code === code) return;
@@ -17370,6 +17447,27 @@ window.NEON_BREAK = {
     }
     box.appendChild(row);
   }
+  /* Aviso en el menú principal: solo el día del evento (hora Argentina), si todavía no estás anotado/a. */
+  function menuEvRender() {
+    var c = $('menuEvent'); if (!c) return;
+    var e = tnoEvData, show = false;
+    try {
+      if (e && e.status !== 'finished' && !(tno.code === e.code && tno.token)) {
+        var skew = e.now - Date.now(), now = Date.now() + skew, day = function (ms) { return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date(ms)); };
+        var hhmm = function (ms) { return tnoEvFmt(ms).replace(/^\S+\s/, ''); };
+        if (day(e.startAt) === day(now) && now < e.endAt) {
+          show = true; c.__run = e.status === 'running'; c.__open = now >= e.openAt;
+          c.textContent = c.__run ? t('tno.ev.chipRun') : (c.__open ? t('tno.ev.chipOpen', { start: hhmm(e.startAt) }) : t('tno.ev.chipSoon', { open: hhmm(e.openAt) }));
+        }
+      }
+    } catch (err) { show = false; }
+    c.hidden = !show;
+  }
+  $('menuEvent').addEventListener('click', function () {
+    var e = tnoEvData; if (!e) return; var c = $('menuEvent');
+    tnoOpen();
+    if (c.__run) tnoJoinNow(e.code, 'watch', ''); else if (c.__open) tnoJoinCode(e.code);
+  });
   function tnoEvLoad() {
     var now = Date.now(); if (now - tnoEvAt < 15000) return; tnoEvAt = now;
     var url = serverUrl(); if (!url || !window.PenteNet) return;
@@ -17377,7 +17475,7 @@ window.NEON_BREAK = {
     try { fetch(window.PenteNet.httpBase(url) + '/health', { mode: 'no-cors' }).catch(function () {}); } catch (e) {}
     var net = tnoEvNet = window.PenteNet.connect(url, {
       onState: function () {}, onOpen: function () { try { net.send({ t: 'tevents' }); } catch (e) {} },
-      onMessage: function (m) { if (m && m.t === 'tevents') { tnoEvData = m.ev || null; tnoEvRender(); try { net.close(); } catch (e) {} if (tnoEvNet === net) tnoEvNet = null; } }
+      onMessage: function (m) { if (m && m.t === 'tevents') { tnoEvData = m.ev || null; tnoEvRender(); menuEvRender(); try { net.close(); } catch (e) {} if (tnoEvNet === net) tnoEvNet = null; } }
     });
   }
   function tnoRenderLive() {
