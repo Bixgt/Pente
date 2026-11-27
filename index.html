@@ -1097,6 +1097,7 @@ html[data-theme="playa"] #menuOverlay { --bg: #e9d9a8; --panel: #f6ecc9; --panel
 .coin-res.on { opacity: 1; }
 .coin-res small { display: block; font-size: 14px; font-weight: 600; opacity: .8; margin-top: 4px; }
 .coin-skip { font-size: 12px; opacity: .5; }
+@media (max-width: 1099px) { body.in-lab #btnMenu { display: none; } body.in-lab .actions.sidebar-row { margin-top: -4px; } body.in-lab .hud:not(.ffa) { height: auto; min-height: 0; } body.in-lab .hud .player { min-height: 0; padding-top: 6px; padding-bottom: 6px; } body.in-lab .actions:not(.sidebar-row) { gap: 6px; } }          /* práctica en celular: el panel ya tiene «Salir»; sin «Menú» las herramientas suben y se ven sin scrollear */
 #btnFeedback { position: relative; }
 .nbadge { position: absolute; top: 7px; left: 34px; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 9px; background: #e5484d; color: #fff; font: 800 11px/18px system-ui, sans-serif; text-align: center; box-shadow: 0 0 0 2px var(--panel, #1c1f26); pointer-events: none; }
 #menuEvent { margin-top: -8px; }
@@ -1879,7 +1880,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span><b class="newb" id="nwProfile" hidden></b></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v2.17</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v2.18</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="chip evchip" id="menuEvent" hidden></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
@@ -11133,7 +11134,8 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
   /* ---- Explicación ampliada: qué pasa en la mesa antes de jugar, qué logra la jugada, qué pasa si no se juega y qué conviene aprender. ---- */
   function emptyCells(s) { var out = [], x, y; for (y = 0; y < s.size; y++) for (x = 0; x < s.size; x++) if (P.get(s, x, y) === P.EMPTY) out.push({ x: x, y: y }); return out; }
   function near(s, x, y, r) { for (var dy = -r; dy <= r; dy++) for (var dx = -r; dx <= r; dx++) { if (P.inBounds(s, x + dx, y + dy) && P.get(s, x + dx, y + dy) !== P.EMPTY) return true; } return false; }
-  function coords(list, max) { return list.slice(0, max || 4).map(function (c) { return P.label(c.x, c.y, boardN()); }).join(', '); }
+  var curN = 19;      // tamaño del tablero que se está analizando (este módulo no ve boardN() de la app: usarlo tiraba ReferenceError y el entrenador siempre decía «No encontré jugadas»)
+  function coords(list, max) { return list.slice(0, max || 4).map(function (c) { return P.label(c.x, c.y, curN); }).join(', '); }
   /* Casillas donde `color` ganaría ya, donde armaría un cuatro abierto (= tiene un tres abierto) y donde capturaría. */
   function threatMap(s, color) {
     var res = { win: [], open4: [], four: [], cap: [] }, st = withTurn(s, color);
@@ -11148,7 +11150,7 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
     return res;
   }
   function explain(state, color, x, y) {
-    var s = withTurn(state, color), opp = P.opponent(color), out = { before: [], why: [], skip: [], warn: [], tips: [] }, tip = {};
+    var s = withTurn(state, color), opp = P.opponent(color), out = { before: [], why: [], skip: [], warn: [], tips: [] }, tip = {}; curN = s.size;
     function addTip(k) { if (!tip[k]) { tip[k] = 1; out.tips.push(k); } }
     var mine = P.playMove(s, x, y, color); if (!mine.ok) return out;
     var tOpp = threatMap(s, opp), tMe = threatMap(s, color), cc = s.captures || {};
@@ -11162,7 +11164,7 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
     if (tMe.cap.length) out.before.push({ k: 'meCap', at: coords(tMe.cap), n: tMe.cap.reduce(function (a, c) { return a + c.n; }, 0) });
     if (!out.before.length) out.before.push({ k: 'quiet' });
     // 2) Qué logra la jugada (con coordenadas)
-    var tags = tagsFor(s, x, y, color), at = P.label(x, y, boardN()), after = mine.state;
+    var tags = tagsFor(s, x, y, color), at = P.label(x, y, s.size), after = mine.state;
     tags.forEach(function (tg) {
       if (tg.k === 'win') { out.why.push({ k: 'win' }); }
       else if (tg.k === 'blockWin') { out.why.push({ k: 'blockWin', at: at }); addTip('blockWin'); if (tOpp.win.length > 1) out.warn.push({ k: 'moreWins', at: coords(tOpp.win.filter(function (c) { return c.x !== x || c.y !== y; })) }); }
@@ -11217,7 +11219,7 @@ window.PENTE_SAMPLES = { playaPlace2: 'data:audio/mpeg;base64,//uURAAAAAAAAAAAAA
   function describe(s, e, color) {
     var tags = tagsFor(s, e.x, e.y, color);
     if (!tags.length) tags.push({ k: s.board.some(function (v) { return v; }) ? 'develop' : 'center' });
-    return { x: e.x, y: e.y, coord: P.label(e.x, e.y, boardN()), tags: tags };
+    return { x: e.x, y: e.y, coord: P.label(e.x, e.y, s.size), tags: tags };
   }
 
   /* Arma el consejo a partir del ranking [{x,y,v}] (mejor primero) que devolvió el motor; `win` es el valor de "victoria" de ese motor. */
@@ -12775,7 +12777,8 @@ window.NEON_BREAK = {
     if (canvas === $('board')) {        // los tableros con marco se agrandan para que la GRILLA mida lo mismo que en el tablero simple (el marco sobresale un poco); sin pasarse del ancho/alto de la pantalla
       var sc = art ? Math.max(1, (cfg.coords ? (n - 1) / (n + 2.1) : (n - 1) / n) / (art.span[1] - art.span[0]) * (art.fit || 1)) : 1;      // sin tope: la grilla mide SIEMPRE lo mismo que en el tablero simple; lo que sobra es solo el marco, que puede salirse de la pantalla (letras y grilla quedan adentro)
       var inLab = document.body.classList.contains('in-lab') && art && canvas.parentElement;
-      if (inLab) {                                         // tablero de práctica: el marco no puede pisar el panel ni las barras de jugadores, así que se achica hasta entrar en su lugar
+      var stackedLab = inLab && !window.matchMedia('(min-width: 1100px)').matches;      // celular/tablet: el tablero de práctica va arriba y el panel abajo
+      if (inLab && !stackedLab) {                          // tablero de práctica en pantalla ancha: el marco no puede pisar el panel ni las barras de jugadores, así que se achica hasta entrar en su lugar
         var wr = canvas.parentElement.getBoundingClientRect(), cw0 = canvas.clientWidth || 600, ch0 = canvas.clientHeight || cw0;
         if (wr.width > 50 && wr.height > 50) sc = Math.min(sc, wr.width / cw0, wr.height / ch0);
       }
@@ -12785,8 +12788,12 @@ window.NEON_BREAK = {
       }
       var want = Math.round((canvas.clientWidth || 600) * Math.min(2, window.devicePixelRatio || 1) * sc);        // el lienzo tiene los píxeles del tamaño FINAL (con la ampliación): si no, el navegador lo estira y las fichas se ven borrosas
       if (want > 4 && canvas.width !== want) { canvas.width = canvas.height = want; metrics.w = want; }
-      canvas.style.transformOrigin = inLab ? '50% 50%' : window.innerWidth >= 1100 ? '0% 50%' : '';        // en pantalla ancha el marco sobresale hacia la derecha (donde hay lugar), no sobre el panel
+      canvas.style.transformOrigin = inLab && !stackedLab ? '50% 50%' : window.innerWidth >= 1100 ? '0% 50%' : '';        // en pantalla ancha el marco sobresale hacia la derecha (donde hay lugar), no sobre el panel
       canvas.style.transform = Math.abs(sc - 1) > 0.005 ? 'scale(' + sc.toFixed(4) + ')' : '';
+      if (canvas.parentElement) {                          // en celular el marco de práctica NO se achica (la grilla quedaba diminuta): se le reserva lugar arriba y abajo y, como en una partida normal, puede asomar un poco por los costados
+        var ov = stackedLab ? Math.max(0, (sc - 1) / 2 * (canvas.clientHeight || 0)) * 0.6 : 0;
+        canvas.parentElement.style.paddingTop = canvas.parentElement.style.paddingBottom = ov > 1 ? Math.round(ov) + 'px' : '';
+      }
     }
     try { spGlowSync(); } catch (e) {}
     if (art) { metrics.cell = (art.span[1] - art.span[0]) * metrics.w / (n - 1); metrics.off = art.span[0] * metrics.w; return; }     // tablero con marco: la grilla ocupa el campo del dibujo
