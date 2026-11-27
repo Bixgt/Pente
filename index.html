@@ -1097,6 +1097,8 @@ html[data-theme="playa"] #menuOverlay { --bg: #e9d9a8; --panel: #f6ecc9; --panel
 .coin-res.on { opacity: 1; }
 .coin-res small { display: block; font-size: 14px; font-weight: 600; opacity: .8; margin-top: 4px; }
 .coin-skip { font-size: 12px; opacity: .5; }
+#btnFeedback { position: relative; }
+.nbadge { position: absolute; top: 7px; left: 34px; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 9px; background: #e5484d; color: #fff; font: 800 11px/18px system-ui, sans-serif; text-align: center; box-shadow: 0 0 0 2px var(--panel, #1c1f26); pointer-events: none; }
 #menuEvent { margin-top: -8px; }
 #menuEvent b { font-weight: 800; }
 html[data-theme="playa"] #menuOverlay .chip { color: #0b5560; background: rgba(246,236,201,.85); border-color: #2fb0bf; }
@@ -1877,7 +1879,7 @@ button.ttl-chip.rk5[aria-pressed="true"] { background: linear-gradient(135deg, #
       </div>
       <button type="button" class="sq sq-av" id="btnProfile"><span id="avEmoji"></span><b class="newb" id="nwProfile" hidden></b></button>
     </div>
-    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v2.16</p></div>
+    <div class="brand"><h1 data-i18n="menu.title"></h1><p class="sub" data-i18n="menu.subtitle"></p><p class="ver" aria-hidden="true">v2.17</p></div>
     <button type="button" class="chip" id="menuDaily"></button>
     <button type="button" class="chip evchip" id="menuEvent" hidden></button>
     <button type="button" class="xpmini" id="menuXp"><span class="xp-lv" id="mxLv"></span><span class="xpbar"><i id="mxFill"></i></span><span class="xp-txt" id="mxTxt"></span></button>
@@ -8906,6 +8908,9 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     'tno.ev.open': 'Inscripción abierta · {n} anotados (mínimo {min}) · arranca a las {start}',
     'tno.ev.running': 'En juego · {n} jugadores · termina a las {end}',
     'tno.ev.join': 'Anotarme',
+    'fb.pending': '{n} sin resolver',
+    'lnk.leave': 'Te llegó un link a otra sala o torneo. Si lo abrís, salís de lo que estás haciendo.',
+    'lnk.open': 'Abrir el link',
     'coin.title': 'Partida decisiva · se sortea quién empieza',
     'coin.black': 'Salen NEGRAS',
     'coin.white': 'Salen BLANCAS',
@@ -9065,6 +9070,9 @@ window.PENTE_PUZZLES = [{"id":"pv4eope","k":2,"r":["o.....x......",".x..........
     'tno.ev.open': 'Sign-up open · {n} joined (min {min}) · starts at {start}',
     'tno.ev.running': 'In progress · {n} players · ends at {end}',
     'tno.ev.join': 'Join',
+    'fb.pending': '{n} unresolved',
+    'lnk.leave': 'You received a link to another room or tournament. Opening it will leave what you are doing.',
+    'lnk.open': 'Open the link',
     'coin.title': 'Deciding game · coin toss for who starts',
     'coin.black': 'It’s BLACK',
     'coin.white': 'It’s WHITE',
@@ -12771,6 +12779,10 @@ window.NEON_BREAK = {
         var wr = canvas.parentElement.getBoundingClientRect(), cw0 = canvas.clientWidth || 600, ch0 = canvas.clientHeight || cw0;
         if (wr.width > 50 && wr.height > 50) sc = Math.min(sc, wr.width / cw0, wr.height / ch0);
       }
+      if (art && !inLab && themeId === 'steampunk' && canvas.parentElement) {          // el marco Steampunk no puede pisar el «Turno de…» (arriba) ni los botones (abajo): se achica hasta entrar en el alto disponible
+        var wh = canvas.parentElement.getBoundingClientRect().height, chh = canvas.clientHeight || 0;
+        if (wh > 50 && chh > 50) sc = Math.max(1, Math.min(sc, wh / chh * 0.98));
+      }
       var want = Math.round((canvas.clientWidth || 600) * Math.min(2, window.devicePixelRatio || 1) * sc);        // el lienzo tiene los píxeles del tamaño FINAL (con la ampliación): si no, el navegador lo estira y las fichas se ven borrosas
       if (want > 4 && canvas.width !== want) { canvas.width = canvas.height = want; metrics.w = want; }
       canvas.style.transformOrigin = inLab ? '50% 50%' : window.innerWidth >= 1100 ? '0% 50%' : '';        // en pantalla ancha el marco sobresale hacia la derecha (donde hay lugar), no sobre el panel
@@ -13969,7 +13981,7 @@ window.NEON_BREAK = {
   function open(id) {
     closeAll();
     if (id === 'tnOverlay' && typeof tnoEvLoad === 'function') setTimeout(tnoEvLoad, 0);
-    if (id === 'menuOverlay') { $('btnResume').hidden = !(state && !isOver()); if (typeof menuEvRender === 'function') { menuEvRender(); setTimeout(tnoEvLoad, 0); } }
+    if (id === 'menuOverlay') { $('btnResume').hidden = !(state && !isOver()); if (typeof menuEvRender === 'function') { menuEvRender(); setTimeout(tnoEvLoad, 0); } if (typeof fbBadgeLoad === 'function') fbBadgeLoad(); }
     if (id === 'playOverlay') $('btnTutorial').classList.toggle('primary', !tutDone());
     if (id === 'playOverlay' || id === 'menuOverlay') renderHero();
     if (id === 'playOverlay' && typeof quickRefresh === 'function') quickRefresh();
@@ -14359,6 +14371,18 @@ window.NEON_BREAK = {
     else $('btnSpectateOffer').hidden = true;
   }
 
+  /* App instalada: con launch_handler (manifest) un link de Pente (sala, mirar, torneo, club) enfoca la ventana ya abierta en vez de abrir otra; acá se lo procesa.
+     Si estás en medio de una partida se pregunta antes; el lanzamiento en frío (el link que abrió la app) ya lo manejó initOnline, no se repite. */
+  var launchUrl0 = location.href;
+  try {
+    if ('launchQueue' in window && window.launchQueue && window.launchQueue.setConsumer) window.launchQueue.setConsumer(function (p) {
+      var u = p && p.targetURL, x; if (!u || u === launchUrl0) return;
+      try { x = new URL(u); } catch (e) { return; }
+      if (x.origin !== location.origin || !/[?&](t|mirar|sala|club)=/.test(x.search)) return;
+      var go = function () { location.href = x.href; };
+      if (online.active || daily.active || tut.active || lab.active || (state && !isOver())) ask(t('lnk.leave'), t('lnk.open'), go); else go();
+    });
+  } catch (e) {}
   function initOnline() {
     var url = serverUrl();
     try { $('onName').value = profile.name || localStorage.getItem('pente.name') || ''; } catch (e) {}
@@ -15708,9 +15732,27 @@ window.NEON_BREAK = {
     open('feedbackOverlay');
     if (logged && profile.nameSet && /^bixgt$/i.test(profile.name || '')) Auth.isAdmin().then(function (ok) { fb.admin = ok; $('fbInboxBox').hidden = !ok; if (ok) fbLoad(); }, function () {});
   }
+  /* Globito con los comentarios sin resolver sobre el botón del buzón del menú: solo lo ve el admin (la base decide quién es admin) */
+  var fbBadgeAt = 0;
+  function fbBadge(n) {
+    var b = $('btnFeedback'); if (!b) return; var x = b.querySelector('.nbadge');
+    if (!n) { if (x) x.remove(); return; }
+    if (!x) { x = el('span', 'nbadge'); b.appendChild(x); }
+    x.textContent = n > 99 ? '99+' : String(n); x.title = t('fb.pending', { n: n });
+  }
+  function fbBadgeLoad(force) {
+    var logged = !!(typeof Auth !== 'undefined' && Auth && Auth.user);
+    if (!(logged && profile.nameSet && /^bixgt$/i.test(profile.name || ''))) { fbBadge(0); return; }
+    if (!force && Date.now() - fbBadgeAt < 45000) return; fbBadgeAt = Date.now();
+    Auth.isAdmin().then(function (ok) { if (!ok) { fbBadge(0); return; } return Auth.feedbackList(false).then(function (rows) { fbBadge(rows.length); }); }, function () {});
+  }
+  setTimeout(fbBadgeLoad, 2500); setTimeout(fbBadgeLoad, 9000);          // el menú ya está abierto al cargar y la sesión tarda: se reintenta; después cada minuto mientras el menú está a la vista
+  setInterval(function () { if (!document.hidden && $('menuOverlay').classList.contains('open')) fbBadgeLoad(); }, 60000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) setTimeout(fbBadgeLoad, 800); });
   function fbLoad() {
     var box = $('fbInbox'); box.textContent = '…';
     Auth.feedbackList($('fbAll').checked).then(function (rows) {
+      if (!$('fbAll').checked) fbBadge(rows.length);
       box.innerHTML = '';
       if (!rows.length) { box.appendChild(el('p', 'hint', t('fb.empty'))); return; }
       rows.forEach(function (r) {
